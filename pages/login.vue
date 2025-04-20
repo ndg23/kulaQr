@@ -75,7 +75,7 @@
                 />
                 <label 
                   for="password"
-                  class="absolute left-4 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-1.5"
+                  class="absolute left-4 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-1.5"
                 >
                   Mot de passe
                 </label>
@@ -179,13 +179,31 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-/* Animation de fade-in */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+.peer:placeholder-shown ~ label {
+  cursor: text;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-form {
-  animation: fadeIn 0.6s ease-out;
+.peer:focus ~ label {
+  top: 0.5rem;
+  transform: translateY(0);
+  font-size: 0.875rem;
+}
+
+.peer:-webkit-autofill {
+  -webkit-background-clip: text;
+}
+
+/* Animation du loader */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 </style> 
