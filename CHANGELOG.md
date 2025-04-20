@@ -5,9 +5,14 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Non publié]
+## [0.0.9] - 2025-04-20
 
 ### Ajouté
+- Nouvelle page d'accueil avec design inspiré d'Apple
+- Menu mobile responsive avec animations
+- Effets de parallaxe et animations subtiles
+- Mise en page optimisée pour mobile
+- Sections Features et Stats repensées
 - Interface de gestion des QR codes avec personnalisation (couleur, taille) et export multi-formats
 - Nouveau design des formulaires avec labels flottants et animations
 - Layout manager avec navigation responsive et notifications
@@ -15,6 +20,8 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Intégration des icônes Lucide
 
 ### Modifié
+- Amélioration de l'expérience utilisateur sur mobile
+- Optimisation des performances d'animation
 - Refonte du design des pages produits et QR codes
 - Amélioration de l'expérience utilisateur des formulaires
 - Migration vers le module Supabase officiel de Nuxt
