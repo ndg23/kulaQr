@@ -17,6 +17,9 @@ importers:
       qrcode:
         specifier: ^1.5.3
         version: 1.5.4
+      qrcode-vue3:
+        specifier: ^1.7.1
+        version: 1.7.1
       socket.io-client:
         specifier: ^4.7.2
         version: 4.8.1
@@ -3348,6 +3351,12 @@ packages:
 
   pump@3.0.2:
     resolution: {integrity: sha512-tUPXtzlGM8FE3P0ZL6DVs/3P58k9nk8/jZeQCurTJylQA8qFYzHFfhBJkuqyE0FifOsQ0uKWekiZ5g8wtr28cw==}
+
+  qrcode-generator@1.4.4:
+    resolution: {integrity: sha512-HM7yY8O2ilqhmULxGMpcHSF1EhJJ9yBj8gvDEuZ6M+KGJ0YY2hKpnXvRD+hZPLrDVck3ExIGhmPtSdcjC+guuw==}
+
+  qrcode-vue3@1.7.1:
+    resolution: {integrity: sha512-Xa82NslFJUqsnQbLtc1qO+xPEOeFaTRxktg3ugRd2Pk116kta1X+7GLSEPQj9gor8jWVyfmLmhYZHuANnRZoLQ==}
 
   qrcode@1.5.4:
     resolution: {integrity: sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg==}
@@ -7956,6 +7965,12 @@ snapshots:
     dependencies:
       end-of-stream: 1.4.4
       once: 1.4.0
+
+  qrcode-generator@1.4.4: {}
+
+  qrcode-vue3@1.7.1:
+    dependencies:
+      qrcode-generator: 1.4.4
 
   qrcode@1.5.4:
     dependencies:
