@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-gray-50;
+    }
+}
+
+@layer components { 
+    .btn-primary {
+        @apply bg-blue-500 text-white px-4 py-2 rounded-md;
+    }
+
+    /* Classes pour le menu */
+    .menu-card {
+        @apply bg-white p-6 rounded-lg shadow-md;
+    }
+
+    .menu-category {
+        @apply text-2xl font-bold mb-4 text-gray-800 border-b border-gray-200 pb-2;
+    }
+
+    .menu-item {
+        @apply flex justify-between items-start py-3;
+    }
+
+    .menu-item-name {
+        @apply text-lg font-medium text-gray-900;
+    }
+
+    .menu-item-price {
+        @apply text-lg font-semibold text-gray-800;
+    }
+
+    .menu-item-description {
+        @apply text-sm text-gray-600 mt-1;
+    }
+}
+
+html, body {
+    @apply h-full;
+}
+
+#root {
+    @apply h-full;
+}
