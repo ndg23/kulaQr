@@ -194,7 +194,8 @@ import {
   User,
   LogOut,
   ChevronDown,
-  ShoppingCart
+  ShoppingCart,
+  
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -216,9 +217,9 @@ const navigationItems = [
     icon: QrCode
   },
   {
-    name: 'Statistiques',
-    to: `/manager/${route.params.slug}/stats`,
-    icon: ChartBar
+    name: 'Paramètres',
+    to: `/manager/${route.params.slug}/settings`,
+    icon: Settings
   }
 ]
 

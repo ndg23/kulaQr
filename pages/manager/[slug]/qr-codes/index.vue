@@ -14,20 +14,21 @@
           <h2 class="text-lg font-semibold text-gray-900">Aperçu</h2>
         </div>
         <div class="p-6">
-          <div class="aspect-square max-w-sm mx-auto bg-white rounded-xl shadow-sm border-2 border-gray-100 p-8">
+          <div id="qr-code-container" class="aspect-square max-w-sm mx-auto bg-white rounded-xl shadow-sm border-2 border-gray-100 p-8">
             <div class="flex flex-col items-center">
               <span class="text-2xl font-bold text-gray-900">{{ establishment?.name }}</span>
               <span class="mt-2 text-sm text-gray-500">Table {{ selectedTable }}</span>
               
               <div class="mt-8 w-full max-w-[240px]" ref="qrCodeRef">
                 <QRCodeVue3
+                  v-if="qrCodeUrl"
                   :value="qrCodeUrl"
                   :size="240"
                   :margin="0"
-                  :dotsOptions="{ type: 'dots', color: qrCodeColor }"
-                  :backgroundOptions="{ color: '#FFFFFF' }"
-                  :cornersSquareOptions="{ type: 'dot', color: qrCodeColor }"
-                  :cornersDotOptions="{ type: 'dot', color: qrCodeColor }"
+                  :dots-options="{ type: 'dots', color: qrCodeColor }"
+                  :background-options="{ color: '#FFFFFF' }"
+                  :corners-square-options="{ type: 'dot', color: qrCodeColor }"
+                  :corners-dot-options="{ type: 'dot', color: qrCodeColor }"
                 />
               </div>
 
@@ -98,13 +99,6 @@
               PNG
             </button>
             <button
-              @click="downloadQR('svg')"
-              class="w-full flex items-center justify-center px-4 py-3 rounded-xl bg-gray-50 border-2 border-gray-100 text-gray-700 font-medium hover:bg-gray-100 transition-colors"
-            >
-              <Download class="w-5 h-5 mr-2" />
-              SVG
-            </button>
-            <button
               @click="downloadQR('pdf')"
               class="w-full flex items-center justify-center px-4 py-3 rounded-xl bg-gray-50 border-2 border-gray-100 text-gray-700 font-medium hover:bg-gray-100 transition-colors"
             >
@@ -128,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import QRCodeVue3 from 'qrcode-vue3'
 import { Download, Printer } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
@@ -180,7 +174,7 @@ const loadEstablishment = async () => {
 }
 
 // Download functions
-const downloadQR = async (format: 'png' | 'svg' | 'pdf') => {
+const downloadQR = async (format: 'png' | 'pdf') => {
   if (!qrCodeRef.value) return
 
   try {
@@ -197,10 +191,6 @@ const downloadQR = async (format: 'png' | 'svg' | 'pdf') => {
         const imgData = canvas.toDataURL('image/png')
         pdf.addImage(imgData, 'PNG', 10, 10, 190, 190)
         pdf.save(`qr-code-table-${selectedTable.value}.pdf`)
-        break
-      
-      case 'svg':
-        // Implement SVG download
         break
     }
 
