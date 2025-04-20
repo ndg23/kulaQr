@@ -5,7 +5,14 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.9] - 2025-04-20
+## [Non publié]
+
+### Ajouté
+- Nouvelle page de connexion avec design moderne et épuré
+- Animations et transitions fluides
+- Support de l'authentification sociale
+
+## [0.1.0] - 2024-01-20
 
 ### Ajouté
 - Nouvelle page d'accueil avec design inspiré d'Apple
@@ -43,7 +50,29 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Typage TypeScript amélioré
 - Structure du projet réorganisée
 
-## [0.1.0] - 2024-01-20
+## [0.0.9] - 2025-04-19
+
+### Ajouté
+- Système d'authentification complet avec Supabase
+- Gestion des sessions et des tokens
+- Page de connexion avec design moderne
+- Support de l'authentification sociale (Google)
+- Système de notifications toast
+- Gestion des erreurs améliorée
+- Animations et transitions de page
+
+### Modifié
+- Refonte complète du système d'authentification
+- Amélioration de la sécurité
+- Optimisation des performances de chargement
+
+### Technique
+- Intégration complète de Supabase Auth
+- Middleware d'authentification
+- Gestion des états avec Pinia
+- Typage TypeScript pour l'authentification
+
+## [0.0.1] - 2024-01-20
 
 ### Ajouté
 - Configuration initiale du projet
