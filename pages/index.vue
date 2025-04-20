@@ -33,32 +33,107 @@
     <!-- Hero Section -->
     <section class="pt-[120px] pb-[80px]">
       <div class="max-w-[980px] mx-auto px-8 text-center">
-        <h1 class="text-[48px] md:text-[72px] font-semibold leading-tight text-gray-900">
-          La commande au restaurant,<br/>
-          <span class="text-blue-500">simplifiée.</span>
+        <h1 class="text-[56px] md:text-[96px] font-bold leading-[1.1] tracking-tight text-gray-900">
+          Menu digital.<br/>
+          <span class="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
+            Commande facile.
+          </span>
         </h1>
-        <p class="mt-6 text-xl md:text-2xl text-gray-500 max-w-[600px] mx-auto">
-          Transformez l'expérience de vos clients avec des QR codes intelligents
+        <p class="mt-8 text-xl md:text-2xl text-gray-500 max-w-[600px] mx-auto font-light">
+          La solution tout-en-un pour digitaliser votre restaurant et augmenter vos ventes
         </p>
-        <div class="mt-10">
+        <div class="mt-12">
           <NuxtLink
             to="/register"
-            class="inline-flex text-lg text-blue-500 hover:text-blue-600 transition-colors"
+            class="inline-flex text-lg font-medium text-blue-600 hover:text-blue-700 transition-colors items-center"
           >
-            Commencer gratuitement <ArrowRight class="w-5 h-5 ml-1" />
+            Essayer gratuitement <ArrowRight class="w-5 h-5 ml-1" />
           </NuxtLink>
         </div>
       </div>
     </section>
 
     <!-- Preview Section -->
+    <section class="py-[120px]">
+      <div class="max-w-[1400px] mx-auto px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div>
+            <img
+              src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
+              alt="Restaurant Ambiance"
+              class="rounded-2xl shadow-xl w-full object-cover h-[600px]"
+            />
+          </div>
+          <div class="space-y-8">
+            <h2 class="text-[40px] font-semibold text-gray-900 leading-tight">
+              Transformez l'expérience de vos clients
+            </h2>
+            <p class="text-xl text-gray-500">
+              Plus besoin d'attendre le serveur. Vos clients commandent directement depuis leur smartphone.
+            </p>
+            <div class="grid grid-cols-2 gap-8">
+              <div class="space-y-2">
+                <div class="text-2xl font-semibold text-gray-900">+40%</div>
+                <div class="text-gray-500">de commandes par table</div>
+              </div>
+              <div class="space-y-2">
+                <div class="text-2xl font-semibold text-gray-900">-15min</div>
+                <div class="text-gray-500">de temps d'attente</div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-4">
+              <img
+                src="https://images.unsplash.com/photo-1504674900247-0877df9cc836"
+                alt="QR Code Example"
+                class="w-24 h-24"
+              />
+              <div class="text-sm text-gray-500">
+                Scannez pour voir<br/>une démo du menu
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Preview Section -->
     <section class="py-[120px] bg-gray-50">
-      <div class="max-w-[1200px] mx-auto px-8">
-        <img
-          src="https://images.unsplash.com/photo-1504674900247-0877df9cc836"
-          alt="Dashboard Preview"
-          class="rounded-2xl shadow-xl w-full"
-        />
+      <div class="max-w-[1400px] mx-auto px-8">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
+          <div class="md:col-span-5 space-y-8">
+            <h2 class="text-[40px] font-semibold text-gray-900 leading-tight">
+              Un menu digital<br/>qui vous ressemble
+            </h2>
+            <p class="text-xl text-gray-500">
+              Personnalisez votre menu avec vos couleurs, photos et catégories. Mettez à jour vos prix et disponibilités en temps réel.
+            </p>
+            <div class="flex items-center space-x-6">
+              <img
+                src="https://randomuser.me/api/portraits/men/32.jpg"
+                alt="Chef"
+                class="w-12 h-12 rounded-full"
+              />
+              <div>
+                <div class="font-medium text-gray-900">Michel Durant</div>
+                <div class="text-gray-500">Restaurant Le Gourmet</div>
+              </div>
+            </div>
+          </div>
+          <div class="md:col-span-7">
+            <div class="relative">
+              <img
+                src="https://images.unsplash.com/photo-1504674900247-0877df9cc836"
+                alt="Menu Example"
+                class="rounded-2xl shadow-xl w-full"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1504674900247-0877df9cc836"
+                alt="QR Code"
+                class="absolute -bottom-8 -right-8 w-32 h-32 bg-white rounded-xl shadow-lg p-4"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
