@@ -1,12 +1,14 @@
 <template>
   <div class="min-h-screen bg-white">
-    <!-- Navigation style Apple -->
-    <nav class="fixed w-full bg-white/80 backdrop-blur-xl z-50">
-      <div class="max-w-[1400px] mx-auto">
-        <div class="flex justify-between h-[48px] items-center px-6 lg:px-8">
-          <div class="flex items-center space-x-2">
-            <span class="text-xl font-semibold">KulaQr</span>
-          </div>
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white/80 backdrop-blur-xl shadow-sm z-50 border-b border-gray-100">
+      <div class="max-w-[1200px] mx-auto">
+        <div class="flex justify-between h-[64px] items-center px- lg:px-">
+          <NuxtLink to="/" class="flex items-center space-x-">
+           <img src="~/assets/icon/logo.png" class="w-[100px] h-[100px] text-white" />
+            <span class="text-3xl font-logo">Kula QR</span>
+          </NuxtLink>
+          
           <div class="hidden md:flex items-center space-x-8">
             <NuxtLink 
               v-for="item in navItems" 
@@ -16,190 +18,152 @@
             >
               {{ item.name }}
             </NuxtLink>
-          </div>
-          <div class="flex items-center space-x-4">
             <NuxtLink
               to="/login"
-              class="hidden md:block text-sm text-blue-500 hover:text-blue-600 transition-colors"
+              class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >
               Connexion
             </NuxtLink>
-            <button 
-              class="md:hidden text-gray-500 hover:text-gray-700"
-              @click="mobileMenu = true"
+            <NuxtLink
+              to="/register"
+              class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
             >
-              <Menu class="w-6 h-6" />
-            </button>
+              Démarrer gratuitement
+            </NuxtLink>
           </div>
         </div>
       </div>
     </nav>
 
-    <!-- Mobile Menu -->
-    <TransitionRoot :show="mobileMenu" as="template">
-      <Dialog as="div" class="relative z-50" @close="mobileMenu = false">
-        <TransitionChild
-          enter="transition-opacity duration-300"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="transition-opacity duration-200"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/30" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 z-50 flex">
-          <TransitionChild
-            enter="transition-transform duration-300"
-            enter-from="-translate-x-full"
-            enter-to="translate-x-0"
-            leave="transition-transform duration-200"
-            leave-from="translate-x-0"
-            leave-to="-translate-x-full"
-          >
-            <DialogPanel class="relative flex w-full max-w-xs flex-col overflow-y-auto bg-white pb-12 shadow-xl">
-              <!-- Mobile menu content -->
-              <div class="px-4 pt-5 pb-2 flex">
-                <button
-                  type="button"
-                  class="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
-                  @click="mobileMenu = false"
-                >
-                  <span class="sr-only">Close menu</span>
-                  <X class="h-6 w-6" />
-                </button>
-              </div>
-
-              <div class="space-y-6 px-4 py-6">
-                <div class="flow-root">
-                  <NuxtLink
-                    v-for="item in navItems"
-                    :key="item.name"
-                    :to="item.to"
-                    class="-m-2 block p-2 font-medium text-gray-900"
-                    @click="mobileMenu = false"
-                  >
-                    {{ item.name }}
-                  </NuxtLink>
-                </div>
-              </div>
-            </DialogPanel>
-          </TransitionChild>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-
-    <!-- Hero Section style Apple -->
-    <section class="relative pt-[88px] overflow-hidden">
-      <div class="max-w-[1400px] mx-auto">
-        <div class="text-center px-6 lg:px-8">
-          <h1 class="text-[40px] sm:text-[56px] lg:text-[80px] font-semibold tracking-tight text-gray-900 leading-[1.1]">
-            Menu digital.<br class="hidden sm:block" />
-            <span class="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 text-transparent bg-clip-text">
-              Commande simplifiée.
-            </span>
-          </h1>
-          <p class="mt-6 text-xl sm:text-2xl text-gray-500 max-w-[600px] mx-auto font-light">
-            Transformez l'expérience de vos clients avec des QR codes intelligents
-          </p>
-          <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <NuxtLink
-              to="/register"
-              class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-all"
-            >
-              Démarrer gratuitement
-              <ArrowRight class="w-5 h-5 ml-2" />
-            </NuxtLink>
-            <a 
-              href="#demo"
-              class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <Play class="w-5 h-5 mr-2" />
-              Voir la démo
-            </a>
-          </div>
-        </div>
-
-        <!-- Image Hero avec effet parallaxe -->
-        <div class="mt-16 sm:mt-24 relative">
-          <div class="aspect-[16/9] max-w-[1200px] mx-auto overflow-hidden rounded-t-[2.5rem] shadow-2xl">
-            <img
-              src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
-              alt="Restaurant Experience"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Éléments flottants -->
-          <div class="absolute top-1/4 -right-4 sm:right-8 bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg p-4 floating">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
-                <Check class="w-5 h-5 text-green-500" />
-              </div>
-              <div class="text-sm">
-                <div class="font-medium">Nouvelle commande</div>
-                <div class="text-gray-500">Table 12 • 89,50€</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Features Section style Apple -->
-    <section class="py-24 sm:py-32">
-      <div class="max-w-[980px] mx-auto px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-16">
-          <div 
-            v-for="feature in features" 
-            :key="feature.title"
-            class="relative"
-          >
-            <div class="mb-6">
-              <div 
-                class="w-12 h-12 rounded-[20px] flex items-center justify-center"
-                :class="feature.bgColor"
+    <!-- Hero Section Repensée -->
+    <section class="min-h-screen flex flex-col justify-center relative pt-[64px]">
+      <div class="max-w-[1200px] mx-auto px-6 py-24">
+        <!-- Hero Content -->
+        <div class="grid grid-cols-12 gap-8">
+          <!-- Left Content - Span 6 colonnes -->
+          <div class="col-span-12 lg:col-span-6 flex flex-col justify-center">
+            <h1 class="text-size-mobile lg:text-size-hero font-bold leading-[1.1] mb-8">
+              Menu digital pour
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400">
+                restaurants modernes
+              </span>
+            </h1>
+            <p class="text-2xl text-gray-600 mb-12">
+              La solution tout-en-un pour digitaliser votre restaurant et augmenter vos ventes de <span class="font-medium text-gray-900">+35%</span>
+            </p>
+            
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 mb-16">
+              <NuxtLink
+                to="/register"
+                class="px-8 py-4 bg-gray-900 text-white rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors"
               >
-                <component :is="feature.icon" class="w-6 h-6" :class="feature.iconColor" />
+                Essayer gratuitement
+              </NuxtLink>
+              <a 
+                href="#demo"
+                class="px-8 py-4 bg-gray-50 text-gray-900 rounded-xl text-lg font-medium hover:bg-gray-100 transition-colors"
+              >
+                Voir la démo
+              </a>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="grid grid-cols-3 gap-8 py-8 border-t border-gray-100">
+              <div>
+                <div class="text-3xl font-semibold text-gray-900">2000+</div>
+                <div class="text-gray-500">Restaurants</div>
+              </div>
+              <div>
+                <div class="text-3xl font-semibold text-gray-900">1M+</div>
+                <div class="text-gray-500">Commandes</div>
+              </div>
+              <div>
+                <div class="text-3xl font-semibold text-gray-900">98%</div>
+                <div class="text-gray-500">Satisfaction</div>
               </div>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900">
-              {{ feature.title }}
-            </h3>
-            <p class="mt-3 text-base text-gray-500 leading-relaxed">
-              {{ feature.description }}
-            </p>
+          </div>
+
+          <!-- Right Content - Span 6 colonnes -->
+          <div class="col-span-12 lg:col-span-6">
+            <div class="aspect-[4/3] rounded-3xl overflow-hidden bg-gray-100">
+              <img
+                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
+                alt="Restaurant Experience"
+                class="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Nouvelle section Caractéristiques -->
-    <section class="py-[120px] bg-gray-50">
-      <div class="max-w-[980px] mx-auto px-8">
-        <div class="text-center max-w-[800px] mx-auto mb-20">
-          <h2 class="text-[48px] font-bold text-gray-900 leading-tight">
-            Une solution complète pour votre établissement
+    <!-- Features Section Repensée -->
+    <section class="py-32 bg-gray-50">
+      <div class="max-w-[1200px] mx-auto px-6">
+        <!-- Section Header -->
+        <div class="max-w-3xl mx-auto text-center mb-24">
+          <h2 class="text-4xl lg:text-5xl font-semibold mb-6">
+            Une expérience client révolutionnaire
           </h2>
-          <p class="mt-6 text-xl text-gray-500">
-            Tout ce dont vous avez besoin pour digitaliser votre restaurant et augmenter vos revenus
+          <p class="text-xl text-gray-600">
+            Découvrez comment KulaQr transforme la gestion de votre restaurant
           </p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
-          <div 
-            v-for="feature in features" 
-            :key="feature.title"
-            class="text-center"
-          >
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full" :class="feature.bgColor">
-              <component :is="feature.icon" class="w-8 h-8" :class="feature.iconColor" />
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-24">
+          <!-- Feature 1 -->
+          <div class="space-y-24">
+            <div>
+              <div class="aspect-[16/9] rounded-3xl overflow-hidden bg-gray-100 mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
+                  alt="QR Code Feature"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <h3 class="text-2xl font-semibold mb-4">QR Codes intelligents</h3>
+              <p class="text-gray-600">Générez des QR codes uniques pour chaque table avec votre identité visuelle</p>
             </div>
-            <h3 class="mt-6 text-xl font-semibold text-gray-900">
-              {{ feature.title }}
-            </h3>
-            <p class="mt-3 text-gray-500">
-              {{ feature.description }}
-            </p>
+            <div>
+              <div class="aspect-[16/9] rounded-3xl overflow-hidden bg-gray-100 mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
+                  alt="Orders Feature"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <h3 class="text-2xl font-semibold mb-4">Commandes en temps réel</h3>
+              <p class="text-gray-600">Suivez et gérez vos commandes instantanément depuis votre tableau de bord</p>
+            </div>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="space-y-24 lg:mt-48">
+            <div>
+              <div class="aspect-[16/9] rounded-3xl overflow-hidden bg-gray-100 mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
+                  alt="Analytics Feature"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <h3 class="text-2xl font-semibold mb-4">Analyses détaillées</h3>
+              <p class="text-gray-600">Suivez vos performances et optimisez votre menu en temps réel</p>
+            </div>
+            <div>
+              <div class="aspect-[16/9] rounded-3xl overflow-hidden bg-gray-100 mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
+                  alt="Security Feature"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <h3 class="text-2xl font-semibold mb-4">Sécurité avancée</h3>
+              <p class="text-gray-600">Protection des données et des paiements avec les dernières technologies</p>
+            </div>
           </div>
         </div>
       </div>
@@ -218,22 +182,55 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-[120px]">
-      <div class="max-w-[600px] mx-auto px-8 text-center">
-        <h2 class="text-[40px] font-semibold text-gray-900">
-          Prêt à commencer ?
+    <section class="relative py-[120px] overflow-hidden">
+      <!-- Motif de fond -->
+      <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-gray-50/50 to-gray-50/80" />
+      </div>
+
+      <!-- Cercles décoratifs -->
+      <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl" />
+      <div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl" />
+      
+      <div class="relative max-w-[600px] mx-auto px-8 text-center">
+        <span class="inline-block text-blue-600 font-medium mb-4">
+          Prêt à digitaliser votre restaurant ?
+        </span>
+        <h2 class="text-[40px] md:text-[48px] font-semibold text-gray-900 leading-tight">
+          Commencez votre essai gratuit
         </h2>
-        <p class="mt-4 text-xl text-gray-500">
-          Essayez KulaQr gratuitement pendant 14 jours
+        <p class="mt-6 text-xl text-gray-600">
+          Rejoignez plus de 2000 restaurants qui font confiance à KulaQr. Essai gratuit de 14 jours, sans carte bancaire.
         </p>
-        <div class="mt-10">
+        <div class="mt-12 space-y-4">
           <NuxtLink
             to="/register"
-            class="inline-flex items-center px-8 py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            class="inline-flex items-center px-8 py-4 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all transform hover:scale-105 text-lg font-medium"
           >
             Commencer maintenant
             <ArrowRight class="w-5 h-5 ml-2" />
           </NuxtLink>
+          <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
+            <Shield class="w-4 h-4" />
+            <span>Aucune carte bancaire requise</span>
+          </div>
+        </div>
+
+        <!-- Trust Metrics -->
+        <div class="mt-16 grid grid-cols-3 gap-8 border-t border-gray-100 pt-16">
+          <div>
+            <div class="font-semibold text-2xl text-gray-900">14 jours</div>
+            <div class="mt-1 text-gray-500">d'essai gratuit</div>
+          </div>
+          <div>
+            <div class="font-semibold text-2xl text-gray-900">5 minutes</div>
+            <div class="mt-1 text-gray-500">de configuration</div>
+          </div>
+          <div>
+            <div class="font-semibold text-2xl text-gray-900">24/7</div>
+            <div class="mt-1 text-gray-500">support client</div>
+          </div>
         </div>
       </div>
     </section>
@@ -243,21 +240,15 @@
 <script setup lang="ts">
 import {
   QrCode,
-  Clock,
-  ChartBar,
-  Menu,
   ArrowRight,
   Play,
+  TrendingUp,
+  Users,
+  Clock,
+  ChartBar,
   Shield,
-  Heart,
-  MessageCircle,
-  Check,
-  X
+  Check
 } from 'lucide-vue-next'
-import { ref } from 'vue'
-import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
-
-const mobileMenu = ref(false)
 
 const navItems = [
   { name: 'Fonctionnalités', to: '#features' },
@@ -267,23 +258,23 @@ const navItems = [
 
 const features = [
   {
-    title: 'QR Codes Personnalisés',
+    title: 'QR Codes Intelligents',
     description: 'Générez des QR codes uniques pour chaque table avec votre identité visuelle',
     icon: QrCode,
     bgColor: 'bg-blue-50',
     iconColor: 'text-blue-500'
   },
   {
-    title: 'Commandes en Temps Réel',
+    title: 'Commandes en Direct',
     description: 'Suivez et gérez vos commandes instantanément depuis votre tableau de bord',
     icon: Clock,
     bgColor: 'bg-emerald-50',
     iconColor: 'text-emerald-500'
   },
   {
-    title: 'Analyses Détaillées',
-    description: 'Obtenez des insights précieux sur vos ventes et le comportement client',
-    icon: ChartBar,
+    title: 'Sécurité Avancée',
+    description: 'Protection des données et des paiements avec les dernières technologies',
+    icon: Shield,
     bgColor: 'bg-purple-50',
     iconColor: 'text-purple-500'
   }
@@ -296,42 +287,28 @@ const stats = [
 ]
 </script>
 
-<style>
-.backdrop-blur-md {
+<style scoped>
+.backdrop-blur-xl {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
-/* Smooth scroll behavior */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Animations subtiles */
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(6deg); }
-  50% { transform: translateY(-10px) rotate(6deg); }
-}
-
-.floating {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { 
-    transform: translateY(0) rotate(2deg);
-    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
+/* Utilisation des classes Tailwind pour le responsive */
+@screen sm {
+  .text-size-mobile {
+    @apply text-5xl;
   }
-  50% { 
-    transform: translateY(-20px) rotate(2deg);
-    filter: drop-shadow(0 40px 40px rgba(0,0,0,0.15));
+  .text-size-hero {
+    @apply text-6xl;
   }
 }
 
-/* Optimisations mobiles */
-@media (max-width: 640px) {
-  .floating {
-    transform: scale(0.8);
+@screen lg {
+  .text-size-mobile {
+    @apply text-[64px];
+  }
+  .text-size-hero {
+    @apply text-[80px];
   }
 }
 </style>

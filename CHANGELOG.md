@@ -1,81 +1,162 @@
-# Changelog
+# KulaQr - Changelog
 
-Toutes les modifications notables de ce projet seront documentées dans ce fichier.
+> Une solution moderne pour la digitalisation des restaurants
 
-Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
-et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## Versions
 
-## [Non publié]
+### [0.3.0] 🚧
 
-### Ajouté
-- Nouvelle page de connexion avec design moderne et épuré
-- Animations et transitions fluides
-- Support de l'authentification sociale
+#### ✨ Nouvelles fonctionnalités
+- **Administration complète**
+  - Dashboard inspiré de Twitter
+  - Gestion des restaurants et utilisateurs
+  - Interface intuitive et moderne
+  - Statistiques en temps réel
+  - Système de paramètres complet
 
-## [0.1.0] - 2024-01-20
+- **Gestion des utilisateurs**
+  - Interface de gestion CRUD
+  - Filtres et recherche avancée
+  - Attribution des rôles
+  - Statuts personnalisables
+  - Modal d'édition intuitif
 
-### Ajouté
-- Nouvelle page d'accueil avec design inspiré d'Apple
-- Menu mobile responsive avec animations
-- Effets de parallaxe et animations subtiles
-- Mise en page optimisée pour mobile
-- Sections Features et Stats repensées
-- Interface de gestion des QR codes avec personnalisation (couleur, taille) et export multi-formats
-- Nouveau design des formulaires avec labels flottants et animations
-- Layout manager avec navigation responsive et notifications
-- Composants modaux améliorés utilisant Headless UI
-- Intégration des icônes Lucide
+- **Gestion des restaurants**
+  - Vue détaillée des restaurants
+  - Statistiques par établissement
+  - Actions rapides contextuelles
+  - Formulaire de création guidé
+  - Gestion des propriétaires
 
-### Modifié
-- Amélioration de l'expérience utilisateur sur mobile
-- Optimisation des performances d'animation
-- Refonte du design des pages produits et QR codes
-- Amélioration de l'expérience utilisateur des formulaires
-- Migration vers le module Supabase officiel de Nuxt
-- Optimisation des performances avec le chargement dynamique des composants
+- **Paramètres système**
+  - Configuration email SMTP
+  - Paramètres généraux
+  - Informations système
+  - Actions rapides
+  - Sauvegarde et réinitialisation
 
-### Corrigé
-- Problème de redéfinition du client Supabase
-- Gestion des erreurs améliorée avec retours visuels
-- Animations plus fluides des modaux et transitions
-- Support mobile optimisé
+- **Authentification repensée**
+  - Design minimaliste inspiré de Twitter/Apple
+  - Labels flottants avec animations fluides
+  - Validation en temps réel des formulaires
+  - Support de l'authentification sociale
+  - Messages d'erreur contextuels
 
-### Technique
+#### 🎨 Interface utilisateur
+- **Expérience utilisateur améliorée**
+  - Transitions et animations optimisées
+  - Retours visuels instantanés
+  - Navigation intuitive
+  - Interface adaptative
+
+#### 🔒 Sécurité
+- **Protection renforcée**
+  - Validation client/serveur
+  - Protection anti-spam
+  - Gestion sécurisée des tokens
+  - Authentification à deux facteurs
+
+---
+
+### [0.2.0] 21 Janvier 2025 🚧
+
+#### ✨ Nouvelles fonctionnalités
+- **Authentification repensée**
+  - Design minimaliste inspiré de Twitter/Apple
+  - Labels flottants avec animations fluides
+  - Validation en temps réel des formulaires
+  - Support de l'authentification sociale
+  - Messages d'erreur contextuels
+
+#### 🎨 Interface utilisateur
+- **Expérience utilisateur améliorée**
+  - Transitions et animations optimisées
+  - Retours visuels instantanés
+  - Navigation intuitive
+  - Interface adaptative
+
+#### 🔒 Sécurité
+- **Protection renforcée**
+  - Validation client/serveur
+  - Protection anti-spam
+  - Gestion sécurisée des tokens
+  - Authentification à deux facteurs
+
+---
+
+### [0.1.0] - 20 Janvier 2024 🎉
+
+#### ✨ Nouvelles fonctionnalités
+- **Page d'accueil**
+  - Design inspiré d'Apple
+  - Animations fluides
+  - Mise en page responsive
+  - Sections Features et Stats
+
+- **Gestion des QR codes**
+  - Personnalisation avancée
+  - Export multi-formats
+  - Templates personnalisables
+
+#### 🔧 Améliorations techniques
 - Migration vers Nuxt 3.8.0
-- Ajout des dépendances :
-  - @headlessui/vue: ^1.7.23
-  - lucide-vue-next: ^0.468.0
-  - qrcode-vue3: ^1.7.1
-  - html2canvas: ^1.4.1
-- Typage TypeScript amélioré
-- Structure du projet réorganisée
+- Intégration Headless UI
+- Optimisation des performances
+- Support TypeScript amélioré
 
-## [0.0.9] - 2025-04-19
+#### 📱 Mobile
+- Navigation responsive
+- Interface adaptative
+- Optimisation des animations
+- Support tactile amélioré
 
-### Ajouté
-- Système d'authentification complet avec Supabase
-- Gestion des sessions et des tokens
-- Page de connexion avec design moderne
-- Support de l'authentification sociale (Google)
-- Système de notifications toast
-- Gestion des erreurs améliorée
-- Animations et transitions de page
+#### 🐛 Corrections
+- Résolution des conflits Supabase
+- Amélioration des retours utilisateur
+- Optimisation des transitions
+- Support cross-browser
 
-### Modifié
-- Refonte complète du système d'authentification
-- Amélioration de la sécurité
-- Optimisation des performances de chargement
+---
 
-### Technique
-- Intégration complète de Supabase Auth
+### [0.0.9] - 19 Avril 2025 🔐
+
+#### 🔒 Sécurité & Authentification
+- Système d'authentification Supabase
+- Gestion des sessions
+- Support OAuth (Google)
+- Notifications temps réel
+
+#### ⚡️ Performance
+- Optimisation du chargement
+- Mise en cache améliorée
+- Réduction du bundle size
+
+#### 🛠 Infrastructure
 - Middleware d'authentification
-- Gestion des états avec Pinia
-- Typage TypeScript pour l'authentification
+- État global avec Pinia
+- Types TypeScript complets
 
-## [0.0.1] - 2024-01-20
+---
 
-### Ajouté
-- Configuration initiale du projet
-- Mise en place de Nuxt.js
-- Intégration de Supabase
-- Structure de base de données 
+### [0.0.1] - 20 Janvier 2024 🚀
+
+#### 🎉 Premier déploiement
+- Configuration Nuxt.js
+- Intégration Supabase
+- Structure de base
+- Architecture initiale
+
+---
+
+## Guide des émojis
+
+- ✨ Nouvelles fonctionnalités
+- 🎨 Design/UI/UX
+- 🔧 Modifications techniques
+- 🐛 Corrections de bugs
+- 🔒 Sécurité
+- ⚡️ Performance
+- 📱 Mobile
+- 🛠 Infrastructure
+- 🚀 Déploiement
+- 🎉 Version majeure 

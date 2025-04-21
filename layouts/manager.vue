@@ -7,7 +7,7 @@
           <!-- Left side -->
           <div class="flex items-center">
             <NuxtLink to="/" class="flex items-center">
-              <span class="text-2xl font-bold">KulaQr</span>
+              <span class="text-2xl font-logo">Kula QR</span>
             </NuxtLink>
           </div>
 

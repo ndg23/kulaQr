@@ -10,6 +10,11 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        'logo': ['Arial Rounded MT Bold', 'system-ui', '-apple-system', 'sans-serif'],
+
+      },
       colors: {
         primary: {
           50: '#fdf8ed',
