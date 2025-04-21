@@ -6,15 +6,15 @@ CREATE TABLE establishments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,  -- Pour les URLs
   description TEXT,
   image_url TEXT,
   address TEXT,
   phone TEXT,
   opening_hours TEXT,
-  rating DECIMAL(2,1) DEFAULT 4.5,
-  review_count INTEGER DEFAULT 0,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  is_active BOOLEAN DEFAULT TRUE
+  is_active BOOLEAN DEFAULT TRUE,
+  currency TEXT DEFAULT 'EUR'
 );
 
 -- Categories table
@@ -23,7 +23,10 @@ CREATE TABLE categories (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  order_number INTEGER NOT NULL DEFAULT 0
+  description TEXT,
+  order_number INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE,
+  UNIQUE(establishment_id, name)
 );
 
 -- Products table
@@ -36,44 +39,24 @@ CREATE TABLE products (
   price DECIMAL(10,2) NOT NULL,
   image_url TEXT,
   is_available BOOLEAN DEFAULT TRUE,
-  order_number INTEGER NOT NULL DEFAULT 0
+  order_number INTEGER NOT NULL DEFAULT 0,
+  allergens TEXT[],  -- Information importante pour les clients
+  UNIQUE(category_id, name)
 );
 
--- Orders table
-CREATE TABLE orders (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
-  table_number INTEGER,
-  status TEXT NOT NULL DEFAULT 'pending',
-  total_amount DECIMAL(10,2) NOT NULL
-);
-
--- Order items table
-CREATE TABLE order_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
-  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
-  quantity INTEGER NOT NULL,
-  price DECIMAL(10,2) NOT NULL
-);
-
--- QR codes table
+-- Tables QR codes
 CREATE TABLE qr_codes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
-  table_number INTEGER,
-  scan_count INTEGER NOT NULL DEFAULT 0
+  table_number INTEGER NOT NULL,
+  UNIQUE(establishment_id, table_number)
 );
 
 -- Row Level Security Policies
 ALTER TABLE establishments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE qr_codes ENABLE ROW LEVEL SECURITY;
 
 -- Establishments policies
@@ -112,20 +95,6 @@ CREATE POLICY "Users can manage their establishment products" ON products
     )
   );
 
--- Orders policies
-CREATE POLICY "Orders are viewable by establishment owners" ON orders
-  FOR SELECT USING (
-    auth.uid() IN (
-      SELECT user_id FROM establishments 
-      WHERE id = orders.establishment_id
-    )
-  );
-
-CREATE POLICY "Anyone can create orders" ON orders
-  FOR INSERT WITH CHECK (true);
-
 -- Create indexes for better performance
 CREATE INDEX idx_categories_establishment ON categories(establishment_id);
 CREATE INDEX idx_products_category ON products(category_id);
-CREATE INDEX idx_orders_establishment ON orders(establishment_id);
-CREATE INDEX idx_order_items_order ON order_items(order_id);

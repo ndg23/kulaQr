@@ -5,8 +5,8 @@
         <!-- Logo -->
         <div class="h-16 flex items-center px-6 border-b border-gray-100">
           <NuxtLink to="/admin" class="flex items-center">
-            <img src="~/assets/icon/logo.png" class="w-8 h-8" alt="Logo" />
-            <span class="text-xl font-bold ml-3 text-gray-900">Kula QR</span>
+            <img src="~/assets/icon/logo.png" class="w-[100px] h-[100px]" alt="Logo" />
+            <span class="text-xl font-logo ml-3 text-gray-900">Kula QR</span>
           </NuxtLink>
         </div>
   

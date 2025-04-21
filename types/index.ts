@@ -10,8 +10,18 @@ export interface Product {
   created_at: string;
 }
 
-export interface CartItem extends Product {
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
   quantity: number;
+  notes?: string;
+}
+
+export interface Cart {
+  items: CartItem[];
+  tableNumber?: number;
+  notes?: string;
 }
 
 export interface Category {
@@ -43,17 +53,17 @@ export interface OrderData {
 
 export interface Establishment {
   id: string;
+  created_at: string;
   name: string;
   description?: string;
   image_url?: string;
   address?: string;
   phone?: string;
   opening_hours?: string;
-  rating?: number;
-  review_count?: number;
+  rating: number;
+  review_count: number;
   user_id: string;
   is_active: boolean;
-  created_at: string;
 }
 
 export interface Order {

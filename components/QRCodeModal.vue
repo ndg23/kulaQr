@@ -43,12 +43,12 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void
 }>()
-
+const menuUrl = ref('')
 const qrCodeUrl = ref('')
 
 onMounted(async () => {
-  const menuUrl = `${window.location.origin}/menu/${props.restaurantId}`
-  qrCodeUrl.value = await QRCode.toDataURL(menuUrl, {
+  menuUrl.value = `${window.location.origin}/menu/${props.restaurantId}`
+  qrCodeUrl.value = await QRCode.toDataURL(menuUrl.value, {
     width: 512,
     margin: 2,
     color: {

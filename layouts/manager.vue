@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#F8FAFC]">
+  <div class="min-h-screen bg-gray-50">
     <!-- Header -->
     <header class="sticky top-0 z-30 bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto">
@@ -7,7 +7,8 @@
           <!-- Left side -->
           <div class="flex items-center">
             <NuxtLink to="/" class="flex items-center">
-              <span class="text-2xl font-logo">Kula QR</span>
+              <img src="~/assets/icon/logo.png" class="w-8 h-8" alt="Logo" />
+              <span class="text-xl font-logo ml-3 text-gray-900">Kula QR</span>
             </NuxtLink>
           </div>
 
@@ -19,9 +20,9 @@
               :to="item.to"
               :class="[
                 isActive(item.to)
-                  ? 'bg-gray-50 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                'px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200'
+                  ? 'bg-gray-900 text-white'
+                  : 'text-gray-700 hover:bg-gray-50',
+                'px-4 py-2 rounded-full text-sm font-medium transition-colors'
               ]"
             >
               <div class="flex items-center space-x-2">
@@ -33,12 +34,24 @@
 
           <!-- Right side -->
           <div class="flex items-center space-x-4">
+            <!-- Quick Actions -->
+            <button
+              @click="showAddProduct = true"
+              class="hidden md:inline-flex items-center px-4 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
+            >
+              <Plus class="w-4 h-4 mr-1.5" />
+              Nouveau produit
+            </button>
+
             <!-- Notifications -->
             <Menu as="div" class="relative">
               <MenuButton class="relative p-2 rounded-full hover:bg-gray-50">
                 <span class="sr-only">Notifications</span>
                 <Bell class="w-5 h-5 text-gray-600" />
-                <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
+                <span 
+                  v-if="hasNotifications"
+                  class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" 
+                />
               </MenuButton>
               <transition
                 enter-active-class="transition ease-out duration-100"
@@ -48,7 +61,7 @@
                 leave-from-class="transform opacity-100 scale-100"
                 leave-to-class="transform opacity-0 scale-95"
               >
-                <MenuItems class="absolute right-0 mt-2 w-80 origin-top-right rounded-xl bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <MenuItems class="absolute right-0 mt-2 w-80 origin-top-right rounded-2xl bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <div class="px-4 py-2 border-b border-gray-100">
                     <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
                   </div>
@@ -83,11 +96,16 @@
             <!-- Profile dropdown -->
             <Menu as="div" class="relative">
               <MenuButton class="flex items-center space-x-3">
-                <img
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
-                  alt="Avatar"
-                  class="h-8 w-8 rounded-full"
-                />
+                <div class="flex items-center space-x-3">
+                  <img
+                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                    alt="Avatar"
+                    class="h-8 w-8 rounded-full"
+                  />
+                  <span class="hidden md:block text-sm font-medium text-gray-700">
+                    {{ establishment?.name }}
+                  </span>
+                </div>
                 <ChevronDown class="w-4 h-4 text-gray-600" />
               </MenuButton>
               <transition
@@ -100,22 +118,8 @@
               >
                 <MenuItems class="absolute right-0 mt-2 w-48 origin-top-right rounded-xl bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <MenuItem v-slot="{ active }">
-                    <a
-                      href="#"
-                      :class="[
-                        active ? 'bg-gray-50' : '',
-                        'block px-4 py-2 text-sm text-gray-700'
-                      ]"
-                    >
-                      <div class="flex items-center">
-                        <User class="w-4 h-4 mr-2" />
-                        Mon profil
-                      </div>
-                    </a>
-                  </MenuItem>
-                  <MenuItem v-slot="{ active }">
-                    <a
-                      href="#"
+                    <NuxtLink
+                      :to="`/manager/${slug}/settings`"
                       :class="[
                         active ? 'bg-gray-50' : '',
                         'block px-4 py-2 text-sm text-gray-700'
@@ -125,22 +129,22 @@
                         <Settings class="w-4 h-4 mr-2" />
                         Paramètres
                       </div>
-                    </a>
+                    </NuxtLink>
                   </MenuItem>
                   <div class="border-t border-gray-100 my-1" />
                   <MenuItem v-slot="{ active }">
-                    <a
-                      href="#"
+                    <button
+                      @click="logout"
                       :class="[
                         active ? 'bg-gray-50' : '',
-                        'block px-4 py-2 text-sm text-red-600'
+                        'block w-full px-4 py-2 text-left text-sm text-red-600'
                       ]"
                     >
                       <div class="flex items-center">
                         <LogOut class="w-4 h-4 mr-2" />
                         Déconnexion
                       </div>
-                    </a>
+                    </button>
                   </MenuItem>
                 </MenuItems>
               </transition>
@@ -159,7 +163,7 @@
           :to="item.to"
           :class="[
             isActive(item.to)
-              ? 'text-blue-500'
+              ? 'text-gray-900'
               : 'text-gray-600',
             'flex flex-col items-center py-2 px-3'
           ]"
@@ -188,42 +192,71 @@ import {
   LayoutDashboard,
   Store,
   QrCode,
-  ChartBar,
   Settings,
   Bell,
-  User,
   LogOut,
   ChevronDown,
   ShoppingCart,
-  
+  Plus,
+  UtensilsCrossed,
+  ListOrdered
 } from 'lucide-vue-next'
+import { useSupabaseWrapper } from '~/composables/useSupabase'
 
 const route = useRoute()
+const router = useRouter()
+const { client: supabase } = useSupabaseWrapper()
+const slug = route.params.slug
 
+// State
+const establishment = ref(null)
+const showAddProduct = ref(false)
+const hasNotifications = ref(true)
+
+// Navigation
 const navigationItems = [
   {
-    name: 'Dashboard',
-    to: `/manager/${route.params.slug}`,
-    icon: LayoutDashboard
-  },
-  {
     name: 'Menu',
-    to: `/manager/${route.params.slug}/products`,
-    icon: Store
+    to: `/manager/${slug}/menu`,
+    icon: UtensilsCrossed
   },
   {
-    name: 'QR Codes',
-    to: `/manager/${route.params.slug}/qr-codes`,
+    name: 'Catégories',
+    to: `/manager/${slug}/categories`,
+    icon: ListOrdered
+  },
+  {
+    name: 'QR Code',
+    to: `/manager/${slug}/qr-codes`,
     icon: QrCode
   },
   {
     name: 'Paramètres',
-    to: `/manager/${route.params.slug}/settings`,
+    to: `/manager/${slug}/settings`,
     icon: Settings
   }
 ]
 
+// Methods
 const isActive = (path: string) => {
   return route.path === path
 }
+
+const loadEstablishment = async () => {
+  const { data } = await supabase
+    .from('establishments')
+    .select()
+    .eq('id', slug)
+    .single()
+  
+  establishment.value = data
+}
+
+const logout = async () => {
+  await supabase.auth.signOut()
+  router.push('/auth/login')
+}
+
+// Initial load
+onMounted(loadEstablishment)
 </script> 

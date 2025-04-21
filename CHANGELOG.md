@@ -4,7 +4,7 @@
 
 ## Versions
 
-### [0.3.0] 🚧
+### [0.3.0] 21 Avril 2025 🚧
 
 #### ✨ Nouvelles fonctionnalités
 - **Administration complète**
@@ -58,7 +58,7 @@
 
 ---
 
-### [0.2.0] 21 Janvier 2025 🚧
+### [0.2.0] 21 Avril 2025 🚧
 
 #### ✨ Nouvelles fonctionnalités
 - **Authentification repensée**
@@ -84,7 +84,7 @@
 
 ---
 
-### [0.1.0] - 20 Janvier 2024 🎉
+### [0.1.0] 20 Avril 2025 🎉
 
 #### ✨ Nouvelles fonctionnalités
 - **Page d'accueil**
