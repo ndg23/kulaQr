@@ -194,9 +194,7 @@ const signInWithGoogle = async () => {
   try {
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
-      }
+      
     })
     if (authError) {
       error.value = 'Erreur de connexion avec Google'

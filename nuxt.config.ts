@@ -19,7 +19,13 @@ export default defineNuxtConfig({
     },
     pageTransition: { name: 'page', mode: 'out-in' }
   },
-
+  googleSignIn: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    scope: 'email profile',
+    prompt: 'consent',
+    access_type: 'offline',
+    redirect_uri: 'http://localhost:3001/auth/callback'
+  },
   supabase: {
     url: process.env.SUPABASE_URL,
     key: process.env.SUPABASE_KEY,
