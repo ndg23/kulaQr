@@ -4,6 +4,55 @@
 
 ## Versions
 
+### [0.4.0] - 22 Avril 2025 🔒
+
+#### ✨ Nouvelles fonctionnalités
+- **Authentification améliorée**
+  - Refonte complète du système d'authentification
+  - Support OAuth avec Google
+  - Gestion des erreurs contextuelles
+  - Validation en temps réel
+  - Page de callback OAuth
+  - Redirection intelligente post-inscription
+
+- **Types d'établissements**
+  - Nouvelle table establishment_types
+  - Sélecteur de type avec icônes
+  - 8 types prédéfinis (Restaurant, Fast-food, Café, etc.)
+  - Interface de sélection moderne avec Headless UI
+  - Personnalisation par type (features JSON)
+
+#### 🎨 Interface utilisateur
+- **Formulaires améliorés**
+  - Labels flottants animés
+  - Validation en temps réel
+  - Messages d'erreur contextuels
+  - Boutons de soumission dynamiques
+  - Animations de chargement
+
+#### 🗃 Base de données
+- **Nouvelle structure**
+  - Table users optimisée
+  - Gestion des types d'établissements
+  - Triggers de maintenance
+  - Policies de sécurité
+  - Indexes de performance
+
+#### 🔒 Sécurité
+- **Renforcement des accès**
+  - Row Level Security (RLS)
+  - Policies par table
+  - Validation des données
+  - Protection contre les injections
+  - Gestion sécurisée des sessions
+
+#### 🔧 Corrections
+- Correction des redirections post-inscription
+- Amélioration de la gestion des erreurs
+- Optimisation des requêtes Supabase
+- Correction des styles des formulaires
+- Meilleure gestion des états de chargement
+
 ### [0.3.0] 21 Avril 2025 🚧
 
 #### ✨ Nouvelles fonctionnalités
@@ -159,4 +208,42 @@
 - 📱 Mobile
 - 🛠 Infrastructure
 - 🚀 Déploiement
-- 🎉 Version majeure 
+- 🎉 Version majeure
+
+## [0.3.0]
+
+### Changed
+- Intégration complète de Supabase Auth
+  - Connexion avec email/mot de passe
+  - Inscription avec création d'établissement
+  - Authentification Google
+  - Gestion des erreurs avec notifications
+  - Redirection intelligente
+  - Persistance de session
+
+- Amélioration des modaux (Produits et Catégories)
+  - Refactorisation pour utiliser @headlessui/vue
+  - Meilleure gestion des transitions et animations
+  - Ajout d'un effet de flou sur l'arrière-plan
+  - Correction des problèmes d'affichage
+  - Amélioration de la structure TypeScript
+- Mise à jour des types TypeScript
+  - Amélioration de l'interface Category
+  - Ajout des métadonnées UI pour les icônes
+  - Meilleure cohérence entre les interfaces
+
+- Amélioration majeure du design du modal de catégorie
+  - Ajout d'un effet de flou sur l'arrière-plan
+  - Coins plus arrondis et ombres améliorées
+  - Animations et transitions plus fluides
+  - Sélection d'icônes plus intuitive avec retour visuel
+  - Ajout du champ d'ordre d'affichage
+  - Plus d'icônes disponibles pour les catégories
+  - Meilleure gestion des types TypeScript
+  - Support de la fermeture avec la touche Escape
+  - Amélioration de l'accessibilité et de l'UX
+
+## [1.0.0] - 2025-04-21
+
+### Added
+- Première version de l'application 

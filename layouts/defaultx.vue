@@ -13,13 +13,13 @@
           <!-- Right Side Navigation -->
           <nav class="flex items-center space-x-6">
             <NuxtLink 
-              to="/login" 
+              to="/auth/login" 
               class="text-sm font-medium text-gray-500 hover:text-gray-900"
             >
               Se connecter
             </NuxtLink>
             <NuxtLink 
-              to="/register" 
+              to="/auth/register" 
               class="inline-flex h-9 px-4 items-center justify-center bg-black text-white rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
             >
               Créer un compte

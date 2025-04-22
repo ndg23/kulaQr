@@ -159,7 +159,7 @@
   
   const handleLogout = async () => {
     // Logique de déconnexion
-    router.push('/login')
+    router.push('/auth/login')
     toast.success('Déconnexion réussie', 'À bientôt !')
   }
   </script>

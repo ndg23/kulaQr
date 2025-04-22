@@ -7,7 +7,7 @@
         <p class="mt-1 text-sm text-gray-500">Gérez les catégories de votre menu</p>
       </div>
       <button
-        @click="openNewCategory"
+        @click="openCategoryModal"
         class="inline-flex items-center px-4 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
       >
         <Plus class="w-4 h-4 mr-1.5" />
@@ -76,13 +76,43 @@
     </div>
 
     <!-- Category Modal -->
-    <CategoryModal
-      v-if="showCategoryModal"
-      :show="showCategoryModal"
-      :category="editingCategory"
-      @close="closeCategoryModal"
-      @submit="saveCategory"
-    />
+    <TransitionRoot appear :show="showCategoryModal" as="template">
+      <Dialog as="div" class="relative z-50" @close="closeCategoryModal">
+        <TransitionChild
+          as="template"
+          enter="duration-300 ease-out"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="duration-200 ease-in"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4">
+            <TransitionChild
+              as="template"
+              enter="duration-300 ease-out"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="duration-200 ease-in"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+                <CategoryModal
+                  :category="editingCategory"
+                  @close="closeCategoryModal"
+                  @submit="saveCategory"
+                />
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
   </div>
 </template>
 
@@ -93,6 +123,14 @@ import {
   Coffee, Pizza, IceCream, Wine, Beer
 } from 'lucide-vue-next'
 import { useToast } from '~/composables/useToast'
+import { Category } from '~/types'
+import CategoryModal from '~/components/modals/CategoryModal.vue'
+import {
+  TransitionRoot,
+  TransitionChild,
+  Dialog,
+  DialogPanel
+} from '@headlessui/vue'
 
 const toast = useToast()
 const route = useRoute()
@@ -207,7 +245,7 @@ const mockProducts = [
 
 // State
 const showCategoryModal = ref(false)
-const editingCategory = ref(null)
+const editingCategory = ref<Category | null>(null)
 const categories = ref(mockCategories)
 const products = ref(mockProducts)
 
@@ -224,12 +262,12 @@ const formatPrice = (price: number) => {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
 }
 
-const openNewCategory = () => {
+const openCategoryModal = () => {
   editingCategory.value = null
   showCategoryModal.value = true
 }
 
-const editCategory = (category: any) => {
+const editCategory = (category: Category) => {
   editingCategory.value = { ...category }
   showCategoryModal.value = true
 }
@@ -371,4 +409,10 @@ onMounted(loadData)
 definePageMeta({
   layout: 'manager'
 })
-</script> 
+</script>
+
+<style scoped>
+.backdrop-blur-sm {
+  backdrop-filter: blur(8px);
+}
+</style> 

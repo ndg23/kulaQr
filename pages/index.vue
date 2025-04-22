@@ -19,13 +19,13 @@
               {{ item.name }}
             </NuxtLink>
             <NuxtLink
-              to="/login"
+              to="/auth/login"
               class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >
               Connexion
             </NuxtLink>
             <NuxtLink
-              to="/register"
+              to="/auth/register"
               class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
             >
               Démarrer gratuitement
@@ -55,7 +55,7 @@
             <!-- CTA Buttons -->
             <div class="flex flex-col sm:flex-row gap-4 mb-16">
               <NuxtLink
-                to="/register"
+                to="/auth/register"
                 class="px-8 py-4 bg-gray-900 text-white rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors"
               >
                 Essayer gratuitement
@@ -205,7 +205,7 @@
         </p>
         <div class="mt-12 space-y-4">
           <NuxtLink
-            to="/register"
+            to="/auth/register"
             class="inline-flex items-center px-8 py-4 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all transform hover:scale-105 text-lg font-medium"
           >
             Commencer maintenant

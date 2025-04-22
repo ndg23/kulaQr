@@ -1,103 +1,101 @@
 <template>
-  <div class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-    <div class="bg-white w-full max-w-lg mx-4 rounded-[2rem] shadow-xl" @click.stop>
-      <!-- Header -->
-      <div class="p-6 pb-0">
-        <h2 class="text-2xl font-bold text-gray-900">
-          {{ props.category ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
-        </h2>
-        <p class="mt-1 text-sm text-gray-500">
-          {{ props.category ? 'Modifiez les informations de la catégorie' : 'Ajoutez une nouvelle catégorie à votre menu' }}
-        </p>
+  <div>
+    <!-- Header -->
+    <div class="p-6 pb-0">
+      <h2 class="text-2xl font-bold text-gray-900">
+        {{ props.category ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
+      </h2>
+      <p class="mt-1 text-sm text-gray-500">
+        {{ props.category ? 'Modifiez les informations de la catégorie' : 'Ajoutez une nouvelle catégorie à votre menu' }}
+      </p>
+    </div>
+
+    <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
+      <!-- Name -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Nom de la catégorie
+        </label>
+        <input
+          v-model="form.name"
+          type="text"
+          required
+          class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all duration-200"
+          placeholder="Ex: Entrées, Plats, Desserts..."
+        />
       </div>
 
-      <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
-        <!-- Name -->
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">
-            Nom de la catégorie
-          </label>
-          <input
-            v-model="form.name"
-            type="text"
-            required
-            class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all duration-200"
-            placeholder="Ex: Entrées, Plats, Desserts..."
-          />
-        </div>
-
-        <!-- Icon Selection -->
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">
-            Icône
-          </label>
-          <div class="grid grid-cols-4 gap-3">
-            <button
-              v-for="icon in availableIcons"
-              :key="icon.name"
-              type="button"
-              @click="selectIcon(icon)"
-              class="aspect-square rounded-xl border-2 flex items-center justify-center transition-all duration-200"
-              :class="[
-                form.icon === icon.component
-                  ? 'border-blue-500 bg-blue-50 scale-[1.02]'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-              ]"
-            >
-              <component 
-                :is="icon.component" 
-                class="w-6 h-6 transition-colors duration-200" 
-                :class="form.icon === icon.component ? 'text-blue-500' : 'text-gray-400'" 
-              />
-            </button>
-          </div>
-        </div>
-
-        <!-- Description -->
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">
-            Description (optionnelle)
-          </label>
-          <textarea
-            v-model="form.description"
-            rows="3"
-            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all duration-200"
-            placeholder="Description de la catégorie..."
-          />
-        </div>
-
-        <!-- Order Number -->
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">
-            Ordre d'affichage
-          </label>
-          <input
-            v-model="form.order_number"
-            type="number"
-            min="0"
-            required
-            class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all duration-200"
-          />
-        </div>
-
-        <!-- Actions -->
-        <div class="flex items-center justify-end space-x-3 pt-6">
+      <!-- Icon Selection -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Icône
+        </label>
+        <div class="grid grid-cols-4 gap-3">
           <button
+            v-for="icon in availableIcons"
+            :key="icon.name"
             type="button"
-            @click="$emit('close')"
-            class="px-6 py-2 bg-white text-gray-700 rounded-full text-sm font-medium border border-gray-200 hover:bg-gray-50 transition-all duration-200"
+            @click="selectIcon(icon)"
+            class="aspect-square rounded-xl border-2 flex items-center justify-center transition-all duration-200"
+            :class="[
+              form.icon === icon.component
+                ? 'border-blue-500 bg-blue-50 scale-[1.02]'
+                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+            ]"
           >
-            Annuler
-          </button>
-          <button
-            type="submit"
-            class="px-6 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-all duration-200"
-          >
-            {{ props.category ? 'Enregistrer' : 'Créer' }}
+            <component 
+              :is="icon.component" 
+              class="w-6 h-6 transition-colors duration-200" 
+              :class="form.icon === icon.component ? 'text-blue-500' : 'text-gray-400'" 
+            />
           </button>
         </div>
-      </form>
-    </div>
+      </div>
+
+      <!-- Description -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Description (optionnelle)
+        </label>
+        <textarea
+          v-model="form.description"
+          rows="3"
+          class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all duration-200"
+          placeholder="Description de la catégorie..."
+        />
+      </div>
+
+      <!-- Order Number -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Ordre d'affichage
+        </label>
+        <input
+          v-model="form.order_number"
+          type="number"
+          min="0"
+          required
+          class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all duration-200"
+        />
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-end space-x-3 pt-6">
+        <button
+          type="button"
+          @click="$emit('close')"
+          class="px-6 py-2 bg-white text-gray-700 rounded-full text-sm font-medium border border-gray-200 hover:bg-gray-50 transition-all duration-200"
+        >
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="px-6 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-all duration-200"
+        >
+          {{ props.category ? 'Enregistrer' : 'Créer' }}
+        </button>
+      </div>
+    </form>
   </div>
 </template>
 
@@ -111,7 +109,6 @@ import {
 import type { Category } from '~/types'
 
 const props = defineProps<{
-  show: boolean
   category?: Partial<Category>
 }>()
 
@@ -152,15 +149,6 @@ const handleSubmit = () => {
     id: props.category?.id
   })
 }
-
-// Close on escape key
-onMounted(() => {
-  const handleEscape = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') emit('close')
-  }
-  window.addEventListener('keydown', handleEscape)
-  return () => window.removeEventListener('keydown', handleEscape)
-})
 </script>
 
 <style scoped>

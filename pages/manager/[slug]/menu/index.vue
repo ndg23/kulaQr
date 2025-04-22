@@ -7,7 +7,7 @@
         <p class="mt-1 text-sm text-gray-500">Gérez les produits de votre établissement</p>
       </div>
       <button
-        @click="showAddProduct = true"
+        @click="openAddProduct"
         class="inline-flex items-center px-4 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
       >
         <Plus class="w-4 h-4 mr-1.5" />
@@ -133,25 +133,57 @@
     </div>
 
     <!-- Add/Edit Product Modal -->
-    <ProductModal
-      v-if="showAddProduct"
-      :show="showAddProduct"
-      :product="editingProduct"
-      @close="closeModal"
-      @submit="saveProduct"
-    />
+    <TransitionRoot appear :show="showAddProduct" as="template">
+      <Dialog as="div" class="relative z-50" @close="closeModal">
+        <TransitionChild
+          as="template"
+          enter="duration-300 ease-out"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="duration-200 ease-in"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-black bg-opacity-25" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4">
+            <TransitionChild
+              as="template"
+              enter="duration-300 ease-out"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="duration-200 ease-in"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+                <ProductModal
+                  :product="editingProduct"
+                  :categories="categories"
+                  @close="closeModal"
+                  @submit="saveProduct"
+                />
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Switch } from '@headlessui/vue'
+import { Switch, TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue'
 import {
   Plus, UtensilsCrossed, Edit2, Trash2,
   Coffee, Pizza, Store, TrendingUp, IceCream
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useToast } from '~/composables/useToast'
+import ProductModal from '~/components/modals/ProductModal.vue'
 
 const { client: supabase, withLoading } = useSupabaseWrapper()
 const toast = useToast()
@@ -288,7 +320,7 @@ const formatPrice = (price: number) => {
 
 const loadData = async () => {
   // Simuler un délai de chargement
-  await new Promise(resolve => setTimeout(resolve, 500))
+  await new Promise(resolve => setTimeout(resolve, 5000))
   
   categories.value = mockCategories
   products.value = mockProducts
@@ -348,6 +380,11 @@ const deleteProduct = async (id: string) => {
       toast.success('Produit supprimé', 'Le produit a été supprimé')
     }
   }
+}
+
+const openAddProduct = () => {
+  editingProduct.value = null
+  showAddProduct.value = true
 }
 
 // Initial load

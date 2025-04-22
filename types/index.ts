@@ -10,6 +10,19 @@ export interface Product {
   created_at: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  order_number: number;
+  establishment_id: string;
+  created_at: string;
+  // Métadonnées UI (non stockées en DB)
+  icon?: any;
+  iconBg?: string;
+  iconColor?: string;
+}
+
 export interface CartItem {
   id: string;
   name: string;
@@ -22,14 +35,7 @@ export interface Cart {
   items: CartItem[];
   tableNumber?: number;
   notes?: string;
-}
-
-export interface Category {
-  id: string;
-  establishment_id: string;
-  name: string;
-  order_number: number;
-  created_at: string;
+  establishmentId: string;
 }
 
 export interface EstablishmentData {

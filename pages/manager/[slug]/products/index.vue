@@ -160,11 +160,11 @@
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black/25" />
+          <div class="fixed inset-0 bg-black bg-opacity-25" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
+          <div class="flex min-h-full items-center justify-center p-4">
             <TransitionChild
               as="template"
               enter="duration-300 ease-out"
@@ -174,8 +174,9 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+              <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
                 <ProductModal
+                  v-if="showAddProduct"
                   :product="editingProduct"
                   :categories="categories"
                   @close="closeModal"
