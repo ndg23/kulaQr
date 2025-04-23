@@ -152,7 +152,7 @@
 import { ref, reactive } from 'vue'
 import { ImageIcon, Upload, Loader2 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
-import { useToast } from '~/composables/useToast'
+import { useCustomToast } from '~/composables/useToast'
 
 definePageMeta({
   layout: 'manager'
@@ -161,7 +161,7 @@ definePageMeta({
 const route = useRoute()
 const slug = route.params.slug as string
 const { client: supabase, withLoading } = useSupabaseWrapper()
-const toast = useToast()
+const {showToast} = useCustomToast()
 
 const fileInput = ref<HTMLInputElement>()
 const imagePreview = ref<string>()
@@ -185,7 +185,7 @@ const loadEstablishment = async () => {
     .single()
 
   if (error) {
-    toast.error('Erreur', 'Impossible de charger les données')
+    showToast.error('Erreur', 'Impossible de charger les données')
     return
   }
 
@@ -210,11 +210,11 @@ const saveSettings = async () => {
 
     if (error) throw error
 
-    toast.success('Succès', 'Les modifications ont été enregistrées')
+    showToast.success('Succès', 'Les modifications ont été enregistrées')
   })
 
   if (!result) {
-    toast.error('Erreur', 'Impossible de sauvegarder les modifications')
+    showToast.error('Erreur', 'Impossible de sauvegarder les modifications')
   }
 }
 

@@ -7,7 +7,7 @@
           <!-- Left side -->
           <div class="flex items-center">
             <NuxtLink to="/" class="flex items-center">
-              <img src="~/assets/icon/logo.png" class="w-8 h-8" alt="Logo" />
+              <img src="~/assets/icon/logo.png" class="w-[100px] h-[100px]" alt="Logo" />
               <span class="text-xl font-logo ml-3 text-gray-900">Kula QR</span>
             </NuxtLink>
           </div>
@@ -98,10 +98,12 @@
               <MenuButton class="flex items-center space-x-3">
                 <div class="flex items-center space-x-3">
                   <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                    v-if="user?.user_metadata?.avatar_url"
+                    :src="user.user_metadata.avatar_url"
                     alt="Avatar"
                     class="h-8 w-8 rounded-full"
                   />
+                  <UserCircle v-else class="h-8 w-8 text-gray-400" />
                   <span class="hidden md:block text-sm font-medium text-gray-700">
                     {{ establishment?.name }}
                   </span>
@@ -119,7 +121,7 @@
                 <MenuItems class="absolute right-0 mt-2 w-48 origin-top-right rounded-xl bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <MenuItem v-slot="{ active }">
                     <NuxtLink
-                      :to="`/manager/${slug}/settings`"
+                      :to="`/manager/${establishment.value?.id || route.params.slug}/settings/profile`"
                       :class="[
                         active ? 'bg-gray-50' : '',
                         'block px-4 py-2 text-sm text-gray-700'
@@ -134,7 +136,7 @@
                   <div class="border-t border-gray-100 my-1" />
                   <MenuItem v-slot="{ active }">
                     <button
-                      @click="logout"
+                      @click="handleLogout"
                       :class="[
                         active ? 'bg-gray-50' : '',
                         'block w-full px-4 py-2 text-left text-sm text-red-600'
@@ -199,64 +201,110 @@ import {
   ShoppingCart,
   Plus,
   UtensilsCrossed,
-  ListOrdered
+  ListOrdered,
+  UserCircle
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
+import { useEstablishment } from '~/composables/useEstablishment'
+import { useCustomToast } from '~/composables/useToast'
 
 const route = useRoute()
 const router = useRouter()
 const { client: supabase } = useSupabaseWrapper()
-const slug = route.params.slug
+const { establishment, fetchEstablishmentByUserId, fetchEstablishmentBySlug } = useEstablishment()
+const {showToast} = useCustomToast()
+const user = useSupabaseUser()
 
 // State
-const establishment = ref(null)
 const showAddProduct = ref(false)
 const hasNotifications = ref(true)
+const loading = ref(true)
 
-// Navigation
-const navigationItems = [
-  {
-    name: 'Menu',
-    to: `/manager/${slug}/menu`,
-    icon: UtensilsCrossed
-  },
-  {
-    name: 'Catégories',
-    to: `/manager/${slug}/categories`,
-    icon: ListOrdered
-  },
-  {
-    name: 'QR Code',
-    to: `/manager/${slug}/qr-codes`,
-    icon: QrCode
-  },
-  {
-    name: 'Paramètres',
-    to: `/manager/${slug}/settings`,
-    icon: Settings
-  }
-]
+// Navigation - make it reactive with computed
+const navigationItems = computed(() => {
+  const establishmentId = establishment.value?.id || route.params.slug
+  
+  return [
+    {
+      name: 'Menu',
+      to: `/manager/${establishmentId}/menu`,
+      icon: UtensilsCrossed
+    },
+    {
+      name: 'Catégories',
+      to: `/manager/${establishmentId}/categories`,
+      icon: ListOrdered
+    },
+    {
+      name: 'QR Code',
+      to: `/manager/${establishmentId}/qr-codes`,
+      icon: QrCode
+    },
+    {
+      name: 'Paramètres',
+      to: `/manager/${establishmentId}/settings`,
+      icon: Settings
+    }
+  ]
+})
 
 // Methods
 const isActive = (path: string) => {
   return route.path === path
 }
 
-const loadEstablishment = async () => {
-  const { data } = await supabase
-    .from('establishments')
-    .select()
-    .eq('id', slug)
-    .single()
-  
-  establishment.value = data
-}
-
-const logout = async () => {
+const handleLogout = async () => {
   await supabase.auth.signOut()
-  router.push('/auth/auth/login')
+  router.push('/auth/login')
 }
 
-// Initial load
-onMounted(loadEstablishment)
+// Load establishment data
+const loadEstablishment = async () => {
+  loading.value = true
+  
+  try {
+    // If we have a slug in the route, fetch by slug
+    if (route.params.slug) {
+      await fetchEstablishmentBySlug(route.params.slug)
+    } 
+    // Otherwise try to fetch by user ID
+    else if (user.value?.id) {
+      await fetchEstablishmentByUserId()
+    }
+    
+    // If still no establishment, redirect to onboarding
+    if (!establishment.value) {
+      showToast.error('Erreur', 'Établissement non trouvé')
+      router.push('/onboarding')
+    }
+  } catch (err) {
+    console.error('Error loading establishment:', err)
+    showToast.error("Impossible de charger les données de l'établissement")
+  } finally {
+    loading.value = false
+  }
+}
+
+// Watch for route changes to reload establishment data
+watch(() => route.params.slug, (newSlug, oldSlug) => {
+  if (newSlug !== oldSlug) {
+    loadEstablishment()
+  }
+})
+
+// Watch for user changes
+watch(user, (newUser) => {
+  if (newUser) {
+    loadEstablishment()
+  }
+})
+
+onMounted(() => {
+  if (!user.value) {
+    router.push('/auth/login')
+    return
+  }
+  
+  loadEstablishment()
+})
 </script> 

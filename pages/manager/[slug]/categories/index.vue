@@ -15,43 +15,83 @@
       </button>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="loading" class="flex flex-col items-center justify-center py-12">
+      <Loader2 class="w-10 h-10 text-gray-300 animate-spin mb-4" />
+      <p class="text-sm text-gray-500">Chargement des catégories...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="categories.length === 0" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
+        <UtensilsCrossed class="w-8 h-8 text-gray-300" />
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune catégorie</h3>
+      <p class="text-gray-500 mb-6 max-w-md mx-auto">
+        Vous n'avez pas encore créé de catégories pour votre menu. Commencez par ajouter votre première catégorie.
+      </p>
+      <button
+        @click="openCategoryModal"
+        class="inline-flex items-center px-4 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
+      >
+        <Plus class="w-4 h-4 mr-1.5" />
+        Nouvelle catégorie
+      </button>
+    </div>
+
     <!-- Categories Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="category in categories" :key="category.id"
         class="bg-white rounded-xl border border-gray-100 overflow-hidden group hover:shadow-sm transition-all"
       >
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center"
-                :class="category.iconBg"
-              >
-                <component :is="category.icon" class="w-6 h-6" :class="category.iconColor" />
-              </div>
-              <div>
-                <h3 class="font-medium text-gray-900">{{ category.name }}</h3>
-                <p class="text-sm text-gray-500">{{ getProductCount(category.id) }} produits</p>
-              </div>
+        <!-- Category Image Header -->
+        <div class="aspect-video w-full bg-gray-50 relative">
+          <img
+            v-if="category.image_url"
+            :src="category.image_url"
+            :alt="category.name"
+            class="w-full h-full object-cover"
+          />
+          <div v-else class="w-full h-full flex flex-col items-center justify-center p-4">
+            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+              <UtensilsCrossed class="w-8 h-8 text-gray-300" />
             </div>
-            <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <p class="text-sm text-gray-400 text-center">{{ category.name }}</p>
+          </div>
+          
+          <!-- Quick Actions Overlay -->
+          <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="flex items-center space-x-2">
               <button 
                 @click="editCategory(category)"
-                class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                class="p-2 text-white hover:text-gray-200 rounded-lg hover:bg-white/10"
               >
-                <Edit2 class="w-4 h-4" />
+                <Edit2 class="w-5 h-5" />
               </button>
               <button
                 @click="deleteCategory(category.id)"
-                class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50"
+                class="p-2 text-white hover:text-gray-200 rounded-lg hover:bg-white/10"
               >
-                <Trash2 class="w-4 h-4" />
+                <Trash2 class="w-5 h-5" />
               </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+              <UtensilsCrossed class="w-5 h-5 text-blue-500" />
+            </div>
+            <div>
+              <h3 class="font-medium text-gray-900">{{ category.name }}</h3>
+              <p class="text-sm text-gray-500">{{ getProductCount(category.id) }} produits</p>
             </div>
           </div>
 
           <!-- Products List -->
-          <div class="space-y-2">
-            <div v-for="product in getCategoryProducts(category.id)" :key="product.id"
+          <div v-if="getCategoryProducts(category.id).length > 0" class="space-y-2 mt-4">
+            <div v-for="product in getCategoryProducts(category.id).slice(0, 3)" :key="product.id"
               class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50"
             >
               <div class="flex items-center space-x-3">
@@ -66,10 +106,42 @@
                     <UtensilsCrossed class="w-4 h-4 text-gray-400" />
                   </div>
                 </div>
-                <span class="text-sm text-gray-600">{{ product.name }}</span>
+                <div>
+                  <p class="text-sm font-medium text-gray-900 truncate max-w-[140px]">{{ product.name }}</p>
+                  <p class="text-xs text-gray-500">{{ formatPrice(product.price) }}</p>
+                </div>
               </div>
-              <span class="text-sm font-medium text-gray-900">{{ formatPrice(product.price) }}</span>
+              <span 
+                class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium"
+                :class="{
+                  'bg-green-50 text-green-700': product.is_available,
+                  'bg-gray-50 text-gray-600': !product.is_available
+                }"
+              >
+                {{ product.is_available ? 'Disponible' : 'Indisponible' }}
+              </span>
             </div>
+            
+            <!-- Show more link if there are more products -->
+            <div v-if="getCategoryProducts(category.id).length > 3" class="text-center pt-2">
+              <NuxtLink 
+                :to="`/manager/${establishment.value?.id}/menu?category=${category.id}`"
+                class="text-sm text-blue-600 hover:text-blue-800"
+              >
+                Voir les {{ getCategoryProducts(category.id).length - 3 }} autres produits
+              </NuxtLink>
+            </div>
+          </div>
+          
+          <!-- Empty products state -->
+          <div v-else class="mt-4 py-4 px-3 bg-gray-50 rounded-lg text-center">
+            <p class="text-sm text-gray-500">Aucun produit dans cette catégorie</p>
+            <NuxtLink 
+              :to="`/manager/${establishment.value?.id}/menu`"
+              class="text-sm text-blue-600 hover:text-blue-800 inline-block mt-1"
+            >
+              Ajouter un produit
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -87,7 +159,7 @@
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
@@ -101,11 +173,11 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
                 <CategoryModal
                   :category="editingCategory"
-                  @close="closeCategoryModal"
                   @submit="saveCategory"
+                  @close="closeCategoryModal"
                 />
               </DialogPanel>
             </TransitionChild>
@@ -120,10 +192,9 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   Plus, Edit2, Trash2, UtensilsCrossed,
-  Coffee, Pizza, IceCream, Wine, Beer
+  Coffee, Pizza, IceCream, Wine, Beer, Loader2,
+  ImageIcon
 } from 'lucide-vue-next'
-import { useToast } from '~/composables/useToast'
-import { Category } from '~/types'
 import CategoryModal from '~/components/modals/CategoryModal.vue'
 import {
   TransitionRoot,
@@ -131,144 +202,41 @@ import {
   Dialog,
   DialogPanel
 } from '@headlessui/vue'
+import { useSupabaseWrapper } from '~/composables/useSupabase'
+import { useEstablishment } from '~/composables/useEstablishment'
+import type { Category, Product } from '~/types'
+import { useCustomToast } from '~/composables/useToast'
 
-const toast = useToast()
+const {showToast} = useCustomToast()
 const route = useRoute()
 const slug = route.params.slug
-const supabase = useSupabaseClient()
-// Mock Data
-const mockCategories = [
-  {
-    id: '1', // UUID simulé
-    created_at: new Date().toISOString(),
-    establishment_id: slug,
-    name: 'Entrées',
-    order_number: 1,
-    // Métadonnées UI (non stockées en DB)
-    icon: UtensilsCrossed,
-    iconBg: 'bg-orange-50',
-    iconColor: 'text-orange-500',
-    description: 'Nos entrées fraîches et savoureuses'
-  },
-  {
-    id: '2',
-    created_at: new Date().toISOString(),
-    establishment_id: slug,
-    name: 'Plats',
-    order_number: 2,
-    icon: Pizza,
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-500',
-    description: 'Plats principaux et spécialités'
-  },
-  {
-    id: '3',
-    created_at: new Date().toISOString(),
-    establishment_id: slug,
-    name: 'Desserts',
-    order_number: 3,
-    icon: IceCream,
-    iconBg: 'bg-purple-50',
-    iconColor: 'text-purple-500',
-    description: 'Desserts maison et pâtisseries'
-  },
-  {
-    id: '4',
-    created_at: new Date().toISOString(),
-    establishment_id: slug,
-    name: 'Boissons',
-    order_number: 4,
-    icon: Coffee,
-    iconBg: 'bg-green-50',
-    iconColor: 'text-green-500',
-    description: 'Boissons chaudes et froides'
-  }
-]
-
-const mockProducts = [
-  {
-    id: '1',
-    created_at: new Date().toISOString(),
-    category_id: '1',
-    name: 'Salade César',
-    description: 'Laitue romaine, croûtons maison, parmesan, sauce césar',
-    price: 12.90,
-    image_url: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9',
-    is_available: true,
-    order_number: 1
-  },
-  {
-    id: '2',
-    created_at: new Date().toISOString(),
-    category_id: '1',
-    name: 'Soupe à l\'oignon',
-    description: 'Oignons caramélisés, bouillon maison, croûtons gratinés',
-    price: 9.90,
-    image_url: 'https://images.unsplash.com/photo-1547592166-23ac45744acd',
-    is_available: true,
-    order_number: 2
-  },
-  {
-    id: '3',
-    created_at: new Date().toISOString(),
-    category_id: '2',
-    name: 'Pizza Margherita',
-    description: 'Sauce tomate, mozzarella, basilic frais',
-    price: 14.90,
-    image_url: 'https://images.unsplash.com/photo-1600891964092-4316c288032e',
-    is_available: true,
-    order_number: 1
-  },
-  {
-    id: '4',
-    created_at: new Date().toISOString(),
-    category_id: '3',
-    name: 'Crème brûlée',
-    description: 'Crème vanille, caramel croustillant',
-    price: 8.90,
-    image_url: 'https://images.unsplash.com/photo-1470324161839-ce2bb6fa6bc3',
-    is_available: true,
-    order_number: 1
-  },
-  {
-    id: '5',
-    created_at: new Date().toISOString(),
-    category_id: '4',
-    name: 'Café expresso',
-    description: 'Café 100% arabica',
-    price: 2.50,
-    image_url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3',
-    is_available: true,
-    order_number: 1
-  }
-]
+const { client: supabase } = useSupabaseWrapper()
+const { establishment } = useEstablishment()
 
 // State
 const showCategoryModal = ref(false)
 const editingCategory = ref<Category | null>(null)
-const categories = ref(mockCategories)
-const products = ref(mockProducts)
+const categories = ref<Category[]>([])
+const products = ref<Product[]>([])
+const loading = ref(true)
 
 // Methods
 const getProductCount = (categoryId: string) => {
+  if (!products.value) return 0
   return products.value.filter(p => p.category_id === categoryId).length
 }
 
 const getCategoryProducts = (categoryId: string) => {
+  if (!products.value) return []
   return products.value.filter(p => p.category_id === categoryId)
 }
 
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(price)
 }
 
 const openCategoryModal = () => {
   editingCategory.value = null
-  showCategoryModal.value = true
-}
-
-const editCategory = (category: Category) => {
-  editingCategory.value = { ...category }
   showCategoryModal.value = true
 }
 
@@ -277,39 +245,48 @@ const closeCategoryModal = () => {
   editingCategory.value = null
 }
 
-const saveCategory = async (categoryData: Partial<Category>) => {
+const editCategory = (category: Category) => {
+  editingCategory.value = { ...category }
+  showCategoryModal.value = true
+}
+
+const saveCategory = async (categoryData: any) => {
   try {
     if (editingCategory.value?.id) {
       const { data, error } = await supabase
         .from('categories')
         .update({
           name: categoryData.name,
-          order_number: categoryData.order_number
+          order_number: categoryData.order_number,
+          icon_name: categoryData.icon,
+          image_url: categoryData.image_url,
+          establishment_id: establishment.value?.id
         })
         .eq('id', editingCategory.value.id)
         .select()
         .single()
 
       if (error) throw error
-      
+      showToast.success('Succès', 'Catégorie sauvegardée')
       // Mise à jour locale
       const index = categories.value.findIndex(c => c.id === editingCategory.value?.id)
       if (index !== -1) {
         categories.value[index] = {
           ...categories.value[index],
           ...data,
-          icon: categoryData.icon, // Garder les métadonnées UI
-          iconBg: categoryData.iconBg,
-          iconColor: categoryData.iconColor
+          iconBg: 'bg-blue-50',
+          iconColor: 'text-blue-500'
         }
       }
     } else {
       const { data, error } = await supabase
         .from('categories')
         .insert({
-          establishment_id: slug,
+          establishment_id: establishment.value?.id,
           name: categoryData.name,
-          order_number: categories.value.length + 1
+          order_number: categories.value.length + 1,
+          icon_name: categoryData.icon,
+          image_url: categoryData.image_url
         })
         .select()
         .single()
@@ -319,92 +296,89 @@ const saveCategory = async (categoryData: Partial<Category>) => {
       // Ajout local
       categories.value.push({
         ...data,
-        icon: categoryData.icon,
         iconBg: 'bg-blue-50',
         iconColor: 'text-blue-500'
       })
     }
     
     closeCategoryModal()
-    toast.success(
+    showToast.success(
       'Catégorie sauvegardée',
       editingCategory.value?.id ? 'Modifications enregistrées' : 'Nouvelle catégorie ajoutée'
     )
   } catch (error) {
     console.error('Error saving category:', error)
-    toast.error('Erreur', "Une erreur s'est produite lors de la sauvegarde")
+    showToast.error('Erreur', "Une erreur s'est produite lors de la sauvegarde")
   }
 }
 
 const deleteCategory = async (id: string) => {
-  if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-    try {
-      const { error } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-
-      // Suppression locale
-      categories.value = categories.value.filter(c => c.id !== id)
-      toast.success('Catégorie supprimée', 'La catégorie a été supprimée')
-    } catch (error) {
-      console.error('Error deleting category:', error)
-      toast.error('Erreur', "Une erreur s'est produite lors de la suppression")
+  // Check if category has products
+  const categoryProducts = getCategoryProducts(id)
+  if (categoryProducts.length > 0) {
+    if (!confirm(`Cette catégorie contient ${categoryProducts.length} produits. Êtes-vous sûr de vouloir la supprimer ? Les produits seront également supprimés.`)) {
+      return
     }
+  } else {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
+      return
+    }
+  }
+
+  try {
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+
+    // Suppression locale
+    categories.value = categories.value.filter(c => c.id !== id)
+    // Also remove products from this category from local state
+    products.value = products.value.filter(p => p.category_id !== id)
+    
+    showToast.success('Catégorie supprimée', 'La catégorie a été supprimée')
+  } catch (error) {
+    console.error('Error deleting category:', error)
+    showToast.error('Erreur', "Une erreur s'est produite lors de la suppression")
   }
 }
 
-// Chargement initial des données
+// Charger les catégories et produits
 const loadData = async () => {
   try {
-    // Charger les catégories
+    // Load categories
     const { data: categoriesData, error: categoriesError } = await supabase
       .from('categories')
-      .select()
-      .eq('establishment_id', slug)
+      .select('*')
+      .eq('establishment_id', establishment.value?.id)
       .order('order_number')
 
     if (categoriesError) throw categoriesError
-
-    // Charger les produits
+    categories.value = categoriesData || []
+    
+    // Load products
     const { data: productsData, error: productsError } = await supabase
       .from('products')
-      .select(`
-        *,
-        category:categories(id)
-      `)
-      .in('category_id', categoriesData.map(c => c.id))
-      .order('order_number')
-
+      .select('*')
+      .eq('establishment_id', establishment.value?.id)
+      .order('name')
+    
     if (productsError) throw productsError
-
-    // Assigner les données avec les métadonnées UI
-    categories.value = categoriesData.map(category => ({
-      ...category,
-      icon: getIconForCategory(category.name),
-      iconBg: getIconBgForCategory(category.name),
-      iconColor: getIconColorForCategory(category.name)
-    }))
-    products.value = productsData
-  } catch (error) {
-    console.error('Error loading data:', error)
-    toast.error('Erreur', "Une erreur s'est produite lors du chargement des données")
+    products.value = productsData || []
+  } catch (err) {
+    console.error('Erreur chargement données:', err)
+    showToast.error('Erreur', 'Impossible de charger les données')
+  } finally {
+    loading.value = false
   }
 }
 
-// Helper pour assigner les icônes en fonction du nom de la catégorie
-const getIconForCategory = (name: string) => {
-  const lowercaseName = name.toLowerCase()
-  if (lowercaseName.includes('entrée')) return UtensilsCrossed
-  if (lowercaseName.includes('plat')) return Pizza
-  if (lowercaseName.includes('dessert')) return IceCream
-  if (lowercaseName.includes('boisson')) return Coffee
-  return UtensilsCrossed
-}
-
-onMounted(loadData)
+// Charger les données au montage
+onMounted(async () => {
+  await loadData()
+})
 
 definePageMeta({
   layout: 'manager'

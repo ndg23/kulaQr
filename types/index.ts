@@ -17,6 +17,9 @@ export interface Category {
   order_number: number;
   establishment_id: string;
   created_at: string;
+  updated_at?: string;
+  icon_name?: string;
+  image_url?: string;
   // Métadonnées UI (non stockées en DB)
   icon?: any;
   iconBg?: string;

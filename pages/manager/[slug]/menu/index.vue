@@ -15,118 +15,138 @@
       </button>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-      <div v-for="stat in quickStats" :key="stat.name"
-        class="bg-white p-4 rounded-xl border border-gray-100"
-      >
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center"
-            :class="stat.iconBg"
-          >
-            <component :is="stat.icon" class="w-5 h-5" :class="stat.iconColor" />
-          </div>
-          <div class="ml-3">
-            <p class="text-sm text-gray-500">{{ stat.name }}</p>
-            <p class="text-lg font-semibold text-gray-900">{{ stat.value }}</p>
-          </div>
-        </div>
-      </div>
+    <!-- Loading State -->
+    <div v-if="loading" class="flex flex-col items-center justify-center py-12">
+      <Loader2 class="w-10 h-10 text-gray-300 animate-spin mb-4" />
+      <p class="text-sm text-gray-500">Chargement de votre menu...</p>
     </div>
 
-    <!-- Category Pills -->
-    <div class="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+    <!-- Empty State -->
+    <div v-else-if="products.length === 0" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
+        <UtensilsCrossed class="w-10 h-10 text-gray-300" />
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-1">
+        Votre menu est vide
+      </h3>
+      <p class="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+        Commencez par ajouter des produits à votre menu pour que vos clients puissent les découvrir.
+      </p>
       <button
-        v-for="category in categories"
-        :key="category.id"
-        @click="activeCategory = category.id"
-        class="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200"
-        :class="[
-          activeCategory === category.id
-            ? 'bg-blue-500 text-white shadow-sm'
-            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-        ]"
+        @click="openAddProduct"
+        class="inline-flex items-center px-4 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
       >
-        {{ category.name }}
+        <Plus class="w-4 h-4 mr-1.5" />
+        Ajouter votre premier produit
       </button>
     </div>
 
-    <!-- Products Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <div v-for="product in filteredProducts" :key="product.id"
-        class="bg-white rounded-xl border border-gray-100 overflow-hidden group hover:shadow-sm transition-all"
-      >
-        <!-- Product Image -->
-        <div class="aspect-square w-full bg-gray-50 relative">
-          <img
-            v-if="product.image_url"
-            :src="product.image_url"
-            :alt="product.name"
-            class="w-full h-full object-cover"
-          />
-          <div v-else class="w-full h-full flex items-center justify-center">
-            <UtensilsCrossed class="w-6 h-6 text-gray-300" />
-          </div>
-          
-          <!-- Quick Actions Overlay -->
-          <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <div class="flex items-center space-x-1">
-              <button 
-                @click="editProduct(product)"
-                class="p-1.5 text-white hover:text-gray-200 rounded-lg hover:bg-white/10"
-              >
-                <Edit2 class="w-4 h-4" />
-              </button>
-              <Switch
-                v-model="product.is_available"
-                @change="toggleAvailability(product)"
-                class="relative inline-flex h-5 w-9"
-              >
-                <span class="sr-only">Disponibilité</span>
-                <div 
-                  :class="[
-                    product.is_available ? 'bg-green-400' : 'bg-gray-200',
-                    'relative inline-flex h-5 w-9 flex-shrink-0 rounded-full transition-colors duration-200'
-                  ]"
-                >
-                  <span
-                    :class="[
-                      product.is_available ? 'translate-x-4' : 'translate-x-1',
-                      'inline-block h-3 w-3 transform rounded-full bg-white shadow transition duration-200 ease-in-out mt-1'
-                    ]"
-                  />
-                </div>
-              </Switch>
+    <!-- Content (only shown if there are products) -->
+    <div v-else>
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div v-for="stat in quickStats" :key="stat.name"
+          class="bg-white p-4 rounded-xl border border-gray-100"
+        >
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+              :class="stat.iconBg"
+            >
+              <component :is="stat.icon" class="w-5 h-5" :class="stat.iconColor" />
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-gray-500">{{ stat.name }}</p>
+              <p class="text-lg font-semibold text-gray-900">{{ stat.value }}</p>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Product Info -->
-        <div class="p-3">
-          <div class="flex items-start justify-between">
-            <div>
-              <h3 class="font-medium text-gray-900">{{ product.name }}</h3>
-              <p class="text-sm text-gray-500 mt-0.5 line-clamp-2">{{ product.description }}</p>
+      <!-- Category Pills -->
+      <div class="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+        <button
+          v-for="category in categories"
+          :key="category.id"
+          @click="activeCategory = category.id"
+          class="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200"
+          :class="[
+            activeCategory === category.id
+              ? 'bg-blue-500 text-white shadow-sm'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+          ]"
+        >
+          {{ category.name }}
+        </button>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div v-for="product in filteredProducts" :key="product.id"
+          class="bg-white rounded-xl border border-gray-100 overflow-hidden group hover:shadow-sm transition-all"
+        >
+          <!-- Product Image -->
+          <div class="aspect-square w-full bg-gray-50 relative">
+            <img
+              v-if="product.image_url"
+              :src="product.image_url"
+              :alt="product.name"
+              class="w-full h-full object-cover"
+            />
+            <div v-else class="w-full h-full flex items-center justify-center">
+              <UtensilsCrossed class="w-6 h-6 text-gray-300" />
             </div>
-            <span class="text-sm font-semibold text-gray-900">{{ formatPrice(product.price) }}</span>
+            
+            <!-- Quick Actions Overlay -->
+            <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div class="flex items-center space-x-1">
+                <button 
+                  @click="editProduct(product)"
+                  class="p-1.5 text-white hover:text-gray-200 rounded-lg hover:bg-white/10"
+                >
+                  <Edit2 class="w-4 h-4" />
+                </button>
+                <Switch
+                  v-model="product.is_available"
+                  @change="toggleAvailability(product)"
+                  class="relative inline-flex h-5 w-10 items-center rounded-full"
+                  :class="product.is_available ? 'bg-green-500' : 'bg-gray-400'"
+                >
+                  <span
+                    class="inline-block h-4 w-4 transform rounded-full bg-white transition"
+                    :class="product.is_available ? 'translate-x-5' : 'translate-x-1'"
+                  />
+                </Switch>
+              </div>
+            </div>
           </div>
           
-          <div class="mt-2 flex items-center justify-between">
-            <span 
-              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-              :class="{
-                'bg-green-50 text-green-700': product.is_available,
-                'bg-gray-50 text-gray-600': !product.is_available
-              }"
-            >
-              {{ product.is_available ? 'Disponible' : 'Indisponible' }}
-            </span>
-            <button
-              @click="deleteProduct(product.id)"
-              class="p-1 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50"
-            >
-              <Trash2 class="w-4 h-4" />
-            </button>
+          <!-- Product Info -->
+          <div class="p-3">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="font-medium text-gray-900">{{ product.name }}</h3>
+                <p class="text-sm text-gray-500 mt-0.5 line-clamp-2">{{ product.description }}</p>
+              </div>
+              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(product.price) }}</span>
+            </div>
+            
+            <div class="mt-2 flex items-center justify-between">
+              <span 
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                :class="{
+                  'bg-green-50 text-green-700': product.is_available,
+                  'bg-gray-50 text-gray-600': !product.is_available
+                }"
+              >
+                {{ product.is_available ? 'Disponible' : 'Indisponible' }}
+              </span>
+              <button
+                @click="deleteProduct(product.id)"
+                class="p-1 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50"
+              >
+                <Trash2 class="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -175,27 +195,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Switch, TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue'
 import {
   Plus, UtensilsCrossed, Edit2, Trash2,
-  Coffee, Pizza, Store, TrendingUp, IceCream
+  Coffee, Pizza, Store, TrendingUp, IceCream, Loader2,
+  Search, MoreVertical, ChevronDown
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
-import { useToast } from '~/composables/useToast'
+import { useCustomToast } from '~/composables/useToast'
+import { useEstablishment } from '~/composables/useEstablishment'
 import ProductModal from '~/components/modals/ProductModal.vue'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 
-const { client: supabase, withLoading } = useSupabaseWrapper()
-const toast = useToast()
 const route = useRoute()
 const slug = route.params.slug
+const { client: supabase } = useSupabaseWrapper()
+const {showToast} = useCustomToast()
+const { establishment } = useEstablishment()
 
 // State
 const showAddProduct = ref(false)
 const editingProduct = ref(null)
-const activeCategory = ref(null)
+const activeCategory = ref('all')
 const categories = ref([])
 const products = ref([])
+const loading = ref(true)
+const search = ref('')
 
 // Mock Data
 const mockCategories = [
@@ -307,10 +333,60 @@ const mockProducts = [
 // Computed
 const filteredProducts = computed(() => {
   let filtered = products.value
-  if (activeCategory.value) {
-    filtered = filtered.filter(p => p.category_id === activeCategory.value)
+
+  // Filter by category
+  if (activeCategory.value !== 'all') {
+    filtered = filtered.filter(product => product.category_id === activeCategory.value)
   }
+
+  // Filter by search
+  if (search.value) {
+    const searchLower = search.value.toLowerCase()
+    filtered = filtered.filter(product => 
+      product.name.toLowerCase().includes(searchLower) ||
+      product.description?.toLowerCase().includes(searchLower)
+    )
+  }
+
   return filtered
+})
+
+// Quick stats
+const quickStats = computed(() => {
+  return [
+    {
+      name: 'Total produits',
+      value: products.value.length,
+      icon: UtensilsCrossed,
+      iconBg: 'bg-blue-50',
+      iconColor: 'text-blue-500'
+    },
+    {
+      name: 'Catégories',
+      value: categories.value.length,
+      icon: ChevronDown,
+      iconBg: 'bg-purple-50',
+      iconColor: 'text-purple-500'
+    },
+    {
+      name: 'Produits actifs',
+      value: products.value.filter(p => p.is_available).length,
+      icon: Plus,
+      iconBg: 'bg-green-50',
+      iconColor: 'text-green-500'
+    },
+    {
+      name: 'Prix moyen',
+      value: formatPrice(
+        products.value.length
+          ? products.value.reduce((sum, p) => sum + p.price, 0) / products.value.length
+          : 0
+      ),
+      icon: MoreVertical,
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-amber-500'
+    }
+  ]
 })
 
 // Methods
@@ -318,25 +394,62 @@ const formatPrice = (price: number) => {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
 }
 
+const handleSearch = () => {
+  // Reset category filter when searching
+  if (search.value) {
+    activeCategory.value = 'all'
+  }
+}
+
+const getCategoryName = (categoryId) => {
+  const category = categories.value.find(c => c.id === categoryId)
+  return category ? category.name : 'Sans catégorie'
+}
+
 const loadData = async () => {
-  // Simuler un délai de chargement
-  await new Promise(resolve => setTimeout(resolve, 5000))
-  
-  categories.value = mockCategories
-  products.value = mockProducts
-  
-  // Définir la première catégorie comme active par défaut
-  if (mockCategories.length > 0) {
-    activeCategory.value = mockCategories[0].id
+  loading.value = true
+  try {
+    // Load categories
+    const { data: categoriesData, error: categoriesError } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('establishment_id', establishment.value?.id)
+      .order('name')
+
+    if (categoriesError) throw categoriesError
+    categories.value = categoriesData || []
+    
+    // Load products directly by establishment_id
+    const { data: productsData, error: productsError } = await supabase
+      .from('products')
+      .select('*, category:categories(name)')
+      .eq('establishment_id', establishment.value?.id)
+      .order('name')
+
+    if (productsError) throw productsError
+    products.value = productsData || []
+  } catch (err) {
+    console.error('Erreur chargement:', err)
+    showToast.error('Erreur', 'Impossible de charger les données')
+  } finally {
+    loading.value = false
   }
 }
 
 const toggleAvailability = async (product: any) => {
-  // Simuler la mise à jour
-  const index = products.value.findIndex(p => p.id === product.id)
-  if (index !== -1) {
-    products.value[index].is_available = product.is_available
-    toast.success('Disponibilité mise à jour', 'Le statut du produit a été modifié')
+  try {
+    const { error } = await supabase
+      .from('products')
+      .update({ is_available: product.is_available })
+      .eq('id', product.id)
+
+    if (error) throw error
+    showToast.success('Disponibilité mise à jour', 'Le statut du produit a été modifié')
+  } catch (err) {
+    console.error('Erreur mise à jour:', err)
+    showToast.error('Erreur', 'Impossible de mettre à jour la disponibilité')
+    // Revenir à l'état précédent
+    product.is_available = !product.is_available
   }
 }
 
@@ -350,35 +463,72 @@ const closeModal = () => {
   editingProduct.value = null
 }
 
-const saveProduct = async (productData: any) => {
-  // Simuler la sauvegarde
-  if (editingProduct.value?.id) {
-    const index = products.value.findIndex(p => p.id === editingProduct.value?.id)
-    if (index !== -1) {
-      products.value[index] = { ...products.value[index], ...productData }
+const saveProduct = async (productData) => {
+  try {
+    // Make sure the product has a valid category_id that belongs to this establishment
+    if (!productData.category_id) {
+      showToast.error('Erreur', 'Veuillez sélectionner une catégorie')
+      return
     }
-  } else {
-    products.value.push({
-      id: Math.max(...products.value.map(p => p.id)) + 1,
-      ...productData,
-      is_available: true
-    })
+    
+    // Verify the category belongs to this establishment
+    const categoryExists = categories.value.some(c => c.id === productData.category_id)
+    if (!categoryExists) {
+      showToast.error('Erreur', 'Catégorie invalide')
+      return
+    }
+    
+    // Add establishment_id to the product data
+    productData.establishment_id = establishment.value?.id
+    
+    if (editingProduct.value?.id) {
+      // Update existing product
+      const { error } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', editingProduct.value.id)
+
+      if (error) throw error
+    } else {
+      // Create new product
+      const { error } = await supabase
+        .from('products')
+        .insert({
+          ...productData,
+          is_available: true
+        })
+
+      if (error) throw error
+    }
+
+    // Reload data
+    await loadData()
+    closeModal()
+    showToast.success(
+      'Produit sauvegardé',
+      editingProduct.value?.id ? 'Modifications enregistrées' : 'Nouveau produit ajouté'
+    )
+  } catch (err) {
+    console.error('Erreur sauvegarde:', err)
+    showToast.error('Erreur', 'Impossible de sauvegarder le produit')
   }
-  
-  closeModal()
-  toast.success(
-    'Produit sauvegardé',
-    editingProduct.value?.id ? 'Modifications enregistrées' : 'Nouveau produit ajouté'
-  )
 }
 
 const deleteProduct = async (id: string) => {
-  if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-    const index = products.value.findIndex(p => p.id === id)
-    if (index !== -1) {
-      products.value.splice(index, 1)
-      toast.success('Produit supprimé', 'Le produit a été supprimé')
-    }
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return
+
+  try {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+    await loadData()
+      showToast.success('Produit supprimé', 'Le produit a été supprimé')
+  } catch (err) {
+    console.error('Erreur suppression:', err)
+    showToast.error('Erreur', 'Impossible de supprimer le produit')
   }
 }
 

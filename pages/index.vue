@@ -1,6 +1,6 @@
 <template>
   <div class="w-full bg-black text-white">
-    <!-- Hero Section with QR Code Focus -->
+    <!-- Hero Section with Logo Focus -->
     <section class="w-full h-[56.25vw] relative flex items-center justify-center bg-black overflow-hidden" style="max-height: 100vh;">
       <div class="absolute inset-0">
         <img 
@@ -22,56 +22,29 @@
           <div class="flex flex-col sm:flex-row items-start gap-6 pt-8">
             <NuxtLink 
               to="/auth/register"
-              class="px-8 py-3 bg-white text-black rounded-full text-lg font-medium hover:opacity-90 transition-opacity"
+              class="px-10 py-4 bg-white text-black rounded-full text-xl font-medium hover:opacity-90 transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center"
             >
-              Commencer gratuitement
+              <span>Commencer maintenant</span>
+              <ArrowRight class="w-5 h-5 ml-2" />
             </NuxtLink>
             <a 
               href="#demo"
               class="px-8 py-3 text-white rounded-full text-lg font-medium hover:underline flex items-center"
             >
+              <Play class="w-5 h-5 mr-2" />
               <span>Voir la démo</span>
-              <ArrowRight class="w-5 h-5 ml-2" />
             </a>
           </div>
         </div>
         
-        <!-- QR Code Visualization -->
+        <!-- Logo Visualization -->
         <div class="md:w-1/2 flex justify-center items-center">
           <div class="relative">
-            <!-- Stylized QR Code -->
-            <div class="w-64 h-64 md:w-80 md:h-80 bg-white rounded-3xl p-6 rotate-3 shadow-2xl">
-              <div class="w-full h-full grid grid-cols-4 grid-rows-4 gap-2">
-                <!-- QR Code Pattern Elements - Stylized -->
-                <div class="col-span-1 row-span-1 bg-black rounded-xl"></div>
-                <div class="col-span-1 row-span-1 bg-transparent"></div>
-                <div class="col-span-1 row-span-1 bg-black rounded-xl"></div>
-                <div class="col-span-1 row-span-1 bg-transparent"></div>
-                <div class="col-span-1 row-span-1 bg-transparent"></div>
-                <div class="col-span-1 row-span-1 bg-black rounded-xl"></div>
-                <div class="col-span-1 row-span-1 bg-transparent"></div>
-                <div class="col-span-1 row-span-1 bg-black rounded-xl"></div>
-                <div class="col-span-1 row-span-1 bg-black rounded-xl"></div>
-                <div class="col-span-1 row-span-1 bg-transparent"></div>
-                <div class="col-span-1 row-span-1 bg-black rounded-xl"></div>
-                <div class="col-span-1 row-span-1 bg-transparent"></div>
-                <div class="col-span-1 row-span-1 bg-black rounded-xl"></div>
-                <div class="col-span-1 row-span-1 bg-transparent"></div>
-                <div class="col-span-1 row-span-1 bg-transparent"></div>
-                <div class="col-span-1 row-span-1 bg-black rounded-xl"></div>
-              </div>
-              
-              <!-- Logo Overlay in Center of QR Code -->
-              <div class="absolute inset-0 flex items-center justify-center">
-                <div class="w-16 h-16 bg-black rounded-2xl flex items-center justify-center">
-                  <span class="text-white text-2xl font-bold">KQ</span>
-                </div>
-              </div>
-              
-              <!-- Text under QR -->
-              <div class="absolute -bottom-12 left-0 right-0 text-center text-white text-lg font-medium">
-                Menu Digital
-              </div>
+            <!-- Company Logo in Apple-style presentation -->
+            <div class="w-64 h-64 md:w-80 md:h-80 bg-white/10 rounded-3xl shadow-2xl flex items-center justify-center overflow-hidden">
+              <!-- Replace with your actual logo -->
+              <img src="~/assets/icon/logo.png" alt="Restaurant logo" class="w-full h-full object-cover" />
+
             </div>
             
             <!-- Phone Outline showing QR scanning -->
@@ -82,7 +55,35 @@
                 </div>
               </div>
             </div>
+            
+            <!-- Floating element to add visual interest -->
+            <div class="absolute -top-12 -left-12 w-24 h-24 bg-white/10 backdrop-blur-lg rounded-full flex items-center justify-center">
+              <QrCode class="w-10 h-10 text-white" />
+            </div>
           </div>
+        </div>
+      </div>
+      
+      <!-- Impactful CTA Bar -->
+      <div class="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md py-4">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
+          <div class="flex items-center gap-8 mb-4 md:mb-0">
+            <div class="flex items-center gap-2">
+              <Users class="w-6 h-6 text-white" />
+              <span class="text-lg text-white/90">+2000 Restaurants</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <Star class="w-6 h-6 text-white" />
+              <span class="text-lg text-white/90">4.9/5 Satisfaction</span>
+            </div>
+          </div>
+          <NuxtLink 
+            to="/auth/register"
+            class="px-8 py-3 bg-white text-black rounded-full text-lg font-medium hover:bg-white/90 transition-colors inline-flex items-center"
+          >
+            <span>Essai gratuit 14 jours</span>
+            <ArrowRight class="w-5 h-5 ml-2" />
+          </NuxtLink>
         </div>
       </div>
     </section>
@@ -201,19 +202,105 @@
         <div class="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6">
           <NuxtLink 
             to="/auth/register"
-            class="px-8 py-3 bg-white text-black rounded-full text-lg font-medium hover:opacity-90 transition-opacity"
+            class="px-10 py-4 bg-white text-black rounded-full text-xl font-medium hover:scale-105 transition-transform shadow-lg flex items-center"
           >
-            Créer mon menu QR
+            <span>Créer mon menu QR</span>
+            <ArrowRight class="w-5 h-5 ml-2" />
           </NuxtLink>
           <a 
-            href="#demo"
-            class="px-8 py-3 text-white rounded-full text-lg font-medium hover:underline"
+            href="#pricing"
+            class="px-8 py-3 border border-white/30 text-white rounded-full text-lg font-medium hover:bg-white/10 transition-colors"
           >
-            Voir la démo
+            Voir nos tarifs
           </a>
         </div>
       </div>
     </section>
+    
+    <!-- Footer Section -->
+    <footer class="w-full bg-black border-t border-white/10 pt-16 pb-8">
+      <div class="max-w-6xl mx-auto px-6">
+        <!-- Footer Main Content -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+          <!-- Brand Column -->
+          <div class="space-y-6">
+            <div class="flex items-center">
+              <!-- Logo placeholder - replace with your actual logo -->
+              <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-3">
+                <span class="text-black text-xl font-bold">KQ</span>
+              </div>
+              <span class="text-white text-xl font-medium">KulaQr</span>
+            </div>
+            <p class="text-gray-400 text-sm">
+              La solution intelligente de menu QR code pour les restaurants modernes.
+            </p>
+            <div class="flex space-x-4">
+              <!-- Social Media Icons -->
+              <a href="#" class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
+                <span class="text-white text-sm">FB</span>
+              </a>
+              <a href="#" class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
+                <span class="text-white text-sm">IG</span>
+              </a>
+              <a href="#" class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
+                <span class="text-white text-sm">TW</span>
+              </a>
+              <a href="#" class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
+                <span class="text-white text-sm">IN</span>
+              </a>
+            </div>
+          </div>
+          
+          <!-- Navigation Columns -->
+          <div class="space-y-4">
+            <h3 class="text-white text-lg font-medium">Produit</h3>
+            <ul class="space-y-3">
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Fonctionnalités</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Tarifs</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Témoignages</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Guide d'utilisation</a></li>
+            </ul>
+          </div>
+          
+          <div class="space-y-4">
+            <h3 class="text-white text-lg font-medium">Ressources</h3>
+            <ul class="space-y-3">
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Documentation</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Centre d'aide</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Partenaires</a></li>
+            </ul>
+          </div>
+          
+          <div class="space-y-4">
+            <h3 class="text-white text-lg font-medium">Contact</h3>
+            <ul class="space-y-3">
+              <li class="text-gray-400">hello@kulaqr.com</li>
+              <li class="text-gray-400">+33 1 23 45 67 89</li>
+              <li class="text-gray-400">14 Rue de la Paix, 75002 Paris</li>
+            </ul>
+            <NuxtLink 
+              to="/contact"
+              class="inline-block px-5 py-2 bg-white/10 text-white rounded-full text-sm font-medium hover:bg-white/20 transition-colors"
+            >
+              Contactez-nous
+            </NuxtLink>
+          </div>
+        </div>
+        
+        <!-- Footer Bottom -->
+        <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <div class="text-gray-500 text-sm mb-4 md:mb-0">
+            © 2025 KulaQr. Tous droits réservés.
+          </div>
+          <div class="flex space-x-6">
+            <a href="#" class="text-gray-500 text-sm hover:text-white transition-colors">Politique de confidentialité</a>
+            <a href="#" class="text-gray-500 text-sm hover:text-white transition-colors">Conditions d'utilisation</a>
+            <a href="#" class="text-gray-500 text-sm hover:text-white transition-colors">Mentions légales</a>
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 

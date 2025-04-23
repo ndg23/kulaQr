@@ -4,6 +4,53 @@
 
 ## Versions
 
+### [0.5.0] - 23 Avril 2025 🍽️
+
+#### ✨ Nouvelles fonctionnalités
+- **Menu client connecté à Supabase**
+  - Intégration complète avec la base de données
+  - Affichage des catégories et produits en temps réel
+  - Gestion du panier améliorée
+  - Création de commandes dans la base de données
+  - États de chargement et gestion des erreurs
+
+- **Tableau de bord amélioré**
+  - Statistiques pertinentes pour les restaurateurs
+  - Visualisation des performances par catégorie
+  - Distribution horaire des commandes
+  - Affichage des produits les plus vendus
+  - Actualisation manuelle des données
+
+- **Système de commandes simplifié**
+  - Structure de base de données optimisée
+  - Modèle de données pour les commandes et articles
+  - Fonction de génération d'exemples de commandes
+  - Vue pour les statistiques du tableau de bord
+  - Indexation pour des performances optimales
+
+#### 🎨 Interface utilisateur
+- **Expérience utilisateur améliorée**
+  - Notifications toast uniformisées
+  - États de chargement visuels
+  - Messages d'erreur contextuels
+  - Animations et transitions fluides
+  - Meilleure gestion des états vides
+
+#### 🗃 Base de données
+- **Optimisation du modèle**
+  - Tables orders et order_items
+  - Indexation pour les requêtes fréquentes
+  - Sécurité avec Row Level Security
+  - Vue dashboard_stats pour les analyses
+  - Fonction de génération de données de test
+
+#### 🔧 Corrections
+- Correction des problèmes de soumission des formulaires
+- Amélioration de la gestion des erreurs
+- Uniformisation du système de notifications
+- Correction des problèmes d'affichage sur mobile
+- Optimisation des requêtes Supabase
+
 ### [0.4.0] - 22 Avril 2025 🔒
 
 #### ✨ Nouvelles fonctionnalités

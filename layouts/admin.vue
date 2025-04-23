@@ -124,11 +124,11 @@
     LogOut,
     Plus
   } from 'lucide-vue-next'
-  import { useToast } from '~/composables/useToast'
+  import { useCustomToast } from '~/composables/useToast'
   
   const route = useRoute()
   const router = useRouter()
-  const toast = useToast()
+  const {showToast} = useCustomToast()
   
   const navigationItems = [
     {
@@ -160,6 +160,6 @@
   const handleLogout = async () => {
     // Logique de déconnexion
     router.push('/auth/login')
-    toast.success('Déconnexion réussie', 'À bientôt !')
+    showToast.success('Déconnexion réussie', 'À bientôt !')
   }
   </script>

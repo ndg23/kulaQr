@@ -1,50 +1,63 @@
-import { ref } from 'vue'
+import { useState } from '#app'
 
 interface Toast {
-  id: number
-  type: 'success' | 'error' | 'info'
+  id: string
   title: string
-  message: string
-  duration?: number
+  description?: string
+  type: 'success' | 'error' | 'info' | 'warning'
 }
 
-const toasts = ref<Toast[]>([])
-let counter = 0
+export function useCustomToast() {
+  const toasts = useState<Toast[]>('toasts', () => [])
 
-export const useToast = () => {
   const addToast = (toast: Omit<Toast, 'id'>) => {
-    const id = counter++
-    const newToast = { ...toast, id }
-    toasts.value.push(newToast)
+    const id = Math.random().toString(36).substring(2, 9)
+    toasts.value = [...toasts.value, { ...toast, id }]
 
-    if (toast.duration !== 0) {
-      setTimeout(() => {
-        removeToast(id)
-      }, toast.duration || 3000)
-    }
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+      removeToast(id)
+    }, 4000)
   }
 
-  const removeToast = (id: number) => {
+  const removeToast = (id: string) => {
     toasts.value = toasts.value.filter(t => t.id !== id)
   }
 
-  const success = (title: string, message: string, duration?: number) => {
-    addToast({ type: 'success', title, message, duration })
-  }
-
-  const error = (title: string, message: string, duration?: number) => {
-    addToast({ type: 'error', title, message, duration })
-  }
-
-  const info = (title: string, message: string, duration?: number) => {
-    addToast({ type: 'info', title, message, duration })
+  const showToast = {
+    success: (title: string, description?: string) => {
+      addToast({
+        title,
+        description,
+        type: 'success'
+      })
+    },
+    error: (title: string, description?: string) => {
+      addToast({
+        title,
+        description,
+        type: 'error'
+      })
+    },
+    info: (title: string, description?: string) => {
+      addToast({
+        title,
+        description,
+        type: 'info'
+      })
+    },
+    warning: (title: string, description?: string) => {
+      addToast({
+        title,
+        description,
+        type: 'warning'
+      })
+    }
   }
 
   return {
     toasts,
-    success,
-    error,
-    info,
+    showToast,
     removeToast
   }
 } 

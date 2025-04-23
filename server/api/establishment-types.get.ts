@@ -1,9 +1,9 @@
-// import { useSupabaseClient } from '@supabase/supabase-js'
+import { serverSupabaseClient } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
-  const supabase = useSupabaseClient()
+  const client = await serverSupabaseClient(event)
   
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from('establishment_types')
     .select('*')
     .eq('is_active', true)

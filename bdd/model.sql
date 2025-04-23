@@ -114,7 +114,7 @@ CREATE TABLE establishments (
   opening_hours TEXT,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   is_active BOOLEAN DEFAULT TRUE,
-  currency TEXT DEFAULT 'EUR',
+  currency TEXT DEFAULT 'XOF',
   subscription_type TEXT DEFAULT 'basic',
   max_categories INTEGER DEFAULT 5,
   max_products INTEGER DEFAULT 20,
@@ -140,6 +140,7 @@ CREATE TABLE categories (
   establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT,
+  image_url TEXT,
   order_number INTEGER NOT NULL DEFAULT 0,
   is_active BOOLEAN DEFAULT TRUE,
   UNIQUE(establishment_id, name),
@@ -158,6 +159,7 @@ CREATE TABLE products (
   is_available BOOLEAN DEFAULT TRUE,
   order_number INTEGER NOT NULL DEFAULT 0,
   allergens TEXT[],  -- Information importante pour les clients
+  establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
   UNIQUE(category_id, name)
 );
 
@@ -224,6 +226,19 @@ CREATE INDEX idx_products_category ON products(category_id);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_establishments_created_by ON establishments(created_by);
 CREATE INDEX idx_establishments_subscription_type ON establishments(subscription_type);
+-- Allow authenticated users to upload images
+CREATE POLICY "Allow authenticated uploads" 
+ON storage.objects 
+FOR INSERT 
+TO authenticated 
+WITH CHECK (bucket_id = 'images');
+
+-- Allow public access to read images
+CREATE POLICY "Allow public read access" 
+ON storage.objects 
+FOR SELECT 
+TO public 
+USING (bucket_id = 'images');
 
 -- Insérer les types par défaut
 INSERT INTO establishment_types (name, slug, icon, description) VALUES

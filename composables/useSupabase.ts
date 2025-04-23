@@ -1,17 +1,17 @@
 import { ref } from 'vue'
 import type { Database } from '~/types/database'
-
+import { useCustomToast } from './useToast'
 export const useSupabaseWrapper = () => {
   const client = useSupabaseClient<Database>()
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const toast = useToast()
-
+  // const toast = useToast()
+    const {showToast} = useCustomToast()
   const handleError = (err: any) => {
     console.error(err)
     const errorMessage = err.message || 'Une erreur est survenue'
     error.value = errorMessage
-    toast.error('Erreur', errorMessage)
+    showToast.error(errorMessage)
   }
 
   const clearError = () => {

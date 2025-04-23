@@ -194,7 +194,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption, Switch } from '@headlessui/vue'
 import {
   X,
@@ -202,9 +202,12 @@ import {
   Upload,
   ChevronDown,
   Check,
-  Loader2
+  Loader2,
+  UtensilsCrossed
 } from 'lucide-vue-next'
 import type { Product, Category } from '~/types'
+import { useSupabaseWrapper } from '~/composables/useSupabase'
+import { useCustomToast } from '~/composables/useToast'
 
 const props = defineProps({
   product: {
@@ -213,42 +216,187 @@ const props = defineProps({
   },
   categories: {
     type: Array,
-    required: true
+    default: () => []
   }
 })
 
-const emit = defineEmits(['close', 'save'])
-
-const fileInput = ref<HTMLInputElement>()
-const imagePreview = ref<string>()
+const emit = defineEmits(['close', 'submit'])
+const { client: supabase } = useSupabaseWrapper()
+const { showToast } = useCustomToast()
+const fileInput = ref(null)
+const imagePreview = ref('')
 const loading = ref(false)
 
+// Form state
 const form = reactive({
-  name: props.product?.name || '',
-  category_id: props.product?.category_id || '',
-  price: props.product?.price || 0,
-  description: props.product?.description || '',
-  image_url: props.product?.image_url || '',
-  is_available: props.product?.is_available ?? true
+  name: '',
+  description: '',
+  price: 0,
+  category_id: '',
+  image_url: '',
+  image_file: null,
+  allergens: [],
+  is_available: true
 })
 
-const handleImageChange = (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (file) {
-    imagePreview.value = URL.createObjectURL(file)
-    // Ici vous pouvez ajouter la logique pour uploader l'image
+// Initialize form with product data if editing
+onMounted(() => {
+  initializeForm()
+})
+
+// Watch for product changes
+watch(() => props.product, () => {
+  initializeForm()
+}, { deep: true })
+
+// Initialize form data
+const initializeForm = () => {
+  if (props.product) {
+    form.name = props.product.name || ''
+    form.description = props.product.description || ''
+    form.price = props.product.price || 0
+    form.category_id = props.product.category_id || ''
+    form.image_url = props.product.image_url || ''
+    form.allergens = props.product.allergens || []
+    form.is_available = props.product.is_available !== undefined ? props.product.is_available : true
+  } else {
+    // Default values for new product
+    form.name = ''
+    form.description = ''
+    form.price = 0
+    form.category_id = props.categories.length > 0 ? props.categories[0].id : ''
+    form.image_url = ''
+    form.image_file = null
+    form.allergens = []
+    form.is_available = true
+    imagePreview.value = ''
   }
 }
 
-const handleSubmit = async () => {
-  loading.value = true
+// Trigger file input click
+const triggerFileInput = () => {
+  if (fileInput.value) {
+    fileInput.value.click()
+  }
+}
+
+// Handle file selection
+const handleFileChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  // Check file size (2MB max)
+  if (file.size > 2 * 1024 * 1024) {
+    showToast.error('Erreur', 'L\'image est trop volumineuse. Veuillez choisir une image de moins de 2MB.')
+    return
+  }
+  
+  form.image_file = file
+  
+  // Create preview
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    imagePreview.value = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+// Remove image
+const removeImage = () => {
+  form.image_file = null
+  form.image_url = ''
+  imagePreview.value = ''
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
+}
+
+// Upload image to storage
+const uploadImage = async () => {
+  if (!form.image_file) return form.image_url
+  
   try {
-    emit('save', form)
-  } finally {
+    const fileExt = form.image_file.name.split('.').pop()
+    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+    const filePath = `products/${fileName}`
+    
+    const { error: uploadError } = await supabase.storage
+      .from('images')
+      .upload(filePath, form.image_file)
+    
+    if (uploadError) throw uploadError
+    
+    const { data } = supabase.storage
+      .from('images')
+      .getPublicUrl(filePath)
+    
+    return data.publicUrl
+  } catch (error) {
+    console.error('Error uploading image:', error)
+    showToast.error('Erreur', 'Impossible de télécharger l\'image')
+    throw error
+  }
+}
+
+// Handle form submission
+const handleSubmit = async () => {
+  if (!form.name.trim()) {
+    showToast.error('Erreur', 'Veuillez entrer un nom de produit')
+    return
+  }
+  
+  if (!form.category_id) {
+    showToast.error('Erreur', 'Veuillez sélectionner une catégorie')
+    return
+  }
+  
+  if (form.price <= 0) {
+    showToast.error('Erreur', 'Le prix doit être supérieur à 0')
+    return
+  }
+  
+  loading.value = true
+  
+  try {
+    // Upload image if there's a new one
+    let imageUrl = form.image_url
+    if (form.image_file) {
+      imageUrl = await uploadImage()
+    }
+    
+    // Prepare data for submission
+    const productData = {
+      name: form.name,
+      description: form.description,
+      price: parseFloat(form.price),
+      category_id: form.category_id,
+      image_url: imageUrl,
+      allergens: form.allergens,
+      is_available: form.is_available
+    }
+    
+    // Send data to parent component
+    emit('submit', productData)
+  } catch (error) {
+    console.error('Error submitting product:', error)
+    showToast.error('Erreur', 'Une erreur est survenue lors de la sauvegarde')
     loading.value = false
   }
 }
+
+// Add allergen
+const addAllergen = (allergen) => {
+  if (!form.allergens.includes(allergen)) {
+    form.allergens.push(allergen)
+  }
+}
+
+// Remove allergen
+const removeAllergen = (allergen) => {
+  form.allergens = form.allergens.filter(a => a !== allergen)
+}
 </script>
+
 <style scoped>
 .modal-enter-active,
 .modal-leave-active {

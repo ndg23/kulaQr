@@ -140,7 +140,7 @@ const loadDashboardData = async () => {
       stats.value.orders = todayOrders.length
       stats.value.revenue = formatPrice(totalAmount)
       stats.value.activeTables = activeTables
-
+      
       // Get recent orders
       recentOrders.value = todayOrders.slice(0, 5)
     }
