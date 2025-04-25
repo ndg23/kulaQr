@@ -8,7 +8,7 @@
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-      <div v-for="stat in stats" :key="stat.name" 
+      <div v-for="stat in statsDisplay" :key="stat.name" 
         class="bg-white p-8 rounded-[2rem] border border-gray-100 transition-all hover:scale-[1.02] hover:shadow-lg"
       >
         <div class="flex items-center space-x-6">
@@ -122,40 +122,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { 
   Store, Search, Edit2, Trash2,
   Plus, TrendingUp, ShoppingBag, Users
 } from 'lucide-vue-next'
-import { useToast } from '~/composables/useToast'
+import { useCustomToast } from '~/composables/useToast'
+import { useSupabaseWrapper } from '~/composables/useSupabase'
 
-const toast = useToast()
+const { showToast } = useCustomToast()
+const { client: supabase } = useSupabaseWrapper()
 const loading = ref(false)
 
-// Stats data
-const stats = [
-  { 
-    name: 'Restaurants actifs', 
-    value: '234',
-    icon: Store,
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-500'
-  },
-  { 
-    name: 'Commandes totales', 
-    value: '12.5k',
-    icon: ShoppingBag,
-    iconBg: 'bg-purple-50',
-    iconColor: 'text-purple-500'
-  },
-  { 
-    name: 'Revenu mensuel', 
-    value: '€45k',
-    icon: TrendingUp,
-    iconBg: 'bg-green-50',
-    iconColor: 'text-green-500'
-  }
-]
+// State
+const restaurants = ref([])
+const stats = ref({
+  active: 0,
+  orders: 0,
+  revenue: 0
+})
 
 // Filters
 const filters = ref({
@@ -163,25 +148,93 @@ const filters = ref({
   status: ''
 })
 
-// Sample data
-const restaurants = ref([
-  {
-    id: 1,
-    name: 'Le Bistrot Parisien',
-    address: '123 Rue de Paris, 75001 Paris',
-    owner: 'Jean Dupont',
-    status: 'active'
+// Load restaurants data
+const loadRestaurants = async () => {
+  try {
+    loading.value = true
+    
+    // Get establishments with their owners
+    const { data, error } = await supabase
+      .from('establishments')
+      .select(`
+        *,
+        users:user_id (
+          full_name
+        )
+      `)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    // Format the data
+    restaurants.value = data.map(est => ({
+      id: est.id,
+      name: est.name,
+      address: est.address || 'Adresse non spécifiée',
+      owner: est.users?.full_name || 'Propriétaire inconnu',
+      status: est.is_active ? 'active' : 'inactive',
+      created_at: est.created_at
+    }))
+
+    // Calculate stats
+    stats.value = {
+      active: data.filter(est => est.is_active).length,
+      orders: 0, // We'll implement this later
+      revenue: 0  // We'll implement this later
+    }
+
+    // Get order stats (optional - implement if you have orders table)
+    try {
+      const { data: orderStats, error: orderError } = await supabase
+        .rpc('get_order_stats')
+      
+      if (!orderError && orderStats) {
+        stats.value.orders = orderStats.total_orders || 0
+        stats.value.revenue = orderStats.total_revenue || 0
+      }
+    } catch (err) {
+      console.error('Error loading order stats:', err)
+      // Non-critical error, we can continue
+    }
+
+  } catch (err) {
+    console.error('Error loading restaurants:', err)
+    showToast.error('Erreur', 'Impossible de charger les restaurants')
+  } finally {
+    loading.value = false
+  }
+}
+
+// Computed stats for display
+const statsDisplay = computed(() => [
+  { 
+    name: 'Restaurants actifs', 
+    value: stats.value.active.toString(),
+    icon: Store,
+    iconBg: 'bg-blue-50',
+    iconColor: 'text-blue-500'
   },
-  {
-    id: 2,
-    name: 'La Trattoria',
-    address: '45 Avenue des Champs-Élysées, 75008 Paris',
-    owner: 'Marie Martin',
-    status: 'inactive'
+  { 
+    name: 'Commandes totales', 
+    value: stats.value.orders > 1000 
+      ? `${(stats.value.orders / 1000).toFixed(1)}k` 
+      : stats.value.orders.toString(),
+    icon: ShoppingBag,
+    iconBg: 'bg-purple-50',
+    iconColor: 'text-purple-500'
+  },
+  { 
+    name: 'Revenu mensuel', 
+    value: stats.value.revenue > 1000 
+      ? `${(stats.value.revenue / 1000).toFixed(0)}k` 
+      : stats.value.revenue.toString(),
+    icon: TrendingUp,
+    iconBg: 'bg-green-50',
+    iconColor: 'text-green-500'
   }
 ])
 
-// Computed
+// Filtered restaurants
 const filteredRestaurants = computed(() => {
   return restaurants.value.filter(restaurant => {
     const matchesSearch = !filters.value.search || 
@@ -194,20 +247,33 @@ const filteredRestaurants = computed(() => {
   })
 })
 
-// Methods
-const deleteRestaurant = async (id: number) => {
-  if (confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ?')) {
-    try {
-      loading.value = true
-      // Logique de suppression
-      toast.success('Restaurant supprimé', 'Le restaurant a été supprimé avec succès')
-    } catch (error) {
-      toast.error('Erreur', "Une erreur s'est produite lors de la suppression")
-    } finally {
-      loading.value = false
-    }
+// Delete restaurant
+const deleteRestaurant = async (id) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ?')) return
+
+  try {
+    loading.value = true
+    
+    const { error } = await supabase
+      .from('establishments')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+
+    showToast.success('Restaurant supprimé', 'Le restaurant a été supprimé avec succès')
+    await loadRestaurants() // Reload the list
+    
+  } catch (error) {
+    console.error('Error deleting restaurant:', error)
+    showToast.error('Erreur', "Une erreur s'est produite lors de la suppression")
+  } finally {
+    loading.value = false
   }
 }
+
+// Load initial data
+onMounted(loadRestaurants)
 
 definePageMeta({
   layout: 'admin'

@@ -117,7 +117,7 @@
                       <div>
                         <h4 class="font-medium text-gray-900">{{ product.name }}</h4>
                         <p class="text-sm text-gray-500 mt-1">{{ product.description }}</p>
-                        <p class="text-lg font-semibold text-gray-900 mt-2">{{ product.price }}€</p>
+                        <p class="text-lg font-semibold text-gray-900 mt-2">{{ product.price }}</p>
                       </div>
                       <div class="opacity-0 group-hover:opacity-100 transition-opacity">
                         <button class="p-2 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100">
@@ -173,7 +173,7 @@
           </div>
           <div class="p-8 space-y-6">
             <div>
-              <div class="text-3xl font-bold text-gray-900">€12,450</div>
+              <div class="text-3xl font-bold text-gray-900">12,450</div>
               <div class="text-base text-gray-500">Revenu mensuel</div>
             </div>
             <div>
@@ -222,74 +222,206 @@ import {
   ArrowLeft, Store, User, UtensilsCrossed,
   Plus, Edit2, ChartBar
 } from 'lucide-vue-next'
-import { useToast } from '~/composables/useToast'
+import { useCustomToast } from '~/composables/useToast'
+import { useSupabaseWrapper } from '~/composables/useSupabase'
 
-const toast = useToast()
+const { showToast } = useCustomToast()
+const { client: supabase } = useSupabaseWrapper()
 const route = useRoute()
+const router = useRouter()
+const loading = ref(false)
 
-// Sample data
+// Restaurant data
 const restaurant = ref({
   id: route.params.id,
-  name: 'Le Bistrot Parisien',
-  email: 'contact@bistrotparisien.fr',
-  phone: '+33 1 23 45 67 89',
-  address: '123 Rue de Paris, 75001 Paris',
-  status: 'active',
-  owner: 'Jean Dupont',
-  ownerEmail: 'jean@bistrotparisien.fr'
+  name: '',
+  email: '',
+  phone: '',
+  address: '',
+  status: 'inactive',
+  owner: '',
+  ownerEmail: '',
+  is_active: false
 })
 
-const toggleStatus = () => {
-  restaurant.value.status = restaurant.value.status === 'active' ? 'inactive' : 'active'
-  toast.success('Statut modifié', 'Le statut du restaurant a été mis à jour')
-}
+// Menu categories and products
+const menuCategories = ref([])
 
-const saveChanges = () => {
-  toast.success('Modifications enregistrées', 'Les modifications ont été enregistrées avec succès')
-}
+// Load restaurant data
+const loadRestaurant = async () => {
+  try {
+    loading.value = true
+    
+    // Get establishment data
+    const { data, error } = await supabase
+      .from('establishments')
+      .select(`
+        *,
+        users:user_id (
+          full_name,
+          email
+        )
+      `)
+      .eq('id', route.params.id)
+      .single()
 
-const deleteRestaurant = () => {
-  // Ajouter une confirmation avant suppression
-  if (confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ?')) {
-    toast.success('Restaurant supprimé', 'Le restaurant a été supprimé avec succès')
-    navigateTo('/admin')
+    if (error) throw error
+    
+    // Format the data
+    restaurant.value = {
+      id: data.id,
+      name: data.name,
+      email: data.email || '',
+      phone: data.phone || '',
+      address: data.address || '',
+      status: data.is_active ? 'active' : 'inactive',
+      owner: data.users?.full_name || 'Propriétaire inconnu',
+      ownerEmail: data.users?.email || '',
+      is_active: data.is_active
+    }
+
+    // Load menu categories and products
+    await loadMenuData()
+    
+  } catch (err) {
+    console.error('Error loading restaurant:', err)
+    showToast.error('Erreur', 'Impossible de charger les données du restaurant')
+    router.push('/admin/restaurants')
+  } finally {
+    loading.value = false
   }
 }
 
+// Load menu categories and products
+const loadMenuData = async () => {
+  try {
+    // Get categories with their products
+    const { data, error } = await supabase
+      .from('categories')
+      .select(`
+        id,
+        name,
+        products (
+          id,
+          name,
+          description,
+          price,
+          is_available
+        )
+      `)
+      .eq('establishment_id', route.params.id)
+      .order('order_number')
+
+    if (error) throw error
+
+    menuCategories.value = data.map(category => ({
+      ...category,
+      products: category.products.map(product => ({
+        ...product,
+        price: formatPrice(product.price)
+      }))
+    }))
+    
+  } catch (err) {
+    console.error('Error loading menu data:', err)
+    // Non-critical error, we can continue
+  }
+}
+
+// Format price
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('fr-FR', { 
+    style: 'currency', 
+    currency: 'XOF' 
+  }).format(price)
+}
+
+// Toggle restaurant status
+const toggleStatus = async () => {
+  try {
+    loading.value = true
+    
+    const newStatus = !restaurant.value.is_active
+    
+    const { error } = await supabase
+      .from('establishments')
+      .update({ is_active: newStatus })
+      .eq('id', restaurant.value.id)
+
+    if (error) throw error
+
+    restaurant.value.is_active = newStatus
+    restaurant.value.status = newStatus ? 'active' : 'inactive'
+    
+    showToast.success('Statut modifié', 'Le statut du restaurant a été mis à jour')
+  } catch (err) {
+    console.error('Error toggling status:', err)
+    showToast.error('Erreur', 'Impossible de modifier le statut')
+  } finally {
+    loading.value = false
+  }
+}
+
+// Save restaurant changes
+const saveChanges = async () => {
+  try {
+    loading.value = true
+    
+    const { error } = await supabase
+      .from('establishments')
+      .update({
+        name: restaurant.value.name,
+        email: restaurant.value.email,
+        phone: restaurant.value.phone,
+        address: restaurant.value.address
+      })
+      .eq('id', restaurant.value.id)
+
+    if (error) throw error
+    
+    showToast.success('Modifications enregistrées', 'Les modifications ont été enregistrées avec succès')
+  } catch (err) {
+    console.error('Error saving changes:', err)
+    showToast.error('Erreur', 'Impossible d\'enregistrer les modifications')
+  } finally {
+    loading.value = false
+  }
+}
+
+// Delete restaurant
+const deleteRestaurant = async () => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ?')) return
+  
+  try {
+    loading.value = true
+    
+    const { error } = await supabase
+      .from('establishments')
+      .delete()
+      .eq('id', restaurant.value.id)
+
+    if (error) throw error
+    
+    showToast.success('Restaurant supprimé', 'Le restaurant a été supprimé avec succès')
+    router.push('/admin/restaurants')
+  } catch (err) {
+    console.error('Error deleting restaurant:', err)
+    showToast.error('Erreur', 'Impossible de supprimer le restaurant')
+  } finally {
+    loading.value = false
+  }
+}
+
+// Open product modal
 const openNewProductModal = () => {
-  // Implémenter la logique d'ajout de produit
+  // Implement this when you have a product modal component
+  showToast.info('Fonctionnalité à venir', 'Cette fonctionnalité sera disponible prochainement')
 }
 
-const menuCategories = ref([
-  {
-    id: 1,
-    name: 'Entrées',
-    products: [
-      {
-        id: 1,
-        name: 'Salade César',
-        description: 'Laitue romaine, croûtons, parmesan',
-        price: 12.90
-      },
-      {
-        id: 2,
-        name: 'Soupe à l\'oignon',
-        description: 'Oignons caramélisés, croûtons gratinés',
-        price: 9.90
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Plats',
-    products: [
-      {
-        id: 3,
-        name: 'Steak Frites',
-        description: 'Steak de bœuf, frites maison',
-        price: 24.90
-      }
-    ]
-  }
-])
+// Load data on mount
+onMounted(loadRestaurant)
+
+definePageMeta({
+  layout: 'admin'
+})
 </script>

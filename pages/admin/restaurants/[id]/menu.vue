@@ -111,7 +111,7 @@
                 <h3 class="text-lg font-semibold text-gray-900">{{ product.name }}</h3>
                 <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ product.description }}</p>
                 <div class="flex items-center justify-between mt-3">
-                  <span class="text-xl font-bold text-gray-900">{{ product.price }}€</span>
+                  <span class="text-xl font-bold text-gray-900">{{ product.price }}</span>
                   <span 
                     class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-medium"
                     :class="{

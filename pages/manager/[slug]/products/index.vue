@@ -355,7 +355,7 @@ const loadData = async () => {
 }
 
 const formatPrice = (price) => {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(price)
 }
 
 const toggleAvailability = async (product: Product) => {

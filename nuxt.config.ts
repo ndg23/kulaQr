@@ -7,7 +7,10 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@nuxtjs/supabase'
   ],
-
+  routeRules: {
+    '/staff': { ssr: true },
+    '/staff/**': { ssr: true }
+  },
   app: {
     head: {
       title: 'Menu QR Code Generator',
@@ -19,18 +22,19 @@ export default defineNuxtConfig({
     },
     pageTransition: { name: 'page', mode: 'out-in' }
   },
-  googleSignIn: {
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    scope: 'email profile',
-    prompt: 'consent',
-    access_type: 'offline',
-    redirect_uri: 'http://localhost:3001/auth/callback'
-  },
   supabase: {
     url: process.env.SUPABASE_URL,
     key: process.env.SUPABASE_KEY,
     redirect: false
   },
 
-  compatibilityDate: '2025-04-20'
+  compatibilityDate: '2025-04-23',
+
+  // Ajouter des redirections pour les anciennes URLs
+  nitro: {
+    routeRules: {
+      '/waiter': { redirect: '/staff' },
+      '/waiter/**': { redirect: '/staff/**' }
+    }
+  }
 })

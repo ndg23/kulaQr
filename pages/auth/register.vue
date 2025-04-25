@@ -96,7 +96,6 @@
                     :class="{ 'border-red-300': errors.type }"
                   >
                     <span v-if="selectedType" class="flex items-center">
-                      <component :is="selectedType.icon" class="w-5 h-5 mr-2 text-gray-500" />
                       <span class="block truncate">{{ selectedType.name }}</span>
                     </span>
                     <span v-else class="text-gray-500">Sélectionnez un type</span>
@@ -123,7 +122,6 @@
                           'relative cursor-pointer select-none py-3 px-4'
                         ]">
                           <div class="flex items-center">
-                            <component :is="type.icon" class="w-5 h-5 mr-2" :class="selected ? 'text-facebook' : 'text-gray-400'" />
                             <span :class="[
                               selected ? 'font-semibold' : 'font-normal',
                               'block truncate'
@@ -179,6 +177,9 @@
 import { ref, reactive, computed } from 'vue'
 import { Eye, EyeOff, Loader2, Check, ChevronDown } from 'lucide-vue-next'
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
+import { useRouter } from 'vue-router'
+// import { useSupabase } from '~/composables/useSupabase'
+import { useCustomToast } from '~/composables/useToast'
 
 import FormInput from '~/components/ui/FormInput.vue'
 
@@ -212,6 +213,8 @@ const errors = reactive({
 })
 
 const supabase = useSupabaseClient()
+const router = useRouter()
+const {showToast} = useCustomToast()
 
 const { data: establishmentTypes } = await supabase
   .from('establishment_types')
@@ -327,6 +330,7 @@ const nextStep = () => {
     handleRegister()
   }
 }
+
 
 definePageMeta({
   layout: 'auth'

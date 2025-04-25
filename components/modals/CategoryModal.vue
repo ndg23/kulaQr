@@ -56,31 +56,25 @@
       
       <!-- Category Name -->
       <div class="relative group mb-4">
-        <input
+        <FormInput
           v-model="form.name"
           type="text"
           required
-          class="peer w-full h-16 px-5 pt-4 pl-10 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-blue-500 focus:ring-0 transition-colors"
+          label="Nom de la catégorie"
           placeholder="Plat, Dessert, Boisson..."
         />
-        <label class="absolute left-10 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-blue-500">
-          Nom de la catégorie
-        </label>
       </div>
       
       <!-- Order Number -->
       <div class="relative group">
-        <input
+        <FormInput
           v-model.number="form.order_number"
           type="number"
           step="1"
           min="1"
-          class="peer w-full h-16 px-5 pt-4 pl-10 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-blue-500 focus:ring-0 transition-colors"
           placeholder="1, 2, 3..."
+          label="Ordre d'affichage"
         />
-        <label class="absolute left-10 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-blue-500">
-          Ordre d'affichage
-        </label>
       </div>
       
       <!-- Actions -->
@@ -117,7 +111,7 @@ import {
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
-
+import FormInput from '~/components/ui/FormInput.vue'
 const props = defineProps({
   category: {
     type: Object,

@@ -16,6 +16,19 @@ export default {
 
       },
       colors: {
+        kula: {
+          50: '#fff8f0',
+          100: '#ffecd8',
+          200: '#ffd4ad',
+          300: '#ffb77a',
+          400: '#fd9542',
+          500: '#fb6a00', // Orange vif principal
+          600: '#fa6900', // Variante d'orange
+          700: '#fa6a00', // Autre nuance d'orange
+          800: '#fb6b00', // Encore une teinte d'orange
+          900: '#c54e00',
+          950: '#7c2900',
+        },
         primary: {
           50: '#fdf8ed',
           100: '#f9edc8',

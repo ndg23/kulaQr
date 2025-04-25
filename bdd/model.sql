@@ -7,35 +7,35 @@ BEGIN
   END IF;
 
   IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'establishments') THEN
-    DROP TRIGGER IF EXISTS update_establishments_updated_at ON establishments;
-    DROP TRIGGER IF EXISTS establishment_slug_trigger ON establishments;
-    DROP TRIGGER IF EXISTS establishment_cleanup_trigger ON establishments;
+    DROP TRIGGER IF EXISTS update_establishments_updated_at ON establishments CASCADE;
+    DROP TRIGGER IF EXISTS establishment_slug_trigger ON establishments CASCADE;
+    DROP TRIGGER IF EXISTS establishment_cleanup_trigger ON establishments CASCADE;
   END IF;
 
   IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'products') THEN
-    DROP TRIGGER IF EXISTS products_count_trigger ON products;
-    DROP TRIGGER IF EXISTS check_product_limits ON products;
+    DROP TRIGGER IF EXISTS products_count_trigger ON products CASCADE;
+    DROP TRIGGER IF EXISTS check_product_limits ON products CASCADE;
   END IF;
 
   IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'categories') THEN
-    DROP TRIGGER IF EXISTS check_category_limits ON categories;
+    DROP TRIGGER IF EXISTS check_category_limits ON categories CASCADE;
   END IF;
 
   -- Suppression des policies si les tables existent
   IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'establishments') THEN
-    DROP POLICY IF EXISTS "Public establishments are viewable by everyone" ON establishments;
-    DROP POLICY IF EXISTS "Users can update their own establishments" ON establishments;
-    DROP POLICY IF EXISTS "Admin users can manage all establishments" ON establishments;
+    DROP POLICY IF EXISTS "Public establishments are viewable by everyone" ON establishments CASCADE;
+    DROP POLICY IF EXISTS "Users can update their own establishments" ON establishments CASCADE;
+    DROP POLICY IF EXISTS "Admin users can manage all establishments" ON establishments CASCADE;
   END IF;
 
   IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'categories') THEN
-    DROP POLICY IF EXISTS "Categories are viewable by everyone" ON categories;
-    DROP POLICY IF EXISTS "Users can manage their establishment categories" ON categories;
+    DROP POLICY IF EXISTS "Categories are viewable by everyone" ON categories CASCADE;
+    DROP POLICY IF EXISTS "Users can manage their establishment categories" ON categories CASCADE;
   END IF;
 
   IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'products') THEN
-    DROP POLICY IF EXISTS "Products are viewable by everyone" ON products;
-    DROP POLICY IF EXISTS "Users can manage their establishment products" ON products;
+    DROP POLICY IF EXISTS "Products are viewable by everyone" ON products CASCADE;
+    DROP POLICY IF EXISTS "Users can manage their establishment products" ON products CASCADE;
   END IF;
 END $$;
 
@@ -45,13 +45,14 @@ DROP FUNCTION IF EXISTS update_category_product_count();
 DROP FUNCTION IF EXISTS check_subscription_limits();
 DROP FUNCTION IF EXISTS generate_establishment_slug();
 DROP FUNCTION IF EXISTS update_last_login();
-DROP FUNCTION IF EXISTS check_subscription_validity();
+DROP FUNCTION IF EXISTS check_subscription_validity() CASCADE;
 DROP FUNCTION IF EXISTS cleanup_related_data();
 
 -- Suppression des tables dans l'ordre pour respecter les contraintes de clé étrangère
 DROP TABLE IF EXISTS qr_codes;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS staff;
 DROP TABLE IF EXISTS establishments;
 DROP TABLE IF EXISTS users;
 
@@ -159,7 +160,6 @@ CREATE TABLE products (
   is_available BOOLEAN DEFAULT TRUE,
   order_number INTEGER NOT NULL DEFAULT 0,
   allergens TEXT[],  -- Information importante pour les clients
-  establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
   UNIQUE(category_id, name)
 );
 
@@ -171,6 +171,51 @@ CREATE TABLE qr_codes (
   table_number INTEGER DEFAULT 0,
   UNIQUE(establishment_id, table_number)
 );
+
+-- Après la création de la table qr_codes et avant les Row Level Security Policies
+-- Création de la table staff avec username et PIN
+CREATE TABLE staff (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
+  username TEXT NOT NULL,
+  pin VARCHAR(6) NOT NULL,
+  role TEXT DEFAULT 'server', -- 'server', 'kitchen', 'manager', etc.
+  is_active BOOLEAN DEFAULT TRUE,
+  last_login TIMESTAMP WITH TIME ZONE,
+  UNIQUE(establishment_id, username)
+);
+
+-- Trigger pour staff updated_at
+CREATE TRIGGER update_staff_updated_at
+BEFORE UPDATE ON staff
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- Row Level Security pour la table staff
+ALTER TABLE staff ENABLE ROW LEVEL SECURITY;
+
+-- Policies pour la table staff
+CREATE POLICY "Staff members are viewable by establishment owners" ON staff
+  FOR SELECT USING (
+    auth.uid() IN (
+      SELECT user_id FROM establishments 
+      WHERE id = staff.establishment_id
+    )
+  );
+
+CREATE POLICY "Users can manage their establishment staff" ON staff
+  FOR ALL USING (
+    auth.uid() IN (
+      SELECT user_id FROM establishments 
+      WHERE id = staff.establishment_id
+    )
+  );
+
+-- Index pour de meilleures performances
+CREATE INDEX idx_staff_establishment ON staff(establishment_id);
+CREATE INDEX idx_staff_username ON staff(username);
 
 -- Row Level Security Policies
 ALTER TABLE establishments ENABLE ROW LEVEL SECURITY;

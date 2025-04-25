@@ -16,32 +16,24 @@
       <form @submit.prevent="handleSubmit" class="space-y-6">
         <!-- Name -->
         <div class="relative group">
-          <input
+          <FormInput
             v-model="form.name"
             type="text"
             required
-            class="peer w-full h-16 px-5 pt-4 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-blue-500 focus:ring-0 transition-colors"
+            label="Nom du produit"
             placeholder=" "
           />
-          <label class="absolute left-5 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-blue-500">
-            Nom du produit
-          </label>
         </div>
 
         <!-- Price -->
         <div class="relative group">
-          <input
+          <FormInput
             v-model="form.price"
             type="number"
             step="0.01"
             required
-            class="peer w-full h-16 px-5 pt-4 pl-10 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-blue-500 focus:ring-0 transition-colors"
-            placeholder=" "
+            label="Prix"
           />
-          <span class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">€</span>
-          <label class="absolute left-10 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-blue-500">
-            Prix
-          </label>
         </div>
 
         <!-- Description -->
@@ -208,7 +200,7 @@ import {
 import type { Product, Category } from '~/types'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
-
+import FormInput from '~/components/ui/FormInput.vue'
 const props = defineProps({
   product: {
     type: Object,

@@ -102,82 +102,239 @@
   import {
     Store, ShoppingBag, Star, Users, CreditCard
   } from 'lucide-vue-next'
+  import { useSupabaseWrapper } from '~/composables/useSupabase'
+  import { useCustomToast } from '~/composables/useToast'
   
-  // Stats data
-  const stats = [
+  const { client: supabase } = useSupabaseWrapper()
+  const { showToast } = useCustomToast()
+  const loading = ref(true)
+  
+  // Dashboard data
+  const dashboardData = ref({
+    restaurants: 0,
+    users: 0,
+    orders: 0,
+    revenue: 0
+  })
+  
+  // Recent orders
+  const recentOrders = ref([])
+  
+  // Popular restaurants
+  const popularRestaurants = ref([])
+  
+  // Load dashboard data
+  const loadDashboardData = async () => {
+    try {
+      loading.value = true
+  
+      // Load counts with error handling
+      try {
+        const [
+          restaurantsResponse,
+          usersResponse
+        ] = await Promise.all([
+          // Count restaurants
+          supabase
+            .from('establishments')
+            .select('id', { count: 'exact', head: true }),
+          
+          // Count users
+          supabase
+            .from('users')
+            .select('id', { count: 'exact', head: true })
+        ])
+  
+        // Update dashboard data
+        dashboardData.value = {
+          ...dashboardData.value,
+          restaurants: restaurantsResponse.count || 0,
+          users: usersResponse.count || 0
+        }
+      } catch (err) {
+        console.error('Error loading basic counts:', err)
+      }
+  
+      // Try to load order stats
+      try {
+        const { data: orderStats, error: orderError } = await supabase
+          .rpc('get_order_stats')
+        
+        if (!orderError && orderStats) {
+          dashboardData.value.orders = orderStats.total_orders || 0
+          dashboardData.value.revenue = orderStats.total_revenue || 0
+        }
+      } catch (err) {
+        console.error('Error loading order stats:', err)
+        // Non-critical error, we can continue
+      }
+  
+      // Load recent orders and popular restaurants
+      await Promise.allSettled([
+        loadRecentOrders(),
+        loadPopularRestaurants()
+      ])
+  
+    } catch (error) {
+      console.error('Error loading dashboard data:', error)
+      showToast.error('Erreur', 'Impossible de charger les données du tableau de bord')
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  // Load recent orders with better error handling
+  const loadRecentOrders = async () => {
+    try {
+      // Check if orders table exists by trying to query it
+      const { error: checkError } = await supabase
+        .from('orders')
+        .select('id')
+        .limit(1)
+      
+      if (checkError) {
+        console.log('Orders table may not exist yet:', checkError)
+        return
+      }
+  
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          total_amount,
+          created_at,
+          establishments(name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5)
+  
+      if (error) throw error
+  
+      recentOrders.value = data.map(order => ({
+        id: order.id,
+        restaurant: order.establishments?.name || 'Restaurant inconnu',
+        time: formatRelativeTime(order.created_at),
+        amount: formatCurrency(order.total_amount)
+      }))
+    } catch (error) {
+      console.error('Error loading recent orders:', error)
+      // Set empty array as fallback
+      recentOrders.value = []
+    }
+  }
+  
+  // Load popular restaurants
+  const loadPopularRestaurants = async () => {
+    try {
+      // This query assumes you have a view or function that returns popular restaurants
+      // If not, you can create one or use a simpler query
+      const { data, error } = await supabase
+        .rpc('get_popular_restaurants')
+        .limit(5)
+  
+      if (error) {
+        // Fallback to a simpler query if the RPC doesn't exist
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('establishments')
+          .select(`
+            id,
+            name,
+            orders:orders(id)
+          `)
+          .order('created_at', { ascending: false })
+          .limit(5)
+  
+        if (fallbackError) throw fallbackError
+  
+        popularRestaurants.value = fallbackData.map(restaurant => ({
+          id: restaurant.id,
+          name: restaurant.name,
+          orders: restaurant.orders?.length || 0,
+          rating: 4.5 // Default rating since we don't have ratings yet
+        }))
+      } else {
+        popularRestaurants.value = data
+      }
+    } catch (error) {
+      console.error('Error loading popular restaurants:', error)
+      // Set some default data
+      popularRestaurants.value = []
+    }
+  }
+  
+  // Format relative time (e.g., "5 minutes ago")
+  const formatRelativeTime = (timestamp) => {
+    if (!timestamp) return 'Date inconnue'
+    
+    const now = new Date()
+    const date = new Date(timestamp)
+    const diffMs = now - date
+    const diffSec = Math.floor(diffMs / 1000)
+    const diffMin = Math.floor(diffSec / 60)
+    const diffHour = Math.floor(diffMin / 60)
+    const diffDay = Math.floor(diffHour / 24)
+  
+    if (diffMin < 1) return 'À l\'instant'
+    if (diffMin < 60) return `Il y a ${diffMin} minute${diffMin > 1 ? 's' : ''}`
+    if (diffHour < 24) return `Il y a ${diffHour} heure${diffHour > 1 ? 's' : ''}`
+    if (diffDay < 30) return `Il y a ${diffDay} jour${diffDay > 1 ? 's' : ''}`
+    
+    return date.toLocaleDateString('fr-FR')
+  }
+  
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('fr-FR', { 
+      style: 'currency', 
+      currency: 'XOF' 
+    }).format(amount || 0)
+  }
+  
+  // Computed stats for display
+  const stats = computed(() => [
     {
       name: 'Restaurants',
-      value: '234',
+      value: formatNumber(dashboardData.value.restaurants),
       icon: Store,
       iconBg: 'bg-blue-50',
       iconColor: 'text-blue-500'
     },
     {
       name: 'Clients',
-      value: '1.4k',
+      value: formatNumber(dashboardData.value.users),
       icon: Users,
       iconBg: 'bg-green-50',
       iconColor: 'text-green-500'
     },
     {
       name: 'Commandes',
-      value: '12.5k',
+      value: formatNumber(dashboardData.value.orders),
       icon: ShoppingBag,
       iconBg: 'bg-purple-50',
       iconColor: 'text-purple-500'
     },
     {
       name: 'Revenu',
-      value: '€45k',
+      value: formatNumber(dashboardData.value.revenue),
       icon: CreditCard,
       iconBg: 'bg-orange-50',
       iconColor: 'text-orange-500'
     }
-  ]
+  ])
   
-  // Recent orders
-  const recentOrders = [
-    {
-      id: 1,
-      restaurant: 'Le Bistrot Parisien',
-      time: 'Il y a 5 minutes',
-      amount: '€89.90'
-    },
-    {
-      id: 2,
-      restaurant: 'La Trattoria',
-      time: 'Il y a 15 minutes',
-      amount: '€124.50'
-    },
-    {
-      id: 3,
-      restaurant: 'Sushi Master',
-      time: 'Il y a 45 minutes',
-      amount: '€67.80'
+  // Format large numbers (e.g., 1234 -> 1.2k)
+  const formatNumber = (num) => {
+    if (num >= 1000000) {
+      return `${(num / 1000000).toFixed(1)}M`
     }
-  ]
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}k`
+    }
+    return num.toString()
+  }
   
-  // Popular restaurants
-  const popularRestaurants = [
-    {
-      id: 1,
-      name: 'Le Bistrot Parisien',
-      orders: 1234,
-      rating: 4.8
-    },
-    {
-      id: 2,
-      name: 'La Trattoria',
-      orders: 987,
-      rating: 4.7
-    },
-    {
-      id: 3,
-      name: 'Sushi Master',
-      orders: 856,
-      rating: 4.6
-    }
-  ]
+  // Load data on mount
+  onMounted(loadDashboardData)
   
   definePageMeta({
     layout: 'admin'

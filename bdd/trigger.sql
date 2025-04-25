@@ -101,7 +101,7 @@ EXECUTE FUNCTION generate_establishment_slug();
 CREATE OR REPLACE FUNCTION update_last_login()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE restaurant_users
+  UPDATE users
   SET last_login = NOW()
   WHERE id = NEW.id;
   RETURN NEW;
@@ -132,7 +132,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER subscription_validity_trigger
-BEFORE UPDATE ON restaurant_users
+BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION check_subscription_validity();
 

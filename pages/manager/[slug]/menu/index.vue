@@ -391,7 +391,7 @@ const quickStats = computed(() => {
 
 // Methods
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(price)
 }
 
 const handleSearch = () => {

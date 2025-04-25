@@ -7,7 +7,7 @@
           <!-- Left side -->
           <div class="flex items-center">
             <NuxtLink to="/" class="flex items-center">
-              <img src="~/assets/icon/logo.png" class="w-[100px] h-[100px]" alt="Logo" />
+              <img src="~/assets/icon/logo.png" class="w-auto h-[50px]" alt="Logo" />
               <span class="text-xl font-logo ml-3 text-gray-900">Kula QR</span>
             </NuxtLink>
           </div>
@@ -20,8 +20,8 @@
               :to="item.to"
               :class="[
                 isActive(item.to)
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-700 hover:bg-gray-50',
+                  ? 'bg-kula-500 text-white'
+                  : 'text-gray-700 hover:bg-kula-50',
                 'px-4 py-2 rounded-full text-sm font-medium transition-colors'
               ]"
             >
@@ -37,20 +37,20 @@
             <!-- Quick Actions -->
             <button
               @click="showAddProduct = true"
-              class="hidden md:inline-flex items-center px-4 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
+              class="hidden md:inline-flex items-center px-4 py-2 bg-kula-500 text-white rounded-full text-sm font-medium hover:bg-kula-600 transition-colors"
             >
               <Plus class="w-4 h-4 mr-1.5" />
               Nouveau produit
             </button>
 
             <!-- Notifications -->
-            <Menu as="div" class="relative">
+            <!-- <Menu as="div" class="relative">
               <MenuButton class="relative p-2 rounded-full hover:bg-gray-50">
                 <span class="sr-only">Notifications</span>
                 <Bell class="w-5 h-5 text-gray-600" />
                 <span 
                   v-if="hasNotifications"
-                  class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" 
+                  class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-kula-500 ring-2 ring-white" 
                 />
               </MenuButton>
               <transition
@@ -76,8 +76,8 @@
                       >
                         <div class="flex items-start">
                           <div class="flex-shrink-0">
-                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-50">
-                              <ShoppingCart class="h-4 w-4 text-blue-500" />
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-kula-50">
+                              <ShoppingCart class="h-4 w-4 text-kula-500" />
                             </span>
                           </div>
                           <div class="ml-3 w-0 flex-1">
@@ -91,7 +91,7 @@
                   </div>
                 </MenuItems>
               </transition>
-            </Menu>
+            </Menu> -->
 
             <!-- Profile dropdown -->
             <Menu as="div" class="relative">
@@ -128,11 +128,26 @@
                       ]"
                     >
                       <div class="flex items-center">
-                        <Settings class="w-4 h-4 mr-2" />
-                        Paramètres
+                        <User class="w-4 h-4 mr-2" />
+                        Profile
                       </div>
                     </NuxtLink>
                   </MenuItem>
+                  <MenuItem v-slot="{ active }">
+                    <NuxtLink
+                      :to="`/manager/${establishment.value?.id || route.params.slug}/settings/profile`"
+                      :class="[
+                        active ? 'bg-gray-50' : '',
+                        'block px-4 py-2 text-sm text-gray-700'
+                      ]"
+                    >
+                      <div class="flex items-center">
+                        <Settings class="w-4 h-4 mr-2" />
+                        Etablissement
+                      </div>
+                    </NuxtLink>
+                  </MenuItem>
+
                   <div class="border-t border-gray-100 my-1" />
                   <MenuItem v-slot="{ active }">
                     <button
@@ -202,7 +217,10 @@ import {
   Plus,
   UtensilsCrossed,
   ListOrdered,
-  UserCircle
+  UserCircle,
+  Users,
+  Key,
+  User
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useEstablishment } from '~/composables/useEstablishment'
@@ -240,11 +258,21 @@ const navigationItems = computed(() => {
       to: `/manager/${establishmentId}/qr-codes`,
       icon: QrCode
     },
+    // {
+    //   name: 'Paramètres',
+    //   to: `/manager/${establishmentId}/settings`,
+    //   icon: Settings
+    // },
     {
-      name: 'Paramètres',
-      to: `/manager/${establishmentId}/settings`,
-      icon: Settings
+      name: 'Personnel',
+      to: `/manager/${establishmentId}/staff`,
+      icon: Users
     }
+    // {
+    //   name: 'Accès PIN',
+    //   to: `/manager/${establishmentId}/staff/pins`,
+    //   icon: Key
+    // }
   ]
 })
 

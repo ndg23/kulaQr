@@ -206,6 +206,7 @@ import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useEstablishment } from '~/composables/useEstablishment'
 import type { Category, Product } from '~/types'
 import { useCustomToast } from '~/composables/useToast'
+import ImageUploader from '~/components/ui/ImageUploader.vue'
 
 const {showToast} = useCustomToast()
 const route = useRoute()
@@ -258,7 +259,6 @@ const saveCategory = async (categoryData: any) => {
         .update({
           name: categoryData.name,
           order_number: categoryData.order_number,
-          icon_name: categoryData.icon,
           image_url: categoryData.image_url,
           establishment_id: establishment.value?.id
         })
@@ -285,7 +285,6 @@ const saveCategory = async (categoryData: any) => {
           establishment_id: establishment.value?.id,
           name: categoryData.name,
           order_number: categories.value.length + 1,
-          icon_name: categoryData.icon,
           image_url: categoryData.image_url
         })
         .select()
@@ -383,6 +382,14 @@ onMounted(async () => {
 definePageMeta({
   layout: 'manager'
 })
+
+const handleUploadError = (error) => {
+  showToast.error('Erreur', error)
+}
+
+const handleUploadSuccess = () => {
+  showToast.success('Succès', 'Image téléchargée avec succès')
+}
 </script>
 
 <style scoped>

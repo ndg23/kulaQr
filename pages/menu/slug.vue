@@ -47,7 +47,7 @@
                     {{ product.name }}
                   </h3>
                   <span class="text-lg font-semibold text-facebook">
-                    {{ product.price.toFixed(2) }}€
+                    {{ product.price.toFixed(2) }}
                   </span>
                 </div>
                 <p class="text-gray-600">{{ product.description }}</p>
@@ -130,7 +130,7 @@ const getProductsByCategory = (categoryId: string) => {
 }
 
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(price)
 }
 
 // Load data

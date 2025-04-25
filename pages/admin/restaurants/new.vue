@@ -158,9 +158,11 @@
   
   <script setup lang="ts">
   import { ArrowLeft, Loader2 } from 'lucide-vue-next'
-  import { useToast } from '~/composables/useToast'
+  import { useCustomToast } from '~/composables/useToast'
+  import { useSupabaseWrapper } from '~/composables/useSupabase'
   
-  const toast = useToast()
+  const { showToast } = useCustomToast()
+  const { client: supabase } = useSupabaseWrapper()
   const router = useRouter()
   const loading = ref(false)
   
@@ -176,14 +178,63 @@
   
   const createRestaurant = async () => {
     loading.value = true
+    
     try {
-      // Simulation d'appel API
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // First check if the owner email already exists
+      const { data: existingUser, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', form.ownerEmail)
+        .single()
       
-      toast.success('Restaurant créé', 'Le restaurant a été créé avec succès')
-      router.push('/admin')
+      let userId
+      
+      if (userError && userError.code === 'PGRST116') {
+        // User doesn't exist, create a new one
+        const { data: newUser, error: createError } = await supabase
+          .from('users')
+          .insert({
+            email: form.ownerEmail,
+            full_name: form.ownerName,
+            phone: form.ownerPhone,
+            role: 'manager',
+            status: 'active'
+          })
+          .select('id')
+          .single()
+        
+        if (createError) throw createError
+        userId = newUser.id
+      } else if (userError) {
+        throw userError
+      } else {
+        // User exists
+        userId = existingUser.id
+      }
+      
+      // Now create the establishment
+      const { data: establishment, error: estError } = await supabase
+        .from('establishments')
+        .insert({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          user_id: userId,
+          is_active: true,
+          subscription_type: 'basic'
+        })
+        .select('id')
+        .single()
+      
+      if (estError) throw estError
+      
+      showToast.success('Restaurant créé', 'Le restaurant a été créé avec succès')
+      router.push(`/admin/restaurants/${establishment.id}`)
+      
     } catch (error) {
-      toast.error('Erreur', "Une erreur s'est produite lors de la création")
+      console.error('Error creating restaurant:', error)
+      showToast.error('Erreur', "Une erreur s'est produite lors de la création")
     } finally {
       loading.value = false
     }

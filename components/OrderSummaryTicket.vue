@@ -41,14 +41,14 @@
               class="flex justify-between text-sm text-gray-500 font-mono"
             >
               <span>{{ product.name }} x{{ product.quantity }}</span>
-              <span>€{{ (product.price * product.quantity).toFixed(2) }}</span>
+              <span>{{ (product.price * product.quantity).toFixed(2) }}</span>
             </div>
           </div>
 
           <div class="border-t pt-4">
             <div class="flex justify-between text-lg font-medium text-gray-900 font-mono">
               <span>Total</span>
-              <span>€{{ order.totalAmount.toFixed(2) }}</span>
+              <span>{{ order.totalAmount.toFixed(2) }}</span>
             </div>
           </div>
         </div>

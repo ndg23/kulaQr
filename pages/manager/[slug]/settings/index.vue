@@ -15,16 +15,13 @@
         <div class="p-6 space-y-6">
           <!-- Restaurant Name -->
           <div class="relative group">
-            <input
+            <FormInput
               v-model="form.name"
               type="text"
               required
-              class="peer w-full h-16 px-5 pt-4 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-blue-500 focus:ring-0 transition-colors"
+              label="Nom de l'établissement"
               placeholder=" "
             />
-            <label class="absolute left-5 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-blue-500">
-              Nom de l'établissement
-            </label>
           </div>
 
           <!-- Description -->
@@ -84,28 +81,20 @@
         <div class="p-6 space-y-6">
           <!-- Phone -->
           <div class="relative group">
-            <input
+            <FormInput
               v-model="form.phone"
               type="tel"
-              class="peer w-full h-16 px-5 pt-4 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-blue-500 focus:ring-0 transition-colors"
-              placeholder=" "
+              label="Téléphone"
             />
-            <label class="absolute left-5 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-blue-500">
-              Téléphone
-            </label>
           </div>
 
           <!-- Address -->
           <div class="relative group">
-            <textarea
+            <FormInput
               v-model="form.address"
-              rows="2"
-              class="peer w-full px-5 pt-6 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-blue-500 focus:ring-0 transition-colors"
               placeholder=" "
+              label="Adresse"
             />
-            <label class="absolute left-5 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-blue-500">
-              Adresse
-            </label>
           </div>
         </div>
       </div>
@@ -117,15 +106,11 @@
         </div>
         <div class="p-6">
           <div class="relative group">
-            <textarea
+            <FormInput
               v-model="form.opening_hours"
-              rows="4"
-              class="peer w-full px-5 pt-6 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-blue-500 focus:ring-0 transition-colors"
+              label="Horaires d'ouverture"
               placeholder=" "
             />
-            <label class="absolute left-5 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-blue-500">
-              Horaires d'ouverture
-            </label>
           </div>
         </div>
       </div>
@@ -153,7 +138,7 @@ import { ref, reactive } from 'vue'
 import { ImageIcon, Upload, Loader2 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
-
+import FormInput from '~/components/ui/FormInput.vue'
 definePageMeta({
   layout: 'manager'
 })

@@ -8,7 +8,7 @@
   
       <!-- Stats Grid -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        <div v-for="stat in stats" :key="stat.name" 
+        <div v-for="stat in statsDisplay" :key="stat.name" 
           class="bg-white p-8 rounded-[2rem] border border-gray-100 transition-all hover:scale-[1.02] hover:shadow-lg"
         >
           <div class="flex items-center space-x-6">
@@ -85,7 +85,7 @@
                     <User class="w-6 h-6 text-gray-400" />
                   </div>
                   <div>
-                    <h3 class="text-lg font-semibold text-gray-900">{{ user.name }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ user.full_name }}</h3>
                     <p class="text-sm text-gray-500 mt-1">{{ user.email }}</p>
                     <div class="flex items-center mt-2">
                       <span 
@@ -142,42 +142,27 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, computed } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import { 
     Users, UserPlus, User, Search, Edit2, Trash2,
     UserCheck, UserX, Shield
   } from 'lucide-vue-next'
-  import { useToast } from '~/composables/useToast'
+  import { useCustomToast } from '~/composables/useToast'
+  import { useSupabaseWrapper } from '~/composables/useSupabase'
   
-  const toast = useToast()
+  const { showToast } = useCustomToast()
+  const { client: supabase } = useSupabaseWrapper()
   const loading = ref(false)
   const showUserModal = ref(false)
   const selectedUser = ref(null)
   
-  // Stats data
-  const stats = [
-    { 
-      name: 'Total utilisateurs', 
-      value: '1,234',
-      icon: Users,
-      iconBg: 'bg-purple-50',
-      iconColor: 'text-purple-500'
-    },
-    { 
-      name: 'Utilisateurs actifs', 
-      value: '856',
-      icon: UserCheck,
-      iconBg: 'bg-green-50',
-      iconColor: 'text-green-500'
-    },
-    { 
-      name: 'Administrateurs', 
-      value: '12',
-      icon: Shield,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-500'
-    }
-  ]
+  // State
+  const users = ref([])
+  const stats = ref({
+    total: 0,
+    active: 0,
+    admin: 0
+  })
   
   // Filters
   const filters = ref({
@@ -185,30 +170,65 @@
     role: ''
   })
   
-  // Sample data
-  const users = ref([
-    {
-      id: 1,
-      name: 'Jean Dupont',
-      email: 'jean@example.com',
-      role: 'admin',
-      status: 'active'
+  // Load users data
+  const loadUsers = async () => {
+    try {
+      loading.value = true
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      users.value = data
+
+      // Calculate stats
+      stats.value = {
+        total: data.length,
+        active: data.filter(u => u.status === 'active').length,
+        admin: data.filter(u => u.role === 'admin').length
+      }
+
+    } catch (err) {
+      console.error('Error loading users:', err)
+      showToast.error('Erreur', 'Impossible de charger les utilisateurs')
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  // Computed stats for display
+  const statsDisplay = computed(() => [
+    { 
+      name: 'Total utilisateurs', 
+      value: stats.value.total.toString(),
+      icon: Users,
+      iconBg: 'bg-purple-50',
+      iconColor: 'text-purple-500'
     },
-    {
-      id: 2,
-      name: 'Marie Martin',
-      email: 'marie@example.com',
-      role: 'manager',
-      status: 'active'
+    { 
+      name: 'Utilisateurs actifs', 
+      value: stats.value.active.toString(),
+      icon: UserCheck,
+      iconBg: 'bg-green-50',
+      iconColor: 'text-green-500'
+    },
+    { 
+      name: 'Administrateurs', 
+      value: stats.value.admin.toString(),
+      icon: Shield,
+      iconBg: 'bg-blue-50',
+      iconColor: 'text-blue-500'
     }
   ])
   
-  // Computed
+  // Filtered users
   const filteredUsers = computed(() => {
     return users.value.filter(user => {
       const matchesSearch = !filters.value.search || 
-        user.name.toLowerCase().includes(filters.value.search.toLowerCase()) ||
-        user.email.toLowerCase().includes(filters.value.search.toLowerCase())
+        user.full_name?.toLowerCase().includes(filters.value.search.toLowerCase()) ||
+        user.email?.toLowerCase().includes(filters.value.search.toLowerCase())
       
       const matchesRole = !filters.value.role || user.role === filters.value.role
 
@@ -222,8 +242,8 @@
     showUserModal.value = true
   }
   
-  const editUser = (user: any) => {
-    selectedUser.value = user
+  const editUser = (user) => {
+    selectedUser.value = { ...user }
     showUserModal.value = true
   }
   
@@ -232,35 +252,75 @@
     selectedUser.value = null
   }
   
-  const handleUserSubmit = async (userData: any) => {
+  const handleUserSubmit = async (userData) => {
     try {
       loading.value = true
-      // Logique de création/modification
-      toast.success(
-        selectedUser.value ? 'Utilisateur modifié' : 'Utilisateur créé',
-        selectedUser.value ? 'Les modifications ont été enregistrées' : 'Le nouvel utilisateur a été créé'
-      )
+      
+      if (selectedUser.value?.id) {
+        // Update existing user
+        const { error } = await supabase
+          .from('users')
+          .update({
+            full_name: userData.full_name,
+            email: userData.email,
+            role: userData.role,
+            status: userData.status
+          })
+          .eq('id', selectedUser.value.id)
+
+        if (error) throw error
+        
+        showToast.success('Utilisateur modifié', 'Les modifications ont été enregistrées')
+      } else {
+        // Create new user
+        const { error } = await supabase
+          .from('users')
+          .insert({
+            ...userData,
+            status: 'active'
+          })
+
+        if (error) throw error
+        
+        showToast.success('Utilisateur créé', 'Le nouvel utilisateur a été créé')
+      }
+
       closeUserModal()
+      await loadUsers() // Reload users list
+      
     } catch (error) {
-      toast.error('Erreur', "Une erreur s'est produite")
+      console.error('Error saving user:', error)
+      showToast.error('Erreur', "Une erreur s'est produite")
     } finally {
       loading.value = false
     }
   }
   
-  const deleteUser = async (id: number) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      try {
-        loading.value = true
-        // Logique de suppression
-        toast.success('Utilisateur supprimé', 'L\'utilisateur a été supprimé avec succès')
-      } catch (error) {
-        toast.error('Erreur', "Une erreur s'est produite lors de la suppression")
-      } finally {
-        loading.value = false
-      }
+  const deleteUser = async (id) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return
+
+    try {
+      loading.value = true
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      showToast.success('Utilisateur supprimé', 'L\'utilisateur a été supprimé avec succès')
+      await loadUsers() // Reload users list
+      
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      showToast.error('Erreur', "Une erreur s'est produite lors de la suppression")
+    } finally {
+      loading.value = false
     }
   }
+  
+  // Load initial data
+  onMounted(loadUsers)
   
   definePageMeta({
     layout: 'admin'

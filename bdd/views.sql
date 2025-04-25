@@ -34,44 +34,11 @@ WITH base_stats AS (
     
   FROM establishments e
   LEFT JOIN users u ON e.user_id = u.id
-  LEFT JOIN products p ON p.category_id IN (SELECT id FROM categories WHERE establishment_id = e.id)
+  LEFT JOIN products p ON p.category_id = c.id
   LEFT JOIN categories c ON c.establishment_id = e.id
   LEFT JOIN qr_scans qs ON qs.establishment_id = e.id
-),
-type_counts AS (
-  SELECT 
-    et.name,
-    COUNT(e.id) as count
-  FROM establishment_types et
-  LEFT JOIN establishments e ON e.type_id = et.id
-  GROUP BY et.name
-),
-subscription_counts AS (
-  SELECT 
-    COALESCE(subscription_type, 'free') as type,
-    COUNT(*) as count
-  FROM establishments
-  GROUP BY subscription_type
-),
-type_stats AS (
-  SELECT jsonb_object_agg(name, count) as establishments_by_type
-  FROM type_counts
-),
-sub_stats AS (
-  SELECT jsonb_object_agg(type, count) as subscriptions_distribution
-  FROM subscription_counts
 )
-SELECT 
-  bs.*,
-  ts.establishments_by_type,
-  ss.subscriptions_distribution,
-  -- Calcul des KPIs
-  ROUND((bs.active_establishments::float / NULLIF(bs.total_establishments, 0) * 100)::numeric, 1) as active_rate,
-  ROUND((bs.active_users_7d::float / NULLIF(bs.total_users, 0) * 100)::numeric, 1) as user_engagement_rate,
-  ROUND((bs.new_users_30d::float / NULLIF(bs.total_users, 0) * 100)::numeric, 1) as user_growth_rate
-FROM base_stats bs
-CROSS JOIN type_stats ts
-CROSS JOIN sub_stats ss;
+SELECT * FROM base_stats;
 
 -- Vue pour les statistiques de croissance mensuelle
 CREATE OR REPLACE VIEW monthly_growth_stats AS
@@ -95,4 +62,100 @@ ORDER BY month;
 
 -- Index pour améliorer les performances des requêtes
 CREATE INDEX IF NOT EXISTS idx_qr_scans_establishment_id ON qr_scans(establishment_id);
-CREATE INDEX IF NOT EXISTS idx_qr_scans_created_at ON qr_scans(created_at); 
+CREATE INDEX IF NOT EXISTS idx_qr_scans_created_at ON qr_scans(created_at);
+
+-- Create a view for popular restaurants
+CREATE OR REPLACE VIEW popular_restaurants AS
+SELECT 
+  e.id,
+  e.name,
+  COUNT(o.id) AS order_count,
+  COALESCE(AVG(o.rating), 4.5) AS avg_rating
+FROM 
+  establishments e
+LEFT JOIN 
+  orders o ON e.id = o.establishment_id
+WHERE 
+  e.is_active = true
+GROUP BY 
+  e.id, e.name
+ORDER BY 
+  order_count DESC, avg_rating DESC;
+
+-- Create a function to get popular restaurants
+CREATE OR REPLACE FUNCTION get_popular_restaurants()
+RETURNS TABLE (
+  id UUID,
+  name TEXT,
+  orders INTEGER,
+  rating NUMERIC
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    pr.id,
+    pr.name,
+    pr.order_count::INTEGER AS orders,
+    pr.avg_rating AS rating
+  FROM 
+    popular_restaurants pr
+  ORDER BY 
+    pr.order_count DESC, pr.avg_rating DESC
+  LIMIT 10;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a function to get order statistics
+CREATE OR REPLACE FUNCTION get_order_stats()
+RETURNS TABLE (
+  total_orders INTEGER,
+  total_revenue NUMERIC,
+  avg_order_value NUMERIC
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    COUNT(o.id)::INTEGER AS total_orders,
+    COALESCE(SUM(o.total_amount), 0) AS total_revenue,
+    CASE 
+      WHEN COUNT(o.id) > 0 THEN COALESCE(SUM(o.total_amount) / COUNT(o.id), 0)
+      ELSE 0
+    END AS avg_order_value
+  FROM 
+    orders o;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a view for recent activity
+CREATE OR REPLACE VIEW recent_activity AS
+SELECT 
+  a.id,
+  a.action_type,
+  a.entity_type,
+  a.entity_id,
+  a.details,
+  a.created_at,
+  u.full_name AS user_name,
+  u.id AS user_id
+FROM 
+  activities a
+LEFT JOIN 
+  users u ON a.user_id = u.id
+ORDER BY 
+  a.created_at DESC;
+
+------------------------------------------
+-- Vues pour les établissements populaires
+------------------------------------------
+CREATE OR REPLACE VIEW popular_establishments AS
+SELECT 
+  e.id,
+  e.name,
+  e.description,
+  COUNT(qs.id) as scan_count,
+  COUNT(DISTINCT qs.created_at::date) as unique_days_scanned
+FROM establishments e
+LEFT JOIN qr_scans qs ON qs.establishment_id = e.id
+WHERE e.is_active = true
+GROUP BY e.id, e.name, e.description
+ORDER BY scan_count DESC; 

@@ -1,6 +1,8 @@
+import { useSupabaseWrapper } from '~/composables/useSupabase'
+
 export default defineNuxtRouteMiddleware(async (to) => {
+  const { client: supabase } = useSupabaseWrapper()
   const user = useSupabaseUser()
-  const supabase = useSupabaseClient()
 
   // Vérifier si l'utilisateur est connecté
   if (!user.value && !to.path.startsWith('/auth')) {

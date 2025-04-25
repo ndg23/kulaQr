@@ -12,7 +12,7 @@
         <span class="font-mono font-medium text-gray-800">{{ totalItems }} éléments</span>
       </div>
       <div class="flex items-center">
-        <span class="font-mono font-medium text-gray-800 mr-4">€{{ totalPrice.toFixed(2) }}</span>
+        <span class="font-mono font-medium text-gray-800 mr-4">{{ totalPrice.toFixed(2) }}</span>
         <Icon 
           name="chevron-up" 
           size="24"

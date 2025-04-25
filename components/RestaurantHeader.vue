@@ -1,27 +1,30 @@
 <template>
-  <div class="bg-white">
-    <div class="relative">
-      <img
-        :src="data?.imageUrl || 'https://via.placeholder.com/800x300'"
-        :alt="data?.name"
-        class="w-full h-48 object-cover"
+  <div class="relative">
+    <!-- Cover Image -->
+    <div class="h-48 w-full relative">
+      <img 
+        :src="data.cover_image || defaultImage" 
+        alt="Restaurant cover"
+        class="w-full h-full object-cover"
+        @error="handleImageError"
       />
+      <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-60"></div>
     </div>
-    <div class="px-6 py-6">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2 font-mono">{{ data?.name || "Restaurant Name" }}</h1>
-      <div class="flex flex-wrap items-center text-sm text-gray-500 font-mono space-x-4">
-        <div class="flex items-center">
-          <Icon name="star" class="w-4 h-4 text-gray-400 mr-1" />
-          <span>{{ data?.rating || "4.5" }}</span>
-          <span class="ml-1 opacity-75">({{ data?.reviewCount || "500+" }})</span>
+    
+    <!-- Restaurant Info -->
+    <div class="absolute bottom-0 left-0 w-full p-4 text-white">
+      <h1 class="text-2xl font-bold">{{ data.name }}</h1>
+      <p class="text-sm opacity-90">{{ data.description || 'Menu digital' }}</p>
+      
+      <div class="flex items-center mt-2 space-x-4">
+        <div v-if="data.opening_hours" class="flex items-center text-xs">
+          <Clock class="w-3 h-3 mr-1" />
+          <span>{{ data.opening_hours }}</span>
         </div>
-        <div class="flex items-center">
-          <Icon name="clock" class="w-4 h-4 mr-1" />
-          <span>{{ data?.openingHours || "Open until 10 PM" }}</span>
-        </div>
-        <div class="flex items-center">
-          <Icon name="map-pin" class="w-4 h-4 mr-1" />
-          <span>{{ data?.address || "123 Main St, City" }}</span>
+        
+        <div v-if="data.address" class="flex items-center text-xs">
+          <MapPin class="w-3 h-3 mr-1" />
+          <span>{{ data.address }}</span>
         </div>
       </div>
     </div>
@@ -29,9 +32,22 @@
 </template>
 
 <script setup lang="ts">
-import type { EstablishmentData } from '~/types'
+import { Clock, MapPin } from 'lucide-vue-next'
+import { ref } from 'vue'
 
-defineProps<{
-  data: EstablishmentData
-}>()
+const props = defineProps({
+  data: {
+    type: Object,
+    required: true
+  },
+  defaultImage: {
+    type: String,
+    default: '/images/default-restaurant-cover.jpg'
+  }
+})
+
+// Handle image loading error
+const handleImageError = (e) => {
+  e.target.src = props.defaultImage
+}
 </script> 

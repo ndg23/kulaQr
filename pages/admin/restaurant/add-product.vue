@@ -58,7 +58,7 @@
                   placeholder="0.00"
                   class="w-full px-3 py-2 border rounded-lg pl-7"
                 />
-                <span class="absolute left-3 top-2 text-gray-500">€</span>
+                <span class="absolute left-3 top-2 text-gray-500"></span>
               </div>
             </div>
           </div>
