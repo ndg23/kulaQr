@@ -1,36 +1,39 @@
 <template>
   <div class="twitter-input-wrapper relative font-twitter">
     <div 
-      class="relative border rounded-[25px] bg-white dark:bg-black transition-colors duration-200
-      border-gray-200 dark:border-gray-700 focus-within:border-twitter-blue dark:focus-within:border-twitter-blue
-      hover:border-gray-300 dark:hover:border-gray-600"
+      class="relative border rounded-[25px] bg-white transition-colors duration-200
+      border-gray-200 hover:border-gray-300 focus-within:border-twitter-blue"
       :class="{ 'twitter-focus-ring': isFocused }"
     >
       <input
         :id="id"
         :value="modelValue"
         @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-        @focus="isFocused = true"
-        @blur="isFocused = false"
+        @focus="handleFocus"
+        @blur="handleBlur"
         :type="type"
         :required="required"
         :disabled="disabled"
-        class="peer w-full pt-6 pb-2 pl-5 pr-1 bg-transparent text-black dark:text-white text-base focus:outline-none"
+        class="peer w-full pt-6 pb-2 px-5 bg-transparent text-black text-base focus:outline-none focus:border-blue-500"
         :placeholder="' '"
       />
       <label
         :for="id"
-        class="absolute left-5 top-2 text-xs font-medium text-gray-500 dark:text-gray-400 transition-all
+        class="absolute left-5 top-2 text-xs font-medium text-gray-500 transition-all
         peer-placeholder-shown:text-base peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-gray-500
-        peer-focus:text-xs peer-focus:top-2 peer-focus:text-twitter-blue dark:peer-focus:text-twitter-blue"
+        peer-focus:text-xs peer-focus:top-2 peer-focus:text-twitter-blue"
       >
         {{ label }}
         <span v-if="required" class="text-red-500 ml-0.5">*</span>
       </label>
+
+      <!-- Append Slot -->
+      <div v-if="$slots.append" class="absolute right-3 top-1/2 -translate-y-1/2 text-twitter-blue">
+        <slot name="append" />
+      </div>
     </div>
-    <div v-if="$slots.append" class="absolute right-3 top-5 -translate-y-1/2 text-twitter-blue">
-      <slot name="append" />
-    </div>
+
+    <!-- Error Message -->
     <p v-if="error" class="mt-1 text-xs text-red-500 pl-1">{{ error }}</p>
   </div>
 </template>
@@ -54,6 +57,14 @@ defineEmits<{
 
 const id = computed(() => props.id || `twitter-input-${Math.random().toString(36).substr(2, 9)}`)
 const isFocused = ref(false)
+
+const handleFocus = () => {
+  isFocused.value = true
+}
+
+const handleBlur = () => {
+  isFocused.value = false
+}
 </script>
 
 <style scoped>
@@ -68,20 +79,22 @@ const isFocused = ref(false)
 }
 
 .text-twitter-blue {
-  color: #1DA1F2;
+  color: var(--twitter-blue);
 }
 
 .border-twitter-blue {
-  border-color: #1DA1F2;
+  border-color: var(--twitter-blue);
 }
 
 .focus-within\:border-twitter-blue:focus-within {
-  border-color: #1DA1F2;
+  border-color: var(--twitter-blue);
 }
 
-/* Custom focus ring class instead of using @apply with unavailable classes */
+/* Custom focus ring */
 .twitter-focus-ring {
-  box-shadow: 0 0 0 1px rgba(29, 161, 242, 0.4);
+  box-shadow: 0 0 0 1px var(--twitter-blue);
+  border-color: var(--twitter-blue);
+
 }
 
 /* Twitter input height in 2021 was slightly shorter than in 2022 */
@@ -99,7 +112,7 @@ label {
   transform-origin: left top;
 }
 
-/* Handle disabled state more cleanly */
+/* Handle disabled state */
 input:disabled {
   cursor: not-allowed;
   opacity: 0.6;
@@ -107,5 +120,16 @@ input:disabled {
 
 input:disabled + label {
   opacity: 0.6;
+}
+
+/* Placeholder handling */
+input::placeholder {
+  color: transparent;
+}
+
+/* Autofill styles */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px white inset;
+  -webkit-text-fill-color: black;
 }
 </style>

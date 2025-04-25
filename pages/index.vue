@@ -1,95 +1,57 @@
 <template>
   <div class="w-full text-black">
     <!-- Hero Section with Logo Focus - Now with white design -->
-    <section class="w-full min-h-[500px] md:h-[56.25vw] relative flex items-center justify-center bg-white overflow-hidden" style="max-height: 100vh;">
-      <!-- Subtle background pattern -->
-      <div class="absolute inset-0 bg-gray-50 opacity-30 pattern-grid-lg"></div>
-      
-      <div class="relative max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-0 z-10 flex flex-col md:flex-row items-center gap-8">
-        <!-- Text Content -->
-        <div class="text-center md:text-left text-black space-y-4 md:space-y-6 md:w-1/2">
-          <span class="text-base md:text-lg font-medium tracking-wide text-gray-500">LA SOLUTION DE MENU DIGITAL</span>
-          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-gray-900">
-            Votre menu,<br />en un <span class="bg-black text-white px-2">scan</span>.
-          </h1>
-          <p class="text-lg md:text-xl lg:text-2xl font-light text-gray-600">
-            Créez votre menu QR code personnalisé et offrez une expérience moderne à vos clients. Simple, rapide et efficace.
-          </p>
-          <div class="flex flex-col sm:flex-row items-center sm:items-start justify-center md:justify-start gap-4 sm:gap-6 pt-6 md:pt-8">
-            <NuxtLink 
-              to="/auth/register"
-              class="w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-4 bg-black text-white rounded-full text-lg sm:text-xl font-medium hover:opacity-90 transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center"
-            >
-              <span>Commencer maintenant</span>
-              <ArrowRight class="w-5 h-5 ml-2" />
-            </NuxtLink>
-            <a 
-              href="#demo"
-              class="w-full sm:w-auto px-6 sm:px-8 py-3 text-gray-800 rounded-full text-lg font-medium hover:text-black hover:underline flex items-center justify-center"
-            >
-              <Play class="w-5 h-5 mr-2" />
-              <span>Voir la démo</span>
-            </a>
-          </div>
-        </div>
-        
-        <!-- Logo Visualization -->
-        <div class="md:w-1/2 flex justify-center items-center mt-12 md:mt-0">
-          <div class="relative">
-            <!-- Company Logo in Apple-style presentation -->
-            <div class="w-48 h-48 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 bg-gray-100 rounded-3xl shadow-xl flex items-center justify-center overflow-hidden">
-              <!-- Replace with your actual logo -->
-              <img src="~/assets/icon/logo.png" alt="Restaurant logo" class="w-full h-full object-cover" />
-            </div>
-            
-            <!-- Phone Outline showing QR scanning - more Apple-like -->
-            <div class="absolute -bottom-12 sm:-bottom-16 -right-12 sm:-right-16 w-32 sm:w-40 h-48 sm:h-64 border-2 border-gray-200 rounded-3xl transform -rotate-12 flex items-center justify-center bg-white/80 backdrop-blur-sm shadow-lg">
-              <div class="w-24 sm:w-32 h-40 sm:h-56 bg-gray-50 rounded-2xl border border-gray-100">
-                <div class="w-full h-full flex items-center justify-center">
-                  <QrCode class="w-12 sm:w-16 h-12 sm:h-16 text-gray-800 opacity-90" />
-                </div>
-              </div>
-            </div>
-            
-            <!-- Floating element to add visual interest -->
-            <div class="absolute -top-8 sm:-top-12 -left-8 sm:-left-12 w-16 sm:w-24 h-16 sm:h-24 bg-black rounded-full flex items-center justify-center shadow-lg">
-              <QrCode class="w-8 sm:w-10 h-8 sm:h-10 text-white" />
-            </div>
+    <!-- Hero Section -->
+<section class="w-full min-h-[500px] md:h-[56.25vw] relative flex items-center justify-center bg-white overflow-hidden" style="max-height: 100vh;">
+  <!-- Subtle background pattern -->
+  <div class="absolute inset-0 bg-gray-50 opacity-30 pattern-grid-lg"></div>
+  
+  <div class="relative w-full max-w-6xl mx-auto px-0 md:px-6 py-0 md:py-12 z-10">
+    <!-- Réorganisation du contenu pour mobile -->
+    <div class="flex flex-col md:flex-row items-center gap-0 md:gap-8">
+      <!-- Image en premier sur mobile -->
+      <div class="w-full md:w-1/2 order-1 md:order-2 mb-8 md:mb-0">
+        <div class="relative">
+          <div class="w-full h-[60vh] md:w-[500px] md:h-[500px] bg-gray-100 md:rounded-3xl shadow-xl- flex items-center justify-center overflow-hidden">
+            <img 
+              src="~/assets/images/flyer1.png" 
+              alt="Restaurant logo" 
+              class="w-full h-full object-cover object-center"
+            />
           </div>
         </div>
       </div>
       
-      <!-- Impactful CTA Bar -->
-      <div class="absolute bottom-0 left-0 right-0 bg-black py-4">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between">
-          <div class="flex flex-wrap justify-center md:justify-start items-center gap-4 sm:gap-8 mb-4 md:mb-0">
-            <div class="flex items-center gap-2">
-              <Users class="w-5 sm:w-6 h-5 sm:h-6 text-white" />
-              <span class="text-base sm:text-lg text-white/90">+2000 Restaurants</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <Star class="w-5 sm:w-6 h-5 sm:h-6 text-white" />
-              <span class="text-base sm:text-lg text-white/90">4.9/5 Satisfaction</span>
-            </div>
-          </div>
+      <!-- Texte en dessous sur mobile -->
+      <div class="w-full md:w-1/2 order-2 md:order-1 px-4 md:px-0 text-center md:text-left">
+        <span class="text-base md:text-lg font-medium tracking-wide text-gray-500">LA SOLUTION DE MENU DIGITAL</span>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-gray-900 mt-4">
+          Votre menu,<br />en un <span class="bg-kula-500 text-white px-2">scan</span>.
+        </h1>
+        <p class="text-lg md:text-xl lg:text-2xl font-light text-gray-600 mt-6">
+          Créez votre menu QR code personnalisé et offrez une expérience moderne à vos clients. Simple, rapide et efficace.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center sm:items-start justify-center md:justify-start gap-4 sm:gap-6 pt-8">
           <NuxtLink 
             to="/auth/register"
-            class="w-full md:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-white text-black rounded-full text-base sm:text-lg font-medium hover:bg-gray-100 transition-colors inline-flex items-center justify-center"
+            class="w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-4 bg-black text-white rounded-full text-lg sm:text-xl font-medium hover:opacity-90 transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center"
           >
-            <span>Essai gratuit 14 jours</span>
-            <ArrowRight class="w-4 sm:w-5 h-4 sm:h-5 ml-2" />
+            <span>Commencer maintenant</span>
+            <ArrowRight class="w-5 h-5 ml-2" />
           </NuxtLink>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
     <!-- Features Section - Apple-inspired design -->
-    <section class="w-full py-24 md:py-32 bg-white text-black overflow-hidden">
+    <section class="w-full py-24 md:py-16 bg-white text-black overflow-hidden">
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <!-- Apple-style section header -->
         <div class="text-center mb-16 md:mb-24">
           <span class="text-sm font-semibold tracking-widest text-gray-500 uppercase">Fonctionnalités</span>
-          <h2 class="mt-4 text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-gray-900">
+          <h2 class="mt-4 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900">
             Menu QR Code.
             <span class="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-500">Simplifié.</span>
           </h2>
@@ -129,9 +91,9 @@
             <!-- Apple-style product display with shadow effect -->
             <div class="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-100 rounded-3xl transform rotate-6 scale-95"></div>
             <img 
-              src="https://images.unsplash.com/photo-1533777857889-4be7c70b33f7"
+              src="~/assets/images/scan.png"
               alt="QR Code Demo"
-              class="relative w-full h-full object-cover rounded-3xl shadow-2xl transform -rotate-3"
+              class="relative w-full h-full object--cover rounded-3xl shadow-2xl- -transform -rotate-3"
             />
           </div>
         </div>
@@ -273,26 +235,27 @@
       </div>
     </section>
 
-    <!-- CTA Section - Apple-style with strong contrast -->
-    <section class="w-full py-32 md:py-40 bg-black text-white">
+    <!-- CTA Section - Clean Apple-style design -->
+    <section class="w-full py-32 md:py-40 bg-white text-black">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        <h2 class="text-5xl sm:text-6xl md:text-7xl font-bold leading-tight mb-8">
+        <span class="text-sm font-semibold tracking-widest text-gray-500 uppercase mb-8 block">Commencez maintenant</span>
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-gray-900 mb-6">
           Prêt à transformer <br/>votre expérience client ?
         </h2>
-        <p class="text-xl md:text-2xl text-gray-400 mb-12 max-w-3xl mx-auto">
-          Rejoignez les milliers de restaurants qui ont déjà adopté KulaQr pour digitaliser leur menu
+        <p class="text-lg md:text-xl text-gray-500 mb-12 max-w-2xl mx-auto">
+          Rejoignez les milliers de restaurants qui ont déjà adopté KulaQr pour digitaliser leur menu et améliorer leur service
         </p>
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
           <NuxtLink 
             to="/auth/register"
-            class="w-full sm:w-auto px-10 py-5 bg-white text-black rounded-full text-xl font-medium hover:scale-105 transition-transform flex items-center justify-center"
+            class="w-full sm:w-auto px-8 py-4 bg-black text-white rounded-full text-lg font-medium hover:opacity-90 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] flex items-center justify-center"
           >
             <span>Commencer gratuitement</span>
             <ArrowRight class="w-5 h-5 ml-2" />
           </NuxtLink>
           <a 
             href="#pricing"
-            class="w-full sm:w-auto px-8 py-5 bg-transparent border border-white/30 text-white rounded-full text-lg font-medium hover:bg-white/10 transition-colors"
+            class="w-full sm:w-auto px-8 py-4 bg-gray-100 text-gray-900 rounded-full text-lg font-medium hover:bg-gray-200 transition-all"
           >
             Découvrir nos tarifs
           </a>
@@ -300,105 +263,65 @@
       </div>
     </section>
     
-    <!-- Footer Section - Apple-style modern footer -->
-    <footer class="w-full bg-white pt-20 pb-8 border-t border-gray-100">
+    <!-- Footer - Minimal Apple-style design -->
+    <footer class="w-full bg-white py-12 md:py-16 border-t border-gray-100">
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <!-- Footer Main Content -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16 mb-20">
+        <!-- Main Footer Content -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <!-- Brand Column -->
-          <div class="space-y-6">
-            <div class="flex items-center">
-              <!-- Logo placeholder -->
-              <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center mr-3">
-                <span class="text-white text-xl font-bold">KQ</span>
+          <div class="col-span-2 md:col-span-1">
+            <div class="flex items-center mb-6">
+              <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center mr-3">
+                <span class="text-white text-sm font-medium">KQ</span>
               </div>
-              <span class="text-black text-xl font-semibold">KulaQr</span>
+              <span class="text-black text-lg font-medium">KulaQr</span>
             </div>
-            <p class="text-gray-500 text-base leading-relaxed">
-              La solution intelligente de menu QR code qui transforme l'expérience client dans votre établissement.
+            <p class="text-gray-500 text-sm leading-relaxed">
+              La solution intelligente de menu QR code qui transforme l'expérience client.
             </p>
-            <div class="flex space-x-4">
-              <!-- Social Media Icons - Apple style -->
-              <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                <span class="text-gray-700 text-sm">FB</span>
-              </a>
-              <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                <span class="text-gray-700 text-sm">IG</span>
-              </a>
-              <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                <span class="text-gray-700 text-sm">TW</span>
-              </a>
-              <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                <span class="text-gray-700 text-sm">IN</span>
-              </a>
-            </div>
           </div>
           
-          <!-- Navigation Columns - Apple style clean footer links -->
-          <div class="space-y-6">
-            <h3 class="text-black text-lg font-semibold">Produit</h3>
-            <ul class="space-y-4">
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Fonctionnalités</a></li>
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Tarifs</a></li>
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Témoignages</a></li>
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Guide d'utilisateur</a></li>
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Nouveautés</a></li>
+         
+          
+          <!-- Company -->
+          <div>
+            <h3 class="text-sm font-medium text-gray-900 mb-4">Entreprise</h3>
+            <ul class="space-y-3">
+              <li><a href="/about" class="text-sm text-gray-500 hover:text-black transition-colors">À propos</a></li>
+              <li><a href="/contact" class="text-sm text-gray-500 hover:text-black transition-colors">Contact</a></li>
             </ul>
           </div>
           
-          <div class="space-y-6">
-            <h3 class="text-black text-lg font-semibold">Ressources</h3>
-            <ul class="space-y-4">
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Blog</a></li>
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Documentation</a></li>
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Centre d'aide</a></li>
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Développeurs</a></li>
-              <li><a href="#" class="text-gray-500 hover:text-black transition-colors">Partenaires</a></li>
+          <!-- Contact -->
+          <div>
+            <h3 class="text-sm font-medium text-gray-900 mb-4">Contact</h3>
+            <ul class="space-y-3">
+              <li class="text-sm text-gray-500">hello@kulaqr.com</li>
+              <li class="text-sm text-gray-500">+221 77 749 39 10</li>
+              <li class="text-sm text-gray-500">Dakar, Senegal</li>
             </ul>
-          </div>
-          
-          <div class="space-y-6">
-            <h3 class="text-black text-lg font-semibold">Contact</h3>
-            <ul class="space-y-4">
-              <li class="flex items-center">
-                <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                  <span class="text-gray-700 text-xs">@</span>
-                </div>
-                <span class="text-gray-500">hello@kulaqr.com</span>
-              </li>
-              <li class="flex items-center">
-                <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                  <span class="text-gray-700 text-xs">T</span>
-                </div>
-                <span class="text-gray-500">+33 1 23 45 67 89</span>
-              </li>
-              <li class="flex items-center">
-                <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                  <span class="text-gray-700 text-xs">P</span>
-                </div>
-                <span class="text-gray-500">14 Rue de la Paix, 75002 Paris</span>
-              </li>
-            </ul>
-            <NuxtLink 
-              to="/contact"
-              class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
-            >
-              Nous contacter
-              <ArrowRight class="w-4 h-4 ml-2" />
-            </NuxtLink>
           </div>
         </div>
         
-        <!-- Footer Bottom - Apple style clean legal links -->
-        <div class="border-t border-gray-100 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <div class="text-gray-400 mb-4 sm:mb-0 text-sm">
-            © 2025 KulaQr. Tous droits réservés.
+        <!-- Footer Bottom -->
+        <div class="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div class="flex items-center gap-6">
+            <a href="#" class="text-gray-400 hover:text-black">
+              <Twitter class="w-5 h-5" />
+            </a>
+            <a href="#" class="text-gray-400 hover:text-black">
+              <Instagram class="w-5 h-5" />
+            </a>
+            <a href="#" class="text-gray-400 hover:text-black">
+              <Linkedin class="w-5 h-5" />
+            </a>
           </div>
-          <div class="flex flex-wrap justify-center gap-6 text-sm">
-            <NuxtLink to="/legal#mentions-legales" class="text-gray-400 hover:text-black transition-colors">Mentions légales</NuxtLink>
-            <NuxtLink to="/legal#cgu" class="text-gray-400 hover:text-black transition-colors">Conditions d'utilisation</NuxtLink>
-            <NuxtLink to="/legal#privacy" class="text-gray-400 hover:text-black transition-colors">Politique de confidentialité</NuxtLink>
-            <NuxtLink to="/legal#cookies" class="text-gray-400 hover:text-black transition-colors">Gestion des cookies</NuxtLink>
+          
+          <div class="flex flex-wrap justify-center gap-6">
+            <a href="/legal/mentions-legales" class="text-xs text-gray-500 hover:text-black">Mentions légales</a>
+            <a href="/legal/privacy" class="text-xs text-gray-500 hover:text-black">Confidentialité</a>
+            <a href="/legal/terms" class="text-xs text-gray-500 hover:text-black">CGU</a>
+            <span class="text-xs text-gray-500">© 2024 KulaQr</span>
           </div>
         </div>
       </div>
@@ -419,7 +342,10 @@ import {
   Check,
   Star,
   Building2,
-  UtensilsCrossed
+  UtensilsCrossed,
+  Twitter,
+  Instagram,
+  Linkedin
 } from 'lucide-vue-next'
 
 const navItems = [
@@ -468,8 +394,8 @@ body {
 
 /* Add subtle pattern background for hero section */
 .pattern-grid-lg {
-  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                   linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-image: linear-gradient(to right, rgba(233, 16, 16, 0.05) 1px, transparent 1px),
+                   linear-gradient(to bottom, rgba(223, 28, 28, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 </style>
