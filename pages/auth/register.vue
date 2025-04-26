@@ -1,16 +1,16 @@
 <template>
   <div class="min-h-screen bg-[#FBsFBFD]">
     <!-- Logo -->
-    <div class="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 z-50">
+    <!-- <div class="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 z-50">
       <div class="max-w-xl mx-auto px-4 h-full flex items-center">
         <NuxtLink to="/" class="flex items-center space-x-2">
-          <img src="~/assets/icon/logo.png" alt="Logo" class="h-8 w-auto" />
+          <img src="~/assets/icon/logo.png" alt="Logo" class="h-[50px] w-auto" />
         </NuxtLink>
       </div>
-    </div>
+    </div> -->
 
     <!-- Main Content -->
-    <div class="pt-32 pb-16 px-4">
+    <div class="lg:pt-32 pt-20 pb-16 px-4">
       <div class="max-w-md mx-auto">
         <!-- Progress Steps -->
         <div class="flex items-center justify-between mb-12">
@@ -237,6 +237,39 @@
         <div class="mt-16 grid grid-cols-3 gap-6 text-center">
           <!-- ... Trust signals content ... -->
         </div>
+
+        <!-- Add after the form -->
+        <div class="mt-8 text-center space-y-4">
+          <div class="h-px w-full bg-gray-100"></div>
+          
+          <p class="text-gray-500">
+            Vous avez déjà un compte ?
+            <NuxtLink 
+              to="/auth/login" 
+              class="text-black font-medium hover:opacity-80 transition-opacity"
+            >
+              Se connecter
+            </NuxtLink>
+          </p>
+
+          <!-- Terms and Privacy -->
+          <p class="text-xs text-gray-400 max-w-md mx-auto">
+            En continuant, vous acceptez nos 
+            <NuxtLink to="/terms" class="underline hover:text-gray-600">Conditions d'utilisation</NuxtLink> 
+            et notre 
+            <NuxtLink to="/privacy" class="underline hover:text-gray-600">Politique de confidentialité</NuxtLink>
+          </p>
+        </div>
+
+        <!-- Language Selector -->
+        <div class="fixed bottom-4 right-4">
+          <select 
+            class="h-8 pl-2 pr-8 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-gray-300"
+          >
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -459,5 +492,24 @@ definePageMeta({
 }
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+/* Add smooth transitions */
+.transition-opacity {
+  transition: opacity 0.2s ease;
+}
+
+/* Improve link hover states */
+a:hover {
+  opacity: 0.8;
+}
+
+/* Style select dropdown */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1em;
 }
 </style>

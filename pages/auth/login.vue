@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-screen bg-white items- center ju stify-center">
     <!-- Main Content -->
-    <div class="max-w-md mx-auto px-6 pt-20 pb-16 flex flex-col min-h-screen">
+    <div class="max-w-md mx-auto items-cen ter jus tify-center px-6 pt-24 pb-16 flex flex-col min-h-screen">
       <!-- Logo centered at top -->
-      <div class="mb-10 text-center">
+      <!-- <div class="mb-10 text-center">
         <img src="~/assets/icon/logo.png" alt="Logo" class="h-12 mx-auto" />
-      </div>
+      </div> -->
 
       <!-- Titre principal -->
       <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">
-        Connectez-vous à KulaQr
+       Se connecter à KulaQr
       </h1>
 
       <!-- Alert de succès -->

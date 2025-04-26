@@ -1,9 +1,9 @@
 <template>
   <div class="twitter-input-wrapper relative font-twitter">
     <div 
-      class="relative border rounded-[25px] bg-white transition-colors duration-200
-      border-gray-200 hover:border-gray-300 focus-within:border-twitter-blue"
-      :class="{ 'twitter-focus-ring': isFocused }"
+    class="relative border rounded-[25px] bg-white transition-colors duration-200
+    border-gray-200 hover:border-gray-300 focus-within:border-twitter-blue"
+    :class="{ 'twitter-focus-ring': isFocused }"
     >
       <input
         :id="id"
@@ -14,7 +14,8 @@
         :type="type"
         :required="required"
         :disabled="disabled"
-        class="peer w-full pt-6 pb-2 px-5 bg-transparent text-black text-base focus:outline-none focus:border-blue-500"
+        
+        class="peer w-full pt-6 pb-2 px-5 bg-transparent text-black text-base focus:outline-none -focus:border-blue-500"
         :placeholder="' '"
       />
       <label

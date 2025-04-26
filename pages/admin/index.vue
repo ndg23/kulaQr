@@ -7,7 +7,7 @@
       </div>
   
       <!-- Stats Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 mb-8">
         <div v-for="stat in stats" :key="stat.name" 
           class="bg-white p-6 rounded-3xl border border-gray-100 transition-all hover:scale-[1.02]"
         >
@@ -100,7 +100,8 @@
   
   <script setup lang="ts">
   import {
-    Store, ShoppingBag, Star, Users, CreditCard
+    Store, ShoppingBag, Star, Users, CreditCard,
+    QrCode, Scan, Table
   } from 'lucide-vue-next'
   import { useSupabaseWrapper } from '~/composables/useSupabase'
   import { useCustomToast } from '~/composables/useToast'
@@ -114,7 +115,10 @@
     restaurants: 0,
     users: 0,
     orders: 0,
-    revenue: 0
+    revenue: 0,
+    totalScans: 0,
+    scansToday: 0,
+    activeTables: 0
   })
   
   // Recent orders
@@ -128,45 +132,50 @@
     try {
       loading.value = true
   
-      // Load counts with error handling
-      try {
-        const [
-          restaurantsResponse,
-          usersResponse
-        ] = await Promise.all([
-          // Count restaurants
-          supabase
-            .from('establishments')
-            .select('id', { count: 'exact', head: true }),
-          
-          // Count users
-          supabase
-            .from('users')
-            .select('id', { count: 'exact', head: true })
-        ])
+      const [
+        restaurantsResponse,
+        usersResponse,
+        qrResponse,
+        tablesResponse
+      ] = await Promise.all([
+        // Count restaurants
+        supabase
+          .from('establishments')
+          .select('id', { count: 'exact', head: true }),
+        
+        // Count users
+        supabase
+          .from('users')
+          .select('id', { count: 'exact', head: true }),
+        
+        // QR stats
+        supabase
+          .from('qr_scans')
+          .select('id', 'created_at'),
+        
+        // Count active tables
+        supabase
+          .from('qr_codes')
+          .select('id', { count: 'exact', head: true })
+      ])
   
-        // Update dashboard data
-        dashboardData.value = {
-          ...dashboardData.value,
-          restaurants: restaurantsResponse.count || 0,
-          users: usersResponse.count || 0
-        }
-      } catch (err) {
-        console.error('Error loading basic counts:', err)
+      // Update dashboard data
+      dashboardData.value = {
+        ...dashboardData.value,
+        restaurants: restaurantsResponse.count || 0,
+        users: usersResponse.count || 0,
+        totalScans: qrResponse.data?.length || 0,
+        scansToday: qrResponse.data?.filter(scan => 
+          new Date(scan.created_at) > new Date(Date.now() - 24*60*60*1000)
+        ).length || 0,
+        activeTables: tablesResponse.count || 0
       }
   
-      // Try to load order stats
-      try {
-        const { data: orderStats, error: orderError } = await supabase
-          .rpc('get_order_stats')
-        
-        if (!orderError && orderStats) {
-          dashboardData.value.orders = orderStats.total_orders || 0
-          dashboardData.value.revenue = orderStats.total_revenue || 0
-        }
-      } catch (err) {
-        console.error('Error loading order stats:', err)
-        // Non-critical error, we can continue
+      // Load order stats
+      const { data: orderStats } = await supabase.rpc('get_order_stats')
+      if (orderStats) {
+        dashboardData.value.orders = orderStats.total_orders || 0
+        dashboardData.value.revenue = orderStats.total_revenue || 0
       }
   
       // Load recent orders and popular restaurants
@@ -315,10 +324,24 @@
     },
     {
       name: 'Revenu',
-      value: formatNumber(dashboardData.value.revenue),
+      value: formatCurrency(dashboardData.value.revenue),
       icon: CreditCard,
       iconBg: 'bg-orange-50',
       iconColor: 'text-orange-500'
+    },
+    {
+      name: 'Scans QR',
+      value: `${formatNumber(dashboardData.value.totalScans)} (+${dashboardData.value.scansToday})`,
+      icon: QrCode,
+      iconBg: 'bg-indigo-50',
+      iconColor: 'text-indigo-500'
+    },
+    {
+      name: 'Tables actives',
+      value: formatNumber(dashboardData.value.activeTables),
+      icon: Table,
+      iconBg: 'bg-pink-50',
+      iconColor: 'text-pink-500'
     }
   ])
   
@@ -328,8 +351,7 @@
       return `${(num / 1000000).toFixed(1)}M`
     }
     if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}k`
-    }
+      return `${(num / 1000).toFixed(1)}k`    }
     return num.toString()
   }
   

@@ -2,9 +2,38 @@
     <div class="font-sans bg-white min-h-screen max-w-lg mx-auto pb-24">
       <ErrorMessage v-if="error" :message="error" />
       
-      <div v-if="loading" class="flex flex-col items-center justify-center h-screen">
-        <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-gray-600">Chargement du menu...</p>
+      <div v-if="loading" class="min-h-screen flex items-center justify-center bg-white">
+        <div class="space-y-4 text-center">
+          <Loader2 class="w-8 h-8 animate-spin mx-auto text-gray-400" />
+          <p class="text-gray-500">Chargement du menu...</p>
+        </div>
+      </div>
+      
+      <div v-else-if="!establishment" class="min-h-screen flex items-center justify-center bg-white px-4">
+        <div class="max-w-md w-full space-y-8 text-center">
+          <div class="w-20 h-20 mx-auto bg-gray-50 rounded-3xl flex items-center justify-center">
+            <Store class="w-10 h-10 text-gray-400" />
+          </div>
+          <div class="space-y-3">
+            <h1 class="text-2xl font-semibold text-gray-900">
+              Restaurant introuvable
+            </h1>
+            <p class="text-gray-500 text-lg">
+              Ce menu n'est plus disponible ou a été déplacé.
+            </p>
+          </div>
+          <div class="pt-4">
+            <NuxtLink 
+              to="/"
+              class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-2xl text-white bg-black hover:bg-gray-800 transition-colors"
+            >
+              Retourner à l'accueil
+            </NuxtLink>
+          </div>
+          <p class="text-sm text-gray-400 pt-4">
+            Si vous pensez qu'il s'agit d'une erreur, veuillez contacter le support.
+          </p>
+        </div>
       </div>
       
       <template v-else>
@@ -66,7 +95,7 @@
   
   <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
-  import { UtensilsCrossed } from 'lucide-vue-next'
+  import { UtensilsCrossed, Store, Loader2 } from 'lucide-vue-next'
   import type { CartItem, OrderData, Product } from '~/types'
   import RestaurantHeader from '~/components/RestaurantHeader.vue'
   import CategoryButton from '~/components/CategoryButton.vue'
@@ -271,5 +300,18 @@
     to {
       transform: rotate(360deg);
     }
+  }
+  
+  .min-h-screen {
+    min-height: 100vh;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .space-y-8 {
+    animation: fadeIn 0.3s ease-out;
   }
   </style> 

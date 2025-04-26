@@ -20,13 +20,13 @@
         <form @submit.prevent="login" class="space-y-6">
           <!-- Username Input -->
           <div>
-            <input
+            <FormInput
               id="username"
               v-model="username"
               type="text"
               required
-              class="block w-full px-4 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-gray-900"
-              placeholder="Identifiant"
+              label="Identifiant"
+           
             />
           </div>
 
@@ -77,7 +77,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
 import { useRouter } from 'vue-router'
-
+import FormInput from '~/components/ui/FormInput.vue'
 const { client: supabase } = useSupabaseWrapper()
 const { showToast } = useCustomToast()
 const router = useRouter()

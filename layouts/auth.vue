@@ -1,19 +1,24 @@
 <template>
   <div class="min-h-screen bg-white">
     <!-- Back Button -->
-    <div class="fixed top-2 left-8">
-      <NuxtLink 
+    <div class="fixed top-0 w-full space-x-2- border-b border-gray-200 z-50 bg-white">
+      <div class="flex items-center space-x-2 max-w-5xl mx-auto left-8 flex justify-between items-center">
+        <NuxtLink 
         to="/" 
         class="inline-flex items-center text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-full p-2 transition-colors"
       >
         <ArrowLeft class="w-5 h-5 mr-2" />
-        <span class="text-lg font-medium">Retour</span>
+        <!-- <span class="text-lg font-medium">Retour</span> -->
       </NuxtLink>
+     
+        <NuxtLink to="/" class="flex items-center space-x-2">
+          <img src="~/assets/icon/logo.png" alt="Logo" class="h-[50px] w-auto" />
+        </NuxtLink>
+      </div>
     </div>
-
     <!-- Main Content -->
     <div class="min-h-screen flex items-center justify-center px-6">
-      <div class="w-full max-w-[700px]">
+      <div class="w-full max-w-5xl">
         <!-- Logo -->
         <!-- <div class="mb-16 text-center">
           <NuxtLink to="/" class="inline-flex items-center space-x-3">

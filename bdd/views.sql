@@ -20,23 +20,34 @@ WITH base_stats AS (
     COUNT(DISTINCT u.id) as total_users,
     COUNT(DISTINCT u.id) FILTER (WHERE u.created_at >= NOW() - INTERVAL '30 days') as new_users_30d,
     COUNT(DISTINCT u.id) FILTER (WHERE u.last_login >= NOW() - INTERVAL '7 days') as active_users_7d,
+    COUNT(DISTINCT u.id) FILTER (WHERE u.subscription_tier != 'free') as paying_users,
     
-    -- Statistiques des produits
+    -- Statistiques des commandes
+    COUNT(DISTINCT o.id) as total_orders,
+    COUNT(DISTINCT o.id) FILTER (WHERE o.created_at >= NOW() - INTERVAL '24 hours') as orders_24h,
+    COALESCE(SUM(o.total_amount), 0) as total_revenue,
+    COALESCE(AVG(o.total_amount), 0) as avg_order_value,
+    
+    -- Statistiques des produits et catégories
     COUNT(DISTINCT p.id) as total_products,
-    AVG(p.price) as avg_product_price,
-    
-    -- Statistiques des catégories
     COUNT(DISTINCT c.id) as total_categories,
+    AVG(p.price) as avg_product_price,
     
     -- Statistiques des scans QR
     COUNT(qs.id) as total_qr_scans,
-    COUNT(qs.id) FILTER (WHERE qs.created_at >= NOW() - INTERVAL '24 hours') as qr_scans_24h
+    COUNT(qs.id) FILTER (WHERE qs.created_at >= NOW() - INTERVAL '24 hours') as qr_scans_24h,
+    
+    -- Statistiques du staff
+    COUNT(DISTINCT s.id) as total_staff_members,
+    COUNT(DISTINCT s.id) FILTER (WHERE s.last_login >= NOW() - INTERVAL '24 hours') as active_staff_24h
     
   FROM establishments e
   LEFT JOIN users u ON e.user_id = u.id
-  LEFT JOIN products p ON p.category_id = c.id
   LEFT JOIN categories c ON c.establishment_id = e.id
+  LEFT JOIN products p ON p.category_id = c.id
   LEFT JOIN qr_scans qs ON qs.establishment_id = e.id
+  LEFT JOIN staff s ON s.establishment_id = e.id
+  LEFT JOIN orders o ON o.establishment_id = e.id
 )
 SELECT * FROM base_stats;
 
@@ -152,10 +163,84 @@ SELECT
   e.id,
   e.name,
   e.description,
+  e.image_url,
+  e.type_id,
+  et.name as establishment_type,
+  COUNT(DISTINCT o.id) as order_count,
   COUNT(qs.id) as scan_count,
-  COUNT(DISTINCT qs.created_at::date) as unique_days_scanned
+  COUNT(DISTINCT qs.created_at::date) as unique_days_scanned,
+  COALESCE(AVG(o.rating), 4.5) as avg_rating,
+  COUNT(DISTINCT p.id) as product_count,
+  COUNT(DISTINCT c.id) as category_count,
+  e.theme_settings,
+  e.analytics_enabled
 FROM establishments e
+LEFT JOIN establishment_types et ON e.type_id = et.id
 LEFT JOIN qr_scans qs ON qs.establishment_id = e.id
+LEFT JOIN orders o ON o.establishment_id = e.id
+LEFT JOIN categories c ON c.establishment_id = e.id
+LEFT JOIN products p ON p.establishment_id = e.id
 WHERE e.is_active = true
-GROUP BY e.id, e.name, e.description
-ORDER BY scan_count DESC; 
+GROUP BY e.id, e.name, e.description, e.image_url, e.type_id, et.name, e.theme_settings, e.analytics_enabled
+ORDER BY order_count DESC, scan_count DESC;
+
+------------------------------------------
+-- Vue pour l'activité du staff
+------------------------------------------
+CREATE OR REPLACE VIEW staff_activity AS
+SELECT 
+  sa.id,
+  sa.created_at,
+  s.username as staff_name,
+  s.role as staff_role,
+  e.name as establishment_name,
+  sa.action,
+  sa.details,
+  sa.ip_address,
+  sa.user_agent
+FROM staff_activity_logs sa
+JOIN staff s ON sa.staff_id = s.id
+JOIN establishments e ON sa.establishment_id = e.id
+ORDER BY sa.created_at DESC;
+
+------------------------------------------
+-- Vue pour les statistiques des commandes
+------------------------------------------
+CREATE OR REPLACE VIEW order_statistics AS
+SELECT
+  e.id as establishment_id,
+  e.name as establishment_name,
+  COUNT(o.id) as total_orders,
+  COUNT(o.id) FILTER (WHERE o.status = 'delivered') as completed_orders,
+  COUNT(o.id) FILTER (WHERE o.status = 'cancelled') as cancelled_orders,
+  COALESCE(AVG(o.rating), 0) as avg_rating,
+  COALESCE(SUM(o.total_amount), 0) as total_revenue,
+  COALESCE(AVG(o.total_amount), 0) as avg_order_value,
+  COUNT(DISTINCT o.table_number) as tables_served,
+  COUNT(o.id) FILTER (WHERE o.created_at >= NOW() - INTERVAL '24 hours') as orders_last_24h
+FROM establishments e
+LEFT JOIN orders o ON o.establishment_id = e.id
+GROUP BY e.id, e.name;
+
+------------------------------------------
+-- Vue pour le suivi des QR codes
+------------------------------------------
+CREATE OR REPLACE VIEW qr_code_analytics AS
+SELECT
+  qc.id as qr_code_id,
+  e.name as establishment_name,
+  qc.table_number,
+  COUNT(qs.id) as total_scans,
+  COUNT(DISTINCT qs.created_at::date) as unique_days,
+  COUNT(qs.id) FILTER (WHERE qs.created_at >= NOW() - INTERVAL '24 hours') as scans_last_24h,
+  MAX(qs.created_at) as last_scan_at
+FROM qr_codes qc
+JOIN establishments e ON qc.establishment_id = e.id
+LEFT JOIN qr_scans qs ON qs.establishment_id = e.id
+GROUP BY qc.id, e.name, qc.table_number;
+
+-- Index pour améliorer les performances
+CREATE INDEX IF NOT EXISTS idx_qr_scans_establishment_id ON qr_scans(establishment_id);
+CREATE INDEX IF NOT EXISTS idx_qr_scans_created_at ON qr_scans(created_at);
+CREATE INDEX IF NOT EXISTS idx_orders_establishment_id ON orders(establishment_id);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at); 
