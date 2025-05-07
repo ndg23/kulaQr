@@ -232,3 +232,15 @@ CREATE POLICY "Administrators can view all QR scans"
       SELECT id FROM users WHERE role = 'admin'
     )
   ); 
+
+  -- Autoriser les insertions anonymes dans la table orders
+CREATE POLICY "Allow anonymous order creation" 
+ON public.orders FOR INSERT 
+TO anon
+WITH CHECK (true);
+
+-- Autoriser les insertions anonymes dans la table order_items
+CREATE POLICY "Allow anonymous order_item creation" 
+ON public.order_items FOR INSERT 
+TO anon
+WITH CHECK (true);

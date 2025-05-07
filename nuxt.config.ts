@@ -2,18 +2,18 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
-
+  ssr: false,
   modules: [
+    '@nuxt/ui',
     '@nuxtjs/tailwindcss',
     '@nuxtjs/supabase'
+   
+
   ],
-  routeRules: {
-    '/staff': { ssr: true },
-    '/staff/**': { ssr: true }
-  },
+
   app: {
     head: {
-      title: 'Menu QR Code Generator',
+      title: 'Kula Qr',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -27,9 +27,34 @@ export default defineNuxtConfig({
     key: process.env.SUPABASE_KEY,
     redirect: false
   },
-
+  googleSignIn: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    scope: 'email profile',
+    prompt: 'consent',
+    access_type: 'offline',
+    redirect_uri: 'http://localhost:3200/auth/callback'
+  },
   compatibilityDate: '2025-04-23',
-
+  tailwindcss: {
+    cssPath: '~/assets/css/main.css',
+    configPath: 'tailwind.config.js',
+    exposeConfig: false,
+    viewer: true,
+  },
+  postcss: {
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {},
+    },
+  },
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@heroicons/vue/24/outline',
+        '@headlessui/vue'
+      ]
+    }
+  },
   // Ajouter des redirections pour les anciennes URLs
   nitro: {
     routeRules: {

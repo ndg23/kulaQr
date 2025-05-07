@@ -60,7 +60,7 @@
 
           <!-- Email input with floating label -->
           <div class="relative">
-            <FormInput
+            <FloatLabelInput
               v-model="email"
               type="email"
               label="Adresse email"
@@ -71,7 +71,7 @@
 
           <!-- Password input with floating label -->
           <div class="relative">
-            <FormInput
+            <FloatLabelInput
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
               label="Mot de passe"
@@ -88,7 +88,7 @@
                   <EyeOff v-else class="w-5 h-5" />
                 </button>
               </template>
-            </FormInput>
+            </FloatLabelInput>
           </div>
 
           <!-- Remember me & Forgot password -->

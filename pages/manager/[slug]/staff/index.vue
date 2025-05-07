@@ -181,26 +181,23 @@
                 <form @submit.prevent="saveStaff" class="space-y-4">
                   <!-- Username -->
                   <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
-                      Nom d'utilisateur
-                    </label>
-                    <input
+                  
+                    <FloatLabelInput
                       id="username"
                       v-model="staffForm.username"
                       type="text"
                       required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-kula-500 focus:border-kula-500"
+                      label="Nom d'utilisateur"
                       placeholder="Ex: Jean D."
                     />
                   </div>
                   
                   <!-- Role -->
-                  <div>
-                    <label for="role" class="block text-sm font-medium text-gray-700 mb-1">
-                      Rôle
-                    </label>
-                    <select
+                  <!-- <div>
+                    
+                    <FloatLabelSelect
                       id="role"
+                      label="Rôle"
                       v-model="staffForm.role"
                       class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-kula-500 focus:border-kula-500"
                     >
@@ -208,8 +205,8 @@
                       <option value="staff">Personnel</option>
                       <option value="waiter">Serveur</option>
                       <option value="kitchen">Cuisine</option>
-                    </select>
-                  </div>
+                    </FloatLabelSelect>
+                  </div> -->
                   
                   <!-- Active Status -->
                   <div class="flex items-center">
@@ -368,7 +365,6 @@ const saveStaff = async () => {
         .from('staff')
         .update({
           username: staffForm.username,
-          role: staffForm.role,
           is_active: staffForm.is_active,
           updated_at: new Date().toISOString()
         })
@@ -382,7 +378,6 @@ const saveStaff = async () => {
         staffMembers.value[index] = {
           ...staffMembers.value[index],
           username: staffForm.username,
-          role: staffForm.role,
           is_active: staffForm.is_active,
           updated_at: new Date().toISOString()
         }
@@ -398,7 +393,7 @@ const saveStaff = async () => {
         .insert({
           username: staffForm.username,
           establishment_id: slug,
-          role: staffForm.role,
+          role:"staff",
           pin: staffForm.pin,
           is_active: staffForm.is_active
         })

@@ -1,171 +1,136 @@
 <template>
-  <div class="min-h-screen bg-[#F5F5F7] relative">
-    <!-- Pattern Background -->
-    <div class="absolute inset-0 pointer-events-none pattern-grid opacity-[0.03]"></div>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="~/assets/images/logo.png" alt="Logo" class="w-10 h-10" />
+      </div>
+      <nav class="nav-menu">
+        <NuxtLink to="/staff" class="nav-link active">
+          <ClipboardList class="w-6 h-6" />
+          <span>Commandes</span>
+        </NuxtLink>
+        <NuxtLink to="/staff/products" class="nav-link">
+          <Package class="w-6 h-6" />
+          <span>Produits</span>
+        </NuxtLink>
+        <NuxtLink to="/staff/stats" class="nav-link">
+          <BarChart2 class="w-6 h-6" />
+          <span>Statistiques</span>
+        </NuxtLink>
+        <button @click="logout" class="nav-link text-left">
+          <LogOut class="w-6 h-6" />
+          <span>Déconnexion</span>
+        </button>
+      </nav>
+    </aside>
 
-    <!-- Content -->
-    <div class="relative z-10">
-      <!-- En-tête avec effet glassmorphism -->
-      <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50">
-        <div class="max-w-6xl mx-auto px-6 py-5">
-          <div class="flex items-center justify-between">
-            <div>
-              <h1 class="text-2xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Commandes
-              </h1>
-              <div class="flex items-center gap-2 mt-1">
-                <div class="flex items-center gap-1.5 text-sm bg-green-50 text-green-600 px-2.5 py-1 rounded-full">
-                  <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                  <span class="font-medium">{{ filteredOrders.length }} commandes</span>
-                </div>
-                <span class="text-sm text-gray-500">{{ currentDateTime }}</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="relative">
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Rechercher une commande..."
-                  class="pl-10 pr-4 py-2.5 w-64 rounded-full bg-gray-900/5 border-none text-sm placeholder-gray-500 focus:ring-2 focus:ring-gray-900/10 focus:bg-white transition-all"
-                />
-                <Search class="w-4 h-4 text-gray-400 absolute left-4 top-3" />
-              </div>
-              <button 
-                @click="toggleFilters"
-                class="p-2.5 rounded-full hover:bg-gray-900/5 transition-colors"
-                :class="{ 'bg-gray-900/10 text-gray-900': showFilters }"
-              >
-                <Filter class="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="header">
+        <h1 class="text-xl font-bold">Gérer les Commandes</h1>
+        <div class="search-container">
+          <input 
+            v-model="searchQuery"
+            type="text"
+            placeholder="Rechercher une commande..."
+            class="search-input"
+          />
+          <Search class="search-icon w-4 h-4" />
         </div>
       </header>
 
-      <!-- Filtres avancés -->
-      <div 
-        v-if="showFilters"
-        class="border-b border-gray-200/50 bg-white/70 backdrop-blur-xl"
-      >
-        <div class="max-w-6xl mx-auto px-6 py-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-xs font-medium text-gray-500 mb-2">Statut</label>
-              <select 
-                v-model="statusFilter" 
-                class="w-full rounded-xl border-gray-200/50 text-sm focus:ring-gray-900/10 bg-white/50"
-              >
-                <option value="all">Tous les statuts</option>
-                <option value="pending">En attente</option>
-                <option value="preparing">En préparation</option>
-                <option value="ready">Prêtes</option>
-              </select>
-            </div>
-            <!-- Autres filtres similaires -->
-          </div>
-        </div>
+      <!-- Tabs -->
+      <div class="tabs">
+        <button 
+          v-for="status in ['Toutes', 'Nouvelles', 'En préparation', 'Prêtes']"
+          :key="status"
+          @click="activeFilter = status"
+          class="tab"
+          :class="{ 'active': activeFilter === status }"
+        >
+          {{ status }}
+          <span v-if="status !== 'Toutes'" class="tab-count">
+            {{ getFilterCount(status) }}
+          </span>
+        </button>
       </div>
 
-      <!-- Liste des commandes -->
-      <main class="max-w-3xl mx-auto px-6 py-8">
-        <TransitionGroup 
-          name="list" 
-          class="space-y-4"
-          tag="div"
-        >
+      <!-- Orders List -->
+      <div class="command-list">
+        <TransitionGroup name="list">
           <div 
             v-for="order in filteredOrders" 
             :key="order.id"
-            class="group bg-white rounded-2xl border border-gray-200/50 overflow-hidden hover:shadow-lg transition-all duration-300"
+            class="command-card"
           >
-            <!-- En-tête commande -->
-            <div class="p-5 flex items-center justify-between border-b border-gray-100">
-              <div class="flex items-center gap-4">
-                <div 
-                  class="w-12 h-12 rounded-2xl flex items-center justify-center"
-                  :class="getStatusColor(order.status).bg"
-                >
-                  <component 
-                    :is="getStatusIcon(order.status)" 
-                    class="w-6 h-6"
-                    :class="getStatusColor(order.status).text" 
-                  />
+            <div class="command-header">
+              <span class="command-id">#{{ order.orderNumber }}</span>
+              <span class="command-date">{{ formatTime(order.created_at) }}</span>
+            </div>
+            
+            <div class="command-info">
+              <div class="command-details">
+                <div class="flex items-center gap-2 text-secondary">
+                  <Coffee class="w-4 h-4" />
+                  Table {{ order.table }}
                 </div>
-                <div>
-                  <div class="flex items-center gap-3">
-                    <span class="text-xl font-bold text-gray-900">#{{ order.orderNumber }}</span>
-                    <span class="px-2.5 py-1 rounded-full text-xs font-medium"
-                      :class="getStatusColor(order.status).badge"
-                    >
-                      {{ translateStatus(order.status) }}
-                    </span>
-                  </div>
-                  <div class="mt-1 text-sm text-gray-500 flex items-center gap-2">
-                    <span>Table {{ order.table }}</span>
-                    <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                    <span>{{ formatTime(order.created_at) }}</span>
-                  </div>
+                <div class="command-items">
+                  {{ order.items.length }} article(s)
                 </div>
               </div>
-              <span class="text-lg font-bold text-gray-900">{{ formatPrice(order.total) }}</span>
+              <div class="command-amount">
+                {{ formatPrice(order.total) }}
+              </div>
             </div>
 
-            <!-- Articles -->
-            <div class="divide-y divide-gray-50">
+            <div class="command-items-list">
               <div 
                 v-for="item in order.items" 
                 :key="item.id"
-                class="p-4 flex items-center gap-4 group-hover:bg-gray-50/50 transition-colors"
+                class="command-item"
               >
-                <div class="bg-gray-100 w-10 h-10 rounded-xl flex items-center justify-center font-medium text-gray-900">
-                  {{ item.quantity }}
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium text-gray-900">{{ item.name }}</div>
-                  <div v-if="item.note" class="text-sm text-gray-500 mt-0.5">{{ item.note }}</div>
-                </div>
-                <span class="text-sm font-medium text-gray-900">
-                  {{ formatPrice(item.price * item.quantity) }}
-                </span>
+                <span class="item-quantity">{{ item.quantity }}×</span>
+                <span class="item-name">{{ item.name }}</span>
+                <span class="item-price">{{ formatPrice(item.price * item.quantity) }}</span>
               </div>
             </div>
 
-            <!-- Actions -->
-            <div class="p-4 bg-gray-50/50 flex justify-end gap-2">
-              <button 
-                v-if="order.status === 'pending'"
-                @click="updateOrderStatus(order.id, 'preparing')"
-                class="px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800 active:scale-95 transition-all flex items-center gap-2"
+            <div class="command-status">
+              <span 
+                class="status-badge"
+                :class="{
+                  'status-pending': order.status === 'pending',
+                  'status-preparing': order.status === 'preparing',
+                  'status-ready': order.status === 'ready'
+                }"
               >
-                <ChefHat class="w-4 h-4" />
-                Accepter
-              </button>
-              <button 
-                v-if="order.status === 'preparing'"
-                @click="updateOrderStatus(order.id, 'ready')"
-                class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 active:scale-95 transition-all flex items-center gap-2"
-              >
-                <Check class="w-4 h-4" />
-                Prête
-              </button>
+                {{ translateStatus(order.status) }}
+              </span>
+              
+              <div class="command-actions">
+                <button 
+                  v-if="order.status === 'pending'"
+                  @click="updateOrderStatus(order.id, 'preparing')"
+                  class="btn-action prepare"
+                >
+                  <ChefHat class="w-4 h-4" />
+                  Préparer
+                </button>
+                <button 
+                  v-if="order.status === 'preparing'"
+                  @click="updateOrderStatus(order.id, 'ready')"
+                  class="btn-action complete"
+                >
+                  <Check class="w-4 h-4" />
+                  Terminer
+                </button>
+              </div>
             </div>
           </div>
         </TransitionGroup>
-
-        <!-- État vide -->
-        <div 
-          v-if="filteredOrders.length === 0" 
-          class="text-center py-16 bg-white rounded-2xl border border-gray-200/50"
-        >
-          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center">
-            <ClipboardCheck class="w-10 h-10 text-gray-300" />
-          </div>
-          <h3 class="text-lg font-medium text-gray-900">Aucune commande</h3>
-          <p class="text-sm text-gray-500 mt-2">Les nouvelles commandes apparaîtront ici</p>
-        </div>
-      </main>
-    </div>
+      </div>
+    </main>
   </div>
 </template>
 
@@ -188,109 +153,54 @@ import {
   Clock,
   Wifi,
   Package,
-  BarChart2,
-  ShoppingCart,
-  Filter
+  BarChart2
 } from 'lucide-vue-next'
 import { useSupabaseClient } from '#imports'
 import { useCustomToast } from '~/composables/useToast'
-import type { Order, OrderItem, OrderStatus, StatusMessage } from '~/types'
 
 const supabase = useSupabaseClient()
 const router = useRouter()
 const { showToast } = useCustomToast()
 
-// State avec typage
-const orders = ref<Order[]>([])
+const orders = ref([])
 const activeFilter = ref('Toutes')
 const loading = ref(false)
-const latestActivity = ref<string | null>(null)
-const newOrderSound = ref<HTMLAudioElement | null>(null)
-const isOnline = ref(true)
+const newOrderSound = ref(null)
 const searchQuery = ref('')
-const connectionStatus = ref<'connected' | 'disconnected'>('connected')
-const showFilters = ref(false)
-const statusFilter = ref('all')
+const connectionStatus = ref('connected') // 'connected' or 'disconnected'
+const latestActivity = ref(null) // Latest activity message
 
-// Typage des fonctions
-const statusMessages: StatusMessage = {
-  accepted: 'acceptée',
-  rejected: 'refusée',
-  preparing: 'en préparation',
-  ready: 'prête',
-  completed: 'terminée'
-}
-
-const translateStatus = (status: OrderStatus): string => {
-  const translations: Record<OrderStatus, string> = {
-    'pending': 'Nouvelle',
-    'accepted': 'Acceptée',
-    'preparing': 'En préparation',
-    'ready': 'Prête',
-    'completed': 'Terminée',
-    'rejected': 'Refusée'
+// Status filters with icons
+const statusFilters = [
+  { 
+    label: 'Toutes', 
+    value: 'Toutes',
+    icon: ClipboardList,
+    colorClass: 'hover:bg-gray-50',
+    iconClass: 'text-gray-400'
+  },
+  { 
+    label: 'Nouvelles', 
+    value: 'Nouvelles',
+    icon: Bell,
+    colorClass: 'hover:bg-blue-50',
+    iconClass: 'text-blue-500'
+  },
+  { 
+    label: 'En préparation', 
+    value: 'En préparation',
+    icon: ChefHat,
+    colorClass: 'hover:bg-yellow-50',
+    iconClass: 'text-yellow-500'
+  },
+  { 
+    label: 'Prêtes', 
+    value: 'Prêtes',
+    icon: CheckCircle,
+    colorClass: 'hover:bg-green-50',
+    iconClass: 'text-green-500'
   }
-  return translations[status]
-}
-
-const getFilterCount = (filter: string): number => {
-  if (filter === 'Toutes') {
-    return orders.value.filter(order => 
-      ['pending', 'preparing', 'ready'].includes(order.status)
-    ).length
-  }
-  
-  return orders.value.filter(order => 
-    statusMap[filter]?.includes(order.status)
-  ).length
-}
-
-const formatTime = (dateString: string): string => {
-  const now = new Date()
-  const orderTime = new Date(dateString)
-  const diffMinutes = Math.floor((now.getTime() - orderTime.getTime()) / (1000 * 60))
-  
-  if (diffMinutes < 1) return 'À l\'instant'
-  if (diffMinutes === 1) return 'Il y a 1 min'
-  if (diffMinutes < 60) return `Il y a ${diffMinutes} min`
-  
-  const diffHours = Math.floor(diffMinutes / 60)
-  if (diffHours === 1) return 'Il y a 1h'
-  return `Il y a ${diffHours}h`
-}
-
-const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
-  try {
-    const { error } = await supabase
-      .from('orders')
-      .update({ 
-        status: newStatus,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-    
-    if (error) throw error
-
-    const orderNumber = orders.value.find(o => o.id === orderId)?.orderNumber
-    if (!orderNumber) return
-
-    const notificationMessage = `Commande #${orderNumber} ${statusMessages[newStatus]}`
-    showToast.success(notificationMessage, 'success')
-    setLatestActivity(notificationMessage)
-  } catch (err) {
-    console.error('Erreur mise à jour:', err)
-    showToast.error('Erreur', 'Impossible de mettre à jour la commande')
-  }
-}
-
-const setLatestActivity = (message: string): void => {
-  latestActivity.value = message
-  setTimeout(() => {
-    if (latestActivity.value === message) {
-      latestActivity.value = null
-    }
-  }, 10000)
-}
+]
 
 // Date et heure actuelle
 const currentDateTime = computed(() => {
@@ -303,7 +213,7 @@ const currentDateTime = computed(() => {
   })
 })
 
-const statusMap: Record<string, OrderStatus[]> = {
+const statusMap = {
   'Toutes': ['pending', 'accepted', 'preparing', 'ready'],
   'Nouvelles': ['pending'],
   'Acceptées': ['accepted'],
@@ -311,39 +221,104 @@ const statusMap: Record<string, OrderStatus[]> = {
   'Prêtes': ['ready']
 }
 
+// Translate status codes to French
+const translateStatus = (status) => {
+  const translations = {
+    'pending': 'Nouvelle',
+    'accepted': 'Acceptée',
+    'preparing': 'En préparation',
+    'ready': 'Prête',
+    'completed': 'Terminée',
+    'rejected': 'Refusée'
+  }
+  return translations[status] || status
+}
+
 // Filter orders by status and search query
 const filteredOrders = computed(() => {
-  let filtered = [...orders.value]
+  // First filter by status
+  let filtered = orders.value
   
-  // Filter by status
-  if (statusFilter.value !== 'all') {
-    filtered = filtered.filter((order: Order) => 
-      statusMap[statusFilter.value]?.includes(order.status)
+  if (activeFilter.value !== 'Toutes') {
+    filtered = filtered.filter(order => 
+      statusMap[activeFilter.value]?.includes(order.status)
     )
   } else {
-    filtered = filtered.filter((order: Order) => 
+    filtered = filtered.filter(order => 
       !['completed', 'cancelled', 'rejected'].includes(order.status)
     )
   }
   
-  // Filter by search query
+  // Then filter by search query if present
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter((order: Order) => {
+    filtered = filtered.filter(order => {
       // Search by order number
       if (order.orderNumber.toLowerCase().includes(query)) return true
       // Search by table number
       if (order.table.toString().includes(query)) return true
       // Search by items
-      if (order.items.some((item: OrderItem) => 
-        item.name.toLowerCase().includes(query)
-      )) return true
+      if (order.items.some(item => item.name.toLowerCase().includes(query))) return true
       return false
     })
   }
   
   return filtered
 })
+
+// Get count for each filter
+const getFilterCount = (filter) => {
+  if (filter === 'Toutes') {
+    return orders.value.filter(order => 
+      !['completed', 'cancelled', 'rejected'].includes(order.status)
+    ).length
+  }
+  
+  return orders.value.filter(order => 
+    statusMap[filter]?.includes(order.status)
+  ).length
+}
+
+// Types pour Supabase
+type OrderStatus = 'pending' | 'accepted' | 'rejected' | 'preparing' | 'ready' | 'completed'
+
+interface DatabaseOrder {
+  id: string
+  establishment_id: string
+  table_number: number
+  status: OrderStatus
+  total_amount: number
+  created_at: string
+  notes: string | null
+}
+
+interface OrderItem {
+  id: string
+  order_id: string
+  product_id: string
+  quantity: number
+  unit_price: number
+  notes: string | null
+  products: {
+    name: string
+  }
+}
+
+interface FormattedOrder {
+  id: string
+  orderNumber: string
+  table: number
+  status: OrderStatus
+  created_at: string
+  total: number
+  items: {
+    id: string
+    name: string
+    quantity: number
+    price: number
+    note: string | null
+  }[]
+}
 
 // Load orders from Supabase
 const fetchOrders = async () => {
@@ -423,6 +398,67 @@ const refreshOrders = () => {
   fetchOrders()
 }
 
+// Update order status
+const updateOrderStatus = async (orderId, newStatus) => {
+  try {
+    // Find order before update for notification
+    const orderBefore = orders.value.find(o => o.id === orderId)
+    const orderNumber = orderBefore ? orderBefore.orderNumber : orderId.toString().slice(-4).padStart(4, '0')
+    
+    const { error } = await supabase
+      .from('orders')
+      .update({ 
+        status: newStatus,
+        updated_at: new Date().toISOString() // Update timestamp
+      })
+      .eq('id', orderId)
+    
+    if (error) throw error
+    
+    // Update locally (real-time will handle, but immediate feedback is good)
+    const order = orders.value.find(o => o.id === orderId)
+    if (order) {
+      order.status = newStatus
+    }
+    
+    // Confirmation message
+    const statusMessages = {
+      accepted: 'acceptée',
+      rejected: 'refusée',
+      preparing: 'en préparation',
+      ready: 'prête',
+      completed: 'terminée'
+    }
+    
+    const notificationMessage = `Commande #${orderNumber} ${statusMessages[newStatus]}`
+    
+    showToast.success(notificationMessage, 'success')
+    setLatestActivity(notificationMessage)
+    
+    // Remove completed or rejected orders after delay
+    if (['completed', 'rejected'].includes(newStatus)) {
+      setTimeout(() => {
+        orders.value = orders.value.filter(o => o.id !== orderId)
+      }, 3000)
+    }
+  } catch (err) {
+    console.error('Erreur lors de la mise à jour du statut:', err)
+    showToast.error('Erreur lors de la mise à jour du statut', 'error')
+  }
+}
+
+// Set latest activity message with auto-clear
+const setLatestActivity = (message) => {
+  latestActivity.value = message
+  
+  // Clear after 10 seconds
+  setTimeout(() => {
+    if (latestActivity.value === message) {
+      latestActivity.value = null
+    }
+  }, 10000)
+}
+
 // Reconnect to Supabase
 const reconnect = () => {
   connectionStatus.value = 'connecting'
@@ -456,7 +492,7 @@ const setupConnectionMonitoring = () => {
 }
 
 // Print order
-const printOrder = (order: Order) => {
+const printOrder = (order) => {
   const printWindow = window.open('', '_blank')
   if (!printWindow) {
     showToast.error('Veuillez autoriser les popups pour imprimer', 'error')
@@ -542,11 +578,48 @@ const printOrder = (order: Order) => {
 }
 
 // Format price
-const formatPrice = (price: number) => {
+const formatPrice = (price) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'XOF'
   }).format(price)
+}
+
+// Format time
+const formatTime = (dateString) => {
+  return new Date(dateString).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+// Calculate time elapsed
+const getTimeAgo = (dateString) => {
+  const now = new Date()
+  const orderTime = new Date(dateString)
+  const diffMinutes = Math.floor((now - orderTime) / (1000 * 60))
+  
+  if (diffMinutes < 1) return 'À l\'instant'
+  if (diffMinutes === 1) return 'Il y a 1 min'
+  if (diffMinutes < 60) return `Il y a ${diffMinutes} min`
+  
+  const diffHours = Math.floor(diffMinutes / 60)
+  if (diffHours === 1) return 'Il y a 1h'
+  return `Il y a ${diffHours}h`
+}
+
+// Logout
+const logout = async () => {
+  try {
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+    
+    router.push('/auth/login')
+    showToast.success('Déconnexion réussie', 'À bientôt !')
+  } catch (err) {
+    console.error('Erreur lors de la déconnexion:', err)
+    showToast.error('Erreur lors de la déconnexion', 'error')
+  }
 }
 
 // Subscribe to real-time updates
@@ -618,6 +691,14 @@ const subscribeToOrders = () => {
             }
             
             // Notification de changement de statut
+            const statusMessages = {
+              accepted: 'acceptée',
+              rejected: 'refusée',
+              preparing: 'en préparation',
+              ready: 'prête',
+              completed: 'terminée'
+            }
+            
             const message = `Commande #${orders.value[index].orderNumber} ${statusMessages[updatedOrder.status]}`
             setLatestActivity(message)
           }
@@ -665,7 +746,7 @@ const subscribeToOrders = () => {
 }
 
 // Fetch a single order with its items
-const fetchOrderWithItems = async (orderId: string) => {
+const fetchOrderWithItems = async (orderId) => {
   try {
     // Get the order
     const { data: orderData, error: orderError } = await supabase
@@ -748,55 +829,6 @@ onMounted(() => {
 definePageMeta({
   layout: 'staff'
 })
-
-// Ajoutez ces types pour les données de la base de données
-interface DatabaseOrder {
-  id: string
-  establishment_id: string
-  table_number: number
-  status: OrderStatus
-  total_amount: number
-  created_at: string
-  notes: string | null
-}
-
-interface FormattedOrder {
-  id: string
-  orderNumber: string
-  table: number
-  status: OrderStatus
-  created_at: string
-  total: number
-  items: OrderItem[]
-}
-
-const getStatusColor = (status: OrderStatus) => {
-  const colors: Record<OrderStatus, { bg: string; text: string; badge: string }> = {
-    'pending': { bg: 'bg-yellow-50', text: 'text-yellow-700', badge: 'bg-yellow-100' },
-    'accepted': { bg: 'bg-green-50', text: 'text-green-700', badge: 'bg-green-100' },
-    'preparing': { bg: 'bg-blue-50', text: 'text-blue-700', badge: 'bg-blue-100' },
-    'ready': { bg: 'bg-green-50', text: 'text-green-700', badge: 'bg-green-100' },
-    'completed': { bg: 'bg-green-50', text: 'text-green-700', badge: 'bg-green-100' },
-    'rejected': { bg: 'bg-red-50', text: 'text-red-700', badge: 'bg-red-100' }
-  }
-  return colors[status]
-}
-
-const getStatusIcon = (status: OrderStatus) => {
-  const icons: Record<OrderStatus, Component> = {
-    'pending': Coffee,
-    'accepted': CheckCircle,
-    'preparing': ChefHat,
-    'ready': CheckCircle,
-    'completed': CheckCircle,
-    'rejected': X
-  }
-  return icons[status]
-}
-
-const toggleFilters = () => {
-  showFilters.value = !showFilters.value
-}
 </script>
 
 <style scoped>
@@ -881,22 +913,5 @@ const toggleFilters = () => {
   @apply bg-white border border-gray-200 rounded-xl p-4 mb-4 hover:shadow-md transition-all;
 }
 
-.pattern-grid {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23000000' d='M8 21H4a1 1 0 0 1-1-1v-4a1 1 0 0 0-2 0v4a3 3 0 0 0 3 3h4a1 1 0 0 0 0-2m14-6a1 1 0 0 0-1 1v4a1 1 0 0 1-1 1h-4a1 1 0 0 0 0 2h4a3 3 0 0 0 3-3v-4a1 1 0 0 0-1-1M20 1h-4a1 1 0 0 0 0 2h4a1 1 0 0 1 1 1v4a1 1 0 0 0 2 0V4a3 3 0 0 0-3-3M2 9a1 1 0 0 0 1-1V4a1 1 0 0 1 1-1h4a1 1 0 0 0 0-2H4a3 3 0 0 0-3 3v4a1 1 0 0 0 1 1m8-4H6a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1M9 9H7V7h2Zm5 2h4a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1m1-4h2v2h-2Zm-5 6H6a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1m-1 4H7v-2h2Zm5-1a1 1 0 0 0 1-1a1 1 0 0 0 0-2h-1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1m4-3a1 1 0 0 0-1 1v3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1m-4 4a1 1 0 1 0 1 1a1 1 0 0 0-1-1'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 48px 48px; /* Double size for better visibility */
-  transform: rotate(0deg);
-  animation: patternFloat 60s linear infinite;
-}
-
-@keyframes patternFloat {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 48px 48px;
-  }
-}
-
-/* ... reste des styles ... */
+/* ... autres styles ... */
 </style>

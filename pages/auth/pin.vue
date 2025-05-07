@@ -20,10 +20,11 @@
         <form @submit.prevent="login" class="space-y-6">
           <!-- Username Input -->
           <div>
-            <FormInput
+            <FloatLabelInput
               id="username"
               v-model="username"
               type="text"
+              
               required
               label="Identifiant"
            

@@ -1,101 +1,119 @@
 <template>
-  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Catégories</h1>
-        <p class="mt-1 text-sm text-gray-500">Gérez les catégories de votre menu</p>
-      </div>
-      <button
-        @click="openCategoryModal"
-        class="inline-flex items-center px-4 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
-      >
-        <Plus class="w-4 h-4 mr-1.5" />
-        Nouvelle catégorie
-      </button>
-    </div>
-
-    <!-- Loading State -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-      <Loader2 class="w-10 h-10 text-gray-300 animate-spin mb-4" />
-      <p class="text-sm text-gray-500">Chargement des catégories...</p>
-    </div>
-
-    <!-- Empty State -->
-    <div v-else-if="categories.length === 0" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
-        <UtensilsCrossed class="w-8 h-8 text-gray-300" />
-      </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune catégorie</h3>
-      <p class="text-gray-500 mb-6 max-w-md mx-auto">
-        Vous n'avez pas encore créé de catégories pour votre menu. Commencez par ajouter votre première catégorie.
-      </p>
-      <button
-        @click="openCategoryModal"
-        class="inline-flex items-center px-4 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
-      >
-        <Plus class="w-4 h-4 mr-1.5" />
-        Nouvelle catégorie
-      </button>
-    </div>
-
-    <!-- Categories Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="category in categories" :key="category.id"
-        class="bg-white rounded-xl border border-gray-100 overflow-hidden group hover:shadow-sm transition-all"
-      >
-        <!-- Category Image Header -->
-        <div class="aspect-video w-full bg-gray-50 relative">
-          <img
-            v-if="category.image_url"
-            :src="category.image_url"
-            :alt="category.name"
-            class="w-full h-full object-cover"
-          />
-          <div v-else class="w-full h-full flex flex-col items-center justify-center p-4">
-            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-              <UtensilsCrossed class="w-8 h-8 text-gray-300" />
-            </div>
-            <p class="text-sm text-gray-400 text-center">{{ category.name }}</p>
+  <div class="min-h-screen bg-[#F5F5F7]">
+    <!-- En-tête avec effet glassmorphism -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50">
+      <div class="max-w-6xl mx-auto px-6 py-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Catégories
+            </h1>
+            <p class="text-sm text-gray-500 mt-0.5">{{ categories.length }} catégories • {{ getTotalProducts() }} produits</p>
           </div>
-          
-          <!-- Quick Actions Overlay -->
-          <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <div class="flex items-center space-x-2">
-              <button 
-                @click="editCategory(category)"
-                class="p-2 text-white hover:text-gray-200 rounded-lg hover:bg-white/10"
-              >
-                <Edit2 class="w-5 h-5" />
-              </button>
-              <button
-                @click="deleteCategory(category.id)"
-                class="p-2 text-white hover:text-gray-200 rounded-lg hover:bg-white/10"
-              >
-                <Trash2 class="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+          <button
+            @click="openCategoryModal"
+            class="px-5 py-2.5 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800 active:scale-95 transition-all flex items-center gap-2"
+          >
+            <Plus class="w-4 h-4" />
+            Nouvelle catégorie
+          </button>
         </div>
-        
-        <div class="p-6">
-          <div class="flex items-center space-x-3 mb-4">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-              <UtensilsCrossed class="w-5 h-5 text-blue-500" />
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-8">
+      <!-- Loading State -->
+      <div v-if="loading" class="flex flex-col items-center justify-center py-20">
+        <div class="w-16 h-16 relative">
+          <div class="w-16 h-16 rounded-2xl bg-gray-100 animate-pulse"></div>
+          <Loader2 class="w-8 h-8 text-gray-300 animate-spin absolute inset-0 m-auto" />
+        </div>
+        <p class="text-sm text-gray-500 mt-4">Chargement des catégories...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="categories.length === 0" 
+        class="bg-white rounded-2xl border border-gray-200/50 p-12 text-center max-w-lg mx-auto mt-12"
+      >
+        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gray-50 flex items-center justify-center">
+          <UtensilsCrossed class="w-10 h-10 text-gray-300" />
+        </div>
+        <h3 class="text-xl font-medium text-gray-900 mb-2">Commencez votre menu</h3>
+        <p class="text-gray-500 mb-8">
+          Créez des catégories pour organiser vos produits et faciliter la navigation de vos clients.
+        </p>
+        <button
+          @click="openCategoryModal"
+          class="px-6 py-3 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 active:scale-95 transition-all inline-flex items-center gap-2"
+        >
+          <Plus class="w-5 h-5" />
+          Créer votre première catégorie
+        </button>
+      </div>
+
+      <!-- Categories Grid -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="category in categories" :key="category.id"
+          class="group bg-white rounded-2xl border border-gray-200/50 overflow-hidden hover:shadow-lg transition-all duration-300"
+        >
+          <!-- Image Header -->
+          <div class="aspect-[4/3] relative overflow-hidden">
+            <img
+              v-if="category.image_url"
+              :src="category.image_url"
+              :alt="category.name"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div v-else 
+              class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center"
+            >
+              <div class="text-center">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-white/80 backdrop-blur flex items-center justify-center mb-2">
+                  <UtensilsCrossed class="w-8 h-8 text-gray-400" />
+                </div>
+                <p class="text-sm text-gray-400">{{ category.name }}</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-medium text-gray-900">{{ category.name }}</h3>
-              <p class="text-sm text-gray-500">{{ getProductCount(category.id) }} produits</p>
+
+            <!-- Actions Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute bottom-0 left-0 right-0 p-4 flex justify-end items-center gap-2">
+                <button 
+                  @click="editCategory(category)"
+                  class="p-2 text-white rounded-full hover:bg-white/20 transition-colors"
+                >
+                  <Edit2 class="w-4 h-4" />
+                </button>
+                <button
+                  @click="deleteCategory(category.id)"
+                  class="p-2 text-white rounded-full hover:bg-white/20 transition-colors"
+                >
+                  <Trash2 class="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Products List -->
-          <div v-if="getCategoryProducts(category.id).length > 0" class="space-y-2 mt-4">
-            <div v-for="product in getCategoryProducts(category.id).slice(0, 3)" :key="product.id"
-              class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50"
+          <!-- Category Info -->
+          <div class="p-6">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
+                <UtensilsCrossed class="w-6 h-6 text-blue-500" />
+              </div>
+              <div>
+                <h3 class="font-medium text-gray-900">{{ category.name }}</h3>
+                <p class="text-sm text-gray-500">{{ getProductCount(category.id) }} produits</p>
+              </div>
+            </div>
+
+            <!-- Products Preview -->
+            <div v-if="getCategoryProducts(category.id).length > 0" 
+              class="space-y-3 mt-4 border-t border-gray-100 pt-4"
             >
-              <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg overflow-hidden">
+              <div v-for="product in getCategoryProducts(category.id).slice(0, 3)" :key="product.id"
+                class="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                <div class="w-10 h-10 bg-gray-100 rounded-xl overflow-hidden">
                   <img 
                     v-if="product.image_url"
                     :src="product.image_url"
@@ -103,88 +121,56 @@
                     class="w-full h-full object-cover"
                   />
                   <div v-else class="w-full h-full flex items-center justify-center">
-                    <UtensilsCrossed class="w-4 h-4 text-gray-400" />
+                    <UtensilsCrossed class="w-5 h-5 text-gray-400" />
                   </div>
                 </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-900 truncate max-w-[140px]">{{ product.name }}</p>
-                  <p class="text-xs text-gray-500">{{ formatPrice(product.price) }}</p>
+                <div class="flex-1 min-w-0">
+                  <p class="font-medium text-gray-900 truncate">{{ product.name }}</p>
+                  <p class="text-sm text-gray-500">{{ formatPrice(product.price) }}</p>
                 </div>
+                <span 
+                  class="flex-shrink-0 px-2 py-1 rounded-full text-xs font-medium"
+                  :class="product.is_available ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-600'"
+                >
+                  {{ product.is_available ? 'Disponible' : 'Indisponible' }}
+                </span>
               </div>
-              <span 
-                class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium"
-                :class="{
-                  'bg-green-50 text-green-700': product.is_available,
-                  'bg-gray-50 text-gray-600': !product.is_available
-                }"
+
+              <!-- More products link -->
+              <div v-if="getCategoryProducts(category.id).length > 3" 
+                class="text-center pt-2"
               >
-                {{ product.is_available ? 'Disponible' : 'Indisponible' }}
-              </span>
+                <NuxtLink 
+                  :to="`/manager/${establishment.value?.id}/menu?category=${category.id}`"
+                  class="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Voir {{ getCategoryProducts(category.id).length - 3 }} autres produits
+                </NuxtLink>
+              </div>
             </div>
-            
-            <!-- Show more link if there are more products -->
-            <div v-if="getCategoryProducts(category.id).length > 3" class="text-center pt-2">
+
+            <!-- Empty category state -->
+            <div v-else class="mt-4 py-4 px-4 bg-gray-50 rounded-xl text-center">
+              <p class="text-sm text-gray-500">Aucun produit dans cette catégorie</p>
               <NuxtLink 
-                :to="`/manager/${establishment.value?.id}/menu?category=${category.id}`"
-                class="text-sm text-blue-600 hover:text-blue-800"
+                :to="`/manager/${establishment.value?.id}/menu`"
+                class="text-sm text-blue-600 hover:text-blue-800 font-medium inline-block mt-2"
               >
-                Voir les {{ getCategoryProducts(category.id).length - 3 }} autres produits
+                Ajouter un produit
               </NuxtLink>
             </div>
           </div>
-          
-          <!-- Empty products state -->
-          <div v-else class="mt-4 py-4 px-3 bg-gray-50 rounded-lg text-center">
-            <p class="text-sm text-gray-500">Aucun produit dans cette catégorie</p>
-            <NuxtLink 
-              :to="`/manager/${establishment.value?.id}/menu`"
-              class="text-sm text-blue-600 hover:text-blue-800 inline-block mt-1"
-            >
-              Ajouter un produit
-            </NuxtLink>
-          </div>
         </div>
       </div>
-    </div>
+    </main>
 
     <!-- Category Modal -->
-    <TransitionRoot appear :show="showCategoryModal" as="template">
-      <Dialog as="div" class="relative z-50" @close="closeCategoryModal">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
-                <CategoryModal
-                  :category="editingCategory"
-                  @submit="saveCategory"
-                  @close="closeCategoryModal"
-                />
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
+    <CategoryModal
+      v-if="showCategoryModal"
+      :category="editingCategory"
+      @close="closeCategoryModal"
+      @submit="saveCategory"
+    />
   </div>
 </template>
 
@@ -202,16 +188,16 @@ import {
   Dialog,
   DialogPanel
 } from '@headlessui/vue'
-import { useSupabaseWrapper } from '~/composables/useSupabase'
+// import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useEstablishment } from '~/composables/useEstablishment'
 import type { Category, Product } from '~/types'
 import { useCustomToast } from '~/composables/useToast'
 import ImageUploader from '~/components/ui/ImageUploader.vue'
-
+// import { useSupabaseClient } from '@supabase/supabase-js'
 const {showToast} = useCustomToast()
 const route = useRoute()
 const slug = route.params.slug
-const { client: supabase } = useSupabaseWrapper()
+const supabase = useSupabaseClient()
 const { establishment } = useEstablishment()
 
 // State
@@ -222,14 +208,18 @@ const products = ref<Product[]>([])
 const loading = ref(true)
 
 // Methods
-const getProductCount = (categoryId: string) => {
-  if (!products.value) return 0
-  return products.value.filter(p => p.category_id === categoryId).length
+const getTotalProducts = (): number => {
+  return products.value.length
 }
 
-const getCategoryProducts = (categoryId: string) => {
+const getProductCount = (categoryId: string): number => {
+  if (!products.value) return 0
+  return products.value.filter((p: Product) => p.category_id === categoryId).length
+}
+
+const getCategoryProducts = (categoryId: string): Product[] => {
   if (!products.value) return []
-  return products.value.filter(p => p.category_id === categoryId)
+  return products.value.filter((p: Product) => p.category_id === categoryId)
 }
 
 const formatPrice = (price: number) => {
@@ -251,7 +241,14 @@ const editCategory = (category: Category) => {
   showCategoryModal.value = true
 }
 
-const saveCategory = async (categoryData: any) => {
+interface CategoryData {
+  name: string
+  order_number: number
+  image_url?: string
+  establishment_id?: string
+}
+
+const saveCategory = async (categoryData: CategoryData) => {
   try {
     if (editingCategory.value?.id) {
       const { data, error } = await supabase
@@ -267,13 +264,15 @@ const saveCategory = async (categoryData: any) => {
         .single()
 
       if (error) throw error
-      showToast.success('Succès', 'Catégorie sauvegardée')
+      
+      const updatedCategory = data as Category
+      
       // Mise à jour locale
-      const index = categories.value.findIndex(c => c.id === editingCategory.value?.id)
+      const index = categories.value.findIndex((c: Category) => c.id === editingCategory.value?.id)
       if (index !== -1) {
         categories.value[index] = {
           ...categories.value[index],
-          ...data,
+          ...updatedCategory,
           iconBg: 'bg-blue-50',
           iconColor: 'text-blue-500'
         }
@@ -383,8 +382,8 @@ definePageMeta({
   layout: 'manager'
 })
 
-const handleUploadError = (error) => {
-  showToast.error('Erreur', error)
+const handleUploadError = (error: Error): void => {
+  showToast.error('Erreur', error.message)
 }
 
 const handleUploadSuccess = () => {

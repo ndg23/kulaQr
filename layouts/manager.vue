@@ -1,338 +1,211 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="sticky top-0 z-30 bg-white border-b border-gray-100">
-      <div class="max-w-7xl mx-auto">
-        <div class="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-          <!-- Left side -->
-          <div class="flex items-center">
-            <NuxtLink to="/" class="flex items-center">
-              <img src="~/assets/icon/logo.png" class="w-auto h-[50px]" alt="Logo" />
-              <span class="text-xl font-logo ml-3 text-gray-900">Kula QR</span>
-            </NuxtLink>
-          </div>
+  <div class="min-h-screen bg-white">
+    <div class="mx-auto max-w-7xl flex h-screen">
+      <!-- Left Margin -->
+      <div class="w-[68px] xl:w-[275px] shrink-0" />
 
-          <!-- Navigation -->
-          <nav class="hidden md:flex items-center space-x-1">
-            <NuxtLink
-              v-for="item in navigationItems"
-              :key="item.name"
-              :to="item.to"
+      <!-- Sidebar -->
+      <div class="w-[68px] xl:w-[275px] flex flex-col h-full fixed">
+        <!-- Logo -->
+        <div class="p-3">
+          <div class="xl:hidden flex justify-center">
+            <div class="w-11 h-11 rounded-full bg-black flex items-center justify-center">
+              <img 
+                :src="establishment?.logo || '/default-logo.png'"
+                class="w-6 h-6"
+                alt="Logo"
+              />
+            </div>
+          </div>
+          <h1 class="hidden xl:block text-xl font-bold px-4">
+            {{ establishment?.name || 'Dashboard' }}
+          </h1>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-2">
+          <!-- Primary Navigation -->
+          <div class="space-y-0.5 mb-8">
+            <NuxtLink 
+              v-for="item in primaryNavigation"
+              :key="item.path"
+              :to="item.path"
+              class="flex items-center xl:gap-3 p-3 rounded-full text-[17px] transition-colors"
               :class="[
-                isActive(item.to)
-                  ? 'bg-kula-500 text-white'
-                  : 'text-gray-700 hover:bg-kula-50',
-                'px-4 py-2 rounded-full text-sm font-medium transition-colors'
+                route.path.includes(item.active) 
+                  ? 'font-bold text-black bg-gray-100' 
+                  : 'text-gray-800 hover:bg-gray-50'
               ]"
             >
-              <div class="flex items-center space-x-2">
-                <component :is="item.icon" class="w-4 h-4" />
-                <span>{{ item.name }}</span>
-              </div>
+              <component :is="item.icon" class="w-[24px] h-[24px] min-w-[24px]" />
+              <span class="hidden xl:block">{{ item.name }}</span>
+              <span 
+                v-if="item.count"
+                class="ml-auto bg-[#F91880] text-white text-xs font-bold px-2 py-0.5 rounded-full"
+              >
+                {{ item.count }}
+              </span>
             </NuxtLink>
-          </nav>
-
-          <!-- Right side -->
-          <div class="flex items-center space-x-4">
-            <!-- Quick Actions -->
-            <button
-              @click="showAddProduct = true"
-              class="hidden md:inline-flex items-center px-4 py-2 bg-kula-500 text-white rounded-full text-sm font-medium hover:bg-kula-600 transition-colors"
-            >
-              <Plus class="w-4 h-4 mr-1.5" />
-              Nouveau produit
-            </button>
-
-            <!-- Notifications -->
-            <!-- <Menu as="div" class="relative">
-              <MenuButton class="relative p-2 rounded-full hover:bg-gray-50">
-                <span class="sr-only">Notifications</span>
-                <Bell class="w-5 h-5 text-gray-600" />
-                <span 
-                  v-if="hasNotifications"
-                  class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-kula-500 ring-2 ring-white" 
-                />
-              </MenuButton>
-              <transition
-                enter-active-class="transition ease-out duration-100"
-                enter-from-class="transform opacity-0 scale-95"
-                enter-to-class="transform opacity-100 scale-100"
-                leave-active-class="transition ease-in duration-75"
-                leave-from-class="transform opacity-100 scale-100"
-                leave-to-class="transform opacity-0 scale-95"
-              >
-                <MenuItems class="absolute right-0 mt-2 w-80 origin-top-right rounded-2xl bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  <div class="px-4 py-2 border-b border-gray-100">
-                    <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
-                  </div>
-                  <div class="max-h-96 overflow-y-auto">
-                    <MenuItem v-slot="{ active }">
-                      <a
-                        href="#"
-                        :class="[
-                          active ? 'bg-gray-50' : '',
-                          'block px-4 py-3'
-                        ]"
-                      >
-                        <div class="flex items-start">
-                          <div class="flex-shrink-0">
-                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-kula-50">
-                              <ShoppingCart class="h-4 w-4 text-kula-500" />
-                            </span>
-                          </div>
-                          <div class="ml-3 w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-900">Nouvelle commande</p>
-                            <p class="mt-1 text-sm text-gray-500">Table 4 - 3 articles</p>
-                            <p class="mt-1 text-xs text-gray-400">Il y a 2 minutes</p>
-                          </div>
-                        </div>
-                      </a>
-                    </MenuItem>
-                  </div>
-                </MenuItems>
-              </transition>
-            </Menu> -->
-
-            <!-- Profile dropdown -->
-            <Menu as="div" class="relative">
-              <MenuButton class="flex items-center space-x-3">
-                <div class="flex items-center space-x-3">
-                  <img
-                    v-if="user?.user_metadata?.avatar_url"
-                    :src="user.user_metadata.avatar_url"
-                    alt="Avatar"
-                    class="h-8 w-8 rounded-full"
-                  />
-                  <UserCircle v-else class="h-8 w-8 text-gray-400" />
-                  <span class="hidden md:block text-sm font-medium text-gray-700">
-                    {{ establishment?.name }}
-                  </span>
-                </div>
-                <ChevronDown class="w-4 h-4 text-gray-600" />
-              </MenuButton>
-              <transition
-                enter-active-class="transition ease-out duration-100"
-                enter-from-class="transform opacity-0 scale-95"
-                enter-to-class="transform opacity-100 scale-100"
-                leave-active-class="transition ease-in duration-75"
-                leave-from-class="transform opacity-100 scale-100"
-                leave-to-class="transform opacity-0 scale-95"
-              >
-                <MenuItems class="absolute right-0 mt-2 w-48 origin-top-right rounded-xl bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  <MenuItem v-slot="{ active }">
-                    <NuxtLink
-                      :to="`/manager/${establishment.value?.id || route.params.slug}/settings/profile`"
-                      :class="[
-                        active ? 'bg-gray-50' : '',
-                        'block px-4 py-2 text-sm text-gray-700'
-                      ]"
-                    >
-                      <div class="flex items-center">
-                        <User class="w-4 h-4 mr-2" />
-                        Profile
-                      </div>
-                    </NuxtLink>
-                  </MenuItem>
-                  <MenuItem v-slot="{ active }">
-                    <NuxtLink
-                      :to="`/manager/${establishment.value?.id || route.params.slug}/settings/profile`"
-                      :class="[
-                        active ? 'bg-gray-50' : '',
-                        'block px-4 py-2 text-sm text-gray-700'
-                      ]"
-                    >
-                      <div class="flex items-center">
-                        <Settings class="w-4 h-4 mr-2" />
-                        Etablissement
-                      </div>
-                    </NuxtLink>
-                  </MenuItem>
-
-                  <div class="border-t border-gray-100 my-1" />
-                  <MenuItem v-slot="{ active }">
-                    <button
-                      @click="handleLogout"
-                      :class="[
-                        active ? 'bg-gray-50' : '',
-                        'block w-full px-4 py-2 text-left text-sm text-red-600'
-                      ]"
-                    >
-                      <div class="flex items-center">
-                        <LogOut class="w-4 h-4 mr-2" />
-                        Déconnexion
-                      </div>
-                    </button>
-                  </MenuItem>
-                </MenuItems>
-              </transition>
-            </Menu>
           </div>
+
+          <!-- Secondary Navigation -->
+          <div class="space-y-0.5">
+            <p class="hidden xl:block text-xs font-semibold text-gray-500 uppercase px-4 mb-2">
+              Configuration
+            </p>
+            <NuxtLink 
+              v-for="item in secondaryNavigation"
+              :key="item.path"
+              :to="item.path"
+              class="flex items-center xl:gap-3 p-3 rounded-full text-[15px] transition-colors"
+              :class="[
+                route.path.includes(item.active) 
+                  ? 'font-bold text-black bg-gray-100' 
+                  : 'text-gray-800 hover:bg-gray-50'
+              ]"
+            >
+              <component :is="item.icon" class="w-[20px] h-[20px] min-w-[20px]" />
+              <span class="hidden xl:block">{{ item.name }}</span>
+            </NuxtLink>
+          </div>
+        </nav>
+
+        <!-- User Menu -->
+        <div class="p-3 mt-auto">
+          <Menu as="div" class="relative">
+            <MenuButton class="flex items-center w-full p-2.5 rounded-full hover:bg-gray-50">
+              <img 
+                :src="user?.user_metadata?.avatar_url || '/default-logo.png'"
+                class="w-9 h-9 rounded-full"
+              />
+              <div class="hidden xl:block flex-1 text-left ml-3">
+                <p class="text-[15px] font-bold truncate max-w-[130px]">
+                  {{ user?.user_metadata?.full_name }}
+                </p>
+                <p class="text-[13px] text-gray-500 truncate max-w-[130px]">
+                  {{ user?.email }}
+                </p>
+              </div>
+              <ChevronDown class="hidden xl:block w-4 h-4 text-gray-500" />
+            </MenuButton>
+
+            <MenuItems 
+              class="absolute bottom-full right-0 mb-2 w-[260px] bg-white shadow-lg rounded-xl border border-gray-100 overflow-hidden"
+            >
+              <MenuItem v-slot="{ active }">
+                <button
+                  @click="handleLogout"
+                  class="flex w-full items-center gap-3 px-4 py-3 text-[15px] hover:bg-gray-50"
+                >
+                  <LogOut class="w-5 h-5" />
+                  <span>Se déconnecter</span>
+                </button>
+              </MenuItem>
+            </MenuItems>
+          </Menu>
         </div>
       </div>
-    </header>
 
-    <!-- Mobile navigation -->
-    <div class="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 md:hidden">
-      <nav class="flex justify-around">
-        <NuxtLink
-          v-for="item in navigationItems"
-          :key="item.name"
-          :to="item.to"
-          :class="[
-            isActive(item.to)
-              ? 'text-gray-900'
-              : 'text-gray-600',
-            'flex flex-col items-center py-2 px-3'
-          ]"
-        >
-          <component :is="item.icon" class="w-6 h-6" />
-          <span class="text-xs mt-1">{{ item.name }}</span>
-        </NuxtLink>
-      </nav>
+      <!-- Main Content -->
+      <main class="flex-1 min-w-0 border-x border-[#EFF3F4]">
+        <slot />
+      </main>
+
+      <!-- Right Margin -->
+      <div class="w-[350px] shrink-0 hidden xl:block" />
     </div>
-
-    <!-- Main content -->
-    <main class="pb-16 md:pb-0">
-      <slot />
-    </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems
-} from '@headlessui/vue'
-import {
-  LayoutDashboard,
-  Store,
-  QrCode,
-  Settings,
-  Bell,
-  LogOut,
-  ChevronDown,
+  Package,
   ShoppingCart,
-  Plus,
-  UtensilsCrossed,
-  ListOrdered,
-  UserCircle,
+  BarChart2,
+  Settings,
   Users,
-  Key,
-  User
+  QrCode,
+  Share2,
+  ChevronDown,
+  LogOut
 } from 'lucide-vue-next'
-import { useSupabaseWrapper } from '~/composables/useSupabase'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useEstablishment } from '~/composables/useEstablishment'
-import { useCustomToast } from '~/composables/useToast'
+import { useAuth } from '~/composables/useAuth'
 
 const route = useRoute()
-const router = useRouter()
-const { client: supabase } = useSupabaseWrapper()
-const { establishment, fetchEstablishmentByUserId, fetchEstablishmentBySlug } = useEstablishment()
-const {showToast} = useCustomToast()
-const user = useSupabaseUser()
+const { establishment } = useEstablishment()
+const { user, logout } = useAuth()
 
-// State
-const showAddProduct = ref(false)
-const hasNotifications = ref(true)
-const loading = ref(true)
+const orderCount = ref(0)
 
-// Navigation - make it reactive with computed
-const navigationItems = computed(() => {
-  const establishmentId = establishment.value?.id || route.params.slug
-  
-  return [
-    {
-      name: 'Menu',
-      to: `/manager/${establishmentId}/menu`,
-      icon: UtensilsCrossed
-    },
-    {
-      name: 'Catégories',
-      to: `/manager/${establishmentId}/categories`,
-      icon: ListOrdered
-    },
-    {
-      name: 'QR Code',
-      to: `/manager/${establishmentId}/qr-codes`,
-      icon: QrCode
-    },
-    // {
-    //   name: 'Paramètres',
-    //   to: `/manager/${establishmentId}/settings`,
-    //   icon: Settings
-    // },
-    {
-      name: 'Personnel',
-      to: `/manager/${establishmentId}/staff`,
-      icon: Users
-    }
-    // {
-    //   name: 'Accès PIN',
-    //   to: `/manager/${establishmentId}/staff/pins`,
-    //   icon: Key
-    // }
-  ]
-})
+// Navigation principale adaptée au type d'établissement
+const primaryNavigation = computed(() => [
+  {
+    name: 'Catalogue',
+    path: `/manager/${establishment.value?.id}/menu`,
+    active: '/menu',
+    icon: Package
+  },
+  {
+    name: 'Commandes',
+    path: `/manager/${establishment.value?.id}/orders`,
+    active: '/orders',
+    icon: ShoppingCart,
+    count: orderCount.value
+  },
+  {
+    name: 'Statistiques',
+    path: `/manager/${establishment.value?.id}/analytics`,
+    active: '/analytics',
+    icon: BarChart2
+  }
+])
 
-// Methods
-const isActive = (path: string) => {
-  return route.path === path
-}
+// Navigation secondaire commune
+const secondaryNavigation = computed(() => [
+  {
+    name: 'QR Codes',
+    path: `/manager/${establishment.value?.id}/qr`,
+    active: '/qr',
+    icon: QrCode
+  },
+  {
+    name: 'Partage',
+    path: `/manager/${establishment.value?.id}/share`,
+    active: '/share',
+    icon: Share2
+  },
+  {
+    name: 'Équipe',
+    path: `/manager/${establishment.value?.id}/staff`,
+    active: '/staff',
+    icon: Users
+  },
+  {
+    name: 'Paramètres',
+    path: `/manager/${establishment.value?.id}/settings`,
+    active: '/settings',
+    icon: Settings
+  }
+])
 
 const handleLogout = async () => {
-  await supabase.auth.signOut()
-  router.push('/auth/login')
+  await logout()
+  navigateTo('/auth/login')
+}
+</script>
+
+<style scoped>
+.pattern-grid {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23000000' d='M8 21H4a1 1 0 0 1-1-1v-4a1 1 0 0 0-2 0v4a3 3 0 0 0 3 3h4a1 1 0 0 0 0-2m14-6a1 1 0 0 0-1 1v4a1 1 0 0 1-1 1h-4a1 1 0 0 0 0 2h4a3 3 0 0 0 3-3v-4a1 1 0 0 0-1-1M20 1h-4a1 1 0 0 0 0 2h4a1 1 0 0 1 1 1v4a1 1 0 0 0 2 0V4a3 3 0 0 0-3-3M2 9a1 1 0 0 0 1-1V4a1 1 0 0 1 1-1h4a1 1 0 0 0 0-2H4a3 3 0 0 0-3 3v4a1 1 0 0 0 1 1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 48px 48px;
+  animation: patternFloat 60s linear infinite;
 }
 
-// Load establishment data
-const loadEstablishment = async () => {
-  loading.value = true
-  
-  try {
-    // If we have a slug in the route, fetch by slug
-    if (route.params.slug) {
-      await fetchEstablishmentBySlug(route.params.slug)
-    } 
-    // Otherwise try to fetch by user ID
-    else if (user.value?.id) {
-      await fetchEstablishmentByUserId()
-    }
-    
-    // If still no establishment, redirect to onboarding
-    if (!establishment.value) {
-      showToast.error('Erreur', 'Établissement non trouvé')
-      router.push('/onboarding')
-    }
-  } catch (err) {
-    console.error('Error loading establishment:', err)
-    showToast.error("Impossible de charger les données de l'établissement")
-  } finally {
-    loading.value = false
-  }
+@keyframes patternFloat {
+  0% { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
 }
-
-// Watch for route changes to reload establishment data
-watch(() => route.params.slug, (newSlug, oldSlug) => {
-  if (newSlug !== oldSlug) {
-    loadEstablishment()
-  }
-})
-
-// Watch for user changes
-watch(user, (newUser) => {
-  if (newUser) {
-    loadEstablishment()
-  }
-})
-
-onMounted(() => {
-  if (!user.value) {
-    router.push('/auth/login')
-    return
-  }
-  
-  loadEstablishment()
-})
-</script> 
+</style> 

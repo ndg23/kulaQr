@@ -53,7 +53,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { UploadIcon, XIcon } from 'lucide-vue-next'
-import { useSupabase } from '~/composables/useSupabase'
+// import { useSupabaseClient } from '@supabase/supabase-js'
 
 const props = defineProps({
   modelValue: {
@@ -80,7 +80,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'error', 'success'])
 
-const supabase = useSupabase()
+const supabase = useSupabaseClient()
 const preview = ref('')
 const isDragging = ref(false)
 const uploading = ref(false)

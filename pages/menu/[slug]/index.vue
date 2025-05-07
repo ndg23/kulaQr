@@ -81,20 +81,30 @@
         @increment="incrementCartItem"
         @place-order="placeOrder"
         @toggle="toggleCartExpand"
+        @add-note="openAddNoteModal"
+        @remove-item="removeItemFromCart"
       />
   
-      <WaitingLoader :is-visible="isWaiting" />
+      <WaitingLoader 
+        :is-visible="isWaiting" 
+        :status="orderStatus"
+      />
       
       <OrderSummaryTicket
         v-if="confirmedOrder"
         :order="confirmedOrder"
-        @close="confirmedOrder = null"
+        @close="handleOrderClose"
+      />
+  
+      <AddNote
+        v-model:cart="cart"
+        ref="addNoteModal"
       />
     </div>
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted, computed } from 'vue'
+  import { ref, onMounted, computed, onUnmounted } from 'vue'
   import { UtensilsCrossed, Store, Loader2 } from 'lucide-vue-next'
   import type { CartItem, OrderData, Product } from '~/types'
   import RestaurantHeader from '~/components/RestaurantHeader.vue'
@@ -105,6 +115,7 @@
   import WaitingLoader from '~/components/WaitingLoader.vue'
   import ErrorMessage from '~/components/ErrorMessage.vue'
   import { useSupabaseClient } from '#imports'
+  import AddNote from '~/components/AddNote.vue'
   
   const route = useRoute()
   const slug = route.params.slug as string
@@ -118,9 +129,24 @@
   const cart = ref<CartItem[]>([])
   const isCartExpanded = ref(false)
   const isWaiting = ref(false)
+  const orderStatus = ref<'loading' | 'waiting' | 'success' | 'rejected'>('loading')
   const confirmedOrder = ref<OrderData | null>(null)
   const error = ref('')
   const loading = ref(true)
+  const addNoteModal = ref(null)
+  
+  // Types for Supabase
+  type OrderStatus = 'pending' | 'accepted' | 'rejected' | 'preparing' | 'ready' | 'completed'
+  
+  interface DatabaseOrder {
+    id: string
+    establishment_id: string
+    table_number: number
+    status: OrderStatus
+    total_amount: number
+    created_at: string
+    notes: string | null
+  }
   
   // Fetch data from Supabase
   const fetchData = async () => {
@@ -170,7 +196,9 @@
       loading.value = false
     }
   }
-  
+  const openAddNoteModal = (itemId: string) => {
+    addNoteModal.value.openModal(itemId)
+  }
   // Get products for a specific category
   const getCategoryProducts = (categoryId) => {
     return products.value.filter(product => product.category_id === categoryId)
@@ -182,7 +210,7 @@
     if (existingItem) {
       existingItem.quantity++
     } else {
-      cart.value.push({ ...item, quantity: 1 })
+      cart.value.push({ ...item, quantity: 1, notes: '' })
     }
   }
   
@@ -204,22 +232,28 @@
     }
   }
   
+  const removeItemFromCart = (itemId: string) => {
+    cart.value = cart.value.filter(item => item.id !== itemId)
+  }
+  
   // Order placement
   const placeOrder = async () => {
     if (cart.value.length === 0) return
   
     try {
       isWaiting.value = true
+      orderStatus.value = 'loading'
       
       // Create a new order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          establishment_id: establishment.value.id,
-          table_number: Math.floor(Math.random() * 20) + 1, // Random table for demo
+          establishment_id: establishment.value?.id,
+          table_number: Math.floor(Math.random() * 20) + 1,
           status: 'pending',
-          total_amount: cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
-        })
+          total_amount: cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0),
+          notes: cart.value.filter(item => item.notes).map(item => `${item.name}: ${item.notes}`).join('\n')
+        } as DatabaseOrder)
         .select()
         .single()
       
@@ -231,7 +265,8 @@
         product_id: item.id,
         quantity: item.quantity,
         unit_price: item.price,
-        subtotal: item.price * item.quantity
+        subtotal: item.price * item.quantity,
+        notes: item.notes || null
       }))
       
       const { error: itemsError } = await supabase
@@ -240,30 +275,84 @@
       
       if (itemsError) throw itemsError
       
-      // Create confirmed order object
-      confirmedOrder.value = {
-        id: orderData.id,
-        table: orderData.table_number,
-        items: cart.value.map(item => ({
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity
-        })),
-        total: orderData.total_amount,
-        status: orderData.status,
-        created_at: new Date().toISOString()
-      }
+      // Change status to waiting for staff confirmation
+      orderStatus.value = 'waiting'
       
-      // Clear cart
-      cart.value = []
-      isCartExpanded.value = false
+      // Subscribe to order status changes
+      const channel = supabase
+      .channel('orders-changes')
+      .on<DatabaseOrder>(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+            filter: `id=eq.${orderData.id}`
+          },
+          (payload) => {
+            const newStatus = payload.new.status
+
+            switch (newStatus) {
+              case 'accepted':
+                orderStatus.value = 'success'
+                setTimeout(() => {
+                  isWaiting.value = false
+                  confirmedOrder.value = {
+                    id: orderData.id,
+                    table: orderData.table_number,
+                    items: cart.value.map(item => ({
+                      name: item.name,
+                      price: item.price,
+                      quantity: item.quantity,
+                      notes: item.notes
+                    })),
+                    total: orderData.total_amount,
+                    status: newStatus,
+                    created_at: new Date().toISOString()
+                  }
+                  cart.value = []
+                  isCartExpanded.value = false
+                }, 1000)
+                break
+
+              case 'rejected':
+                orderStatus.value = 'rejected'
+                setTimeout(() => {
+                  isWaiting.value = false
+                  error.value = 'Votre commande a été refusée par le restaurant.'
+                }, 2000)
+                break
+
+              case 'preparing':
+                if (confirmedOrder.value) {
+                  confirmedOrder.value.status = newStatus
+                }
+                break
+
+              case 'ready':
+                if (confirmedOrder.value) {
+                  confirmedOrder.value.status = newStatus
+                }
+                break
+            }
+          }
+        )
+        .subscribe()
+
+      // Cleanup subscription on component unmount
+      onUnmounted(() => {
+        channel.unsubscribe()
+      })
       
     } catch (err) {
       console.error('Error placing order:', err)
       error.value = 'Impossible de passer la commande. Veuillez réessayer.'
-    } finally {
       isWaiting.value = false
     }
+  }
+  
+  const handleOrderClose = () => {
+    confirmedOrder.value = null
   }
   
   const toggleCategory = (categoryId: string) => {

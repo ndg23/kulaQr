@@ -8,6 +8,7 @@ export interface Product {
   is_available: boolean;
   order_number: number;
   created_at: string;
+  establishment_id: string;
 }
 
 export interface Category {
@@ -75,20 +76,38 @@ export interface Establishment {
   is_active: boolean;
 }
 
-export interface Order {
-  id: string;
-  establishment_id: string;
-  table_number?: number;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
-  total_amount: number;
-  created_at: string;
-}
-
 export interface OrderItem {
   id: string;
-  order_id: string;
-  product_id: string;
+  name: string;
   quantity: number;
   price: number;
+  note: string | null;
+  products?: {
+    name: string;
+  };
+  order_id?: string;
+  unit_price: number;
+}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  table: number;
+  status: OrderStatus;
   created_at: string;
+  total: number;
+  items: OrderItem[];
+  table_number?: number;
+  total_amount?: number;
+}
+
+export type OrderStatus = 'pending' | 'accepted' | 'preparing' | 'ready' | 'completed' | 'rejected';
+
+export interface StatusMessage {
+  [key: string]: string;
+  accepted: string;
+  rejected: string;
+  preparing: string;
+  ready: string;
+  completed: string;
 } 

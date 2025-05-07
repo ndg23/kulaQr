@@ -202,7 +202,6 @@
     CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   table_number INTEGER,
   status VARCHAR(50) NOT NULL DEFAULT 'pending', -- 'pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'
   total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
@@ -324,3 +323,9 @@ BEFORE INSERT OR UPDATE OF name ON establishments
 FOR EACH ROW
 WHEN (NEW.slug IS NULL OR OLD.name != NEW.name)
 EXECUTE FUNCTION generate_establishment_slug();
+
+-- Ajout de la contrainte de clé étrangère entre order_items et products
+ALTER TABLE order_items
+ADD CONSTRAINT fk_order_items_product
+FOREIGN KEY (product_id) REFERENCES products(id)
+ON DELETE SET NULL;

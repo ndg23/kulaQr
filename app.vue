@@ -23,4 +23,5 @@
 .font-logo {
   font-family: 'Arial Rounded MT Bold', system-ui, -apple-system, sans-serif;
 }
+
 </style>
