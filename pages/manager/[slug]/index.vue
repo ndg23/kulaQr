@@ -1,184 +1,233 @@
 <template>
-  <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <!-- Header with Date -->
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-        <p class="mt-1 text-sm text-gray-500">{{ formattedDate }}</p>
-      </div>
-      <button 
-        @click="loadDashboardData" 
-        class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-      >
-        <RefreshCw class="w-4 h-4 mr-1.5" />
-        Actualiser
-      </button>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Today's Orders -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div class="flex items-center justify-between mb-4">
-          <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-            <ShoppingCart class="w-6 h-6 text-blue-500" />
-          </div>
-          <span class="text-sm font-medium text-blue-500">Aujourd'hui</span>
-        </div>
-        <div class="space-y-1">
-          <h3 class="text-2xl font-bold text-gray-900">{{ stats.orders }} commandes</h3>
-          <p class="text-sm text-gray-500">{{ stats.revenue }}</p>
+  <div class="min-h-screen bg-white">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white bg-opacity-90 backdrop-blur-sm border-b border-gray-100">
+      <div class="px-4 py-3">
+        <div class="flex items-center justify-between">
+          <h1 class="text-xl font-bold">Tableau de bord</h1>
+          <button 
+            @click="refreshData" 
+            class="flex items-center gap-2 text-sm text-blue-500 hover:text-blue-600"
+            :class="{ 'animate-spin': isRefreshing }"
+          >
+            <RefreshCw class="w-4 h-4" />
+            <span class="hidden sm:inline">Actualiser</span>
+          </button>
         </div>
       </div>
+    </header>
 
-      <!-- Average Order Value -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div class="flex items-center justify-between mb-4">
-          <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-            <TrendingUp class="w-6 h-6 text-green-500" />
-          </div>
-          <span class="text-sm font-medium text-green-500">Moyenne</span>
-        </div>
-        <div class="space-y-1">
-          <h3 class="text-2xl font-bold text-gray-900">{{ stats.averageOrderValue }}</h3>
-          <p class="text-sm text-gray-500">par commande</p>
-        </div>
+    <div class="px-4 py-3">
+      <!-- Date and welcome -->
+      <div class="mb-6">
+        <p class="text-sm text-gray-500 capitalize">{{ getCurrentDate() }}</p>
+        <h2 class="text-2xl font-bold mt-1">Bonjour, {{ user?.user_metadata?.full_name?.split(' ')[0] || 'Manager' }} 👋</h2>
       </div>
 
-      <!-- Popular Items -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div class="flex items-center justify-between mb-4">
-          <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-            <Utensils class="w-6 h-6 text-purple-500" />
-          </div>
-          <span class="text-sm font-medium text-purple-500">Plus vendus</span>
-        </div>
-        <div class="space-y-1">
-          <h3 class="text-2xl font-bold text-gray-900">{{ stats.topProduct || 'Aucun' }}</h3>
-          <p class="text-sm text-gray-500">{{ stats.topProductOrders > 0 ? `${stats.topProductOrders} commandes` : 'Pas de données' }}</p>
-        </div>
+      <!-- Loading state -->
+      <div v-if="isLoading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
-    </div>
 
-    <!-- Secondary Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <!-- Category Performance -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">Performance par catégorie</h2>
-        </div>
-        <div class="p-6">
-          <div v-if="loading" class="flex justify-center py-8">
-            <Loader2 class="w-8 h-8 text-gray-300 animate-spin" />
-          </div>
-          <div v-else-if="stats.categoryPerformance.length === 0" class="text-center py-8">
-            <div class="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-4">
-              <ChartPie class="w-8 h-8 text-gray-300" />
+      <div v-else>
+        <!-- Dashboard Summary -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div 
+            v-for="stat in dashboardSummary" 
+            :key="stat.name"
+            class="bg-white border border-gray-200 rounded-xl p-4"
+          >
+            <div class="flex items-center gap-3 mb-2">
+              <div :class="[
+                stat.iconBg, 
+                'w-10 h-10 rounded-full flex items-center justify-center'
+              ]">
+                <component :is="stat.icon" class="w-5 h-5" :class="stat.iconColor" />
+              </div>
+              <span class="text-sm text-gray-500">{{ stat.name }}</span>
             </div>
-            <p class="text-gray-500">Pas de données disponibles</p>
-          </div>
-          <div v-else class="space-y-4">
-            <div v-for="category in stats.categoryPerformance" :key="category.id" class="flex items-center">
-              <div class="w-32 flex-shrink-0">
-                <p class="text-sm font-medium text-gray-700 truncate">{{ category.name }}</p>
-              </div>
-              <div class="flex-1 ml-4">
-                <div class="w-full bg-gray-100 rounded-full h-2.5">
-                  <div class="bg-blue-500 h-2.5 rounded-full" :style="`width: ${category.percentage}%`"></div>
-                </div>
-              </div>
-              <div class="ml-4 flex-shrink-0 w-16 text-right">
-                <p class="text-sm font-medium text-gray-900">{{ category.percentage }}%</p>
-              </div>
-            </div>
+            <p class="text-xl font-bold">{{ stat.value }}</p>
+            <p v-if="stat.change" class="text-xs mt-1" :class="stat.change > 0 ? 'text-green-500' : 'text-red-500'">
+              {{ stat.change > 0 ? '+' : '' }}{{ stat.change }}% vs hier
+            </p>
           </div>
         </div>
-      </div>
 
-      <!-- Time Distribution -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">Répartition horaire</h2>
-        </div>
-        <div class="p-6">
-          <div v-if="loading" class="flex justify-center py-8">
-            <Loader2 class="w-8 h-8 text-gray-300 animate-spin" />
-          </div>
-          <div v-else-if="stats.hourlyDistribution.length === 0" class="text-center py-8">
-            <div class="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-4">
-              <Clock class="w-8 h-8 text-gray-300" />
-            </div>
-            <p class="text-gray-500">Pas de données disponibles</p>
-          </div>
-          <div v-else class="space-y-4">
-            <div v-for="hour in stats.hourlyDistribution" :key="hour.hour" class="flex items-center">
-              <div class="w-16 flex-shrink-0">
-                <p class="text-sm font-medium text-gray-700">{{ hour.label }}</p>
-              </div>
-              <div class="flex-1 ml-4">
-                <div class="w-full bg-gray-100 rounded-full h-2.5">
-                  <div class="bg-green-500 h-2.5 rounded-full" :style="`width: ${hour.percentage}%`"></div>
-                </div>
-              </div>
-              <div class="ml-4 flex-shrink-0 w-16 text-right">
-                <p class="text-sm font-medium text-gray-900">{{ hour.count }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent Orders -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-gray-900">Commandes récentes</h2>
-        <NuxtLink 
-          to="/orders" 
-          class="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
-        >
-          Voir toutes
-        </NuxtLink>
-      </div>
-      <div v-if="loading" class="flex justify-center py-12">
-        <Loader2 class="w-8 h-8 text-gray-300 animate-spin" />
-      </div>
-      <div v-else-if="recentOrders.length === 0" class="text-center py-12">
-        <div class="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-4">
-          <ShoppingCart class="w-8 h-8 text-gray-300" />
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-1">Aucune commande</h3>
-        <p class="text-gray-500 max-w-sm mx-auto">
-          Vous n'avez pas encore reçu de commandes aujourd'hui.
-        </p>
-      </div>
-      <div v-else class="divide-y divide-gray-100">
-        <div 
-          v-for="order in recentOrders" 
-          :key="order.id"
-          class="p-4 hover:bg-gray-50 transition-colors"
-        >
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-              <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                <span class="text-blue-500 font-medium">T{{ order.table_number }}</span>
-              </div>
-              <div>
-                <div class="font-medium text-gray-900">{{ formatPrice(order.total_amount) }}</div>
-                <div class="text-sm text-gray-500">{{ formatTime(order.created_at) }}</div>
-              </div>
-            </div>
-            <div class="flex items-center space-x-2">
-              <span 
-                class="px-3 py-1 rounded-full text-sm font-medium"
-                :class="{
-                  'bg-emerald-50 text-emerald-600': order.status === 'completed',
-                  'bg-amber-50 text-amber-600': order.status === 'pending',
-                  'bg-blue-50 text-blue-600': order.status === 'preparing'
-                }"
+        <!-- Sales Chart -->
+        <div class="mb-6 bg-white border border-gray-200 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold">Ventes</h3>
+            <div class="flex gap-2">
+              <button 
+                v-for="period in ['day', 'week', 'month']" 
+                :key="period"
+                @click="chartPeriod = period"
+                class="px-3 py-1 text-xs rounded-full"
+                :class="chartPeriod === period ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
               >
-                {{ orderStatusMap[order.status] }}
-              </span>
+                {{ periodLabels[period] }}
+              </button>
+            </div>
+          </div>
+          <div class="h-64">
+            <!-- Chart would go here - using a placeholder -->
+            <div class="h-full flex items-center justify-center bg-gray-50 rounded-lg">
+              <div class="flex flex-col items-center">
+                <BarChart2 class="w-12 h-12 text-gray-300 mb-2" />
+                <p class="text-sm text-gray-500">Graphique des ventes par {{ periodLabels[chartPeriod].toLowerCase() }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two-column layout for desktop -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Recent Orders -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold">Commandes récentes</h3>
+              <NuxtLink 
+                :to="`/manager/${establishment?.id}/orders`"
+                class="text-blue-500 text-sm font-medium hover:underline"
+              >
+                Voir tout
+              </NuxtLink>
+            </div>
+            
+            <div class="space-y-3">
+              <div 
+                v-for="order in recentOrders" 
+                :key="order.id"
+                class="bg-white border border-gray-200 rounded-xl p-4"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div :class="[
+                      getStatusColor(order.status).bg,
+                      'w-10 h-10 rounded-full flex items-center justify-center'
+                    ]">
+                      <component 
+                        :is="getStatusIcon(order.status)"
+                        class="w-5 h-5"
+                        :class="getStatusColor(order.status).text"
+                      />
+                    </div>
+                    <div>
+                      <p class="font-bold">#{{ formatOrderNumber(order.id) }}</p>
+                      <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-xs px-2 py-0.5 rounded-full"
+                          :class="getStatusColor(order.status).badge"
+                        >
+                          {{ translateStatus(order.status) }}
+                        </span>
+                        <span class="text-xs text-gray-500">{{ formatTime(order.created_at) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="font-bold">{{ formatPrice(order.total_amount) }}</p>
+                </div>
+                <div class="mt-2 pl-[3.25rem] text-xs text-gray-500">
+                  {{ order.product_names?.slice(0, 3).join(', ') }}
+                  <span v-if="order.product_names?.length > 3">
+                    et {{ order.product_names.length - 3 }} autres
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Popular Products -->
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold">Produits populaires</h3>
+              <NuxtLink 
+                :to="`/manager/${establishment?.id}/menu`"
+                class="text-blue-500 text-sm font-medium hover:underline"
+              >
+                Voir tout
+              </NuxtLink>
+            </div>
+            
+            <div class="space-y-3">
+              <div 
+                v-for="product in popularProducts" 
+                :key="product.id"
+                class="bg-white border border-gray-200 rounded-xl p-4"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <img 
+                      :src="product.image_url || '/default-product.png'" 
+                      class="w-12 h-12 rounded-lg object-cover"
+                      alt="Product"
+                    />
+                    <div>
+                      <p class="font-bold">{{ product.name }}</p>
+                      <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-xs text-gray-500">{{ product.total_quantity || 0 }} vendus</span>
+                        <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                        <span class="text-xs text-gray-500">{{ product.category_name }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-bold">{{ formatPrice(product.price) }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                      {{ formatPrice(product.total_revenue || 0) }} total
+                    </p>
+                  </div>
+                </div>
+                <!-- Progress bar -->
+                <div class="h-1.5 bg-gray-100 rounded-full mt-3 overflow-hidden">
+                  <div 
+                    class="h-full bg-blue-500 rounded-full"
+                    :style="{ width: `${getPercentage(product.total_quantity, maxQuantity)}%` }"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Performance -->
+        <div class="mt-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold">Performance des catégories</h3>
+            <NuxtLink 
+              :to="`/manager/${establishment?.id}/categories`"
+              class="text-blue-500 text-sm font-medium hover:underline"
+            >
+              Gérer les catégories
+            </NuxtLink>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div 
+              v-for="category in categoryPerformance" 
+              :key="category.id"
+              class="bg-white border border-gray-200 rounded-xl p-4"
+            >
+              <div class="flex items-center gap-3 mb-3">
+                <img 
+                  :src="category.image_url || '/default-category.png'" 
+                  class="w-10 h-10 rounded-full object-cover"
+                  alt="Category"
+                />
+                <div>
+                  <p class="font-bold">{{ category.name }}</p>
+                  <p class="text-xs text-gray-500">{{ category.product_count }} produits</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div class="bg-gray-50 rounded-lg p-2">
+                  <p class="text-gray-500 text-xs">Ventes</p>
+                  <p class="font-bold">{{ formatPrice(category.total_revenue || 0) }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-2">
+                  <p class="text-gray-500 text-xs">Articles vendus</p>
+                  <p class="font-bold">{{ category.total_items_sold || 0 }}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -190,187 +239,226 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { 
-  ShoppingCart, Users, Utensils, TrendingUp, 
-  RefreshCw, ChartPie, Clock, Loader2 
+  TrendingUp, 
+  Users, 
+  ShoppingCart, 
+  DollarSign,
+  Coffee,
+  ChefHat,
+  Check,
+  CheckCircle,
+  RefreshCw,
+  BarChart2
 } from 'lucide-vue-next'
-import { useSupabaseWrapper } from '~/composables/useSupabase'
+import { useEstablishment } from '~/composables/useEstablishment'
+import { useAuth } from '~/composables/useAuth'
+import { useSupabaseClient } from '#imports'
 import { useCustomToast } from '~/composables/useToast'
-import { formatPrice, formatTime } from '~/utils/format'
 
-definePageMeta({
-  layout: 'manager'
-})
+const { establishment } = useEstablishment()
+const { user } = useAuth()
+const supabase = useSupabaseClient()
+const showToast = useCustomToast()
 
-const route = useRoute()
-const slug = route.params.slug as string
-const { client: supabase } = useSupabaseWrapper()
-const { showToast } = useCustomToast()
-
-const stats = ref({
-  orders: 0,
-  revenue: '0 XOF',
-  averageOrderValue: '0 XOF',
-  activeTables: 0,
-  topProduct: '-',
-  topProductOrders: 0,
-  categoryPerformance: [],
-  hourlyDistribution: []
-})
-
-const recentOrders = ref([])
-const loading = ref(true)
-
-const orderStatusMap = {
-  'completed': 'Terminée',
-  'pending': 'En attente',
-  'preparing': 'En préparation'
+const isLoading = ref(true)
+const isRefreshing = ref(false)
+const chartPeriod = ref('week')
+const periodLabels = {
+  day: 'Jour',
+  week: 'Semaine',
+  month: 'Mois'
 }
 
-// Format today's date
-const formattedDate = computed(() => {
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
-  return new Date().toLocaleDateString('fr-FR', options)
+// Data from views
+const dashboardSummary = ref([])
+const recentOrders = ref([])
+const popularProducts = ref([])
+const categoryPerformance = ref([])
+const salesData = ref([])
+
+// Computed max quantity for progress bars
+const maxQuantity = computed(() => {
+  if (!popularProducts.value.length) return 1
+  return Math.max(...popularProducts.value.map(p => p.total_quantity || 0))
 })
 
-const loadDashboardData = async () => {
-  loading.value = true
+// Load data from Supabase views
+const loadData = async () => {
   try {
-    const today = new Date().toISOString().split('T')[0]
+    isLoading.value = true
     
-    // Get today's orders
-    const { data: todayOrders, error: ordersError } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('establishment_id', slug)
-      .gte('created_at', today)
-      .order('created_at', { ascending: false })
-    
-    if (ordersError) throw ordersError
-
-    if (todayOrders && todayOrders.length > 0) {
-      // Calculate stats
-      const totalAmount = todayOrders.reduce((sum, order) => sum + order.total_amount, 0)
-      const activeTables = todayOrders.filter(order => order.status !== 'completed').length
-      const avgOrderValue = totalAmount / todayOrders.length
-
-      stats.value.orders = todayOrders.length
-      stats.value.revenue = formatPrice(totalAmount)
-      stats.value.averageOrderValue = formatPrice(avgOrderValue)
-      stats.value.activeTables = activeTables
-      
-      // Get recent orders
-      recentOrders.value = todayOrders.slice(0, 5)
-      
-      // Calculate hourly distribution
-      const hourCounts = {}
-      const maxHourCount = { count: 0 }
-      
-      todayOrders.forEach(order => {
-        const hour = new Date(order.created_at).getHours()
-        hourCounts[hour] = (hourCounts[hour] || 0) + 1
-        if (hourCounts[hour] > maxHourCount.count) {
-          maxHourCount.count = hourCounts[hour]
-        }
-      })
-      
-      stats.value.hourlyDistribution = Object.keys(hourCounts).map(hour => {
-        const percentage = Math.round((hourCounts[hour] / maxHourCount.count) * 100)
-        return {
-          hour,
-          label: `${hour}h`,
-          count: hourCounts[hour],
-          percentage
-        }
-      }).sort((a, b) => parseInt(a.hour) - parseInt(b.hour))
-    } else {
-      // Reset stats if no orders
-      stats.value.orders = 0
-      stats.value.revenue = formatPrice(0)
-      stats.value.averageOrderValue = formatPrice(0)
-      stats.value.activeTables = 0
-      recentOrders.value = []
-      stats.value.hourlyDistribution = []
-    }
-
-    // Get category performance
-    const { data: categories, error: categoriesError } = await supabase
-      .from('categories')
-      .select('id, name')
-      .eq('establishment_id', slug)
-    
-    if (categoriesError) throw categoriesError
-    
-    if (categories && categories.length > 0) {
-      // Get product counts by category
-      const { data: products, error: productsError } = await supabase
-        .from('products')
-        .select('category_id, orders_count')
-        .eq('establishment_id', slug)
-      
-      if (productsError) throw productsError
-      
-      if (products && products.length > 0) {
-        const categoryCounts = {}
-        let totalOrders = 0
-        
-        products.forEach(product => {
-          if (product.category_id) {
-            categoryCounts[product.category_id] = (categoryCounts[product.category_id] || 0) + (product.orders_count || 0)
-            totalOrders += (product.orders_count || 0)
-          }
-        })
-        
-        stats.value.categoryPerformance = categories
-          .map(category => ({
-            id: category.id,
-            name: category.name,
-            count: categoryCounts[category.id] || 0,
-            percentage: totalOrders > 0 
-              ? Math.round((categoryCounts[category.id] || 0) / totalOrders * 100) 
-              : 0
-          }))
-          .filter(cat => cat.count > 0)
-          .sort((a, b) => b.count - a.count)
-      } else {
-        stats.value.categoryPerformance = []
-      }
-    }
-
-    // Get most popular product
-    const { data: popular, error: popularError } = await supabase
-      .from('products')
-      .select('name, orders_count')
-      .eq('establishment_id', slug)
-      .order('orders_count', { ascending: false })
-      .limit(1)
+    // Load dashboard summary
+    const { data: summaryData, error: summaryError } = await supabase
+      .from('dashboard_summary')
+      .select('*')
+      .eq('establishment_id', establishment.value?.id)
       .single()
     
-    if (!popularError && popular) {
-      stats.value.topProduct = popular.name
-      stats.value.topProductOrders = popular.orders_count || 0
-    } else {
-      stats.value.topProduct = '-'
-      stats.value.topProductOrders = 0
-    }
+    if (summaryError) throw summaryError
+    
+    // Format dashboard summary
+    dashboardSummary.value = [
+      {
+        name: 'Ventes totales',
+        value: formatPrice(summaryData.total_revenue || 0),
+        icon: DollarSign,
+        iconBg: 'bg-blue-50',
+        iconColor: 'text-blue-500',
+        change: 8 // Example change percentage
+      },
+      {
+        name: 'Commandes',
+        value: summaryData.total_orders || 0,
+        icon: ShoppingCart,
+        iconBg: 'bg-orange-50',
+        iconColor: 'text-orange-500',
+        change: 12
+      },
+      {
+        name: 'Commandes en attente',
+        value: summaryData.pending_orders || 0,
+        icon: Coffee,
+        iconBg: 'bg-yellow-50',
+        iconColor: 'text-yellow-500'
+      },
+      {
+        name: 'Panier moyen',
+        value: formatPrice(summaryData.average_order_value || 0),
+        icon: TrendingUp,
+        iconBg: 'bg-green-50',
+        iconColor: 'text-green-500',
+        change: -2
+      }
+    ]
+    
+    // Load recent orders
+    const { data: ordersData, error: ordersError } = await supabase
+      .from('recent_orders')
+      .select('*')
+      .eq('establishment_id', establishment.value?.id)
+      .order('created_at', { ascending: false })
+      .limit(5)
+    
+    if (ordersError) throw ordersError
+    recentOrders.value = ordersData || []
+    
+    // Load popular products
+    const { data: productsData, error: productsError } = await supabase
+      .from('popular_products')
+      .select('*')
+      .limit(5)
+    
+    if (productsError) throw productsError
+    popularProducts.value = productsData || []
+    
+    // Load category performance
+    const { data: categoriesData, error: categoriesError } = await supabase
+      .from('category_performance')
+      .select('*')
+      .limit(6)
+    
+    if (categoriesError) throw categoriesError
+    categoryPerformance.value = categoriesData || []
+    
+    // Load sales data for chart
+    const { data: salesOverviewData, error: salesError } = await supabase
+      .from('sales_overview')
+      .select('*')
+      .order('day', { ascending: false })
+      .limit(30)
+    
+    if (salesError) throw salesError
+    salesData.value = salesOverviewData || []
+    
   } catch (error) {
     console.error('Error loading dashboard data:', error)
     showToast.error('Erreur', 'Impossible de charger les données du tableau de bord')
   } finally {
-    loading.value = false
+    isLoading.value = false
+    isRefreshing.value = false
   }
 }
 
-onMounted(() => {
-  loadDashboardData()
-})
-</script>
+// Refresh data
+const refreshData = async () => {
+  isRefreshing.value = true
+  await loadData()
+}
 
-<style scoped>
-/* Animation for the loader */
-@keyframes spin {
-  to { transform: rotate(360deg); }
+// Format price
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(price)
 }
-.animate-spin {
-  animation: spin 1s linear infinite;
+
+// Format time
+const formatTime = (dateString: string) => {
+  return new Date(dateString).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
-</style> 
+
+// Get current date
+const getCurrentDate = () => {
+  return new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+// Format order number
+const formatOrderNumber = (id: string) => {
+  return id.toString().slice(-4).padStart(4, '0')
+}
+
+// Get percentage for progress bars
+const getPercentage = (value: number, max: number) => {
+  if (!value || !max) return 0
+  return (value / max) * 100
+}
+
+const getStatusColor = (status: string) => {
+  const colors = {
+    'pending': { bg: 'bg-yellow-50', text: 'text-yellow-700', badge: 'bg-yellow-100 text-yellow-700' },
+    'preparing': { bg: 'bg-blue-50', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-700' },
+    'ready': { bg: 'bg-green-50', text: 'text-green-700', badge: 'bg-green-100 text-green-700' },
+    'completed': { bg: 'bg-gray-50', text: 'text-gray-700', badge: 'bg-gray-100 text-gray-700' }
+  }
+  return colors[status as keyof typeof colors] || colors.pending
+}
+
+const getStatusIcon = (status: string) => {
+  const icons = {
+    'pending': Coffee,
+    'preparing': ChefHat,
+    'ready': Check,
+    'completed': CheckCircle
+  }
+  return icons[status as keyof typeof icons] || Coffee
+}
+
+const translateStatus = (status: string) => {
+  const translations = {
+    'pending': 'En attente',
+    'preparing': 'En préparation',
+    'ready': 'Prêt',
+    'completed': 'Terminé'
+  }
+  return translations[status as keyof typeof translations] || status
+}
+
+onMounted(() => {
+  loadData()
+})
+
+definePageMeta({
+  layout: 'manager'
+})
+</script> 

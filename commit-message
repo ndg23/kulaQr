@@ -1,0 +1,23 @@
+feat(dashboard): implement Twitter-style UI and database views
+
+This commit introduces a major UI overhaul for the manager dashboard with a Twitter-inspired design, along with powerful database views for analytics.
+
+Key changes:
+- Redesigned manager layout with Twitter 2020 design language
+- Improved dashboard with card-based metrics and visualizations
+- Created 8 database views for comprehensive analytics:
+  - sales_overview: Daily/weekly/monthly sales aggregation
+  - popular_products: Product performance tracking
+  - recent_orders: Simplified order access
+  - category_performance: Category analytics
+  - staff_activity: Staff performance monitoring
+  - dashboard_summary: Key business metrics
+  - time_performance: Time-based analysis
+  - customer_retention: Customer loyalty tracking
+- Enhanced mobile responsiveness
+- Improved data visualization with progress bars and status indicators
+- Fixed user menu dropdown positioning
+
+This update significantly improves both the aesthetics and functionality of the manager dashboard, making it easier to monitor restaurant performance at a glance.
+
+Closes #142 

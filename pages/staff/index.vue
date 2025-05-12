@@ -1,171 +1,142 @@
 <template>
-  <div class="min-h-screen bg-[#F5F5F7] relative">
-    <!-- Pattern Background -->
-    <div class="absolute inset-0 pointer-events-none pattern-grid opacity-[0.03]"></div>
-
-    <!-- Content -->
-    <div class="relative z-10">
-      <!-- En-tête avec effet glassmorphism -->
-      <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50">
-        <div class="max-w-6xl mx-auto px-6 py-5">
-          <div class="flex items-center justify-between">
-            <div>
-              <h1 class="text-2xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Commandes
-              </h1>
-              <div class="flex items-center gap-2 mt-1">
-                <div class="flex items-center gap-1.5 text-sm bg-green-50 text-green-600 px-2.5 py-1 rounded-full">
-                  <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                  <span class="font-medium">{{ filteredOrders.length }} commandes</span>
-                </div>
-                <span class="text-sm text-gray-500">{{ currentDateTime }}</span>
-              </div>
+  <div class="min-h-screen bg-white">
+    <!-- En-tête simplifié -->
+    <header class="sticky top-0 z-50 bg-white border-b">
+      <div class="px-4 py-3 sm:px-6 sm:py-4">
+        <div class="flex items-center justify-between">
+          <h1 class="text-lg sm:text-xl font-medium text-gray-900">Commandes</h1>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full" :class="isOnline ? 'bg-green-500' : 'bg-gray-300'"></div>
+              <span class="text-sm text-gray-600">{{ isOnline ? 'En ligne' : 'Hors ligne' }}</span>
             </div>
-            <div class="flex items-center gap-4">
-              <div class="relative">
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Rechercher une commande..."
-                  class="pl-10 pr-4 py-2.5 w-64 rounded-full bg-gray-900/5 border-none text-sm placeholder-gray-500 focus:ring-2 focus:ring-gray-900/10 focus:bg-white transition-all"
-                />
-                <Search class="w-4 h-4 text-gray-400 absolute left-4 top-3" />
-              </div>
-              <button 
-                @click="toggleFilters"
-                class="p-2.5 rounded-full hover:bg-gray-900/5 transition-colors"
-                :class="{ 'bg-gray-900/10 text-gray-900': showFilters }"
-              >
-                <Filter class="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <!-- Filtres avancés -->
-      <div 
-        v-if="showFilters"
-        class="border-b border-gray-200/50 bg-white/70 backdrop-blur-xl"
-      >
-        <div class="max-w-6xl mx-auto px-6 py-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-xs font-medium text-gray-500 mb-2">Statut</label>
-              <select 
-                v-model="statusFilter" 
-                class="w-full rounded-xl border-gray-200/50 text-sm focus:ring-gray-900/10 bg-white/50"
-              >
-                <option value="all">Tous les statuts</option>
-                <option value="pending">En attente</option>
-                <option value="preparing">En préparation</option>
-                <option value="ready">Prêtes</option>
-              </select>
-            </div>
-            <!-- Autres filtres similaires -->
+            <button 
+              @click="toggleSound"
+              class="p-2 text-gray-500 hover:text-gray-900"
+            >
+              <component :is="isSoundEnabled ? Volume2 : VolumeX" class="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
+    </header>
 
-      <!-- Liste des commandes -->
-      <main class="max-w-3xl mx-auto px-6 py-8">
-        <TransitionGroup 
-          name="list" 
-          class="space-y-4"
-          tag="div"
+    <main class="px-4 py-4 sm:px-6 max-w-5xl mx-auto">
+      <!-- Filtres style Leboncoin -->
+      <div class="flex gap-2 overflow-x-auto pb-4">
+        <button
+          v-for="status in ['all', 'pending', 'preparing', 'ready']"
+          :key="status"
+          @click="statusFilter = status"
+          class="h-10 px-5 text-sm font-medium whitespace-nowrap transition-all"
+          :class="[
+            statusFilter === status 
+              ? 'bg-orange-500 text-white rounded-full' 
+              : 'text-gray-700 hover:bg-gray-100 rounded-full'
+          ]"
         >
-          <div 
-            v-for="order in filteredOrders" 
-            :key="order.id"
-            class="group bg-white rounded-2xl border border-gray-200/50 overflow-hidden hover:shadow-lg transition-all duration-300"
-          >
-            <!-- En-tête commande -->
-            <div class="p-5 flex items-center justify-between border-b border-gray-100">
+          {{ status === 'all' ? 'Toutes' : translateStatus(status) }}
+          <span v-if="status !== 'all'" class="ml-2 text-xs">
+            {{ orders.filter(o => o.status === status).length }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Liste des commandes style Leboncoin -->
+      <div class="mt-6 space-y-4">
+        <div
+          v-for="order in filteredOrders"
+          :key="order.id"
+          class="bg-white border rounded-lg hover:shadow-md transition-shadow"
+        >
+          <div class="p-5">
+            <!-- En-tête avec statut et temps -->
+            <div class="flex items-start justify-between gap-4">
               <div class="flex items-center gap-4">
-                <div 
-                  class="w-12 h-12 rounded-2xl flex items-center justify-center"
-                  :class="getStatusColor(order.status).bg"
-                >
+                <div :class="[
+                  'w-14 h-14 rounded-lg flex items-center justify-center',
+                  order.status === 'pending' ? 'bg-orange-50 text-orange-600' :
+                  order.status === 'preparing' ? 'bg-blue-50 text-blue-600' :
+                  'bg-green-50 text-green-600'
+                ]">
                   <component 
-                    :is="getStatusIcon(order.status)" 
-                    class="w-6 h-6"
-                    :class="getStatusColor(order.status).text" 
+                    :is="getStatusIcon(order.status)"
+                    class="w-7 h-7"
                   />
                 </div>
                 <div>
-                  <div class="flex items-center gap-3">
-                    <span class="text-xl font-bold text-gray-900">#{{ order.orderNumber }}</span>
-                    <span class="px-2.5 py-1 rounded-full text-xs font-medium"
-                      :class="getStatusColor(order.status).badge"
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl font-medium text-gray-900">#{{ order.orderNumber }}</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium"
+                      :class="[
+                        order.status === 'pending' ? 'bg-orange-50 text-orange-600' :
+                        order.status === 'preparing' ? 'bg-blue-50 text-blue-600' :
+                        'bg-green-50 text-green-600'
+                      ]"
                     >
                       {{ translateStatus(order.status) }}
                     </span>
                   </div>
-                  <div class="mt-1 text-sm text-gray-500 flex items-center gap-2">
+                  <div class="flex items-center gap-2 mt-1.5 text-sm text-gray-500">
+                    <TableIcon class="w-4 h-4" />
                     <span>Table {{ order.table }}</span>
                     <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                     <span>{{ formatTime(order.created_at) }}</span>
                   </div>
                 </div>
               </div>
-              <span class="text-lg font-bold text-gray-900">{{ formatPrice(order.total) }}</span>
-            </div>
-
-            <!-- Articles -->
-            <div class="divide-y divide-gray-50">
-              <div 
-                v-for="item in order.items" 
-                :key="item.id"
-                class="p-4 flex items-center gap-4 group-hover:bg-gray-50/50 transition-colors"
-              >
-                <div class="bg-gray-100 w-10 h-10 rounded-xl flex items-center justify-center font-medium text-gray-900">
-                  {{ item.quantity }}
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium text-gray-900">{{ item.name }}</div>
-                  <div v-if="item.note" class="text-sm text-gray-500 mt-0.5">{{ item.note }}</div>
-                </div>
-                <span class="text-sm font-medium text-gray-900">
-                  {{ formatPrice(item.price * item.quantity) }}
-                </span>
+              
+              <!-- Actions rapides -->
+              <div class="flex items-center gap-2">
+                <button
+                  v-if="order.status === 'pending'"
+                  @click="updateOrderStatus(order.id, 'preparing')"
+                  class="h-10 px-6 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600"
+                >
+                  Accepter
+                </button>
+                <button
+                  v-if="order.status === 'preparing'"
+                  @click="updateOrderStatus(order.id, 'ready')"
+                  class="h-10 px-6 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600"
+                >
+                  Prêt
+                </button>
+                <button
+                  v-if="order.status === 'ready'"
+                  @click="updateOrderStatus(order.id, 'completed')"
+                  class="h-10 px-6 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600"
+                >
+                  Terminé
+                </button>
               </div>
             </div>
 
-            <!-- Actions -->
-            <div class="p-4 bg-gray-50/50 flex justify-end gap-2">
-              <button 
-                v-if="order.status === 'pending'"
-                @click="updateOrderStatus(order.id, 'preparing')"
-                class="px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800 active:scale-95 transition-all flex items-center gap-2"
-              >
-                <ChefHat class="w-4 h-4" />
-                Accepter
-              </button>
-              <button 
-                v-if="order.status === 'preparing'"
-                @click="updateOrderStatus(order.id, 'ready')"
-                class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 active:scale-95 transition-all flex items-center gap-2"
-              >
-                <Check class="w-4 h-4" />
-                Prête
-              </button>
+            <!-- Liste des articles -->
+            <div class="mt-6 pl-[4.5rem]">
+              <div class="space-y-3">
+                <div 
+                  v-for="item in order.items" 
+                  :key="item.id"
+                  class="flex justify-between items-center text-sm"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-gray-900">{{ item.quantity }}×</span>
+                    <span class="text-gray-600">{{ item.name }}</span>
+                  </div>
+                  <span class="text-gray-900">{{ formatPrice(item.price) }}</span>
+                </div>
+                <!-- Total -->
+                <div class="flex justify-between items-center pt-3 border-t">
+                  <span class="font-medium text-gray-900">Total</span>
+                  <span class="text-lg font-medium text-gray-900">{{ formatPrice(order.total) }}</span>
+                </div>
+              </div>
             </div>
           </div>
-        </TransitionGroup>
-
-        <!-- État vide -->
-        <div 
-          v-if="filteredOrders.length === 0" 
-          class="text-center py-16 bg-white rounded-2xl border border-gray-200/50"
-        >
-          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center">
-            <ClipboardCheck class="w-10 h-10 text-gray-300" />
-          </div>
-          <h3 class="text-lg font-medium text-gray-900">Aucune commande</h3>
-          <p class="text-sm text-gray-500 mt-2">Les nouvelles commandes apparaîtront ici</p>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   </div>
 </template>
 
@@ -190,11 +161,22 @@ import {
   Package,
   BarChart2,
   ShoppingCart,
-  Filter
+  Filter,
+  Volume2,
+  VolumeX,
+  Table as TableIcon
 } from 'lucide-vue-next'
 import { useSupabaseClient } from '#imports'
 import { useCustomToast } from '~/composables/useToast'
-import type { Order, OrderItem, OrderStatus, StatusMessage } from '~/types'
+import type { 
+  Order, 
+  OrderItem, 
+  OrderStatus, 
+  StatusMessage,
+  DatabaseOrder,
+  DatabaseOrderItem,
+  ConnectionStatus 
+} from '~/types'
 
 const supabase = useSupabaseClient()
 const router = useRouter()
@@ -208,9 +190,10 @@ const latestActivity = ref<string | null>(null)
 const newOrderSound = ref<HTMLAudioElement | null>(null)
 const isOnline = ref(true)
 const searchQuery = ref('')
-const connectionStatus = ref<'connected' | 'disconnected'>('connected')
+const connectionStatus = ref<ConnectionStatus>('connected')
 const showFilters = ref(false)
 const statusFilter = ref('all')
+const isSoundEnabled = ref(true)
 
 // Typage des fonctions
 const statusMessages: StatusMessage = {
@@ -235,12 +218,12 @@ const translateStatus = (status: OrderStatus): string => {
 
 const getFilterCount = (filter: string): number => {
   if (filter === 'Toutes') {
-    return orders.value.filter(order => 
+    return orders.value.filter((order: Order) => 
       ['pending', 'preparing', 'ready'].includes(order.status)
     ).length
   }
   
-  return orders.value.filter(order => 
+  return orders.value.filter((order: Order) => 
     statusMap[filter]?.includes(order.status)
   ).length
 }
@@ -796,6 +779,10 @@ const getStatusIcon = (status: OrderStatus) => {
 
 const toggleFilters = () => {
   showFilters.value = !showFilters.value
+}
+
+const toggleSound = () => {
+  isSoundEnabled.value = !isSoundEnabled.value
 }
 </script>
 

@@ -484,27 +484,27 @@
 
 ## [0.2.0]
 
+### Added
+- Twitter-style navigation sidebar for manager dashboard
+- Improved mobile responsiveness with collapsible sidebar
+- New dashboard layout with modern card-based design
+- Staff order management interface with Leboncoin-inspired design
+- Real-time order notifications and status updates
+- Comprehensive database views for dashboard analytics
+
 ### Changed
-- **Authentification repensée**
-  - Design minimaliste inspiré de Twitter/Apple
-  - Labels flottants avec animations fluides
-  - Validation en temps réel des formulaires
-  - Support de l'authentification sociale
-  - Messages d'erreur contextuels
+- Redesigned manager dashboard with better data visualization
+- Simplified staff order interface for improved usability
+- Enhanced mobile-first approach across all interfaces
+- Improved color scheme and typography for better readability
+- Optimized layout for different screen sizes
 
-#### 🎨 Interface utilisateur
-- **Expérience utilisateur améliorée**
-  - Transitions et animations optimisées
-  - Retours visuels instantanés
-  - Navigation intuitive
-  - Interface adaptative
-
-#### 🔒 Sécurité
-- **Protection renforcée**
-  - Validation client/serveur
-  - Protection anti-spam
-  - Gestion sécurisée des tokens
-  - Authentification à deux facteurs
+### Fixed
+- User menu dropdown positioning on mobile devices
+- Order status color indicators for better visibility
+- Navigation active state detection
+- Mobile responsiveness issues in order management
+- Performance optimizations for real-time updates
 
 ## [0.1.0]
 
@@ -565,3 +565,37 @@
   - Intégration Supabase
   - Structure de base
   - Architecture initiale 
+
+## [0.6.0] - 2025-05-12
+
+### Added
+- Twitter-style navigation sidebar for manager dashboard
+- Comprehensive database views for analytics:
+  - Sales overview with daily/weekly/monthly aggregation
+  - Popular products tracking with performance metrics
+  - Category performance analysis
+  - Staff activity monitoring
+  - Time-based performance analysis
+  - Customer retention tracking
+- Real-time dashboard data refresh
+- Progress bars for visual data comparison
+- Status indicators with color coding
+
+### Changed
+- Complete UI overhaul with Twitter 2020 design language
+- Redesigned manager dashboard with better data visualization
+- Enhanced mobile-first approach across all interfaces
+- Improved color scheme and typography for better readability
+- Optimized layout for different screen sizes
+- Simplified data presentation with card-based design
+
+### Fixed
+- User menu dropdown positioning on mobile devices
+- Order status color indicators for better visibility
+- Navigation active state detection
+- Mobile responsiveness issues in order management
+- Performance optimizations for real-time updates
+- Database query performance for dashboard views
+
+
+

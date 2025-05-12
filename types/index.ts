@@ -101,7 +101,7 @@ export interface Order {
   total_amount?: number;
 }
 
-export type OrderStatus = 'pending' | 'accepted' | 'preparing' | 'ready' | 'completed' | 'rejected';
+export type OrderStatus = 'pending' | 'accepted' | 'preparing' | 'ready' | 'completed' | 'rejected' | 'cancelled';
 
 export interface StatusMessage {
   [key: string]: string;
@@ -110,4 +110,28 @@ export interface StatusMessage {
   preparing: string;
   ready: string;
   completed: string;
-} 
+}
+
+// Types pour la base de données
+export interface DatabaseOrder {
+  id: string;
+  establishment_id: string;
+  table_number: number;
+  status: OrderStatus;
+  total_amount: number;
+  created_at: string;
+  notes: string | null;
+}
+
+export interface DatabaseOrderItem {
+  id: string;
+  order_id: string;
+  quantity: number;
+  unit_price: number;
+  note: string | null;
+  products: {
+    name: string;
+  };
+}
+
+export type ConnectionStatus = 'connected' | 'disconnected' | 'connecting'; 
