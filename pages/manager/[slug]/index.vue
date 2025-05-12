@@ -1,27 +1,26 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-screen bg-gray-50">
     <!-- Header -->
-    <header class="sticky top-0 z-40 bg-white bg-opacity-90 backdrop-blur-sm border-b border-gray-100">
-      <div class="px-4 py-3">
+    <header class="sticky top-0 z-40 bg-white border-b border-gray-200">
+      <div class="px-4 py-4">
         <div class="flex items-center justify-between">
-          <h1 class="text-xl font-bold">Tableau de bord</h1>
+          <h1 class="text-xl font-bold">Dashboard</h1>
           <button 
             @click="refreshData" 
-            class="flex items-center gap-2 text-sm text-blue-500 hover:text-blue-600"
-            :class="{ 'animate-spin': isRefreshing }"
+            class="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            :disabled="isRefreshing"
           >
-            <RefreshCw class="w-4 h-4" />
-            <span class="hidden sm:inline">Actualiser</span>
+            <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
+            <span>Actualiser</span>
           </button>
         </div>
       </div>
     </header>
 
-    <div class="px-4 py-3">
-      <!-- Date and welcome -->
-      <div class="mb-6">
-        <p class="text-sm text-gray-500 capitalize">{{ getCurrentDate() }}</p>
-        <h2 class="text-2xl font-bold mt-1">Bonjour, {{ user?.user_metadata?.full_name?.split(' ')[0] || 'Manager' }} 👋</h2>
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <!-- Welcome section -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold">Bonjour, {{ user?.user_metadata?.full_name?.split(' ')[0] || 'Manager' }} 👋</h2>
       </div>
 
       <!-- Loading state -->
@@ -30,78 +29,48 @@
       </div>
 
       <div v-else>
-        <!-- Dashboard Summary -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <!-- Key metrics -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div 
             v-for="stat in dashboardSummary" 
             :key="stat.name"
-            class="bg-white border border-gray-200 rounded-xl p-4"
+            class="bg-white rounded-xl p-6 shadow-sm"
           >
-            <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-center gap-3 mb-3">
               <div :class="[
                 stat.iconBg, 
-                'w-10 h-10 rounded-full flex items-center justify-center'
+                'w-12 h-12 rounded-full flex items-center justify-center'
               ]">
-                <component :is="stat.icon" class="w-5 h-5" :class="stat.iconColor" />
+                <component :is="stat.icon" class="w-6 h-6" :class="stat.iconColor" />
               </div>
-              <span class="text-sm text-gray-500">{{ stat.name }}</span>
+              <span class="text-gray-500">{{ stat.name }}</span>
             </div>
-            <p class="text-xl font-bold">{{ stat.value }}</p>
-            <p v-if="stat.change" class="text-xs mt-1" :class="stat.change > 0 ? 'text-green-500' : 'text-red-500'">
-              {{ stat.change > 0 ? '+' : '' }}{{ stat.change }}% vs hier
-            </p>
+            <p class="text-3xl font-bold">{{ stat.value }}</p>
           </div>
         </div>
 
-        <!-- Sales Chart -->
-        <div class="mb-6 bg-white border border-gray-200 rounded-xl p-4">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold">Ventes</h3>
-            <div class="flex gap-2">
-              <button 
-                v-for="period in ['day', 'week', 'month']" 
-                :key="period"
-                @click="chartPeriod = period"
-                class="px-3 py-1 text-xs rounded-full"
-                :class="chartPeriod === period ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-              >
-                {{ periodLabels[period] }}
-              </button>
-            </div>
-          </div>
-          <div class="h-64">
-            <!-- Chart would go here - using a placeholder -->
-            <div class="h-full flex items-center justify-center bg-gray-50 rounded-lg">
-              <div class="flex flex-col items-center">
-                <BarChart2 class="w-12 h-12 text-gray-300 mb-2" />
-                <p class="text-sm text-gray-500">Graphique des ventes par {{ periodLabels[chartPeriod].toLowerCase() }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Two-column layout for desktop -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Two-column layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- Recent Orders -->
-          <div class="mb-6">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-bold">Commandes récentes</h3>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold">Commandes récentes</h3>
               <NuxtLink 
                 :to="`/manager/${establishment?.id}/orders`"
-                class="text-blue-500 text-sm font-medium hover:underline"
+                class="text-blue-500 font-medium hover:underline"
               >
                 Voir tout
               </NuxtLink>
             </div>
             
-            <div class="space-y-3">
+            <div class="space-y-4">
               <div 
-                v-for="order in recentOrders" 
+                v-for="order in recentOrders.slice(0, 5)" 
                 :key="order.id"
-                class="bg-white border border-gray-200 rounded-xl p-4"
+                class="border-b border-gray-100 pb-4 last:border-0 last:pb-0"
               >
                 <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-4">
                     <div :class="[
                       getStatusColor(order.status).bg,
                       'w-10 h-10 rounded-full flex items-center justify-center'
@@ -113,76 +82,64 @@
                       />
                     </div>
                     <div>
-                      <p class="font-bold">#{{ formatOrderNumber(order.id) }}</p>
-                      <div class="flex items-center gap-2 mt-0.5">
+                      <div class="flex items-center gap-2">
+                        <p class="font-bold">#{{ formatOrderNumber(order.id) }}</p>
                         <span class="text-xs px-2 py-0.5 rounded-full"
                           :class="getStatusColor(order.status).badge"
                         >
                           {{ translateStatus(order.status) }}
                         </span>
-                        <span class="text-xs text-gray-500">{{ formatTime(order.created_at) }}</span>
                       </div>
+                      <p class="text-sm text-gray-500 mt-1">
+                        Table {{ order.table_number }}
+                      </p>
                     </div>
                   </div>
-                  <p class="font-bold">{{ formatPrice(order.total_amount) }}</p>
-                </div>
-                <div class="mt-2 pl-[3.25rem] text-xs text-gray-500">
-                  {{ order.product_names?.slice(0, 3).join(', ') }}
-                  <span v-if="order.product_names?.length > 3">
-                    et {{ order.product_names.length - 3 }} autres
-                  </span>
+                  <p class="font-bold text-lg">{{ formatPrice(order.total_amount) }}</p>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Popular Products -->
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-bold">Produits populaires</h3>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold">Produits populaires</h3>
               <NuxtLink 
                 :to="`/manager/${establishment?.id}/menu`"
-                class="text-blue-500 text-sm font-medium hover:underline"
+                class="text-blue-500 font-medium hover:underline"
               >
-                Voir tout
+                Gérer le menu
               </NuxtLink>
             </div>
             
-            <div class="space-y-3">
+            <div class="space-y-4">
               <div 
-                v-for="product in popularProducts" 
+                v-for="product in popularProducts.slice(0, 5)" 
                 :key="product.id"
-                class="bg-white border border-gray-200 rounded-xl p-4"
+                class="border-b border-gray-100 pb-4 last:border-0 last:pb-0"
               >
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <img 
-                      :src="product.image_url || '/default-product.png'" 
-                      class="w-12 h-12 rounded-lg object-cover"
-                      alt="Product"
-                    />
-                    <div>
-                      <p class="font-bold">{{ product.name }}</p>
-                      <div class="flex items-center gap-2 mt-0.5">
-                        <span class="text-xs text-gray-500">{{ product.total_quantity || 0 }} vendus</span>
-                        <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                        <span class="text-xs text-gray-500">{{ product.category_name }}</span>
+                <div class="flex items-center gap-4">
+                  <img 
+                    :src="product.image_url || '/default-product.png'" 
+                    class="w-12 h-12 rounded-lg object-cover"
+                    alt="Product"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <p class="font-bold truncate">{{ product.name }}</p>
+                      <p class="font-bold">{{ formatPrice(product.price) }}</p>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                      <p class="text-sm text-gray-500">{{ product.total_quantity || 0 }} vendus</p>
+                      <div class="w-24 h-1.5 bg-gray-100 rounded-full">
+                        <div 
+                          class="h-full bg-blue-500 rounded-full"
+                          :style="{ width: `${getPercentage(product.total_quantity, maxQuantity)}%` }"
+                        ></div>
                       </div>
                     </div>
                   </div>
-                  <div class="text-right">
-                    <p class="font-bold">{{ formatPrice(product.price) }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">
-                      {{ formatPrice(product.total_revenue || 0) }} total
-                    </p>
-                  </div>
-                </div>
-                <!-- Progress bar -->
-                <div class="h-1.5 bg-gray-100 rounded-full mt-3 overflow-hidden">
-                  <div 
-                    class="h-full bg-blue-500 rounded-full"
-                    :style="{ width: `${getPercentage(product.total_quantity, maxQuantity)}%` }"
-                  ></div>
                 </div>
               </div>
             </div>
@@ -190,22 +147,22 @@
         </div>
 
         <!-- Category Performance -->
-        <div class="mt-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold">Performance des catégories</h3>
+        <div class="mt-8 bg-white rounded-xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold">Performance par catégorie</h3>
             <NuxtLink 
               :to="`/manager/${establishment?.id}/categories`"
-              class="text-blue-500 text-sm font-medium hover:underline"
+              class="text-blue-500 font-medium hover:underline"
             >
               Gérer les catégories
             </NuxtLink>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div 
-              v-for="category in categoryPerformance" 
+              v-for="category in categoryPerformance.slice(0, 3)" 
               :key="category.id"
-              class="bg-white border border-gray-200 rounded-xl p-4"
+              class="border border-gray-100 rounded-lg p-4"
             >
               <div class="flex items-center gap-3 mb-3">
                 <img 
@@ -218,14 +175,14 @@
                   <p class="text-xs text-gray-500">{{ category.product_count }} produits</p>
                 </div>
               </div>
-              <div class="grid grid-cols-2 gap-2 text-sm">
-                <div class="bg-gray-50 rounded-lg p-2">
+              <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="bg-gray-50 rounded-lg p-3">
                   <p class="text-gray-500 text-xs">Ventes</p>
-                  <p class="font-bold">{{ formatPrice(category.total_revenue || 0) }}</p>
+                  <p class="font-bold text-lg">{{ formatPrice(category.total_revenue || 0) }}</p>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-2">
-                  <p class="text-gray-500 text-xs">Articles vendus</p>
-                  <p class="font-bold">{{ category.total_items_sold || 0 }}</p>
+                <div class="bg-gray-50 rounded-lg p-3">
+                  <p class="text-gray-500 text-xs">Vendus</p>
+                  <p class="font-bold text-lg">{{ category.total_items_sold || 0 }}</p>
                 </div>
               </div>
             </div>
@@ -240,15 +197,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { 
   TrendingUp, 
-  Users, 
   ShoppingCart, 
   DollarSign,
   Coffee,
   ChefHat,
   Check,
   CheckCircle,
-  RefreshCw,
-  BarChart2
+  RefreshCw
 } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
@@ -262,19 +217,12 @@ const showToast = useCustomToast()
 
 const isLoading = ref(true)
 const isRefreshing = ref(false)
-const chartPeriod = ref('week')
-const periodLabels = {
-  day: 'Jour',
-  week: 'Semaine',
-  month: 'Mois'
-}
 
 // Data from views
 const dashboardSummary = ref([])
 const recentOrders = ref([])
 const popularProducts = ref([])
 const categoryPerformance = ref([])
-const salesData = ref([])
 
 // Computed max quantity for progress bars
 const maxQuantity = computed(() => {
@@ -303,19 +251,17 @@ const loadData = async () => {
         value: formatPrice(summaryData.total_revenue || 0),
         icon: DollarSign,
         iconBg: 'bg-blue-50',
-        iconColor: 'text-blue-500',
-        change: 8 // Example change percentage
+        iconColor: 'text-blue-500'
       },
       {
         name: 'Commandes',
         value: summaryData.total_orders || 0,
         icon: ShoppingCart,
         iconBg: 'bg-orange-50',
-        iconColor: 'text-orange-500',
-        change: 12
+        iconColor: 'text-orange-500'
       },
       {
-        name: 'Commandes en attente',
+        name: 'En attente',
         value: summaryData.pending_orders || 0,
         icon: Coffee,
         iconBg: 'bg-yellow-50',
@@ -326,8 +272,7 @@ const loadData = async () => {
         value: formatPrice(summaryData.average_order_value || 0),
         icon: TrendingUp,
         iconBg: 'bg-green-50',
-        iconColor: 'text-green-500',
-        change: -2
+        iconColor: 'text-green-500'
       }
     ]
     
@@ -355,24 +300,14 @@ const loadData = async () => {
     const { data: categoriesData, error: categoriesError } = await supabase
       .from('category_performance')
       .select('*')
-      .limit(6)
+      .limit(3)
     
     if (categoriesError) throw categoriesError
     categoryPerformance.value = categoriesData || []
     
-    // Load sales data for chart
-    const { data: salesOverviewData, error: salesError } = await supabase
-      .from('sales_overview')
-      .select('*')
-      .order('day', { ascending: false })
-      .limit(30)
-    
-    if (salesError) throw salesError
-    salesData.value = salesOverviewData || []
-    
   } catch (error) {
     console.error('Error loading dashboard data:', error)
-    showToast.error('Erreur', 'Impossible de charger les données du tableau de bord')
+    showToast.error('Erreur', 'Impossible de charger les données')
   } finally {
     isLoading.value = false
     isRefreshing.value = false
@@ -385,32 +320,14 @@ const refreshData = async () => {
   await loadData()
 }
 
-// Format price
+// Format price with XOF currency
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'EUR',
+    currency: 'XOF',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(price)
-}
-
-// Format time
-const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-// Get current date
-const getCurrentDate = () => {
-  return new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
 }
 
 // Format order number
