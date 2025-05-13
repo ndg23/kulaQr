@@ -42,6 +42,10 @@
           v-if="establishment" 
         />
         
+        <div v-if="showTableBanner" class="bg-blue-50 p-4 rounded-xl mb-6 text-center">
+          <p class="text-blue-700 font-medium">Table {{ tableNumber }}</p>
+        </div>
+        
         <div class="pb-24" v-if="categories.length > 0">
           <div v-for="category in categories" :key="category.id">
             <CategoryButton
@@ -88,6 +92,7 @@
       <WaitingLoader 
         :is-visible="isWaiting" 
         :status="orderStatus"
+        :status-message="statusMessage"
       />
       
       <OrderSummaryTicket
@@ -100,11 +105,39 @@
         v-model:cart="cart"
         ref="addNoteModal"
       />
+      
+      <!-- Notification toast pour les changements de statut -->
+      <div 
+        v-if="showStatusToast" 
+        class="fixed bottom-24 left-0 right-0 flex justify-center z-50 px-4"
+        @click="showStatusToast = false"
+      >
+        <div class="bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3 animate-fadeIn">
+          <div v-if="orderStatus === 'waiting'" class="w-2 h-2 bg-blue-400 rounded-full"></div>
+          <div v-else-if="orderStatus === 'success'" class="w-2 h-2 bg-green-400 rounded-full"></div>
+          <div v-else-if="orderStatus === 'rejected'" class="w-2 h-2 bg-red-400 rounded-full"></div>
+          <span>{{ statusMessage }}</span>
+        </div>
+      </div>
     </div>
+  
+    <!-- <div v-if="isDev && debugQrTracking" class="fixed bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white p-4 font-mono text-xs z-50 max-h-60 overflow-auto">
+      <pre>{{ debugQrTracking }}</pre>
+    </div> -->
+    
+    <!-- Bouton de test en développement -->
+    <!-- <div v-if="isDev" class="fixed top-20 right-4 z-50">
+      <button 
+        @click="testScanManually" 
+        class="bg-blue-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:bg-blue-600"
+      >
+        Test Scan
+      </button>
+    </div> -->
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted, computed, onUnmounted } from 'vue'
+  import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
   import { UtensilsCrossed, Store, Loader2 } from 'lucide-vue-next'
   import type { CartItem, OrderData, Product } from '~/types'
   import RestaurantHeader from '~/components/RestaurantHeader.vue'
@@ -134,6 +167,13 @@
   const error = ref('')
   const loading = ref(true)
   const addNoteModal = ref(null)
+  const debugQrTracking = ref('')
+  
+  // Nouvelles propriétés pour gérer les notifications
+  const statusMessage = ref('')
+  const showStatusToast = ref(false)
+  
+  const isDev = process.dev
   
   // Types for Supabase
   type OrderStatus = 'pending' | 'accepted' | 'rejected' | 'preparing' | 'ready' | 'completed'
@@ -147,6 +187,9 @@
     created_at: string
     notes: string | null
   }
+  
+  // Nouvelle propriété pour suivre l'abonnement aux changements de statut des commandes
+  let orderSubscription = null
   
   // Fetch data from Supabase
   const fetchData = async () => {
@@ -236,14 +279,120 @@
     cart.value = cart.value.filter(item => item.id !== itemId)
   }
   
-  // Order placement
+  // Méthode pour afficher un toast de notification
+  const showToast = (message: string) => {
+    statusMessage.value = message
+    showStatusToast.value = true
+    
+    // Masquer automatiquement après 5 secondes
+    setTimeout(() => {
+      showStatusToast.value = false
+    }, 5000)
+  }
+  
+  // Méthode pour s'abonner aux changements de statut de commande
+  const subscribeToOrderUpdates = (orderId) => {
+    // Annuler l'abonnement existant s'il y en a un
+    if (orderSubscription) {
+      orderSubscription.unsubscribe()
+    }
+    
+    console.log('Abonnement aux mises à jour pour la commande:', orderId)
+    
+    // Créer un nouvel abonnement pour cette commande
+    orderSubscription = supabase
+      .channel(`order-status-${orderId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${orderId}`
+        },
+        (payload) => {
+          console.log('Mise à jour de statut de commande reçue:', payload)
+          
+          const newStatus = payload.new.status
+          
+          // Mettre à jour le statut dans l'objet confirmedOrder
+          if (confirmedOrder.value && confirmedOrder.value.id === orderId) {
+            confirmedOrder.value.status = newStatus
+          }
+          
+          // Définir les messages de statut pour l'interface
+          const statusMessages = {
+            'confirmed': 'Votre commande a été confirmée',
+            'preparing': 'Votre commande est en préparation',
+            'ready': 'Votre commande est prête !',
+            'completed': 'Votre commande a été livrée',
+            'cancelled': 'Votre commande a été annulée'
+          }
+          
+          // Mettre à jour le message de statut
+          statusMessage.value = statusMessages[newStatus] || 'Mise à jour du statut'
+          
+          // Mettre à jour l'affichage pour le composant WaitingLoader
+          orderStatus.value = getWaitingStatus(newStatus)
+          
+          // Si c'est une transition importante, afficher un toast
+          showToast(statusMessages[newStatus] || 'Le statut de votre commande a changé')
+          
+          // Si la commande est terminée ou annulée, cacher le loader d'attente
+          if (newStatus === 'completed' || newStatus === 'cancelled') {
+            isWaiting.value = false
+          }
+          
+          // Si la commande est confirmée (et qu'elle était en attente),
+          // mettre à jour confirmedOrder et vider le panier
+          if (newStatus === 'confirmed' && !confirmedOrder.value) {
+            isWaiting.value = false // Masquer le loader
+            
+            // Créer la commande confirmée
+            confirmedOrder.value = {
+              id: orderId,
+              table: tableNumber.value || 0,
+              items: cart.value.map(item => ({
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                notes: item.notes
+              })),
+              total: cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0),
+              status: newStatus,
+              created_at: new Date().toISOString()
+            }
+            
+            // Vider le panier et fermer l'interface de panier
+            cart.value = []
+            isCartExpanded.value = false
+          }
+        }
+      )
+      .subscribe()
+  }
+  
+  // Fonction d'aide pour convertir le statut en état d'attente
+  const getWaitingStatus = (orderStatus) => {
+    const statusMap = {
+      'pending': 'loading',
+      'confirmed': 'waiting',
+      'preparing': 'waiting',
+      'ready': 'success',
+      'completed': 'success',
+      'cancelled': 'rejected'
+    }
+    return statusMap[orderStatus] || 'loading'
+  }
+  
+  // Mettre à jour la fonction placeOrder pour s'abonner aux mises à jour
   const placeOrder = async () => {
     if (cart.value.length === 0) return
   
+    isWaiting.value = true
+    orderStatus.value = 'loading'
+    
     try {
-      isWaiting.value = true
-      orderStatus.value = 'loading'
-      
       // Create a new order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -278,71 +427,8 @@
       // Change status to waiting for staff confirmation
       orderStatus.value = 'waiting'
       
-      // Subscribe to order status changes
-      const channel = supabase
-      .channel('orders-changes')
-      .on<DatabaseOrder>(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'orders',
-            filter: `id=eq.${orderData.id}`
-          },
-          (payload) => {
-            const newStatus = payload.new.status
-
-            switch (newStatus) {
-              case 'accepted':
-                orderStatus.value = 'success'
-                setTimeout(() => {
-                  isWaiting.value = false
-                  confirmedOrder.value = {
-                    id: orderData.id,
-                    table: orderData.table_number,
-                    items: cart.value.map(item => ({
-                      name: item.name,
-                      price: item.price,
-                      quantity: item.quantity,
-                      notes: item.notes
-                    })),
-                    total: orderData.total_amount,
-                    status: newStatus,
-                    created_at: new Date().toISOString()
-                  }
-                  cart.value = []
-                  isCartExpanded.value = false
-                }, 1000)
-                break
-
-              case 'rejected':
-                orderStatus.value = 'rejected'
-                setTimeout(() => {
-                  isWaiting.value = false
-                  error.value = 'Votre commande a été refusée par le restaurant.'
-                }, 2000)
-                break
-
-              case 'preparing':
-                if (confirmedOrder.value) {
-                  confirmedOrder.value.status = newStatus
-                }
-                break
-
-              case 'ready':
-                if (confirmedOrder.value) {
-                  confirmedOrder.value.status = newStatus
-                }
-                break
-            }
-          }
-        )
-        .subscribe()
-
-      // Cleanup subscription on component unmount
-      onUnmounted(() => {
-        channel.unsubscribe()
-      })
+      // S'abonner aux mises à jour de statut pour cette commande
+      subscribeToOrderUpdates(orderData.id)
       
     } catch (err) {
       console.error('Error placing order:', err)
@@ -351,8 +437,22 @@
     }
   }
   
+  // Fonction pour se désabonner lors du démontage du composant
+  onUnmounted(() => {
+    if (orderSubscription) {
+      orderSubscription.unsubscribe()
+    }
+  })
+  
+  // Mettre à jour la fonction handleOrderClose pour se désabonner 
   const handleOrderClose = () => {
     confirmedOrder.value = null
+    
+    // Se désabonner des mises à jour
+    if (orderSubscription) {
+      orderSubscription.unsubscribe()
+      orderSubscription = null
+    }
   }
   
   const toggleCategory = (categoryId: string) => {
@@ -375,6 +475,60 @@
   onMounted(() => {
     fetchData()
   })
+  
+  onMounted(() => {
+    // Supprimer cette logique pour éviter le double scan
+    // Ne garder que la vérification des scans en attente (qui n'ont pas pu être envoyés précédemment)
+    const pendingData = localStorage.getItem('qr_scan_pending')
+    if (pendingData && !route.query.track) {
+      // Ne traiter les scans en attente que si nous ne sommes pas dans un nouveau scan
+      sendPendingTracking()
+    }
+  })
+  
+  // Simplifier la fonction d'envoi
+  const sendPendingTracking = async () => {
+    const pendingData = localStorage.getItem('qr_scan_pending')
+    if (!pendingData) return
+    
+    try {
+      const data = JSON.parse(pendingData)
+      
+      // Convertir slug en UUID si besoin
+      let establishmentId = data.establishment_id
+      const { data: establishment } = await supabase
+        .from('establishments')
+        .select('id')
+        .eq('slug', data.establishment_id)
+        .single()
+      
+      if (establishment) {
+        establishmentId = establishment.id
+      }
+      
+      // Envoi via l'API
+      const response = await fetch(`${window.location.origin}/api/qr-scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          establishment_id: establishmentId
+        })
+      })
+      
+      if (response.ok) {
+        localStorage.removeItem('qr_scan_pending')
+      }
+    } catch (err) {
+      // Silencieux en production
+    }
+  }
+  
+  const tableNumber = computed(() => route.query.table ? Number(route.query.table) : null)
+  
+  // Show table number if available
+  const showTableBanner = computed(() => tableNumber.value !== null)
+  
   </script>
   
   <style scoped>
@@ -396,11 +550,11 @@
   }
   
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
   
-  .space-y-8 {
+  .animate-fadeIn {
     animation: fadeIn 0.3s ease-out;
   }
   </style> 

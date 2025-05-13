@@ -19,6 +19,25 @@
 
 ## Versions
 
+### [0.6.1] - 15 Mai 2025 🍽️
+
+#### ✨ Nouvelles fonctionnalités
+- **Interface Staff améliorée**
+  - Simplification de l'affichage pour un seul établissement par membre du staff
+  - Ajout de notifications sonores pour les nouvelles commandes
+  - Animation visuelle pour mettre en évidence les commandes récentes
+  - Indicateur en temps réel du statut de connexion au serveur
+
+#### 🐛 Corrections
+- Résolution du problème de chargement indéfini sur la page staff
+- Meilleure gestion des erreurs lors du chargement des données
+- Correction de l'affichage des établissements pour le personnel
+
+#### ⚡️ Performance
+- Optimisation du chargement initial pour l'interface staff
+- Amélioration des requêtes Supabase pour la gestion des commandes
+- Réduction du temps de réponse pour les mises à jour en temps réel
+
 ### [0.6.0] - 12 Mai 2025 📊
 
 #### ✨ Nouvelles fonctionnalités

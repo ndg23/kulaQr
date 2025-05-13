@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen bg-[#F5F5F7]">
-    <!-- En-tête avec effet glassmorphism amélioré -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50">
-      <div class="max-w-[1600px] mx-auto px-6 py-5">
+  <div class="min-h-screen bg-white">
+    <!-- Header with glass effect -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/20 shadow-sm">
+      <div class="max-w-[1400px] mx-auto px-6 sm:px-8 py-6">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div class="max-w-2xl">
             <div class="flex items-center gap-3 mb-2">
-              <h1 class="text-3xl font-semibold text-gray-900">Menu</h1>
+              <h1 class="text-3xl font-bold text-gray-900">Menu</h1>
               <div class="flex items-center gap-2 px-3 py-1 bg-gray-900/5 rounded-full">
                 <span class="text-sm font-medium text-gray-600">{{ categories.length }} catégories</span>
                 <span class="w-1 h-1 rounded-full bg-gray-300"></span>
@@ -21,20 +21,20 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Rechercher un produit..."
-                class="w-full sm:w-64 pl-10 pr-4 h-11 rounded-xl bg-white shadow-sm border border-gray-200/50 focus:ring-2 focus:ring-gray-900/10 focus:border-transparent transition-all"
+                class="w-full sm:w-64 pl-10 pr-4 h-11 rounded-full bg-white shadow-sm border border-gray-200/30 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
               />
               <Search class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             </div>
             <button 
               @click="openNewCategoryModal"
-              class="h-11 px-6 bg-gray-900/5 hover:bg-gray-900/10 text-gray-700 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+              class="h-11 px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2"
             >
               <Plus class="w-4 h-4" />
               Catégorie
             </button>
             <button 
               @click="openAddProduct"
-              class="h-11 px-6 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
+              class="h-11 px-6 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
             >
               <Plus class="w-4 h-4" />
               Nouveau produit
@@ -44,24 +44,24 @@
       </div>
     </header>
 
-    <main class="max-w-[1600px] mx-auto px-6 py-8">
+    <main class="max-w-[1400px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
         <div 
           v-for="stat in quickStats" 
           :key="stat.name"
-          class="group bg-white rounded-xl border border-gray-200/50 hover:border-gray-300 p-4 hover:shadow-lg transition-all duration-300"
+          class="group bg-white rounded-2xl shadow-sm hover:shadow-md p-5 sm:p-6 transition-all duration-300"
         >
           <div class="flex items-center gap-4">
             <div :class="[
               stat.iconBg, 
-              'w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110'
+              'w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110'
             ]">
-              <component :is="stat.icon" class="w-6 h-6" :class="stat.iconColor" />
+              <component :is="stat.icon" class="w-6 h-6 sm:w-7 sm:h-7" :class="stat.iconColor" />
             </div>
             <div>
               <p class="text-sm font-medium text-gray-500">{{ stat.name }}</p>
-              <p class="text-2xl font-semibold text-gray-900 mt-0.5">{{ stat.value }}</p>
+              <p class="text-2xl sm:text-3xl font-bold text-gray-900 mt-0.5">{{ stat.value }}</p>
             </div>
           </div>
         </div>
@@ -73,10 +73,10 @@
           v-for="category in categories"
           :key="category.id"
           @click="activeCategory = category.id"
-          class="h-11 px-5 rounded-xl text-sm font-medium whitespace-nowrap transition-all"
+          class="h-11 px-5 rounded-full text-sm font-medium whitespace-nowrap transition-all"
           :class="[
             activeCategory === category.id
-              ? 'bg-gray-900 text-white shadow-sm'
+              ? 'bg-blue-600 text-white shadow-sm'
               : 'bg-white text-gray-700 border border-gray-200/50 hover:bg-gray-50'
           ]"
         >
@@ -85,11 +85,11 @@
       </div>
 
       <!-- Grid des produits -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
         <div 
           v-for="product in filteredProducts" 
           :key="product.id"
-          class="group bg-white rounded-xl border border-gray-200/50 hover:border-gray-300 overflow-hidden hover:shadow-lg transition-all duration-300"
+          class="group bg-white rounded-2xl shadow-sm hover:shadow-md overflow-hidden transition-all duration-300"
         >
           <!-- Image du produit -->
           <div class="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
@@ -118,8 +118,10 @@
               >
                 <span class="sr-only">Disponibilité</span>
                 <span
-                  class="inline-block h-4 w-4 transform rounded-full bg-gray-900 transition"
-                  :class="product.is_available ? 'translate-x-6' : 'translate-x-1'"
+                  class="inline-block h-4 w-4 transform rounded-full transition"
+                  :class="[
+                    product.is_available ? 'translate-x-6 bg-blue-600' : 'translate-x-1 bg-gray-400'
+                  ]"
                 />
               </Switch>
               <button 
@@ -132,18 +134,47 @@
           </div>
 
           <!-- Infos produit -->
-          <div class="p-4">
+          <div class="p-5">
             <div class="flex items-start justify-between gap-4">
               <div class="min-w-0">
-                <h3 class="font-medium text-gray-900 truncate">{{ product.name }}</h3>
+                <h3 class="font-semibold text-gray-900 truncate">{{ product.name }}</h3>
                 <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ product.description }}</p>
               </div>
-              <span class="text-sm font-semibold text-gray-900 whitespace-nowrap">
+              <span class="text-sm font-bold text-gray-900 whitespace-nowrap">
                 {{ formatPrice(product.price) }}
               </span>
             </div>
+            <div class="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
+              <span class="text-xs text-gray-500">
+                Catégorie: {{ getCategoryName(product.category_id) }}
+              </span>
+              <div 
+                class="text-xs font-medium px-2 py-1 rounded-full"
+                :class="product.is_available ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-500'"
+              >
+                {{ product.is_available ? 'En vente' : 'Masqué' }}
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+      
+      <!-- Empty state -->
+      <div v-if="filteredProducts.length === 0" class="py-16 flex flex-col items-center justify-center">
+        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+          <Search class="w-10 h-10 text-gray-300" />
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun produit trouvé</h3>
+        <p class="text-gray-500 text-center max-w-md">
+          {{ searchQuery ? "Aucun produit ne correspond à votre recherche." : "Aucun produit disponible dans cette catégorie." }}
+        </p>
+        <button 
+          @click="openAddProduct"
+          class="mt-6 h-11 px-6 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+        >
+          <Plus class="w-4 h-4" />
+          Ajouter un produit
+        </button>
       </div>
     </main>
 
@@ -191,7 +222,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Switch, TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue'
+import { Switch, TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle } from '@headlessui/vue'
 import {
   Plus, UtensilsCrossed, Edit2, Trash2,
   Coffee, Pizza, Store, TrendingUp, IceCream, Loader2,
@@ -548,4 +579,24 @@ definePageMeta({
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Smooth element appearance animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.grid > div {
+  animation: fadeIn 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.grid > div:nth-child(1) { animation-delay: 0.05s; }
+.grid > div:nth-child(2) { animation-delay: 0.1s; }
+.grid > div:nth-child(3) { animation-delay: 0.15s; }
+.grid > div:nth-child(4) { animation-delay: 0.2s; }
+.grid > div:nth-child(5) { animation-delay: 0.25s; }
+.grid > div:nth-child(6) { animation-delay: 0.3s; }
+.grid > div:nth-child(7) { animation-delay: 0.35s; }
+.grid > div:nth-child(8) { animation-delay: 0.4s; }
 </style> 

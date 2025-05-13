@@ -1,90 +1,85 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-white">
     <!-- Header -->
-    <header class="sticky top-0 z-40 bg-white border-b border-gray-200">
-      <div class="px-4 py-4">
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100 shaodw--sm">
+      <div class="px-5 sm:px-10 py-5">
         <div class="flex items-center justify-between">
-          <h1 class="text-xl font-bold">Dashboard</h1>
+          <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
           <button 
             @click="refreshData" 
-            class="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            class="flex items-center gap-2 px-5 py-2.5 text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shaodw--sm"
             :disabled="isRefreshing"
           >
             <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
-            <span>Actualiser</span>
+            <span class="hidden sm:inline">Actualiser</span>
           </button>
         </div>
       </div>
     </header>
 
-    <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="max-w-6xl mx-auto px-5 sm:px-10 py-10 sm:py-14">
       <!-- Welcome section -->
-      <div class="mb-8">
-        <h2 class="text-2xl font-bold">Bonjour, {{ user?.user_metadata?.full_name?.split(' ')[0] || 'Manager' }} 👋</h2>
+      <div class="mb-10 sm:mb-16">
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Bonjour, {{ user?.user_metadata?.full_name?.split(' ')[0] || 'Manager' }} 👋</h2>
+        <p class="text-gray-500 mt-2 text-lg">Résumé de votre activité</p>
       </div>
 
       <!-- Loading state -->
-      <div v-if="isLoading" class="flex justify-center items-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div v-if="isLoading" class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-14 w-14 border-b-2 border-blue-600"></div>
       </div>
 
-      <div v-else>
+      <div v-else class="space-y-14">
         <!-- Key metrics -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
           <div 
             v-for="stat in dashboardSummary" 
             :key="stat.name"
-            class="bg-white rounded-xl p-6 shadow-sm"
+            class="bg-white rounded-3xl p-6 sm:p-8 shaodw--lg hover:shaodw--xl transition-all duration-300 border border-gray-100 overflow-hidden group"
           >
-            <div class="flex items-center gap-3 mb-3">
+            <div class="flex flex-col">
               <div :class="[
                 stat.iconBg, 
-                'w-12 h-12 rounded-full flex items-center justify-center'
+                'w-12 h-12 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300'
               ]">
                 <component :is="stat.icon" class="w-6 h-6" :class="stat.iconColor" />
               </div>
-              <span class="text-gray-500">{{ stat.name }}</span>
+              <p class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{{ stat.value }}</p>
+              <span class="text-gray-500 text-sm font-medium">{{ stat.name }}</span>
             </div>
-            <p class="text-3xl font-bold">{{ stat.value }}</p>
           </div>
         </div>
 
-        <!-- Two-column layout -->
+        <!-- Orders & Products -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- Recent Orders -->
-          <div class="bg-white rounded-xl p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="text-xl font-bold">Commandes récentes</h3>
-              <NuxtLink 
-                :to="`/manager/${establishment?.id}/orders`"
-                class="text-blue-500 font-medium hover:underline"
-              >
-                Voir tout
-              </NuxtLink>
+          <div class="bg-white rounded-3xl shaodw--lg hover:shaodw--xl transition-all duration-300 border border-gray-100 overflow-hidden">
+            <div class="flex items-center justify-between px-7 py-6 border-b border-gray-100">
+              <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Commandes récentes</h3>
             </div>
             
-            <div class="space-y-4">
+            <div class="divide-y divide-gray-50">
               <div 
-                v-for="order in recentOrders.slice(0, 5)" 
+                v-for="order in recentOrders.slice(0, 3)" 
                 :key="order.id"
-                class="border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                class="px-7 py-5 hover:bg-gray-50 transition-colors"
               >
                 <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-5">
                     <div :class="[
                       getStatusColor(order.status).bg,
-                      'w-10 h-10 rounded-full flex items-center justify-center'
+                      'w-12 h-12 rounded-2xl flex items-center justify-center shaodw--sm'
                     ]">
                       <component 
                         :is="getStatusIcon(order.status)"
-                        class="w-5 h-5"
+                        class="w-6 h-6"
                         :class="getStatusColor(order.status).text"
                       />
                     </div>
                     <div>
                       <div class="flex items-center gap-2">
-                        <p class="font-bold">#{{ formatOrderNumber(order.id) }}</p>
-                        <span class="text-xs px-2 py-0.5 rounded-full"
+                        <p class="font-bold text-base text-gray-900">#{{ formatOrderNumber(order.id) }}</p>
+                        <span class="text-xs px-3 py-1 rounded-full"
                           :class="getStatusColor(order.status).badge"
                         >
                           {{ translateStatus(order.status) }}
@@ -95,46 +90,50 @@
                       </p>
                     </div>
                   </div>
-                  <p class="font-bold text-lg">{{ formatPrice(order.total_amount) }}</p>
+                  <p class="font-bold text-xl text-gray-900">{{ formatPrice(order.total_amount) }}</p>
                 </div>
               </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-blue-50 to-gray-50 px-7 py-4 border-t border-gray-100 text-center">
+              <NuxtLink 
+                :to="`/manager/${establishment?.id}/orders`"
+                class="text-blue-600 font-bold hover:text-blue-700 transition-colors text-base inline-flex items-center gap-2 group"
+              >
+                <span>Voir toutes les commandes</span>
+                <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </NuxtLink>
             </div>
           </div>
 
           <!-- Popular Products -->
-          <div class="bg-white rounded-xl p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="text-xl font-bold">Produits populaires</h3>
-              <NuxtLink 
-                :to="`/manager/${establishment?.id}/menu`"
-                class="text-blue-500 font-medium hover:underline"
-              >
-                Gérer le menu
-              </NuxtLink>
+          <div class="bg-white rounded-3xl shaodw--lg hover:shaodw--xl transition-all duration-300 border border-gray-100 overflow-hidden">
+            <div class="flex items-center justify-between px-7 py-6 border-b border-gray-100">
+              <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Produits populaires</h3>
             </div>
             
-            <div class="space-y-4">
+            <div class="divide-y divide-gray-50">
               <div 
-                v-for="product in popularProducts.slice(0, 5)" 
+                v-for="product in popularProducts.slice(0, 3)" 
                 :key="product.id"
-                class="border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                class="px-7 py-5 hover:bg-gray-50 transition-colors"
               >
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-5">
                   <img 
                     :src="product.image_url || '/default-product.png'" 
-                    class="w-12 h-12 rounded-lg object-cover"
+                    class="w-16 h-16 rounded-2xl object-cover shaodw--sm border border-gray-100"
                     alt="Product"
                   />
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between">
-                      <p class="font-bold truncate">{{ product.name }}</p>
-                      <p class="font-bold">{{ formatPrice(product.price) }}</p>
+                      <p class="font-bold text-lg text-gray-900 truncate">{{ product.name }}</p>
+                      <p class="font-bold text-xl text-gray-900">{{ formatPrice(product.price) }}</p>
                     </div>
-                    <div class="flex items-center justify-between mt-1">
+                    <div class="flex items-center gap-3 mt-2">
                       <p class="text-sm text-gray-500">{{ product.total_quantity || 0 }} vendus</p>
-                      <div class="w-24 h-1.5 bg-gray-100 rounded-full">
+                      <div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
                         <div 
-                          class="h-full bg-blue-500 rounded-full"
+                          class="h-full bg-blue-600 rounded-full"
                           :style="{ width: `${getPercentage(product.total_quantity, maxQuantity)}%` }"
                         ></div>
                       </div>
@@ -143,46 +142,48 @@
                 </div>
               </div>
             </div>
+            
+            <div class="bg-gradient-to-r from-blue-50 to-gray-50 px-7 py-4 border-t border-gray-100 text-center">
+              <NuxtLink 
+                :to="`/manager/${establishment?.id}/menu`"
+                class="text-blue-600 font-bold hover:text-blue-700 transition-colors text-base inline-flex items-center gap-2 group"
+              >
+                <span>Gérer le menu</span>
+                <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </NuxtLink>
+            </div>
           </div>
         </div>
 
         <!-- Category Performance -->
-        <div class="mt-8 bg-white rounded-xl p-6 shadow-sm">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold">Performance par catégorie</h3>
-            <NuxtLink 
-              :to="`/manager/${establishment?.id}/categories`"
-              class="text-blue-500 font-medium hover:underline"
-            >
-              Gérer les catégories
-            </NuxtLink>
+        <div>
+          <div class="flex items-center justify-between mb-6 sm:mb-8">
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Performance par catégorie</h3>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div 
               v-for="category in categoryPerformance.slice(0, 3)" 
               :key="category.id"
-              class="border border-gray-100 rounded-lg p-4"
+              class="bg-white rounded-3xl p-6 sm:p-8 shaodw--lg hover:shaodw--xl transition-all duration-300 border border-gray-100 overflow-hidden"
             >
-              <div class="flex items-center gap-3 mb-3">
+              <div class="flex flex-col items-center text-center mb-6">
                 <img 
                   :src="category.image_url || '/default-category.png'" 
-                  class="w-10 h-10 rounded-full object-cover"
+                  class="w-20 h-20 rounded-2xl object-cover border border-gray-100 shaodw--sm mb-4"
                   alt="Category"
                 />
-                <div>
-                  <p class="font-bold">{{ category.name }}</p>
-                  <p class="text-xs text-gray-500">{{ category.product_count }} produits</p>
-                </div>
+                <p class="font-bold text-xl text-gray-900">{{ category.name }}</p>
+                <p class="text-sm text-gray-500">{{ category.product_count }} produits</p>
               </div>
-              <div class="grid grid-cols-2 gap-3 text-sm">
-                <div class="bg-gray-50 rounded-lg p-3">
-                  <p class="text-gray-500 text-xs">Ventes</p>
-                  <p class="font-bold text-lg">{{ formatPrice(category.total_revenue || 0) }}</p>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded-2xl p-4 hover:bg-blue-50 transition-colors text-center">
+                  <p class="text-gray-500 text-xs font-medium mb-1">Ventes</p>
+                  <p class="font-bold text-xl sm:text-2xl text-gray-900">{{ formatPrice(category.total_revenue || 0) }}</p>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-3">
-                  <p class="text-gray-500 text-xs">Vendus</p>
-                  <p class="font-bold text-lg">{{ category.total_items_sold || 0 }}</p>
+                <div class="bg-gray-50 rounded-2xl p-4 hover:bg-blue-50 transition-colors text-center">
+                  <p class="text-gray-500 text-xs font-medium mb-1">Vendus</p>
+                  <p class="font-bold text-xl sm:text-2xl text-gray-900">{{ category.total_items_sold || 0 }}</p>
                 </div>
               </div>
             </div>
@@ -203,7 +204,8 @@ import {
   ChefHat,
   Check,
   CheckCircle,
-  RefreshCw
+  RefreshCw,
+  ArrowRight
 } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
@@ -218,11 +220,39 @@ const showToast = useCustomToast()
 const isLoading = ref(true)
 const isRefreshing = ref(false)
 
-// Data from views
-const dashboardSummary = ref([])
-const recentOrders = ref([])
-const popularProducts = ref([])
-const categoryPerformance = ref([])
+// Data from views with proper TypeScript types
+const dashboardSummary = ref<{
+  name: string;
+  value: string | number;
+  icon: any;
+  iconBg: string;
+  iconColor: string;
+}[]>([])
+
+const recentOrders = ref<{
+  id: string;
+  status: string;
+  table_number: number;
+  total_amount: number;
+  created_at: string;
+}[]>([])
+
+const popularProducts = ref<{
+  id: string;
+  name: string;
+  price: number;
+  image_url: string | null;
+  total_quantity: number;
+}[]>([])
+
+const categoryPerformance = ref<{
+  id: string;
+  name: string;
+  image_url: string | null;
+  product_count: number;
+  total_revenue: number;
+  total_items_sold: number;
+}[]>([])
 
 // Computed max quantity for progress bars
 const maxQuantity = computed(() => {
@@ -305,7 +335,7 @@ const loadData = async () => {
     if (categoriesError) throw categoriesError
     categoryPerformance.value = categoriesData || []
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error loading dashboard data:', error)
     showToast.error('Erreur', 'Impossible de charger les données')
   } finally {
