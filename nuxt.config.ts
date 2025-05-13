@@ -61,5 +61,9 @@ export default defineNuxtConfig({
       '/waiter': { redirect: '/staff' },
       '/waiter/**': { redirect: '/staff/**' }
     }
+  },
+  public: {
+    qrSecretKey: process.env.QR_SECRET_KEY,
+    baseURL: process.env.BASE_URL
   }
 })

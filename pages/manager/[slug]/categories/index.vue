@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen bg-[#F5F5F7]">
-    <!-- En-tête avec effet glassmorphism amélioré -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50">
-      <div class="max-w-[1600px] mx-auto px-6 py-5">
+  <div class="min-h-screen bg-white">
+    <!-- Header with glass effect -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/20 shadow-sm">
+      <div class="max-w-[1400px] mx-auto px-6 sm:px-8 py-6">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div class="max-w-2xl">
             <div class="flex items-center gap-3 mb-2">
-              <h1 class="text-3xl font-semibold text-gray-900">Catégories</h1>
+              <h1 class="text-3xl font-bold text-gray-900">Catégories</h1>
               <div class="flex items-center gap-2 px-3 py-1 bg-gray-900/5 rounded-full">
                 <span class="text-sm font-medium text-gray-600">{{ categories.length }}</span>
                 <span class="w-1 h-1 rounded-full bg-gray-300"></span>
@@ -21,13 +21,13 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Rechercher une catégorie..."
-                class="w-full sm:w-64 pl-10 pr-4 h-11 rounded-xl bg-white shadow-sm border border-gray-200/50 focus:ring-2 focus:ring-gray-900/10 focus:border-transparent transition-all"
+                class="w-full sm:w-64 pl-10 pr-4 h-11 rounded-full bg-white shadow-sm border border-gray-200/30 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
               />
               <Search class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             </div>
             <button
               @click="openCategoryModal"
-              class="h-11 px-6 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
+              class="h-11 px-6 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
             >
               <Plus class="w-4 h-4" />
               Nouvelle catégorie
@@ -37,24 +37,24 @@
       </div>
     </header>
 
-    <main class="max-w-[1600px] mx-auto px-6 py-8">
+    <main class="max-w-[1400px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
       <!-- Quick Actions -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
         <div 
           v-for="action in quickActions" 
           :key="action.name"
-          class="group bg-white rounded-xl border border-gray-200/50 hover:border-gray-300 p-4 hover:shadow-lg transition-all duration-300 cursor-pointer"
+          class="group bg-white rounded-2xl shadow-sm hover:shadow-md p-5 sm:p-6 transition-all duration-300 cursor-pointer"
           @click="action.onClick"
         >
           <div class="flex items-center gap-4">
             <div :class="[
               action.iconBg, 
-              'w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110'
+              'w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110'
             ]">
-              <component :is="action.icon" class="w-6 h-6" :class="action.iconColor" />
+              <component :is="action.icon" class="w-6 h-6 sm:w-7 sm:h-7" :class="action.iconColor" />
             </div>
             <div class="flex-1">
-              <h3 class="font-medium text-gray-900">{{ action.name }}</h3>
+              <h3 class="font-semibold text-gray-900">{{ action.name }}</h3>
               <p class="text-sm text-gray-500 mt-0.5">{{ action.description }}</p>
             </div>
             <ArrowRight class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1" />
@@ -73,18 +73,18 @@
 
       <!-- Empty State -->
       <div v-else-if="categories.length === 0" 
-        class="bg-white rounded-2xl border border-gray-200/50 p-12 text-center max-w-lg mx-auto mt-12"
+        class="bg-white rounded-2xl shadow-md p-12 text-center max-w-lg mx-auto mt-12"
       >
         <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gray-50 flex items-center justify-center">
           <UtensilsCrossed class="w-10 h-10 text-gray-300" />
         </div>
-        <h3 class="text-xl font-medium text-gray-900 mb-2">Commencez votre menu</h3>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Commencez votre menu</h3>
         <p class="text-gray-500 mb-8">
           Créez des catégories pour organiser vos produits et faciliter la navigation de vos clients.
         </p>
         <button
           @click="openCategoryModal"
-          class="px-6 py-3 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 active:scale-95 transition-all inline-flex items-center gap-2"
+          class="px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 active:scale-95 transition-all inline-flex items-center gap-2"
         >
           <Plus class="w-5 h-5" />
           Créer votre première catégorie
@@ -92,11 +92,11 @@
       </div>
 
       <!-- Categories Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
         <div 
           v-for="category in filteredCategories" 
           :key="category.id"
-          class="group bg-white rounded-xl border border-gray-200/50 hover:border-gray-300 overflow-hidden hover:shadow-lg transition-all duration-300"
+          class="group bg-white rounded-2xl shadow-sm hover:shadow-md overflow-hidden transition-all duration-300"
         >
           <!-- Image Header avec effet amélioré -->
           <div class="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
@@ -108,7 +108,7 @@
             />
             <div v-else class="absolute inset-0 flex items-center justify-center">
               <div class="text-center transform group-hover:scale-110 transition-all duration-300">
-                <div class="w-16 h-16 mx-auto rounded-xl bg-gray-900/5 backdrop-blur flex items-center justify-center mb-3">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-gray-900/5 backdrop-blur flex items-center justify-center mb-3">
                   <component 
                     :is="category.icon || UtensilsCrossed" 
                     class="w-8 h-8 text-gray-400"
@@ -142,40 +142,92 @@
             </div>
           </div>
 
-          <!-- Category Info -->
-          <div class="p-4">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-gray-900/5 flex items-center justify-center">
-                <component 
-                  :is="category.icon || UtensilsCrossed" 
-                  class="w-5 h-5 text-gray-600" 
-                />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-medium text-gray-900 truncate">{{ category.name }}</h3>
-                <p class="text-sm text-gray-500">Mise à jour {{ formatDate(category.updated_at) }}</p>
-              </div>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div 
-                class="h-full bg-gray-900 rounded-full transition-all duration-300"
-                :style="{ width: `${(getProductCount(category.id) / Math.max(...categories.map(c => getProductCount(c.id)))) * 100}%` }"
-              ></div>
+          <!-- Informations de la catégorie -->
+          <div class="p-5">
+            <h3 class="font-semibold text-gray-900 truncate">{{ category.name }}</h3>
+            <p class="text-sm text-gray-500 mt-1 mb-3 line-clamp-2">{{ category.description || 'Aucune description' }}</p>
+            
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+              <span class="text-xs text-gray-500">Créée le {{ formatDate(category.created_at) }}</span>
+              <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                {{ getProductCount(category.id) > 1 ? `${getProductCount(category.id)} produits` : `${getProductCount(category.id)} produit` }}
+              </span>
             </div>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Category Modal -->
-    <CategoryModal
-      v-if="showCategoryModal"
-      :category="editingCategory"
-      @close="closeCategoryModal"
-      @submit="saveCategory"
-    />
+    <!-- Modal for Category Management -->
+    <TransitionRoot appear :show="showCategoryModal" as="template">
+      <Dialog as="div" class="relative z-50" @close="closeCategoryModal">
+        <TransitionChild
+          as="template"
+          enter="duration-300 ease-out"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="duration-200 ease-in"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <TransitionChild
+              as="template"
+              enter="duration-300 ease-out"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="duration-200 ease-in"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <DialogTitle as="h3" class="text-xl font-semibold leading-6 text-gray-900">
+                  {{ editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
+                </DialogTitle>
+                <div class="mt-6 space-y-5">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                    <input 
+                      v-model="categoryForm.name" 
+                      type="text" 
+                      placeholder="Ex: Entrées, Plats, Desserts..."
+                      class="w-full h-11 px-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description (optionnelle)</label>
+                    <textarea 
+                      v-model="categoryForm.description" 
+                      placeholder="Description de la catégorie..."
+                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                  <button 
+                    @click="closeCategoryModal" 
+                    class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button 
+                    @click="saveCategory" 
+                    class="px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  >
+                    {{ editingCategory ? 'Enregistrer' : 'Ajouter' }}
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
   </div>
 </template>
 
@@ -453,8 +505,24 @@ const formatDate = (date: string) => {
 </script>
 
 <style scoped>
-.backdrop-blur-sm {
-  backdrop-filter: blur(8px);
+/* Smooth element appearance animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+.grid > div {
+  animation: fadeIn 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.grid > div:nth-child(1) { animation-delay: 0.05s; }
+.grid > div:nth-child(2) { animation-delay: 0.1s; }
+.grid > div:nth-child(3) { animation-delay: 0.15s; }
+.grid > div:nth-child(4) { animation-delay: 0.2s; }
+.grid > div:nth-child(5) { animation-delay: 0.25s; }
+.grid > div:nth-child(6) { animation-delay: 0.3s; }
+.grid > div:nth-child(7) { animation-delay: 0.35s; }
+.grid > div:nth-child(8) { animation-delay: 0.4s; }
 </style> 
 

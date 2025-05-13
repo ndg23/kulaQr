@@ -1,137 +1,245 @@
 <template>
   <div class="min-h-screen bg-white">
-    <!-- En-tête simplifié -->
-    <header class="sticky top-0 z-50 bg-white border-b">
-      <div class="px-4 py-3 sm:px-6 sm:py-4">
-        <div class="flex items-center justify-between">
-          <h1 class="text-lg sm:text-xl font-medium text-gray-900">Commandes</h1>
+    <!-- Header -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/20 shadow-sm">
+      <div class="max-w-[1400px] mx-auto px-6 sm:px-8 py-4">
+        <!-- Logo et nom de l'app -->
+        <div class="flex items-center mb-4">
           <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2">
-              <div class="w-2 h-2 rounded-full" :class="isOnline ? 'bg-green-500' : 'bg-gray-300'"></div>
-              <span class="text-sm text-gray-600">{{ isOnline ? 'En ligne' : 'Hors ligne' }}</span>
+            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+              <UtensilsCrossed class="w-5 h-5" />
             </div>
+            <span class="text-xl font-bold text-gray-900">Kula QR</span>
+          </div>
+        </div>
+        
+        <!-- Header contenu -->
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Commandes</h1>
+            <p class="text-base text-gray-500">Gérez les commandes en temps réel</p>
+          </div>
+          
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full" :class="connectionStatus === 'connected' ? 'bg-green-500' : connectionStatus === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'"></div>
+              <span class="text-sm text-gray-600">{{ connectionStatusText }}</span>
+            </div>
+            
             <button 
-              @click="toggleSound"
-              class="p-2 text-gray-500 hover:text-gray-900"
+              @click="toggleSound" 
+              class="h-10 w-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
             >
-              <component :is="isSoundEnabled ? Volume2 : VolumeX" class="w-5 h-5" />
+              <Volume2 v-if="soundEnabled" class="w-5 h-5 text-gray-700" />
+              <VolumeX v-else class="w-5 h-5 text-gray-700" />
+            </button>
+            
+            <button 
+              @click="refreshOrders" 
+              class="h-10 w-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              :class="{ 'animate-spin': isRefreshing }"
+            >
+              <RefreshCw class="w-5 h-5 text-gray-700" />
             </button>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="px-4 py-4 sm:px-6 max-w-5xl mx-auto">
-      <!-- Filtres style Leboncoin -->
-      <div class="flex gap-2 overflow-x-auto pb-4">
-        <button
-          v-for="status in ['all', 'pending', 'preparing', 'ready']"
-          :key="status"
-          @click="statusFilter = status"
-          class="h-10 px-5 text-sm font-medium whitespace-nowrap transition-all"
-          :class="[
-            statusFilter === status 
-              ? 'bg-orange-500 text-white rounded-full' 
-              : 'text-gray-700 hover:bg-gray-100 rounded-full'
-          ]"
+    <main class="max-w-[768px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
+      <!-- Informations sur l'établissement (remplace le sélecteur) -->
+      <div class="mb-8">
+        <div v-if="isLoading" class="h-12 w-full bg-gray-100 animate-pulse rounded-xl mb-6"></div>
+        
+        <div v-else-if="establishment" class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl mb-6">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+            <Store class="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-900">{{ establishment.name }}</h3>
+            <p class="text-sm text-gray-600">Gestion des commandes</p>
+          </div>
+        </div>
+        
+        <div v-else class="p-4 bg-yellow-50 rounded-xl mb-6 text-yellow-800">
+          <p class="text-sm">Aucun établissement associé à votre compte.</p>
+        </div>
+
+        <!-- Reste du filtrage/recherche -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+          <div class="sm:w-64">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Filtrer</label>
+            <div class="relative">
+              <input 
+                v-model="searchQuery"
+                type="text"
+                placeholder="Rechercher une commande..."
+                class="w-full h-12 pl-10 pr-4 rounded-xl bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
+              />
+              <Search class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex overflow-x-auto gap-2 py-2 scrollbar-hide">
+          <button 
+            v-for="status in ['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled']" 
+            :key="status"
+            @click="filterStatus = status"
+            class="h-10 px-4 rounded-full text-sm font-medium whitespace-nowrap"
+            :class="filterStatus === status 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
+          >
+            {{ statusLabels[status] }}
+          </button>
+        </div>
+      </div>
+      
+      <!-- Loading state -->
+      <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
+        <Loader2 class="w-10 h-10 animate-spin text-gray-400 mb-4" />
+        <p class="text-gray-500">Chargement des commandes...</p>
+      </div>
+      
+      <!-- Error state -->
+      <div v-else-if="loadError" class="bg-white rounded-2xl shadow-sm p-8 text-center">
+        <div class="w-16 h-16 mx-auto bg-red-50 rounded-2xl flex items-center justify-center mb-4">
+          <AlertTriangle class="w-8 h-8 text-red-400" />
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Erreur de chargement</h3>
+        <p class="text-gray-500 max-w-md mx-auto mb-4">
+          Impossible de charger les commandes. Veuillez réessayer.
+        </p>
+        <button 
+          @click="loadOrders" 
+          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg inline-flex items-center gap-2"
         >
-          {{ status === 'all' ? 'Toutes' : translateStatus(status) }}
-          <span v-if="status !== 'all'" class="ml-2 text-xs">
-            {{ orders.filter(o => o.status === status).length }}
-          </span>
+          <RefreshCw class="w-4 h-4" />
+          Réessayer
         </button>
       </div>
-
-      <!-- Liste des commandes style Leboncoin -->
-      <div class="mt-6 space-y-4">
-        <div
-          v-for="order in filteredOrders"
+      
+      <!-- Empty state -->
+      <div v-else-if="filteredOrders.length === 0" class="bg-white rounded-2xl shadow-sm p-8 text-center">
+        <div class="w-16 h-16 mx-auto bg-gray-50 rounded-2xl flex items-center justify-center mb-4">
+          <ClipboardList class="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Aucune commande</h3>
+        <p class="text-gray-500 max-w-md mx-auto">
+          {{ searchQuery 
+            ? "Aucune commande ne correspond à votre recherche." 
+            : filterStatus !== 'all' 
+              ? `Aucune commande avec le statut "${statusLabels[filterStatus]}".` 
+              : "Vous n'avez pas encore reçu de commandes." }}
+        </p>
+      </div>
+      
+      <!-- Orders -->
+      <div v-else class="grid grid-cols-1 max-w-7xl mx-auto sm:gap-6">
+        <div 
+          v-for="order in filteredOrders" 
           :key="order.id"
-          class="bg-white border rounded-lg hover:shadow-md transition-shadow"
+          :class="[
+            'bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 relative',
+            recentlyReceivedOrders.has(order.id) ? 'new-order' : ''
+          ]"
         >
-          <div class="p-5">
-            <!-- En-tête avec statut et temps -->
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex items-center gap-4">
-                <div :class="[
-                  'w-14 h-14 rounded-lg flex items-center justify-center',
-                  order.status === 'pending' ? 'bg-orange-50 text-orange-600' :
-                  order.status === 'preparing' ? 'bg-blue-50 text-blue-600' :
-                  'bg-green-50 text-green-600'
-                ]">
-                  <component 
-                    :is="getStatusIcon(order.status)"
-                    class="w-7 h-7"
-                  />
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xl font-medium text-gray-900">#{{ order.orderNumber }}</span>
-                    <span class="px-3 py-1 rounded-full text-sm font-medium"
-                      :class="[
-                        order.status === 'pending' ? 'bg-orange-50 text-orange-600' :
-                        order.status === 'preparing' ? 'bg-blue-50 text-blue-600' :
-                        'bg-green-50 text-green-600'
-                      ]"
-                    >
-                      {{ translateStatus(order.status) }}
-                    </span>
-                  </div>
-                  <div class="flex items-center gap-2 mt-1.5 text-sm text-gray-500">
-                    <TableIcon class="w-4 h-4" />
-                    <span>Table {{ order.table }}</span>
-                    <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                    <span>{{ formatTime(order.created_at) }}</span>
-                  </div>
-                </div>
+          <!-- Order card header -->
+          <div class="flex justify-between items-center p-5 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+              <div :class="[getStatusColor(order.status).bg, 'w-12 h-12 rounded-xl flex items-center justify-center']">
+                <component :is="getStatusIcon(order.status)" class="w-6 h-6" :class="getStatusColor(order.status).text" />
               </div>
-              
-              <!-- Actions rapides -->
-              <div class="flex items-center gap-2">
-                <button
-                  v-if="order.status === 'pending'"
-                  @click="updateOrderStatus(order.id, 'preparing')"
-                  class="h-10 px-6 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600"
-                >
-                  Accepter
-                </button>
-                <button
-                  v-if="order.status === 'preparing'"
-                  @click="updateOrderStatus(order.id, 'ready')"
-                  class="h-10 px-6 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600"
-                >
-                  Prêt
-                </button>
-                <button
-                  v-if="order.status === 'ready'"
-                  @click="updateOrderStatus(order.id, 'completed')"
-                  class="h-10 px-6 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600"
-                >
-                  Terminé
-                </button>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Commande #{{ order.orderNumber || '---' }}</h3>
+                <p class="text-sm text-gray-500">{{ getElapsedTime(order.created_at) }}</p>
               </div>
             </div>
-
-            <!-- Liste des articles -->
-            <div class="mt-6 pl-[4.5rem]">
-              <div class="space-y-3">
-                <div 
-                  v-for="item in order.items" 
-                  :key="item.id"
-                  class="flex justify-between items-center text-sm"
-                >
-                  <div class="flex items-center gap-2">
-                    <span class="font-medium text-gray-900">{{ item.quantity }}×</span>
-                    <span class="text-gray-600">{{ item.name }}</span>
-                  </div>
-                  <span class="text-gray-900">{{ formatPrice(item.price) }}</span>
+            
+            <!-- Indicateur de nouvelle commande -->
+            <div v-if="recentlyReceivedOrders.has(order.id)" class="absolute top-3 right-3 bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs font-medium animate-pulse-subtle">
+              Nouvelle
+            </div>
+            
+            <!-- Status badge -->
+            <div :class="[getStatusColor(order.status).badge, 'px-3 py-1 rounded-full text-xs font-semibold']">
+              {{ translateStatus(order.status) }}
+            </div>
+          </div>
+          
+          <!-- Order items -->
+          <div class="p-5">
+            <h4 class="text-sm font-medium text-gray-500 mb-3">Éléments ({{ order.items.length }})</h4>
+            
+            <div class="space-y-3 mb-4">
+              <div 
+                v-for="(item, index) in order.items" 
+                :key="index"
+                class="flex items-start gap-3"
+              >
+                <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-xs font-medium flex-shrink-0 mt-0.5">
+                  {{ item.quantity }}
                 </div>
-                <!-- Total -->
-                <div class="flex justify-between items-center pt-3 border-t">
-                  <span class="font-medium text-gray-900">Total</span>
-                  <span class="text-lg font-medium text-gray-900">{{ formatPrice(order.total) }}</span>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-gray-900">{{ item.name }}</div>
+                  <div v-if="item.notes" class="text-sm text-gray-500 mt-1">{{ item.notes }}</div>
                 </div>
+                <div class="text-sm font-medium text-gray-900">{{ formatPrice(item.unit_price) }}</div>
               </div>
+            </div>
+            
+            <div class="pt-3 border-t border-gray-100 flex justify-between items-center">
+              <span class="text-sm text-gray-500">Total</span>
+              <span class="text-base font-bold">{{ formatPrice(order.total_amount) }}</span>
+            </div>
+          </div>
+          
+          <!-- Actions -->
+          <div class="p-4 bg-gray-50 border-t border-gray-100">
+            <div class="flex flex-wrap gap-2">
+              <button 
+                v-if="order.status === 'pending'" 
+                @click="updateOrderStatus(order.id, 'preparing')"
+                class="flex-1 h-10 px-3 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+              >
+                <Check class="w-4 h-4" />
+                Accepter
+              </button>
+              
+              <button 
+                v-if="order.status === 'preparing'" 
+                @click="updateOrderStatus(order.id, 'ready')"
+                class="flex-1 h-10 px-3 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+              >
+                <CheckCircle class="w-4 h-4" />
+                Prêt
+              </button>
+              
+              <button 
+                v-if="order.status === 'ready'" 
+                @click="updateOrderStatus(order.id, 'completed')"
+                class="flex-1 h-10 px-3 bg-purple-600 text-white rounded-full text-sm font-medium hover:bg-purple-700 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+              >
+                <ClipboardCheck class="w-4 h-4" />
+                Terminé
+              </button>
+              
+              <button 
+                v-if="['pending', 'preparing'].includes(order.status)"
+                @click="updateOrderStatus(order.id, 'cancelled')"
+                class="h-10 px-3 bg-white border border-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+              >
+                <X class="w-4 h-4" />
+                Annuler
+              </button>
+              
+              <button 
+                @click="printOrder(order)"
+                class="h-10 w-10 bg-white border border-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all flex items-center justify-center"
+              >
+                <Printer class="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
@@ -142,748 +250,631 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useSupabaseClient } from '#imports'
 import { 
   ClipboardCheck, 
   RefreshCw, 
   Printer, 
-  LogOut, 
-  ClipboardList,
-  Bell,
-  Check,
   X,
   CheckCircle,
   Coffee,
-  ChefHat,
   Search,
   Clock,
-  Wifi,
-  Package,
-  BarChart2,
-  ShoppingCart,
-  Filter,
   Volume2,
   VolumeX,
-  Table as TableIcon
+  Table as TableIcon,
+  Loader2,
+  UtensilsCrossed,
+  AlertTriangle,
+  Store
 } from 'lucide-vue-next'
-import { useSupabaseClient } from '#imports'
 import { useCustomToast } from '~/composables/useToast'
+import { useAuth } from '~/composables/useAuth'
 import type { 
   Order, 
   OrderItem, 
   OrderStatus, 
-  StatusMessage,
-  DatabaseOrder,
-  DatabaseOrderItem,
   ConnectionStatus 
 } from '~/types'
 
 const supabase = useSupabaseClient()
-const router = useRouter()
 const { showToast } = useCustomToast()
+const { user } = useAuth()
 
-// State avec typage
+// State
 const orders = ref<Order[]>([])
-const activeFilter = ref('Toutes')
-const loading = ref(false)
-const latestActivity = ref<string | null>(null)
-const newOrderSound = ref<HTMLAudioElement | null>(null)
-const isOnline = ref(true)
+const establishment = ref(null)
+const selectedEstablishment = ref(null)
+const isLoading = ref(true)
+const isRefreshing = ref(false)
+const connectionStatus = ref<ConnectionStatus>('disconnected')
+const filterStatus = ref('all')
 const searchQuery = ref('')
-const connectionStatus = ref<ConnectionStatus>('connected')
-const showFilters = ref(false)
-const statusFilter = ref('all')
-const isSoundEnabled = ref(true)
+const soundEnabled = ref(true)
+const orderSound = ref<HTMLAudioElement|null>(null)
+const staffSession = ref(null)
+const recentlyReceivedOrders = ref<Set<string>>(new Set())
+const loadError = ref(false)
 
-// Typage des fonctions
-const statusMessages: StatusMessage = {
-  accepted: 'acceptée',
-  rejected: 'refusée',
-  preparing: 'en préparation',
-  ready: 'prête',
-  completed: 'terminée'
-}
-
-const translateStatus = (status: OrderStatus): string => {
-  const translations: Record<OrderStatus, string> = {
-    'pending': 'Nouvelle',
-    'accepted': 'Acceptée',
-    'preparing': 'En préparation',
-    'ready': 'Prête',
-    'completed': 'Terminée',
-    'rejected': 'Refusée'
+// Computed
+const connectionStatusText = computed(() => {
+  switch (connectionStatus.value) {
+    case 'connected': return 'Connecté'
+    case 'connecting': return 'Connexion...'
+    default: return 'Déconnecté'
   }
-  return translations[status]
-}
-
-const getFilterCount = (filter: string): number => {
-  if (filter === 'Toutes') {
-    return orders.value.filter((order: Order) => 
-      ['pending', 'preparing', 'ready'].includes(order.status)
-    ).length
-  }
-  
-  return orders.value.filter((order: Order) => 
-    statusMap[filter]?.includes(order.status)
-  ).length
-}
-
-const formatTime = (dateString: string): string => {
-  const now = new Date()
-  const orderTime = new Date(dateString)
-  const diffMinutes = Math.floor((now.getTime() - orderTime.getTime()) / (1000 * 60))
-  
-  if (diffMinutes < 1) return 'À l\'instant'
-  if (diffMinutes === 1) return 'Il y a 1 min'
-  if (diffMinutes < 60) return `Il y a ${diffMinutes} min`
-  
-  const diffHours = Math.floor(diffMinutes / 60)
-  if (diffHours === 1) return 'Il y a 1h'
-  return `Il y a ${diffHours}h`
-}
-
-const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
-  try {
-    const { error } = await supabase
-      .from('orders')
-      .update({ 
-        status: newStatus,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-    
-    if (error) throw error
-
-    const orderNumber = orders.value.find(o => o.id === orderId)?.orderNumber
-    if (!orderNumber) return
-
-    const notificationMessage = `Commande #${orderNumber} ${statusMessages[newStatus]}`
-    showToast.success(notificationMessage, 'success')
-    setLatestActivity(notificationMessage)
-  } catch (err) {
-    console.error('Erreur mise à jour:', err)
-    showToast.error('Erreur', 'Impossible de mettre à jour la commande')
-  }
-}
-
-const setLatestActivity = (message: string): void => {
-  latestActivity.value = message
-  setTimeout(() => {
-    if (latestActivity.value === message) {
-      latestActivity.value = null
-    }
-  }, 10000)
-}
-
-// Date et heure actuelle
-const currentDateTime = computed(() => {
-  return new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
 })
 
-const statusMap: Record<string, OrderStatus[]> = {
-  'Toutes': ['pending', 'accepted', 'preparing', 'ready'],
-  'Nouvelles': ['pending'],
-  'Acceptées': ['accepted'],
-  'En préparation': ['preparing'],
-  'Prêtes': ['ready']
-}
-
-// Filter orders by status and search query
 const filteredOrders = computed(() => {
   let filtered = [...orders.value]
   
-  // Filter by status
-  if (statusFilter.value !== 'all') {
-    filtered = filtered.filter((order: Order) => 
-      statusMap[statusFilter.value]?.includes(order.status)
-    )
-  } else {
-    filtered = filtered.filter((order: Order) => 
-      !['completed', 'cancelled', 'rejected'].includes(order.status)
-    )
-  }
-  
   // Filter by search query
-  if (searchQuery.value.trim()) {
+  if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter((order: Order) => {
-      // Search by order number
-      if (order.orderNumber.toLowerCase().includes(query)) return true
-      // Search by table number
-      if (order.table.toString().includes(query)) return true
-      // Search by items
-      if (order.items.some((item: OrderItem) => 
-        item.name.toLowerCase().includes(query)
-      )) return true
-      return false
-    })
+    filtered = filtered.filter(order => 
+      order.orderNumber.toString().includes(query) ||
+      order.items.some(item => item.name.toLowerCase().includes(query))
+    )
   }
   
-  return filtered
+  // Filter by status
+  if (filterStatus.value !== 'all') {
+    filtered = filtered.filter(order => order.status === filterStatus.value)
+  }
+  
+  // Sort by date (newest first)
+  return filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 })
 
-// Load orders from Supabase
-const fetchOrders = async () => {
-  loading.value = true
-  
+// Status formatting
+const statusLabels = {
+  all: 'Toutes',
+  pending: 'En attente',
+  preparing: 'En préparation',
+  ready: 'Prêt',
+  completed: 'Terminé',
+  cancelled: 'Annulé'
+}
+
+const statusClasses = {
+  pending: 'bg-yellow-50 text-yellow-600',
+  preparing: 'bg-blue-50 text-blue-600',
+  ready: 'bg-green-50 text-green-600',
+  completed: 'bg-purple-50 text-purple-600',
+  cancelled: 'bg-red-50 text-red-600'
+}
+
+// Methods
+const loadStaffSession = () => {
   try {
-    // Get orders
-    const { data: ordersData, error: ordersError } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .in('status', ['pending', 'accepted', 'preparing', 'ready', 'completed'])
-      .limit(50) // Limit for better performance
-    
-    if (ordersError) throw ordersError
-    
-    // For each order, get its items
-    const ordersWithItems = await Promise.all(ordersData.map(async (order) => {
-      // Get order items
-      const { data: orderItems, error: itemsError } = await supabase
-        .from('order_items')
-        .select('*')
-        .eq('order_id', order.id)
+    const sessionData = localStorage.getItem('staff_session')
+    if (sessionData) {
+      staffSession.value = JSON.parse(sessionData)
       
-      if (itemsError) throw itemsError
-      
-      // Process items with joined product data for better performance
-      const itemsWithProductInfo = orderItems.map(item => {
-        return {
-          id: item.id,
-          name: item.products?.name || 'Produit inconnu',
-          quantity: item.quantity,
-          price: item.unit_price,
-          note: item.note
-        }
-      })
-      
-      return {
-        id: order.id,
-        orderNumber: order.id.toString().slice(-4).padStart(4, '0'),
-        table: order.table_number,
-        status: order.status,
-        created_at: order.created_at,
-        total: order.total_amount,
-        items: itemsWithProductInfo
+      // Si la session staff contient un establishment_id, l'utiliser directement
+      if (staffSession.value.establishment_id) {
+        selectedEstablishment.value = staffSession.value.establishment_id
+        loadEstablishment()
+        loadOrders()
+        setupRealtimeConnection()
       }
-    }))
-    
-    // Check for new orders and play sound
-    const previousPendingCount = orders.value.filter(o => o.status === 'pending').length
-    orders.value = ordersWithItems
-    const currentPendingCount = ordersWithItems.filter(o => o.status === 'pending').length
-    
-    if (currentPendingCount > previousPendingCount && previousPendingCount > 0) {
-      playNotificationSound()
-      showToast.success('Nouvelle commande reçue!', 'info')
     }
-    
-  } catch (err) {
-    console.error('Erreur lors du chargement des commandes:', err)
-    showToast.error('Erreur lors du chargement des commandes', 'error')
-  } finally {
-    loading.value = false
+  } catch (error) {
+    console.error('Error loading staff session:', error)
   }
 }
 
-// Play notification sound
-const playNotificationSound = () => {
-  if (newOrderSound.value) {
-    newOrderSound.value.currentTime = 0
-    newOrderSound.value.play().catch(e => console.log('Erreur de lecture audio:', e))
-  }
-}
+const loadEstablishment = async () => {
+  if (!selectedEstablishment.value) return
 
-// Refresh orders
-const refreshOrders = () => {
-  fetchOrders()
-}
-
-// Reconnect to Supabase
-const reconnect = () => {
-  connectionStatus.value = 'connecting'
-  
-  // Attempt to reconnect
-  const unsubscribe = subscribeToOrders()
-  
-  // Simulate connection status check
-  setTimeout(() => {
-    connectionStatus.value = 'connected'
-    showToast.success('Reconnexion réussie', 'success')
-  }, 1000)
-}
-
-// Monitor connection status
-const setupConnectionMonitoring = () => {
-  // Monitor online/offline status
-  window.addEventListener('online', () => {
-    connectionStatus.value = 'connected'
-    reconnect()
-  })
-  
-  window.addEventListener('offline', () => {
-    connectionStatus.value = 'disconnected'
-    showToast.error('Connexion perdue', 'error')
-  })
-  
-  // Check for Supabase connection issues
-  // This is simplified - would need actual health checks
-
-}
-
-// Print order
-const printOrder = (order: Order) => {
-  const printWindow = window.open('', '_blank')
-  if (!printWindow) {
-    showToast.error('Veuillez autoriser les popups pour imprimer', 'error')
-    return
-  }
-  
-  const orderDate = new Date(order.created_at).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-  
-  let itemsHtml = ''
-  order.items.forEach(item => {
-    itemsHtml += `
-      <tr>
-        <td>${item.quantity}×</td>
-        <td>${item.name}</td>
-        <td>${formatPrice(item.price * item.quantity)}</td>
-      </tr>
-      ${item.note ? `<tr><td colspan="3" class="note">Note: ${item.note}</td></tr>` : ''}
-    `
-  })
-  
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Commande #${order.orderNumber}</title>
-      <style>
-        body { font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; }
-        h1 { text-align: center; font-size: 20px; margin-bottom: 5px; }
-        .info { text-align: center; margin-bottom: 20px; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; border-bottom: 1px solid #ddd; padding: 8px; }
-        td { padding: 8px; border-bottom: 1px solid #eee; }
-        .total { font-weight: bold; text-align: right; margin-top: 15px; font-size: 16px; }
-        .note { font-style: italic; font-size: 12px; color: #666; }
-        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
-      </style>
-    </head>
-    <body>
-      <h1>Commande #${order.orderNumber}</h1>
-      <div class="info">
-        <div>Table ${order.table}</div>
-        <div>${orderDate}</div>
-      </div>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Qté</th>
-            <th>Article</th>
-            <th>Prix</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${itemsHtml}
-        </tbody>
-      </table>
-      
-      <div class="total">
-        Total: ${formatPrice(order.total)}
-      </div>
-      
-      <div class="footer">
-        Merci de votre commande !
-      </div>
-    </body>
-    </html>
-  `
-  
-  printWindow.document.write(htmlContent)
-  printWindow.document.close()
-  
-  // Print after content is loaded
-  setTimeout(() => {
-    printWindow.print()
-    printWindow.close()
-  }, 500)
-}
-
-// Format price
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF'
-  }).format(price)
-}
-
-// Subscribe to real-time updates
-const subscribeToOrders = () => {
-  // Subscribe to orders table changes
-  const ordersSubscription = supabase
-    .channel('orders-changes')
-    .on<DatabaseOrder>(
-      'postgres_changes',
-      {
-        event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-        schema: 'public',
-        table: 'orders'
-      },
-      async (payload) => {
-        console.log('Order change received:', payload)
-        
-        if (payload.eventType === 'INSERT') {
-          // Nouvelle commande
-          const order = payload.new
-          
-          // Récupérer les détails de la commande
-          const { data: orderItems, error: itemsError } = await supabase
-            .from('order_items')
-            .select('*, products(name)')
-            .eq('order_id', order.id)
-          
-          if (itemsError) {
-            console.error('Erreur lors de la récupération des items:', itemsError)
-            return
-          }
-          
-          const formattedOrder: FormattedOrder = {
-            id: order.id,
-            orderNumber: order.id.toString().slice(-4).padStart(4, '0'),
-            table: order.table_number,
-            status: order.status,
-            created_at: order.created_at,
-            total: order.total_amount,
-            items: orderItems.map(item => ({
-              id: item.id,
-              name: item.products.name,
-              quantity: item.quantity,
-              price: item.unit_price,
-              note: item.notes
-            }))
-          }
-          
-          // Ajouter la nouvelle commande au début de la liste
-          orders.value = [formattedOrder, ...orders.value]
-          
-          // Notifications
-          if (order.status === 'pending') {
-            playNotificationSound()
-            const message = `Nouvelle commande #${formattedOrder.orderNumber} (Table ${formattedOrder.table})`
-            showToast.success(message, 'Nouvelle commande')
-            setLatestActivity(message)
-          }
-        } 
-        else if (payload.eventType === 'UPDATE') {
-          // Mise à jour d'une commande
-          const updatedOrder = payload.new
-          const index = orders.value.findIndex(o => o.id === updatedOrder.id)
-          
-          if (index !== -1) {
-            orders.value[index] = {
-              ...orders.value[index],
-              status: updatedOrder.status
-            }
-            
-            // Notification de changement de statut
-            const message = `Commande #${orders.value[index].orderNumber} ${statusMessages[updatedOrder.status]}`
-            setLatestActivity(message)
-          }
-        } 
-        else if (payload.eventType === 'DELETE') {
-          // Suppression d'une commande
-          orders.value = orders.value.filter(o => o.id !== payload.old.id)
-        }
-      }
-    )
-    .subscribe()
-
-  // Subscribe to order_items table changes
-  const orderItemsSubscription = supabase
-    .channel('order-items-changes')
-    .on<OrderItem>(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'order_items'
-      },
-      async (payload) => {
-        if (['INSERT', 'UPDATE', 'DELETE'].includes(payload.eventType)) {
-          const orderId = payload.new?.order_id || payload.old?.order_id
-          if (orderId) {
-            const updatedOrder = await fetchOrderWithItems(orderId)
-            if (updatedOrder) {
-              const orderIndex = orders.value.findIndex(o => o.id === updatedOrder.id)
-              if (orderIndex !== -1) {
-                orders.value[orderIndex] = updatedOrder
-              }
-            }
-          }
-        }
-      }
-    )
-    .subscribe()
-
-  // Return cleanup function
-  return () => {
-    ordersSubscription.unsubscribe()
-    orderItemsSubscription.unsubscribe()
-  }
-}
-
-// Fetch a single order with its items
-const fetchOrderWithItems = async (orderId: string) => {
   try {
-    // Get the order
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
+    const { data, error } = await supabase
+      .from('establishments')
+      .select('id, name')
+      .eq('id', selectedEstablishment.value)
       .single()
     
-    if (orderError) throw orderError
+    if (error) throw error
     
-    // Get order items
-    const { data: orderItems, error: itemsError } = await supabase
+    establishment.value = data
+  } catch (error) {
+    console.error('Error loading establishment:', error)
+    showToast.error('Erreur', 'Impossible de charger les informations de l\'établissement')
+    loadError.value = true
+  }
+}
+
+const loadEstablishments = async () => {
+  try {
+    // Charger l'établissement associé au staff actuel
+    const { data: staffData, error: staffError } = await supabase
+      .from('staff')
+      .select('establishment_id')
+      .eq('user_id', user.value.id)
+      .single()
+    
+    if (staffError) throw staffError
+    
+    if (staffData && staffData.establishment_id) {
+      selectedEstablishment.value = staffData.establishment_id
+      
+      // Sauvegarder dans la session
+      if (staffSession.value) {
+        staffSession.value.establishment_id = selectedEstablishment.value
+        localStorage.setItem('staff_session', JSON.stringify(staffSession.value))
+      } else {
+        const newSession = { establishment_id: selectedEstablishment.value }
+        localStorage.setItem('staff_session', JSON.stringify(newSession))
+        staffSession.value = newSession
+      }
+      
+      await loadEstablishment()
+      await loadOrders()
+      setupRealtimeConnection()
+    } else {
+      isLoading.value = false
+      showToast.error('Erreur', 'Aucun établissement associé à votre compte')
+    }
+  } catch (error) {
+    console.error('Error loading staff association:', error)
+    showToast.error('Erreur', 'Impossible de charger votre profil staff')
+    isLoading.value = false
+    loadError.value = true
+  }
+}
+
+const loadOrders = async () => {
+  if (!selectedEstablishment.value) return
+  
+  isLoading.value = true
+  loadError.value = false
+  
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`
+        *
+      `)
+      .eq('establishment_id', selectedEstablishment.value)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    // Traitement par lots pour récupérer les éléments de commande
+    const ordersWithItems = await Promise.all(
+      data.map(async (order, index) => {
+        try {
+          const { data: itemsData, error: itemsError } = await supabase
+            .from('order_items')
+            .select(`
+              *
+            `)
+            .eq('order_id', order.id)
+          
+          if (itemsError) throw itemsError
+          
+          // Formater les éléments pour l'affichage
+          const items = await Promise.all(itemsData.map(async (item) => {
+            // Récupérer les informations sur le produit
+            const { data: productData } = await supabase
+              .from('products')
+              .select('name, description')
+              .eq('id', item.product_id)
+              .single()
+            
+            return {
+              id: item.id,
+              productId: item.product_id,
+              name: productData?.name || 'Produit inconnu',
+              description: productData?.description || '',
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              notes: item.notes
+            }
+          }))
+          
+          return {
+            ...order,
+            items,
+            orderNumber: 1000 + index,
+            isExpanded: false
+          }
+        } catch (err) {
+          console.error(`Error loading items for order ${order.id}:`, err)
+          return {
+            ...order,
+            items: [],
+            orderNumber: 1000 + index,
+            isExpanded: false
+          }
+        }
+      })
+    )
+    
+    orders.value = ordersWithItems
+    console.log('Orders loaded successfully:', orders.value.length)
+  } catch (error) {
+    console.error('Error loading orders:', error)
+    showToast.error('Erreur', 'Impossible de charger les commandes')
+    loadError.value = true
+  } finally {
+    isLoading.value = false
+  }
+}
+
+let subscription;
+
+const setupRealtimeConnection = () => {
+  if (!selectedEstablishment.value) return;
+  
+  // Désabonner de l'ancienne connexion si elle existe
+  if (subscription) {
+    subscription.unsubscribe()
+  }
+  
+  connectionStatus.value = 'connecting'
+  
+  // Créer une nouvelle connexion pour suivre les commandes
+  subscription = supabase
+    .channel(`orders-${selectedEstablishment.value}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'orders',
+        filter: `establishment_id=eq.${selectedEstablishment.value}`
+      },
+      handleNewOrder
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'orders',
+        filter: `establishment_id=eq.${selectedEstablishment.value}`
+      },
+      handleOrderUpdate
+    )
+    .subscribe((status) => {
+      connectionStatus.value = status === 'SUBSCRIBED' ? 'connected' : 'disconnected'
+    })
+}
+
+const handleNewOrder = async (payload) => {
+  console.log('Nouvelle commande reçue:', payload)
+  
+  try {
+    // Récupérer les détails complets de la commande
+    const orderData = payload.new
+    
+    // Récupérer les items de cette commande
+    const { data: itemsData, error: itemsError } = await supabase
       .from('order_items')
-      .select('*, products(name)')
-      .eq('order_id', orderId)
+      .select(`*`)
+      .eq('order_id', orderData.id)
     
     if (itemsError) throw itemsError
     
-    // Process items with joined product data
-    const itemsWithProductInfo = orderItems.map(item => {
+    // Formater les items pour l'affichage
+    const items = await Promise.all(itemsData.map(async (item) => {
+      // Récupérer les informations sur le produit
+      const { data: productData } = await supabase
+        .from('products')
+        .select('name, description')
+        .eq('id', item.product_id)
+        .single()
+      
       return {
         id: item.id,
-        name: item.products?.name || 'Produit inconnu',
+        productId: item.product_id,
+        name: productData?.name || 'Produit inconnu',
+        description: productData?.description || '',
         quantity: item.quantity,
         price: item.unit_price,
-        note: item.note
+        notes: item.notes
       }
-    })
+    }))
     
-    return {
-      id: orderData.id,
-      orderNumber: orderData.id.toString().slice(-4).padStart(4, '0'),
-      table: orderData.table_number,
-      status: orderData.status,
-      created_at: orderData.created_at,
-      total: orderData.total_amount,
-      items: itemsWithProductInfo
+    // Créer la commande formatée avec un numéro d'ordre
+    const orderNumber = 1000 + orders.value.length
+    const formattedOrder = {
+      ...orderData,
+      orderNumber,
+      items,
+      isExpanded: false
     }
-  } catch (err) {
-    console.error('Erreur lors du chargement de la commande:', err)
-    return null
+    
+    // Ajouter la commande à la liste (en premier)
+    orders.value = [formattedOrder, ...orders.value]
+    
+    // Marquer comme nouvelle pour l'animation
+    recentlyReceivedOrders.value.add(formattedOrder.id)
+    setTimeout(() => {
+      recentlyReceivedOrders.value.delete(formattedOrder.id)
+    }, 30000) // Garder l'animation pendant 30 secondes
+    
+    // Notification sonore si activée
+    if (soundEnabled.value) {
+      playOrderSound()
+    }
+    
+    // Notification toast
+    showToast.success('Nouvelle commande', `Commande #${orderNumber} reçue`)
+    
+  } catch (error) {
+    console.error('Error processing new order:', error)
+    showToast.error('Erreur', 'Impossible de traiter la nouvelle commande')
   }
 }
 
-// Watch for status changes to play sounds
-watch(() => orders.value.filter(o => o.status === 'ready').length, (newCount, oldCount) => {
-  if (newCount > oldCount) {
-    // Play a different sound for ready orders
-    playReadySound()
-  }
-})
-
-// Play sound for ready orders
-const playReadySound = () => {
-  if (newOrderSound.value) {
-    // You can add a different sound file for ready orders
-    newOrderSound.value.currentTime = 0
-    newOrderSound.value.play().catch(e => console.log('Erreur de lecture audio:', e))
-  }
-}
-
-// Load orders when component mounts
-onMounted(() => {
-  fetchOrders()
+const handleOrderUpdate = (payload) => {
+  console.log('Order updated:', payload)
   
-  // Set up real-time subscriptions
-  const unsubscribe = subscribeToOrders()
+  // Mettre à jour la commande dans la liste
+  const updatedOrder = payload.new
+  const index = orders.value.findIndex(o => o.id === updatedOrder.id)
   
-  // Set up connection monitoring
-  setupConnectionMonitoring()
-  
-  // Clean up subscriptions when component unmounts
-  onUnmounted(() => {
-    unsubscribe()
-    window.removeEventListener('online', () => {})
-    window.removeEventListener('offline', () => {})
-  })
-})
-
-definePageMeta({
-  layout: 'staff'
-})
-
-// Ajoutez ces types pour les données de la base de données
-interface DatabaseOrder {
-  id: string
-  establishment_id: string
-  table_number: number
-  status: OrderStatus
-  total_amount: number
-  created_at: string
-  notes: string | null
-}
-
-interface FormattedOrder {
-  id: string
-  orderNumber: string
-  table: number
-  status: OrderStatus
-  created_at: string
-  total: number
-  items: OrderItem[]
-}
-
-const getStatusColor = (status: OrderStatus) => {
-  const colors: Record<OrderStatus, { bg: string; text: string; badge: string }> = {
-    'pending': { bg: 'bg-yellow-50', text: 'text-yellow-700', badge: 'bg-yellow-100' },
-    'accepted': { bg: 'bg-green-50', text: 'text-green-700', badge: 'bg-green-100' },
-    'preparing': { bg: 'bg-blue-50', text: 'text-blue-700', badge: 'bg-blue-100' },
-    'ready': { bg: 'bg-green-50', text: 'text-green-700', badge: 'bg-green-100' },
-    'completed': { bg: 'bg-green-50', text: 'text-green-700', badge: 'bg-green-100' },
-    'rejected': { bg: 'bg-red-50', text: 'text-red-700', badge: 'bg-red-100' }
+  if (index !== -1) {
+    // Conserver les propriétés calculées tout en mettant à jour le statut
+    orders.value[index] = {
+      ...orders.value[index],
+      status: updatedOrder.status
+    }
   }
-  return colors[status]
 }
 
-const getStatusIcon = (status: OrderStatus) => {
-  const icons: Record<OrderStatus, Component> = {
-    'pending': Coffee,
-    'accepted': CheckCircle,
-    'preparing': ChefHat,
-    'ready': CheckCircle,
-    'completed': CheckCircle,
-    'rejected': X
+const updateOrderStatus = async (orderId, newStatus) => {
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId)
+    
+    if (error) throw error
+    
+    // Mettre à jour localement
+    const index = orders.value.findIndex(o => o.id === orderId)
+    if (index !== -1) {
+      orders.value[index].status = newStatus
+    }
+    
+    const orderNumber = orders.value.find(o => o.id === orderId)?.orderNumber
+    if (!orderNumber) return
+    
+    const notificationMessage = `Commande #${orderNumber} ${statusMessages[newStatus]}`
+    showToast.success('Statut mis à jour', notificationMessage)
+    
+    // Si terminée ou annulée, retirer de la liste après un délai
+    if (newStatus === 'completed' || newStatus === 'cancelled') {
+      setTimeout(() => {
+        orders.value = orders.value.filter(o => o.id !== orderId)
+      }, 10000)
+    }
+  } catch (error) {
+    console.error('Error updating order status:', error)
+    showToast.error('Erreur', 'Impossible de mettre à jour le statut')
   }
-  return icons[status]
 }
 
-const toggleFilters = () => {
-  showFilters.value = !showFilters.value
+const statusMessages = {
+  pending: 'en attente',
+  preparing: 'en préparation',
+  ready: 'prête',
+  completed: 'terminée',
+  cancelled: 'annulée'
+}
+
+const playOrderSound = () => {
+  try {
+    const audio = new Audio('/sounds/new-order.mp3')
+    audio.volume = 0.6
+    audio.play()
+  } catch (e) {
+    console.log('Unable to play sound', e)
+  }
 }
 
 const toggleSound = () => {
-  isSoundEnabled.value = !isSoundEnabled.value
+  soundEnabled.value = !soundEnabled.value
+  showToast.info(
+    soundEnabled.value ? 'Son activé' : 'Son désactivé', 
+    soundEnabled.value ? 'Vous serez notifié lors des nouvelles commandes' : 'Les notifications sonores sont désactivées'
+  )
 }
+
+const printOrder = (order) => {
+  // Implementation de l'impression
+  showToast.info('Impression', 'Fonctionnalité à implémenter')
+}
+
+const isNewOrder = (order) => {
+  return recentlyReceivedOrders.value.has(order.id)
+}
+
+// Formatters
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR'
+  }).format(price)
+}
+
+const formatTime = (dateString) => {
+  return new Date(dateString).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const getElapsedTime = (dateString) => {
+  const now = new Date()
+  const date = new Date(dateString)
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.round(diffMs / 60000)
+  
+  if (diffMins < 1) return 'À l\'instant'
+  if (diffMins === 1) return 'Il y a 1 minute'
+  if (diffMins < 60) return `Il y a ${diffMins} minutes`
+  
+  const hours = Math.floor(diffMins / 60)
+  if (hours === 1) return 'Il y a 1 heure'
+  return `Il y a ${hours} heures`
+}
+
+// Ajouter cette fonction d'initialisation
+const initializeApp = async () => {
+  try {
+    await loadStaffSession()  // Charger d'abord la session staff
+    await loadEstablishments() // Ensuite charger les établissements
+    
+    // Assurez-vous que isLoading est mis à false même si aucun établissement n'est trouvé
+    if (establishment.value === null) {
+      isLoading.value = false
+    }
+  } catch (error) {
+    console.error('Initialization error:', error)
+    showToast.error('Erreur', "Problème d'initialisation de l'application")
+    isLoading.value = false
+    loadError.value = true
+  }
+}
+
+// Lifecycle
+onMounted(() => {
+  initializeApp()
+})
+
+onUnmounted(() => {
+  if (subscription) {
+    subscription.unsubscribe()
+  }
+})
+
+// Ajouter un watcher pour initialiser la connexion quand un établissement est sélectionné
+watch(selectedEstablishment, (newValue) => {
+  if (newValue) {
+    setupRealtimeConnection()
+  }
+})
+
+// Ajouter ces fonctions pour gérer les statuts des commandes
+const getStatusColor = (status: string) => {
+  const colors = {
+    'pending': {
+      bg: 'bg-yellow-50',
+      text: 'text-yellow-500',
+      badge: 'bg-yellow-100 text-yellow-800'
+    },
+    'confirmed': {
+      bg: 'bg-blue-50',
+      text: 'text-blue-500',
+      badge: 'bg-blue-100 text-blue-800'
+    },
+    'preparing': {
+      bg: 'bg-purple-50',
+      text: 'text-purple-500',
+      badge: 'bg-purple-100 text-purple-800'
+    },
+    'ready': {
+      bg: 'bg-green-50',
+      text: 'text-green-500',
+      badge: 'bg-green-100 text-green-800'
+    },
+    'completed': {
+      bg: 'bg-gray-50',
+      text: 'text-gray-500',
+      badge: 'bg-gray-100 text-gray-800'
+    },
+    'cancelled': {
+      bg: 'bg-red-50',
+      text: 'text-red-500',
+      badge: 'bg-red-100 text-red-800'
+    }
+  }
+  
+  return colors[status] || colors.pending
+}
+
+const getStatusIcon = (status: string) => {
+  const icons = {
+    'pending': Clock,
+    'confirmed': CheckCircle,
+    'preparing': Coffee,
+    'ready': ClipboardCheck,
+    'completed': CheckCircle,
+    'cancelled': X
+  }
+  
+  return icons[status] || Clock
+}
+
+// Ajouter cette fonction pour traduire les statuts
+const translateStatus = (status: string) => {
+  const translations = {
+    'pending': 'En attente',
+    'confirmed': 'Confirmée',
+    'preparing': 'En préparation',
+    'ready': 'Prête',
+    'completed': 'Terminée',
+    'cancelled': 'Annulée'
+  }
+  
+  return translations[status] || 'Inconnu'
+}
+
+definePageMeta({
+  layout: 'default',
+})
 </script>
 
 <style scoped>
-/* Import des variables de couleur Twitter */
-:root {
-  --primary-color: #1DA1F2;
-  --primary-hover: #1a91da;
-  --secondary-color: #657786;
-  --light-gray: #E1E8ED;
-  --very-light-gray: #F5F8FA;
-  --dark-text: #14171A;
-  --danger-color: #E0245E;
-  --success-color: #17BF63;
-  --warning-color: #FFAD1F;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Layout */
-.container {
-  @apply grid grid-cols-[275px_1fr] min-h-screen bg-white;
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
 }
 
-/* Sidebar */
-.sidebar {
-  @apply p-5 border-r border-gray-200 fixed h-full w-[275px];
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.nav-menu {
-  @apply space-y-2 mt-8;
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
-.nav-link {
-  @apply flex items-center gap-3 px-4 py-3 rounded-full text-gray-700 hover:bg-blue-50 hover:text-blue-500 transition-colors;
+@keyframes pulse-subtle {
+  0% { border-color: rgba(59, 130, 246, 0.5); }
+  50% { border-color: rgba(59, 130, 246, 0.8); }
+  100% { border-color: rgba(59, 130, 246, 0.5); }
 }
 
-.nav-link.active {
-  @apply text-blue-500 bg-blue-50;
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite;
 }
 
-/* Main Content */
-.main-content {
-  @apply ml-[275px] min-h-screen border-l border-r border-gray-200;
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
-/* Header */
-.header {
-  @apply sticky top-0 bg-white/80 backdrop-blur-sm border-b border-gray-200 p-4 flex justify-between items-center;
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }
 
-/* Search */
-.search-container {
-  @apply relative;
+@keyframes pulse-highlight {
+  0% { background-color: rgba(59, 130, 246, 0.1); }
+  50% { background-color: rgba(59, 130, 246, 0.2); }
+  100% { background-color: rgba(59, 130, 246, 0.1); }
 }
 
-.search-input {
-  @apply w-64 px-4 py-2 pl-10 bg-gray-100 rounded-full text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all;
+.new-order {
+  animation: pulse-highlight 2s infinite;
+  border-left: 3px solid #3b82f6;
 }
-
-.search-icon {
-  @apply absolute left-3 top-1/2 -translate-y-1/2 text-gray-400;
-}
-
-/* Tabs */
-.tabs {
-  @apply flex border-b border-gray-200;
-}
-
-.tab {
-  @apply px-6 py-4 text-gray-600 hover:text-blue-500 relative transition-colors;
-}
-
-.tab.active {
-  @apply text-blue-500;
-}
-
-.tab.active::after {
-  content: '';
-  @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-500 rounded-full;
-}
-
-/* Command Cards */
-.command-card {
-  @apply bg-white border border-gray-200 rounded-xl p-4 mb-4 hover:shadow-md transition-all;
-}
-
-.pattern-grid {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23000000' d='M8 21H4a1 1 0 0 1-1-1v-4a1 1 0 0 0-2 0v4a3 3 0 0 0 3 3h4a1 1 0 0 0 0-2m14-6a1 1 0 0 0-1 1v4a1 1 0 0 1-1 1h-4a1 1 0 0 0 0 2h4a3 3 0 0 0 3-3v-4a1 1 0 0 0-1-1M20 1h-4a1 1 0 0 0 0 2h4a1 1 0 0 1 1 1v4a1 1 0 0 0 2 0V4a3 3 0 0 0-3-3M2 9a1 1 0 0 0 1-1V4a1 1 0 0 1 1-1h4a1 1 0 0 0 0-2H4a3 3 0 0 0-3 3v4a1 1 0 0 0 1 1m8-4H6a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1M9 9H7V7h2Zm5 2h4a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1m1-4h2v2h-2Zm-5 6H6a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1m-1 4H7v-2h2Zm5-1a1 1 0 0 0 1-1a1 1 0 0 0 0-2h-1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1m4-3a1 1 0 0 0-1 1v3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1m-4 4a1 1 0 1 0 1 1a1 1 0 0 0-1-1'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 48px 48px; /* Double size for better visibility */
-  transform: rotate(0deg);
-  animation: patternFloat 60s linear infinite;
-}
-
-@keyframes patternFloat {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 48px 48px;
-  }
-}
-
-/* ... reste des styles ... */
 </style>
