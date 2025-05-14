@@ -345,84 +345,6 @@ const statusClasses = {
 }
 
 // Methods
-const loadStaffSession = () => {
-  try {
-    const sessionData = localStorage.getItem('staff_session')
-    if (sessionData) {
-      staffSession.value = JSON.parse(sessionData)
-      
-      // Si la session staff contient un establishment_id, l'utiliser directement
-      if (staffSession.value.establishment_id) {
-        selectedEstablishment.value = staffSession.value.establishment_id
-        loadEstablishment()
-        loadOrders()
-        setupRealtimeConnection()
-      }
-    }
-  } catch (error) {
-    console.error('Error loading staff session:', error)
-  }
-}
-
-const loadEstablishment = async () => {
-  if (!selectedEstablishment.value) return
-
-  try {
-    const { data, error } = await supabase
-      .from('establishments')
-      .select('id, name')
-      .eq('id', selectedEstablishment.value)
-      .single()
-    
-    if (error) throw error
-    
-    establishment.value = data
-  } catch (error) {
-    console.error('Error loading establishment:', error)
-    showToast.error('Erreur', 'Impossible de charger les informations de l\'établissement')
-    loadError.value = true
-  }
-}
-
-const loadEstablishments = async () => {
-  try {
-    // Charger l'établissement associé au staff actuel
-    const { data: staffData, error: staffError } = await supabase
-      .from('staff')
-      .select('establishment_id')
-      .eq('user_id', user.value.id)
-      .single()
-    
-    if (staffError) throw staffError
-    
-    if (staffData && staffData.establishment_id) {
-      selectedEstablishment.value = staffData.establishment_id
-      
-      // Sauvegarder dans la session
-      if (staffSession.value) {
-        staffSession.value.establishment_id = selectedEstablishment.value
-        localStorage.setItem('staff_session', JSON.stringify(staffSession.value))
-      } else {
-        const newSession = { establishment_id: selectedEstablishment.value }
-        localStorage.setItem('staff_session', JSON.stringify(newSession))
-        staffSession.value = newSession
-      }
-      
-      await loadEstablishment()
-      await loadOrders()
-      setupRealtimeConnection()
-    } else {
-      isLoading.value = false
-      showToast.error('Erreur', 'Aucun établissement associé à votre compte')
-    }
-  } catch (error) {
-    console.error('Error loading staff association:', error)
-    showToast.error('Erreur', 'Impossible de charger votre profil staff')
-    isLoading.value = false
-    loadError.value = true
-  }
-}
-
 const loadOrders = async () => {
   if (!selectedEstablishment.value) return
   
@@ -723,19 +645,58 @@ const getElapsedTime = (dateString) => {
   return `Il y a ${hours} heures`
 }
 
-// Ajouter cette fonction d'initialisation
+// Mise à jour de l'initialisation pour utiliser le staff_session directement
 const initializeApp = async () => {
   try {
-    await loadStaffSession()  // Charger d'abord la session staff
-    await loadEstablishments() // Ensuite charger les établissements
+    // Vérifier la session staff dans localStorage au lieu de Supabase auth
+    const sessionData = localStorage.getItem('staff_session')
     
-    // Assurez-vous que isLoading est mis à false même si aucun établissement n'est trouvé
-    if (establishment.value === null) {
+    if (!sessionData) {
       isLoading.value = false
+      loadError.value = true
+      showToast.error('Authentification requise', 'Veuillez vous connecter')
+      return
+    }
+    
+    // Charger la session
+    staffSession.value = JSON.parse(sessionData)
+    
+    // Utiliser directement l'establishment_id de la session
+    if (staffSession.value.establishment_id) {
+      selectedEstablishment.value = staffSession.value.establishment_id
+      await loadEstablishment()
+      await loadOrders()
+      setupRealtimeConnection()
+    } else {
+      isLoading.value = false
+      showToast.warning('Configuration incomplète', 'Aucun établissement associé à votre compte')
     }
   } catch (error) {
     console.error('Initialization error:', error)
     showToast.error('Erreur', "Problème d'initialisation de l'application")
+    isLoading.value = false
+    loadError.value = true
+  }
+}
+
+// Charger uniquement l'établissement à partir de l'ID stocké
+const loadEstablishment = async () => {
+  if (!selectedEstablishment.value) return
+
+  try {
+    const { data, error } = await supabase
+      .from('establishments')
+      .select('id, name')
+      .eq('id', selectedEstablishment.value)
+      .single()
+    
+    if (error) throw error
+    
+    establishment.value = data
+    isLoading.value = false
+  } catch (error) {
+    console.error('Error loading establishment:', error)
+    showToast.error('Erreur', 'Impossible de charger les informations de l\'établissement')
     isLoading.value = false
     loadError.value = true
   }
