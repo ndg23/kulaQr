@@ -4,7 +4,7 @@
     <div class="mb-12">
       <div class="flex items-center space-x-4 mb-3">
         <NuxtLink 
-          to="/admin/restaurants"
+          to="/admin/establishments"
           class="p-2 text-gray-500 hover:text-gray-700 rounded-2xl hover:bg-gray-100 transition-all"
         >
           <ArrowLeft class="w-6 h-6" />
@@ -256,11 +256,7 @@ const loadRestaurant = async () => {
     const { data, error } = await supabase
       .from('establishments')
       .select(`
-        *,
-        users:user_id (
-          full_name,
-          email
-        )
+        *
       `)
       .eq('id', route.params.id)
       .single()
@@ -286,7 +282,7 @@ const loadRestaurant = async () => {
   } catch (err) {
     console.error('Error loading restaurant:', err)
     showToast.error('Erreur', 'Impossible de charger les données du restaurant')
-    router.push('/admin/restaurants')
+    router.push('/admin/establishments')
   } finally {
     loading.value = false
   }
@@ -329,7 +325,7 @@ const loadMenuData = async () => {
 }
 
 // Format price
-const formatPrice = (price) => {
+const formatPrice = (price: number) => {
   return new Intl.NumberFormat('fr-FR', { 
     style: 'currency', 
     currency: 'XOF' 
@@ -403,7 +399,7 @@ const deleteRestaurant = async () => {
     if (error) throw error
     
     showToast.success('Restaurant supprimé', 'Le restaurant a été supprimé avec succès')
-    router.push('/admin/restaurants')
+    router.push('/admin/establishments')
   } catch (err) {
     console.error('Error deleting restaurant:', err)
     showToast.error('Erreur', 'Impossible de supprimer le restaurant')

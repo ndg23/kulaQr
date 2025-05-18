@@ -105,7 +105,21 @@ export default {
           800: '#1F2937',
           900: '#111827',
         },
-      }
+      },
+      animation: {
+        'spin-slow': 'spin 1.5s linear infinite',
+        'pulse-subtle': 'pulse-subtle 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'dash-around': 'dash-around 2s linear infinite',
+      },
+      keyframes: {
+        'pulse-subtle': {
+          '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+          '50%': { opacity: 0.7, transform: 'scale(0.95)' },
+        },
+        'dash-around': {
+          'to': { transform: 'rotate(1turn)' },
+        },
+      },
     },
   },
   plugins: [

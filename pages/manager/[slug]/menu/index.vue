@@ -25,16 +25,10 @@
               />
               <Search class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             </div>
-            <button 
-              @click="openNewCategoryModal"
-              class="h-11 px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2"
-            >
-              <Plus class="w-4 h-4" />
-              Catégorie
-            </button>
+           
             <button 
               @click="openAddProduct"
-              class="h-11 px-6 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
+              class="h-11 px-6 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
             >
               <Plus class="w-4 h-4" />
               Nouveau produit
@@ -76,7 +70,7 @@
           class="h-11 px-5 rounded-full text-sm font-medium whitespace-nowrap transition-all"
           :class="[
             activeCategory === category.id
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-green-600 text-white shadow-sm'
               : 'bg-white text-gray-700 border border-gray-200/50 hover:bg-gray-50'
           ]"
         >
@@ -89,7 +83,7 @@
         <div 
           v-for="product in filteredProducts" 
           :key="product.id"
-          class="group bg-white rounded-2xl shadow-sm hover:shadow-md overflow-hidden transition-all duration-300"
+          class="group bg-white rounded-2xl hover:border-1 border hover:border-kula-500 overflow-hidden transition-all duration-300"
         >
           <!-- Image du produit -->
           <div class="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
@@ -110,7 +104,7 @@
             </div>
 
             <!-- Actions -->
-            <div class="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div class="absolute top-3 right-3 flex items-center gap-2 ">
               <Switch
                 v-model="product.is_available"
                 @change="toggleAvailability(product)"
@@ -120,7 +114,7 @@
                 <span
                   class="inline-block h-4 w-4 transform rounded-full transition"
                   :class="[
-                    product.is_available ? 'translate-x-6 bg-blue-600' : 'translate-x-1 bg-gray-400'
+                    product.is_available ? 'translate-x-6 bg-green-600' : 'translate-x-1 bg-gray-400'
                   ]"
                 />
               </Switch>
@@ -170,7 +164,7 @@
         </p>
         <button 
           @click="openAddProduct"
-          class="mt-6 h-11 px-6 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+          class="mt-6 h-11 px-6 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-all flex items-center justify-center gap-2"
         >
           <Plus class="w-4 h-4" />
           Ajouter un produit
@@ -249,112 +243,6 @@ const products = ref([])
 const loading = ref(true)
 const search = ref('')
 
-// Mock Data
-const mockCategories = [
-  {
-    id: 1,
-    name: 'Entrées',
-    icon: Coffee,
-    iconBg: 'bg-orange-50',
-    iconColor: 'text-orange-500'
-  },
-  {
-    id: 2,
-    name: 'Plats',
-    icon: UtensilsCrossed,
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-500'
-  },
-  {
-    id: 3,
-    name: 'Desserts',
-    icon: IceCream,
-    iconBg: 'bg-purple-50',
-    iconColor: 'text-purple-500'
-  },
-  {
-    id: 4,
-    name: 'Boissons',
-    icon: Coffee,
-    iconBg: 'bg-green-50',
-    iconColor: 'text-green-500'
-  }
-]
-
-const mockProducts = [
-  {
-    id: 1,
-    name: 'Salade César',
-    description: 'Laitue romaine, croûtons maison, parmesan, sauce césar',
-    price: 12.90,
-    category_id: 1,
-    is_available: true,
-    image_url: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9'
-  },
-  {
-    id: 2,
-    name: 'Soupe à l\'oignon',
-    description: 'Oignons caramélisés, bouillon maison, croûtons gratinés',
-    price: 9.90,
-    category_id: 1,
-    is_available: true,
-    image_url: 'https://images.unsplash.com/photo-1547592166-23ac45744acd'
-  },
-  {
-    id: 3,
-    name: 'Steak Frites',
-    description: 'Steak de bœuf, frites maison, sauce au poivre',
-    price: 24.90,
-    category_id: 2,
-    is_available: true,
-    image_url: 'https://images.unsplash.com/photo-1600891964092-4316c288032e'
-  },
-  {
-    id: 4,
-    name: 'Saumon grillé',
-    description: 'Saumon frais, légumes de saison, sauce hollandaise',
-    price: 26.90,
-    category_id: 2,
-    is_available: false,
-    image_url: 'https://images.unsplash.com/photo-1485921325833-c519f76c4927'
-  },
-  {
-    id: 5,
-    name: 'Crème brûlée',
-    description: 'Crème vanille, caramel croustillant',
-    price: 8.90,
-    category_id: 3,
-    is_available: true,
-    image_url: 'https://images.unsplash.com/photo-1470324161839-ce2bb6fa6bc3'
-  },
-  {
-    id: 6,
-    name: 'Tarte au citron meringuée',
-    description: 'Crème citron, meringue italienne',
-    price: 9.90,
-    category_id: 3,
-    is_available: true,
-    image_url: 'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81'
-  },
-  {
-    id: 7,
-    name: 'Vin rouge - Bordeaux',
-    description: 'Château Margaux 2018',
-    price: 45.00,
-    category_id: 4,
-    is_available: true,
-    image_url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3'
-  },
-  {
-    id: 8,
-    name: 'Mojito',
-    description: 'Rhum, menthe fraîche, citron vert, sucre de canne',
-    price: 12.00,
-    category_id: 4,
-    is_available: true,
-    image_url: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a'
-  }
-]
 
 // Computed
 const filteredProducts = computed(() => {

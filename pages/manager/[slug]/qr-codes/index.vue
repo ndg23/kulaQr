@@ -1,343 +1,218 @@
 <template>
   <div class="min-h-screen bg-white">
-    <!-- Header -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/20 shadow-sm">
-      <div class="max-w-[1400px] mx-auto px-6 sm:px-8 py-6">
-        <div class="flex flex-col gap-4">
-          <h1 class="text-3xl font-bold text-gray-900">Partage</h1>
-          <p class="text-base text-gray-500">Partagez votre menu digital facilement avec vos clients.</p>
-        </div>
+    <!-- Header ultra-minimaliste -->
+    <header class="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-4">
+      <div class="max-w-3xl mx-auto">
+        <h1 class="text-xl font-semibold text-gray-900">QR Code</h1>
       </div>
     </header>
 
-    <main class="max-w-[1400px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
-      <!-- Analytics Overview -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-        <div class="bg-white rounded-2xl shadow-sm p-6 border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
-              <ScanLine class="w-6 h-6 text-blue-600" />
+    <main class="max-w-3xl mx-auto px-6 py-8">
+      <!-- Carte QR simplifiée et centrée -->
+      <div class="mb-12 flex flex-col items-center">
+        <!-- QR Code avec design minimaliste -->
+        <div class="mb-8 p-6 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-xs w-full">
+          <div class="flex flex-col items-center">
+            <!-- QR Code -->
+            <div class="mb-6 p-4 bg-white rounded-2xl">
+              <img 
+                v-if="menuQrGenerated" 
+                :src="menuQrImage" 
+                alt="QR Code" 
+                class="w-48 h-48" 
+              />
+              <div v-else class="w-48 h-48 flex items-center justify-center bg-gray-50 rounded-lg">
+                <div class="animate-pulse bg-gray-200 w-32 h-32"></div>
+              </div>
             </div>
-            <div>
-              <p class="text-3xl font-bold text-gray-900 mb-1">{{ scanStats.total_scans }}</p>
-              <p class="text-sm text-gray-500">Scans totaux</p>
+            
+            <!-- Texte explicatif simple -->
+            <p class="text-sm text-gray-500 text-center mb-4">
+              Scannez ce code avec l'appareil photo de votre téléphone
+            </p>
+            
+            <!-- URL -->
+            <div class="text-xs px-3 py-1.5 bg-gray-100 rounded-full text-gray-600 mb-6">
+              {{ menuLink.replace('https://', '') }}
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex gap-2 w-full">
+              <button 
+                @click="copyLink" 
+                class="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-800 text-sm flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Clipboard class="w-4 h-4" />
+                <span>Copier</span>
+              </button>
+              <button 
+                @click="downloadQrCode('menu')" 
+                class="flex-1 py-2.5 px-4 bg-blue-500 hover:bg-blue-600 rounded-full text-white text-sm flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Download class="w-4 h-4" />
+                <span>Télécharger</span>
+              </button>
             </div>
           </div>
         </div>
         
-        <div class="bg-white rounded-2xl shadow-sm p-6 border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
-              <Calendar class="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p class="text-3xl font-bold text-gray-900 mb-1">{{ scanStats.today_scans }}</p>
-              <p class="text-sm text-gray-500">Scans aujourd'hui</p>
+        <!-- Statistiques simplifiées -->
+        <div class="w-full max-w-xs">
+          <div class="mb-2 flex items-center justify-between">
+            <h2 class="text-sm font-medium text-gray-700">Statistiques</h2>
+            <div class="flex items-center">
+              <div class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></div>
+              <span class="text-xs text-gray-500">Mis à jour en temps réel</span>
             </div>
           </div>
-        </div>
-        
-        <div class="bg-white rounded-2xl shadow-sm p-6 border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center">
-              <Smartphone class="w-6 h-6 text-purple-600" />
+          
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+              <p class="text-2xl font-medium text-gray-900 mb-1">{{ scanStats.total_scans }}</p>
+              <p class="text-xs text-gray-500">Total</p>
             </div>
-            <div>
-              <p class="text-3xl font-bold text-gray-900 mb-1">{{ scanStats.conversion_rate }}%</p>
-              <p class="text-sm text-gray-500">Taux de conversion</p>
+            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+              <p class="text-2xl font-medium text-gray-900 mb-1">{{ scanStats.today_scans }}</p>
+              <p class="text-xs text-gray-500">Aujourd'hui</p>
+            </div>
+            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+              <p class="text-2xl font-medium text-gray-900 mb-1">{{ scanStats.conversion_rate }}%</p>
+              <p class="text-xs text-gray-500">Conversion</p>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Main Link -->
-      <div class="mb-10">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Lien du menu</h2>
+      
+      <!-- Partage simplifié -->
+      <div class="mb-8">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-base font-medium text-gray-900">Partage</h2>
+        </div>
         
-        <div class="bg-white rounded-2xl shadow-sm p-6 border-gray-100">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-            <div class="flex-1 relative">
-              <input
-                ref="linkInput"
-                type="text"
-                :value="menuLink"
-                readonly
-                class="w-full h-12 pl-10 pr-20 rounded-full bg-white border border-gray-200/50 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
-              />
-              <Link class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-              <div class="absolute right-3 top-1/2 -translate-y-1/2">
-                <button
-                  @click="copyLink"
-                  class="px-4 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                >
-                  Copier
-                </button>
-              </div>
-            </div>
-            <button
-              @click="shareLink"
-              class="h-12 px-6 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
+        <div class="grid grid-cols-4 gap-3">
+          <button 
+            v-for="platform in ['Instagram', 'Facebook', 'Twitter', 'Messages']" 
+            :key="platform"
+            @click="shareToService(platform.toLowerCase())"
+            class="flex flex-col items-center p-3 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div 
+              class="w-10 h-10 rounded-full mb-2 flex items-center justify-center"
+              :class="{
+                'bg-gradient-to-br from-purple-500 to-pink-500': platform === 'Instagram',
+                'bg-blue-600': platform === 'Facebook',
+                'bg-blue-400': platform === 'Twitter',
+                'bg-green-500': platform === 'Messages'
+              }"
             >
-              <Share2 class="w-4 h-4" />
-              Partager
-            </button>
-          </div>
+              <img 
+                v-if="['Instagram', 'Facebook', 'Twitter'].includes(platform)"
+                :src="`/images/social/${platform.toLowerCase()}.svg`" 
+                :alt="platform"
+                class="h-5 w-5 invert"
+              />
+              <MessageSquare v-else class="h-5 w-5 text-white" />
+            </div>
+            <span class="text-xs text-gray-800">{{ platform }}</span>
+          </button>
         </div>
       </div>
-
-      <!-- QR Code Section -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Left Column -->
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-6">QR Codes</h2>
-          
-          <!-- Main QR Code -->
-          <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-gray-100">
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">Menu principal</h3>
-            <p class="text-sm text-gray-500 mb-6">Code QR vers votre menu complet</p>
-            
-            <div class="bg-gray-50 rounded-2xl p-8 mb-6 flex items-center justify-center">
-              <QRCodeVue3 
-                v-if="menuLink"
-                :value="menuLink" 
-                :size="220"
-                :margin="0"
-                class="mx-auto"
-                :dotsOptions="{ type: qrStyleMap[qrStyle], color: qrColor }"
-                :cornersSquareOptions="{ type: 'dot', color: qrColor }"
-                :cornersDotOptions="{ type: 'dot', color: qrColor }"
-              />
-              <Loader2 v-else class="w-10 h-10 animate-spin text-gray-400" />
-            </div>
-
-            <div class="flex flex-wrap items-center gap-3">
-              <button
-                @click="downloadQR('main', 'png')"
-                class="flex-1 h-11 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2"
-              >
-                <Download class="w-4 h-4" />
-                PNG
-              </button>
-              <button
-                @click="downloadQR('main', 'svg')"
-                class="flex-1 h-11 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2"
-              >
-                <Download class="w-4 h-4" />
-                SVG
-              </button>
-              <button
-                @click="printQR('main')"
-                class="flex-1 h-11 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2"
-              >
-                <Printer class="w-4 h-4" />
-                Imprimer
-              </button>
-            </div>
+      
+      <!-- Dernière activité -->
+      <div v-if="lastScan" class="flex items-center justify-between p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <Smartphone class="w-5 h-5 text-gray-600" />
+            <div class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
           </div>
-          
-          <!-- Table QR Code -->
-          <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">QR Code par table</h3>
-            <p class="text-sm text-gray-500 mb-6">Générez des QR codes uniques pour chaque table</p>
-            
-            <div class="mb-6">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Numéro de table</label>
-              <input
-                v-model="tableNumber"
-                type="number"
-                min="1"
-                class="w-full h-12 px-4 rounded-full bg-white border border-gray-200/50 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
-                placeholder="Ex: 1"
-              />
-            </div>
-
-            <div v-if="tableNumber" class="bg-gray-50 rounded-2xl p-8 mb-6 flex items-center justify-center animate-fadeIn">
-              <QRCodeVue3 
-                v-if="tableQrValue"
-                :value="tableQrValue" 
-                :size="220"
-                :margin="0"
-                class="mx-auto"
-                :dotsOptions="{ type: qrStyleMap[qrStyle], color: qrColor }"
-                :cornersSquareOptions="{ type: 'dot', color: qrColor }"
-                :cornersDotOptions="{ type: 'dot', color: qrColor }"
-              />
-              <Loader2 v-else class="w-10 h-10 animate-spin text-gray-400" />
-            </div>
-
-            <div v-else class="flex justify-center items-center h-[220px]">
-              <Loader2 class="w-8 h-8 animate-spin text-gray-400" />
-            </div>
-
-            <div v-if="tableNumber" class="flex flex-wrap items-center gap-3 animate-fadeIn">
-              <button
-                @click="downloadQR('table', 'png')"
-                class="flex-1 h-11 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2"
-              >
-                <Download class="w-4 h-4" />
-                PNG
-              </button>
-              <button
-                @click="downloadQR('table', 'svg')"
-                class="flex-1 h-11 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2"
-              >
-                <Download class="w-4 h-4" />
-                SVG
-              </button>
-              <button
-                @click="printQR('table')"
-                class="flex-1 h-11 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2"
-              >
-                <Printer class="w-4 h-4" />
-                Imprimer
-              </button>
-            </div>
-          </div>
+          <span class="text-sm text-gray-700">Dernier scan {{ formatTimeAgo(lastScan.created_at) }}</span>
         </div>
-        
-        <!-- Right Column -->
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-6">Personnalisation</h2>
-          
-          <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">Style du QR code</h3>
-            <p class="text-sm text-gray-500 mb-6">Personnalisez l'apparence de vos QR codes</p>
-
-            <div class="space-y-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Style des points</label>
-                <select 
-                  v-model="qrStyle" 
-                  class="w-full h-12 px-4 rounded-full bg-white border border-gray-200/50 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
-                >
-                  <option value="dots">Points</option>
-                  <option value="squares">Carrés</option>
-                  <option value="rounded">Arrondis</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Couleur</label>
-                <input
-                  v-model="qrColor"
-                  type="color"
-                  class="w-full h-12 rounded-full bg-white border border-gray-200/50 p-1"
-                />
-              </div>
-              
-              <div class="bg-gray-50 rounded-2xl p-8 flex items-center justify-center">
-                <QRCodeVue3
-                  :value="menuLink"
-                  :size="150"
-                  :margin="0"
-                  class="mx-auto"
-                  :dotsOptions="{ type: qrStyleMap[qrStyle], color: qrColor }"
-                  :cornersSquareOptions="{ type: 'dot', color: qrColor }"
-                  :cornersDotOptions="{ type: 'dot', color: qrColor }"
-                />
-              </div>
-
-              <button
-                @click="applyStyle"
-                class="w-full h-12 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2"
-              >
-                <Check class="w-4 h-4" />
-                Appliquer
-              </button>
-            </div>
-          </div>
-
-          <!-- Preview section -->
-          <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 mt-8">
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">Aperçu mobile</h3>
-            <p class="text-sm text-gray-500 mb-6">Votre QR code en situation réelle</p>
-            
-            <div class="relative w-full h-72 bg-gray-50 rounded-2xl overflow-hidden">
-              <div class="absolute w-64 h-[95%] top-[2.5%] left-[50%] -translate-x-[50%] bg-white rounded-3xl shadow-lg overflow-hidden border-4 border-gray-800">
-                <div class="h-6 bg-gray-800 w-full flex justify-center items-center">
-                  <div class="w-16 h-1.5 bg-gray-600 rounded-full"></div>
-                </div>
-                <div class="p-3 text-center">
-                  <div class="text-xs font-medium text-gray-900 mb-2">Scannez ce QR code</div>
-                  <div class="flex justify-center">
-                    <QRCodeVue3
-                      :value="menuLink"
-                      :size="100"
-                      :margin="0"
-                      class="mx-auto"
-                      :dotsOptions="{ type: qrStyleMap[qrStyle], color: qrColor }"
-                      :cornersSquareOptions="{ type: 'dot', color: qrColor }"
-                      :cornersDotOptions="{ type: 'dot', color: qrColor }"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <button 
-        @click="testScan"
-        class="mt-4 h-10 px-4 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-all"
-      >
-        Test Scan
-      </button>
-
-      <div v-if="lastScan" class="mt-4 p-4 bg-green-50 rounded-xl">
-        <p class="text-green-700 font-medium">Dernier scan: {{ formatDate(lastScan.created_at) }}</p>
-        <p class="text-sm text-green-600">{{ lastScan.user_agent }}</p>
+        <span class="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">Activité</span>
       </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import QRCodeVue3 from 'qrcode-vue3'
-import { Share2, Link, Download, Printer, Check, ScanLine, Calendar, Smartphone, Loader2 } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted } from 'vue'
+import QRCode from 'qrcode'
+import { Share2, Download, Smartphone, QrCode, Clipboard, MessageSquare } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
-import { useCustomToast } from '~/composables/useToast'
-// import { useSupabaseClient } from '~/composables/useSupabase'
+import { useToast } from '~/composables/useToast'
+import { useSupabaseClient } from '#imports'
 
-const { establishment } = useEstablishment()
-const { showToast } = useCustomToast()
-const supabase = useSupabaseClient()
-
-const linkInput = ref<HTMLInputElement | null>(null)
-const tableNumber = ref<number>()
-const qrStyle = ref('dots')
-const qrColor = ref('#0071e3') // Apple Blue
-
-// QR scan statistics
+// États
+const menuQrImage = ref('')
+const menuQrGenerated = ref(false)
+const menuLink = ref('')
+const qrColor = ref('#000000')
+const establishment = useEstablishment()
+const showToast = useToast()
 const scanStats = ref({
   total_scans: 0,
   today_scans: 0,
   conversion_rate: 0
 })
-
 const lastScan = ref(null)
+const supabase = useSupabaseClient()
 
-// QR Style mapping
-const qrStyleMap = {
-  'dots': 'dots',
-  'squares': 'squares',
-  'rounded': 'rounded'
+// Générer l'URL du menu
+const generateStaticUrl = () => {
+  const baseUrl = useRuntimeConfig().public.baseURL
+  return `${baseUrl}/menu/${establishment.value?.slug || ''}`
 }
 
-// Utilisons des refs simples au lieu d'appels asynchrones compliqués
-const menuLink = ref('')
-const tableQrValue = ref('')
-const isLoading = ref(true)
+// Générer le QR code
+const generateQrCode = async () => {
+  if (!menuLink.value) return
+  
+  try {
+    const qrCodeDataUrl = await QRCode.toDataURL(menuLink.value, {
+      width: 512,
+      margin: 1,
+      color: {
+        dark: qrColor.value,
+        light: '#FFFFFF'
+      }
+    })
+    
+    menuQrImage.value = qrCodeDataUrl
+    menuQrGenerated.value = true
+  } catch (err) {
+    console.error('QR code generation error:', err)
+    showToast.error('Erreur', 'Impossible de générer le QR code')
+  }
+}
 
-// Load QR code scan statistics
+// Copier le lien du menu
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(menuLink.value)
+    showToast.success('Copié', 'Lien copié dans le presse-papier')
+  } catch (err) {
+    console.error('Copy error:', err)
+    showToast.error('Erreur', 'Impossible de copier le lien')
+  }
+}
+
+// Télécharger le QR code
+const downloadQrCode = () => {
+  const link = document.createElement('a')
+  link.download = `menu-${establishment.value?.name || 'restaurant'}.png`
+  link.href = menuQrImage.value
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  showToast.success('Téléchargé', 'QR code téléchargé avec succès')
+}
+
+// Charger les statistiques
 const loadScanStats = async () => {
   try {
+    if (!establishment.value?.id) return
+    
     const { data, error } = await supabase
-      .from('qr_scan_stats')
-      .select('*')
-      .eq('establishment_id', establishment.value?.id)
-      .single()
+      .rpc('get_establishment_scan_stats', { establishment_id: establishment.value.id })
     
     if (error) throw error
     
@@ -353,218 +228,128 @@ const loadScanStats = async () => {
   }
 }
 
+// Charger le dernier scan
 const loadLastScan = async () => {
   try {
+    if (!establishment.value?.id) return
+    
     const { data, error } = await supabase
       .from('qr_scans')
       .select('*')
-      .eq('establishment_id', establishment.value?.id)
+      .eq('establishment_id', establishment.value.id)
       .order('created_at', { ascending: false })
       .limit(1)
       .single()
     
-    if (error) throw error
-    if (data) lastScan.value = data
+    if (error && error.code !== 'PGRST116') throw error
+    
+    if (data) {
+      lastScan.value = data
+    }
   } catch (err) {
     console.error('Error loading last scan:', err)
   }
 }
 
-// Methods
-const copyLink = async () => {
-  try {
-    if (!menuLink.value) {
-      showToast.error('Erreur', 'Lien non disponible')
-      return
-    }
-    
-    await navigator.clipboard.writeText(menuLink.value)
-    showToast.success('Lien copié dans le presse-papier!')
-  } catch (err) {
-    console.error('Failed to copy:', err)
-    showToast.error('Erreur lors de la copie')
-  }
-}
-
-const shareLink = async () => {
-  if (navigator.share && menuLink.value) {
-    try {
-      await navigator.share({
-        title: `Menu de ${establishment.value?.name}`,
-        text: `Découvrez notre menu digital`,
-        url: menuLink.value
-      })
-      showToast.success('Lien partagé avec succès!')
-    } catch (err) {
-      copyLink()
-    }
-  } else {
-    copyLink()
-  }
-}
-
-const downloadQR = (type: 'main' | 'table', format: 'png' | 'svg' = 'png') => {
-  const value = type === 'main' 
-    ? menuLink.value 
-    : tableNumber.value ? tableQrValue.value : ''
+// Formater le temps écoulé
+const formatTimeAgo = (dateString) => {
+  const date = new Date(dateString)
+  const seconds = Math.floor((new Date() - date) / 1000)
   
-  if (!value) {
-    showToast.error('Erreur', 'QR code non disponible')
-    return
-  }
+  let interval = seconds / 31536000
+  if (interval > 1) return `il y a ${Math.floor(interval)} an${Math.floor(interval) > 1 ? 's' : ''}`
   
-  const filename = type === 'main' ? 'qr-menu' : `qr-table-${tableNumber.value}`
-  // Implementation for downloading QR code
-  // This would normally use a library like html-to-image or dom-to-image
-  showToast.success('QR Code téléchargé', `Le QR code a été téléchargé au format ${format.toUpperCase()}`)
+  interval = seconds / 2592000
+  if (interval > 1) return `il y a ${Math.floor(interval)} mois`
+  
+  interval = seconds / 86400
+  if (interval > 1) return `il y a ${Math.floor(interval)} jour${Math.floor(interval) > 1 ? 's' : ''}`
+  
+  interval = seconds / 3600
+  if (interval > 1) return `il y a ${Math.floor(interval)} heure${Math.floor(interval) > 1 ? 's' : ''}`
+  
+  interval = seconds / 60
+  if (interval > 1) return `il y a ${Math.floor(interval)} minute${Math.floor(interval) > 1 ? 's' : ''}`
+  
+  return `il y a ${Math.floor(seconds)} seconde${Math.floor(seconds) > 1 ? 's' : ''}`
 }
 
-const printQR = (type: 'main' | 'table') => {
-  // Implementation for printing QR code
-  // This would normally use window.print() with appropriate CSS
-  showToast.success('Impression lancée', 'La fenêtre d\'impression va s\'ouvrir')
-}
-
-const applyStyle = () => {
-  // The QR code style is applied reactively
-  showToast.success('Style appliqué', 'Les QR codes ont été mis à jour')
-}
-
-const testScan = async () => {
-  try {
-    const response = await $fetch('/api/qr-scan-test', {
-      method: 'POST',
-      body: {
-        establishment_id: establishment.value?.id,
-        table_number: 1
-      }
-    });
-    console.log(response);
-    
-    // Try direct database insertion for testing
-    const now = new Date().toISOString();
-    const { data, error } = await supabase
-      .from('qr_scans')
-      .insert({
-        establishment_id: establishment.value?.id,
-        user_agent: navigator.userAgent,
-        created_at: now,
-        ip_address: '127.0.0.1',
-        referrer: document.referrer || 'direct'
-      })
-      .select();
-    
-    console.log("Direct DB insertion result:", { data, error });
-    
-    if (error) {
-      showToast.error('Database error', error.message);
-    } else {
-      showToast.success('Test scan recorded directly');
-      loadScanStats(); // Refresh stats
-    }
-  } catch (err) {
-    console.error('Error recording test scan:', err);
-    showToast.error('Failed to record test scan');
-  }
-};
-
-// Format date helper
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleString()
-}
-
+// Configurer l'écoute des scans en temps réel
+let subscription;
 const setupRealtimeScans = () => {
-  const subscription = supabase
-    .channel('qr_scan_updates')
+  if (!establishment.value?.id) return
+  
+  // Annuler l'abonnement existant
+  if (subscription) {
+    subscription.unsubscribe()
+  }
+  
+  subscription = supabase
+    .channel('qr-scans')
     .on(
       'postgres_changes',
       {
         event: 'INSERT',
         schema: 'public',
         table: 'qr_scans',
-        filter: `establishment_id=eq.${establishment.value?.id}`
+        filter: `establishment_id=eq.${establishment.value.id}`
       },
       (payload) => {
-        console.log('New scan detected:', payload)
+        console.log('Nouveau scan détecté:', payload)
+        
+        // Mettre à jour les statistiques
+        scanStats.value.total_scans++
+        scanStats.value.today_scans++
         lastScan.value = payload.new
-        loadScanStats() // Refresh stats
-        showToast.success('Nouveau scan détecté!')
+        
+        // Montrer une notification
+        showToast.success('Nouveau scan', 'Quelqu\'un a scanné votre QR code')
       }
     )
     .subscribe()
-    
-  // Clean up on unmount
+  
+  // Nettoyage lors du démontage du composant
   onUnmounted(() => {
-    subscription.unsubscribe()
+    if (subscription) subscription.unsubscribe()
   })
 }
 
-// Génération synchrone de l'URL avec un token statique pour tester
-// (À remplacer par l'appel API plus tard)
-const generateStaticUrl = (tableNumber = null) => {
-  const baseUrl = `http://192.168.1.8:3005/menu/${establishment.value?.slug}`
-  const fakeToken = 'static-test-token-123456789'
-  
-  if (tableNumber) {
-    return `${baseUrl}?track=true&token=${fakeToken}&table=${tableNumber}`
-  }
-  
-  return `${baseUrl}?track=true&token=${fakeToken}`
-}
-
-// Chargement simple des URLs
-onMounted(() => {
-  // Charger d'abord les autres données
-  loadScanStats()
-  loadLastScan()
-  setupRealtimeScans()
-  
-  // Solution temporaire: utiliser des URLs statiques pour tester l'affichage
-  menuLink.value = generateStaticUrl()
-  
-  if (tableNumber.value) {
-    tableQrValue.value = generateStaticUrl(tableNumber.value)
-  }
-  
-  // Commenter temporairement les appels API problématiques
-  // fetchQrUrls()
-})
-
-// Observer les changements de numéro de table
-watch(tableNumber, (newValue) => {
-  if (newValue) {
-    // Solution temporaire: utiliser des URLs statiques pour tester l'affichage
-    tableQrValue.value = generateStaticUrl(newValue)
-    
-    // Commenter temporairement les appels API problématiques
-    // fetchTableQr(newValue)
-  } else {
-    tableQrValue.value = ''
-  }
-})
-
-// Fonction à débloquer ultérieurement
-const fetchQrUrls = async () => {
+// Partager sur les réseaux sociaux
+const shareToService = async (platform) => {
   try {
-    const response = await fetch(`/api/qr-token/${establishment.value?.id}`)
-    const data = await response.json()
+    // Version simplifiée du partage
+    const text = `Découvrez notre menu digital : ${menuLink.value}`
     
-    if (data.success && data.token) {
-      const baseUrl = `http://192.168.1.8:3008/menu/${establishment.value?.slug}`
-      menuLink.value = `${baseUrl}?track=true&token=${data.token}`
-      
-      if (tableNumber.value) {
-        tableQrValue.value = `${baseUrl}?track=true&token=${data.token}&table=${tableNumber.value}`
-      }
+    if (navigator.share) {
+      await navigator.share({
+        title: `Menu de ${establishment.value?.name || 'restaurant'}`,
+        text: text,
+        url: menuLink.value
+      })
+      showToast.success('Partagé', `Contenu partagé avec succès`)
     } else {
-      console.error('Failed to get token:', data)
-      showToast.error('Erreur', 'Impossible de générer le token QR')
+      // Fallback: copier le texte
+      await navigator.clipboard.writeText(text)
+      showToast.success('Copié', `Texte pour ${platform} copié`)
     }
-  } catch (error) {
-    console.error('Error fetching token:', error)
-    showToast.error('Erreur', 'Connexion impossible')
+  } catch (err) {
+    console.error('Error sharing:', err)
+    if (err.name !== 'AbortError') {
+      showToast.error('Erreur', 'Impossible de partager le contenu')
+    }
   }
 }
+
+// Initialisation
+onMounted(async () => {
+  menuLink.value = generateStaticUrl()
+  await Promise.all([
+    loadScanStats(),
+    loadLastScan(),
+    generateQrCode()
+  ])
+  setupRealtimeScans()
+})
 
 definePageMeta({
   layout: 'manager'
@@ -572,31 +357,12 @@ definePageMeta({
 </script>
 
 <style scoped>
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Styles minimalistes */
+button {
+  transition: background-color 0.2s, transform 0.1s;
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
-}
-
-input[type="color"] {
-  padding: 0;
-  overflow: hidden;
-}
-
-input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch {
-  border: none;
-  border-radius: 1rem;
-}
-
-input[type="color"]::-moz-color-swatch {
-  border: none;
-  border-radius: 1rem;
+button:active {
+  transform: scale(0.98);
 }
 </style>

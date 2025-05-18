@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-white">
     <!-- Header -->
     <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/20 shadow-sm">
-      <div class="max-w-[1400px] mx-auto px-6 sm:px-8 py-4">
+      <div class="max-w-[768px] mx-auto px-6 sm:px-8 py-4">
         <!-- Logo et nom de l'app -->
         <div class="flex items-center mb-4">
           <div class="flex items-center gap-3">

@@ -270,7 +270,7 @@
 
 #### ✨ Nouvelles fonctionnalités
 - **Page d'accueil**
-  - Design inspiré d'Apple
+  - Design inspiré 
   - Animations fluides
   - Mise en page responsive
   - Sections Features et Stats
@@ -328,11 +328,19 @@
 
 ### ✨ Fonctionnalités à venir
 - **Refonte de la section témoignages**
-  - Design inspiré d'Apple
+  - Design inspiré 
   - Images plus grandes et impactantes des restaurants
   - Nouveau layout en colonnes complètes
   - Animations et transitions améliorées
   - Meilleure mise en valeur des retours clients
+
+- **Refonte de l'interface QR Code** 🎨
+  - Design minimaliste inspiré 
+  - Interface simplifiée et plus intuitive
+  - Statistiques de scan en temps réel
+  - Options de partage optimisées pour les réseaux sociaux
+  - Visualisation claire et immédiate du QR code
+  - Expérience utilisateur plus fluide et épurée
 
 ### 🎨 Améliorations prévues
 - **Design et expérience utilisateur**

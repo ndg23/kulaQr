@@ -56,7 +56,7 @@
         <!-- Action Button -->
         <div class="px-3 mt-4">
           <NuxtLink 
-            to="/admin/restaurants/new" 
+            to="/admin/establishments/new" 
             class="flex items-center justify-center w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full transition-colors"
             @click="isSidebarOpen = false"
           >
@@ -176,8 +176,8 @@
       icon: LayoutDashboard
     },
     {
-      name: 'Restaurants',
-      to: '/admin/restaurants',
+      name: 'establishments',
+      to: '/admin/establishments',
       icon: Store
     },
     {

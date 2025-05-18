@@ -39,28 +39,7 @@
 
     <main class="max-w-[1400px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
       <!-- Quick Actions -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
-        <div 
-          v-for="action in quickActions" 
-          :key="action.name"
-          class="group bg-white rounded-2xl shadow-sm hover:shadow-md p-5 sm:p-6 transition-all duration-300 cursor-pointer"
-          @click="action.onClick"
-        >
-          <div class="flex items-center gap-4">
-            <div :class="[
-              action.iconBg, 
-              'w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110'
-            ]">
-              <component :is="action.icon" class="w-6 h-6 sm:w-7 sm:h-7" :class="action.iconColor" />
-            </div>
-            <div class="flex-1">
-              <h3 class="font-semibold text-gray-900">{{ action.name }}</h3>
-              <p class="text-sm text-gray-500 mt-0.5">{{ action.description }}</p>
-            </div>
-            <ArrowRight class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1" />
-          </div>
-        </div>
-      </div>
+     
 
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-20">
@@ -96,7 +75,7 @@
         <div 
           v-for="category in filteredCategories" 
           :key="category.id"
-          class="group bg-white rounded-2xl shadow-sm hover:shadow-md overflow-hidden transition-all duration-300"
+          class="group bg-white rounded-2xl hover:border-1 border hover:border-kula-500 overflow-hidden transition-all duration-300"
         >
           <!-- Image Header avec effet amélioré -->
           <div class="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
@@ -126,7 +105,7 @@
             </div>
 
             <!-- Actions -->
-            <div class="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div class="absolute top-3 right-3 flex items-center gap-2 ">
               <button 
                 @click="editCategory(category)"
                 class="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-sm"
@@ -184,44 +163,13 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <DialogTitle as="h3" class="text-xl font-semibold leading-6 text-gray-900">
-                  {{ editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
-                </DialogTitle>
-                <div class="mt-6 space-y-5">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                    <input 
-                      v-model="categoryForm.name" 
-                      type="text" 
-                      placeholder="Ex: Entrées, Plats, Desserts..."
-                      class="w-full h-11 px-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Description (optionnelle)</label>
-                    <textarea 
-                      v-model="categoryForm.description" 
-                      placeholder="Description de la catégorie..."
-                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
-                      rows="3"
-                    ></textarea>
-                  </div>
-                </div>
-                <div class="mt-6 flex justify-end gap-3">
-                  <button 
-                    @click="closeCategoryModal" 
-                    class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    Annuler
-                  </button>
-                  <button 
-                    @click="saveCategory" 
-                    class="px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                  >
-                    {{ editingCategory ? 'Enregistrer' : 'Ajouter' }}
-                  </button>
-                </div>
+            <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+
+              <CategoryModal
+                :category="editingCategory"
+                @close="closeCategoryModal"
+                @submit="saveCategory"
+              />
               </DialogPanel>
             </TransitionChild>
           </div>
@@ -265,6 +213,7 @@ const categories = ref<Category[]>([])
 const products = ref<Product[]>([])
 const loading = ref(true)
 const searchQuery = ref('')
+
 
 // Methods
 const getTotalProducts = (): number => {
