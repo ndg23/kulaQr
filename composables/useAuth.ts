@@ -1,4 +1,5 @@
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useState } from '#app'
 import { useSupabaseClient } from '#imports'
 
 export interface UserMetadata {
@@ -16,17 +17,46 @@ export interface User {
 }
 
 export const useAuth = () => {
+  const user = useState('user', () => null)
+  const isLoading = useState('auth_loading', () => true)
   const supabase = useSupabaseClient()
-  const user = ref<User | null>(null)
-  const loading = ref(false)
   const error = ref<string | null>(null)
+
+  // Initialiser la session au démarrage
+  const initSession = async () => {
+    try {
+      isLoading.value = true
+      const { data: { session }, error: err } = await supabase.auth.getSession()
+      if (err) throw err
+      user.value = session?.user || null
+    } catch (err) {
+      console.error('Error loading session:', err)
+      user.value = null
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Écouter les changements de session
+  onMounted(() => {
+    initSession()
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      user.value = session?.user || null
+      isLoading.value = false
+    })
+
+    onUnmounted(() => {
+      subscription.unsubscribe()
+    })
+  })
 
   // Récupérer l'utilisateur courant
   const getCurrentUser = async () => {
     try {
-      loading.value = true
+      isLoading.value = true
       const { data: { user: currentUser }, error: err } = await supabase.auth.getUser()
-      
+      console.log(currentUser)
       if (err) throw err
       user.value = currentUser
       return currentUser
@@ -35,14 +65,14 @@ export const useAuth = () => {
       error.value = 'Impossible de récupérer les informations utilisateur'
       return null
     } finally {
-      loading.value = false
+      isLoading.value = false
     }
   }
 
   // Connexion avec email/password
   const login = async (email: string, password: string) => {
     try {
-      loading.value = true
+      isLoading.value = true
       error.value = null
 
       const { data, error: err } = await supabase.auth.signInWithPassword({
@@ -59,14 +89,14 @@ export const useAuth = () => {
       error.value = 'Email ou mot de passe incorrect'
       return null
     } finally {
-      loading.value = false
+      isLoading.value = false
     }
   }
 
   // Connexion avec code PIN
   const loginWithPin = async (pin: string, establishmentId: string) => {
     try {
-      loading.value = true
+      isLoading.value = true
       error.value = null
 
       // Vérifier le PIN dans la table staff
@@ -95,14 +125,14 @@ export const useAuth = () => {
       error.value = 'PIN invalide'
       return null
     } finally {
-      loading.value = false
+      isLoading.value = false
     }
   }
 
   // Déconnexion
   const logout = async () => {
     try {
-      loading.value = true
+      isLoading.value = true
       error.value = null
       
       const { error: err } = await supabase.auth.signOut()
@@ -113,14 +143,14 @@ export const useAuth = () => {
       console.error('Erreur de déconnexion:', err)
       error.value = 'Impossible de se déconnecter'
     } finally {
-      loading.value = false
+      isLoading.value = false
     }
   }
 
   // Mise à jour du profil
   const updateProfile = async (profile: Partial<UserMetadata>) => {
     try {
-      loading.value = true
+      isLoading.value = true
       error.value = null
 
       const { data, error: err } = await supabase.auth.updateUser({
@@ -136,7 +166,7 @@ export const useAuth = () => {
       error.value = 'Impossible de mettre à jour le profil'
       return null
     } finally {
-      loading.value = false
+      isLoading.value = false
     }
   }
 
@@ -148,14 +178,9 @@ export const useAuth = () => {
     }
   }
 
-  // Écouter les changements d'authentification
-  supabase.auth.onAuthStateChange((event, session) => {
-    user.value = session?.user || null
-  })
-
   return {
     user,
-    loading,
+    isLoading,
     error,
     login,
     loginWithPin,

@@ -16,7 +16,7 @@
       <form @submit.prevent="handleSubmit" class="space-y-6">
         <!-- Name -->
         <div class="relative group">
-          <FormInput
+          <FloatLabelInput
             v-model="form.name"
             type="text"
             required
@@ -27,7 +27,7 @@
 
         <!-- Price -->
         <div class="relative group">
-          <FormInput
+          <FloatLabelInput
             v-model="form.price"
             type="number"
             step="0.01"
@@ -200,7 +200,8 @@ import {
 import type { Product, Category } from '~/types'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
-import FormInput from '~/components/ui/FormInput.vue'
+// import FloatLabelInput from '~/components/ui/FloatLabelInput.vue'
+
 const props = defineProps({
   product: {
     type: Object,

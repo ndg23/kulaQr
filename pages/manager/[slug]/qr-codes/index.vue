@@ -1,133 +1,110 @@
 <template>
   <div class="min-h-screen bg-white">
-    <!-- Header ultra-minimaliste -->
+    <!-- Header simplifié -->
     <header class="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-4">
-      <div class="max-w-3xl mx-auto">
-        <h1 class="text-xl font-semibold text-gray-900">QR Code</h1>
+      <div class="max-w-2xl mx-auto">
+        <div class="flex items-center gap-6">
+          <h1 class="text-xl font-bold text-gray-900">Menu QR Code</h1>
+          <div class="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-full">
+            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+            <span class="text-sm text-gray-600">En ligne</span>
+          </div>
+        </div>
       </div>
     </header>
 
-    <main class="max-w-3xl mx-auto px-6 py-8">
-      <!-- Carte QR simplifiée et centrée -->
-      <div class="mb-12 flex flex-col items-center">
-        <!-- QR Code avec design minimaliste -->
-        <div class="mb-8 p-6 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-xs w-full">
-          <div class="flex flex-col items-center">
-            <!-- QR Code -->
-            <div class="mb-6 p-4 bg-white rounded-2xl">
-              <img 
-                v-if="menuQrGenerated" 
-                :src="menuQrImage" 
-                alt="QR Code" 
-                class="w-48 h-48" 
-              />
-              <div v-else class="w-48 h-48 flex items-center justify-center bg-gray-50 rounded-lg">
-                <div class="animate-pulse bg-gray-200 w-32 h-32"></div>
+    <main class="max-w-2xl mx-auto px-6 py-12">
+      <!-- Carte QR simplifiée -->
+      <div class="bg-white rounded-2xl overflow-hidden">
+        <!-- QR Code Card -->
+        <div 
+          ref="qrCard"
+          class="aspect-[4/3] relative bg-white p-12 flex flex-col items-center justify-center"
+        >
+          <!-- Logo et nom -->
+          <div class="absolute top-8 left-8 right-8 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+                <UtensilsCrossed class="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <span class="text-xl font-bold text-gray-900">{{ establishment.value?.name }}</span>
+                <p class="text-sm text-gray-500 mt-0.5">Menu Digital</p>
               </div>
             </div>
-            
-            <!-- Texte explicatif simple -->
-            <p class="text-sm text-gray-500 text-center mb-4">
-              Scannez ce code avec l'appareil photo de votre téléphone
-            </p>
-            
-            <!-- URL -->
-            <div class="text-xs px-3 py-1.5 bg-gray-100 rounded-full text-gray-600 mb-6">
-              {{ menuLink.replace('https://', '') }}
-            </div>
-            
-            <!-- Actions -->
-            <div class="flex gap-2 w-full">
-              <button 
-                @click="copyLink" 
-                class="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-800 text-sm flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <Clipboard class="w-4 h-4" />
-                <span>Copier</span>
-              </button>
-              <button 
-                @click="downloadQrCode('menu')" 
-                class="flex-1 py-2.5 px-4 bg-blue-500 hover:bg-blue-600 rounded-full text-white text-sm flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <Download class="w-4 h-4" />
-                <span>Télécharger</span>
-              </button>
-            </div>
+          </div>
+
+          <!-- QR Code -->
+          <div class="w-72 h-72 p-6 bg-white rounded-3xl shadow-[0_0_60px_-15px_rgba(0,0,0,0.1)]">
+            <img 
+              v-if="menuQrGenerated" 
+              :src="menuQrImage" 
+              alt="QR Code Menu"
+              class="w-full h-full" 
+            />
+            <div v-else class="w-full h-full animate-pulse bg-gray-50 rounded-2xl"></div>
+          </div>
+
+          <!-- Call to action -->
+          <div class="absolute bottom-8 left-8 right-8">
+            <p class="text-base font-medium text-gray-900 text-center">Scannez pour voir notre menu</p>
+            <p class="text-sm text-gray-500 mt-2 text-center">{{ menuLink }}</p>
           </div>
         </div>
-        
-        <!-- Statistiques simplifiées -->
-        <div class="w-full max-w-xs">
-          <div class="mb-2 flex items-center justify-between">
-            <h2 class="text-sm font-medium text-gray-700">Statistiques</h2>
-            <div class="flex items-center">
-              <div class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></div>
-              <span class="text-xs text-gray-500">Mis à jour en temps réel</span>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-3 gap-3">
-            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
-              <p class="text-2xl font-medium text-gray-900 mb-1">{{ scanStats.total_scans }}</p>
-              <p class="text-xs text-gray-500">Total</p>
-            </div>
-            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
-              <p class="text-2xl font-medium text-gray-900 mb-1">{{ scanStats.today_scans }}</p>
-              <p class="text-xs text-gray-500">Aujourd'hui</p>
-            </div>
-            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
-              <p class="text-2xl font-medium text-gray-900 mb-1">{{ scanStats.conversion_rate }}%</p>
-              <p class="text-xs text-gray-500">Conversion</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Partage simplifié -->
-      <div class="mb-8">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-base font-medium text-gray-900">Partage</h2>
-        </div>
-        
-        <div class="grid grid-cols-4 gap-3">
+
+        <!-- Actions -->
+        <div class="border-t border-gray-50 p-6 flex gap-4">
           <button 
-            v-for="platform in ['Instagram', 'Facebook', 'Twitter', 'Messages']" 
-            :key="platform"
-            @click="shareToService(platform.toLowerCase())"
-            class="flex flex-col items-center p-3 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+            @click="copyLink" 
+            class="flex-1 py-3 px-6 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-700 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
           >
-            <div 
-              class="w-10 h-10 rounded-full mb-2 flex items-center justify-center"
-              :class="{
-                'bg-gradient-to-br from-purple-500 to-pink-500': platform === 'Instagram',
-                'bg-blue-600': platform === 'Facebook',
-                'bg-blue-400': platform === 'Twitter',
-                'bg-green-500': platform === 'Messages'
-              }"
-            >
-              <img 
-                v-if="['Instagram', 'Facebook', 'Twitter'].includes(platform)"
-                :src="`/images/social/${platform.toLowerCase()}.svg`" 
-                :alt="platform"
-                class="h-5 w-5 invert"
-              />
-              <MessageSquare v-else class="h-5 w-5 text-white" />
-            </div>
-            <span class="text-xs text-gray-800">{{ platform }}</span>
+            <Clipboard class="w-4 h-4" />
+            Copier le lien
+          </button>
+          <button 
+            @click="downloadQrCode()" 
+            class="flex-1 py-3 px-6 bg-green-600 hover:bg-green-700 rounded-xl text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+          >
+            <Download class="w-4 h-4" />
+            Télécharger
           </button>
         </div>
       </div>
-      
-      <!-- Dernière activité -->
-      <div v-if="lastScan" class="flex items-center justify-between p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="flex items-center gap-3">
-          <div class="relative">
-            <Smartphone class="w-5 h-5 text-gray-600" />
-            <div class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
+
+      <!-- Stats simplifiées -->
+      <div class="mt-12 space-y-6">
+        <div class="grid grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-2xl">
+            <div class="text-3xl font-bold text-gray-900">{{ scanStats.total_scans }}</div>
+            <div class="text-sm text-gray-500 mt-2">Total scans</div>
           </div>
-          <span class="text-sm text-gray-700">Dernier scan {{ formatTimeAgo(lastScan.created_at) }}</span>
+          <div class="bg-white p-6 rounded-2xl">
+            <div class="text-3xl font-bold text-gray-900">{{ scanStats.today_scans }}</div>
+            <div class="text-sm text-gray-500 mt-2">Aujourd'hui</div>
+          </div>
+          <div class="bg-white p-6 rounded-2xl">
+            <div class="text-3xl font-bold text-gray-900">{{ scanStats.conversion_rate }}%</div>
+            <div class="text-sm text-gray-500 mt-2">Conversion</div>
+          </div>
         </div>
-        <span class="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">Activité</span>
+
+        <!-- Dernier scan -->
+        <div v-if="lastScan" class="bg-white p-6 rounded-2xl">
+          <div class="flex items-center gap-4">
+            <div class="relative">
+              <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
+                <Smartphone class="w-5 h-5 text-gray-400" />
+              </div>
+              <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+            </div>
+            <div>
+              <span class="text-base font-medium text-gray-900">Dernier scan</span>
+              <p class="text-sm text-gray-500 mt-0.5">
+                {{ formatTimeAgo(lastScan.created_at) }}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -136,9 +113,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import QRCode from 'qrcode'
-import { Share2, Download, Smartphone, QrCode, Clipboard, MessageSquare } from 'lucide-vue-next'
+import { Share2, Download, Smartphone, QrCode, Clipboard, MessageSquare, UtensilsCrossed } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
-import { useToast } from '~/composables/useToast'
+import { useCustomToast } from '~/composables/useToast'
 import { useSupabaseClient } from '#imports'
 
 // États
@@ -147,7 +124,7 @@ const menuQrGenerated = ref(false)
 const menuLink = ref('')
 const qrColor = ref('#000000')
 const establishment = useEstablishment()
-const showToast = useToast()
+const {showToast} = useCustomToast()
 const scanStats = ref({
   total_scans: 0,
   today_scans: 0,
@@ -206,13 +183,16 @@ const downloadQrCode = () => {
   showToast.success('Téléchargé', 'QR code téléchargé avec succès')
 }
 
-// Charger les statistiques
+// Charger les statistiques avec la vue qr_scan_stats
 const loadScanStats = async () => {
   try {
     if (!establishment.value?.id) return
     
     const { data, error } = await supabase
-      .rpc('get_establishment_scan_stats', { establishment_id: establishment.value.id })
+      .from('qr_scan_stats')
+      .select('*')
+      .eq('establishment_id', establishment.value.id)
+      .single()
     
     if (error) throw error
     
@@ -252,7 +232,7 @@ const loadLastScan = async () => {
 }
 
 // Formater le temps écoulé
-const formatTimeAgo = (dateString) => {
+const formatTimeAgo = (dateString: string) => {
   const date = new Date(dateString)
   const seconds = Math.floor((new Date() - date) / 1000)
   
@@ -315,7 +295,7 @@ const setupRealtimeScans = () => {
 }
 
 // Partager sur les réseaux sociaux
-const shareToService = async (platform) => {
+const shareToService = async (platform: string) => {
   try {
     // Version simplifiée du partage
     const text = `Découvrez notre menu digital : ${menuLink.value}`
@@ -357,12 +337,21 @@ definePageMeta({
 </script>
 
 <style scoped>
-/* Styles minimalistes */
+/* Styles améliorés */
 button {
-  transition: background-color 0.2s, transform 0.1s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 button:active {
   transform: scale(0.98);
+}
+
+.aspect-4\/3 {
+  aspect-ratio: 4/3;
+}
+
+/* Ombre douce pour les cartes */
+.rounded-2xl {
+  box-shadow: 0 0 40px -15px rgba(0,0,0,0.05);
 }
 </style>
