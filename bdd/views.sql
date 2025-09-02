@@ -1,3 +1,6 @@
+
+
+
 -- Vue pour les statistiques administrateur
 CREATE TABLE IF NOT EXISTS qr_scans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

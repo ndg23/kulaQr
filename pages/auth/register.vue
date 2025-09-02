@@ -32,7 +32,7 @@
             </div>
             <div class="ml-3">
               <p class="text-sm font-medium" :class="step === 2 ? 'text-black' : 'text-gray-500'">
-                Restaurant
+                Etablissement
               </p>
             </div>
           </div>
@@ -195,6 +195,22 @@
               <p v-if="errors.type" class="text-sm text-red-600 mt-1">{{ errors.type }}</p>
             </div>
 
+            <!-- Adresse -->
+            <FormInput
+              v-model="form.address"
+              label="Adresse"
+              :error="errors.address"
+              placeholder="Adresse de votre restaurant"
+            />
+
+            <!-- Téléphone -->
+            <FormInput
+              v-model="form.phone"
+              label="Téléphone"
+              :error="errors.phone"
+              placeholder="Numéro de téléphone"
+            />
+
             <div class="flex items-start py-2">
               <input
                 v-model="form.terms"
@@ -207,6 +223,7 @@
                 <a href="/legal/privacy" class="text-black font-medium hover:opacity-70">politique de confidentialité</a>
               </label>
             </div>
+            <p v-if="errors.terms" class="text-sm text-red-600 mt-1">{{ errors.terms }}</p>
 
             <div class="flex gap-4">
               <button
@@ -280,7 +297,7 @@ import { ref, reactive, computed } from 'vue'
 import { Eye, EyeOff, Loader2, Check, ChevronDown, ArrowRight, ArrowLeft } from 'lucide-vue-next'
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
 import { useRouter } from 'vue-router'
-// import { useSupabase } from '~/composables/useSupabase'
+import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
 
 import FormInput from '~/components/ui/FormInput.vue'
@@ -301,7 +318,8 @@ const form = reactive({
   restaurantName: '',
   type: null as number | null,
   address: '',
-  phone: ''
+  phone: '',
+  terms: false
 })
 
 const errors = reactive({
@@ -311,10 +329,11 @@ const errors = reactive({
   restaurantName: '',
   type: '',
   address: '',
-  phone: ''
+  phone: '',
+  terms: ''
 })
 
-const supabase = useSupabaseClient()
+const { client: supabase } = useSupabaseWrapper()
 const router = useRouter()
 const {showToast} = useCustomToast()
 
@@ -325,21 +344,66 @@ const { data: establishmentTypes } = await supabase
   .order('name')
 
 const selectedType = computed(() => 
-  establishmentTypes.find(type => type.id === form.type)
+  establishmentTypes?.find((type: any) => type.id === form.type)
 )
 
 const step = ref(1)
 
 const handleRegister = async () => {
+  console.log('🚀 Début handleRegister')
+  console.log('📋 Form data:', form)
+  
+  // Validation complète avant soumission
+  let hasErrors = false
+  
   if (!form.type) {
+    console.log('❌ Type manquant:', form.type)
     errors.type = 'Veuillez sélectionner un type de restaurant'
+    hasErrors = true
+  }
+  
+  if (!form.restaurantName || form.restaurantName.trim() === '') {
+    console.log('❌ Nom restaurant manquant:', form.restaurantName)
+    errors.restaurantName = 'Le nom du restaurant est obligatoire'
+    hasErrors = true
+  }
+  
+  if (!form.fullName || form.fullName.trim() === '') {
+    console.log('❌ Nom complet manquant:', form.fullName)
+    errors.fullName = 'Le nom complet est obligatoire'
+    hasErrors = true
+  }
+  
+  if (!form.email || form.email.trim() === '') {
+    console.log('❌ Email manquant:', form.email)
+    errors.email = 'L\'email est obligatoire'
+    hasErrors = true
+  }
+  
+  if (!form.password || form.password.length < 6) {
+    console.log('❌ Mot de passe invalide:', form.password?.length)
+    errors.password = 'Le mot de passe doit contenir au moins 6 caractères'
+    hasErrors = true
+  }
+  
+  if (!form.terms) {
+    console.log('❌ Conditions d\'utilisation non acceptées')
+    errors.terms = 'Vous devez accepter les conditions d\'utilisation'
+    hasErrors = true
+  }
+
+  if (hasErrors) {
+    console.log('❌ Erreurs de validation détectées')
     return
   }
   
+  console.log('✅ Validation OK, début de l\'inscription')
   loading.value = true
   error.value = ''
+  
   try {
     // 1. Créer le compte auth
+    console.log('🔐 Création du compte auth...')
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
@@ -352,6 +416,7 @@ const handleRegister = async () => {
     })
     
     if (authError) {
+      console.error('❌ Erreur auth:', authError)
       errors.email = authError.message === 'User already registered'
         ? 'Cette adresse email est déjà utilisée'
         : 'Une erreur est survenue lors de l\'inscription'
@@ -359,10 +424,14 @@ const handleRegister = async () => {
     }
 
     if (!authData.user?.id) {
+      console.error('❌ User ID non trouvé')
       throw new Error('User ID not found')
     }
+    
+    console.log('✅ Compte auth créé, ID:', authData.user.id)
 
     // 2. Créer l'utilisateur dans la table users
+    console.log('👤 Création de l\'utilisateur dans la table users...')
     const { error: userError } = await supabase
       .from('users')
       .insert({
@@ -371,13 +440,31 @@ const handleRegister = async () => {
         role: 'owner',
         subscription_tier: 'free',
         is_active: true,
-        phone: form.phone,
-        subscription_ends_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) // +90 jours (offre de lancement)
+        phone: form.phone || null,
+        subscription_ends_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
       })
 
-    if (userError) throw userError
+    if (userError) {
+      console.error('❌ Erreur création utilisateur:', userError)
+      throw userError
+    }
     
+    console.log('✅ Utilisateur créé dans la table users')
+
     // 3. Créer l'établissement
+    console.log('🏪 Création de l\'établissement...')
+    console.log('📝 Données établissement:', {
+      name: form.restaurantName,
+      slug: form.restaurantName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      type_id: form.type,
+      user_id: authData.user.id,
+      created_by: authData.user.id,
+      is_active: true,
+      subscription_type: 'basic',
+      address: form.address || null,
+      phone: form.phone || null
+    })
+    
     const { error: establishmentError } = await supabase
       .from('establishments')
       .insert({
@@ -388,24 +475,40 @@ const handleRegister = async () => {
         created_by: authData.user.id,
         is_active: true,
         subscription_type: 'basic',
-        address: form.address,
-        phone: form.phone
+        address: form.address || null,
+        phone: form.phone || null
       })
     
     if (establishmentError) {
+      console.error('❌ Erreur création établissement:', establishmentError)
       errors.restaurantName = 'Erreur lors de la création du restaurant'
       return
     }
     
-    // Redirection avec message de succès
-    navigateTo('/auth/login', {
-      query: { 
-        registered: 'true',
-        email: form.email
-      }
+    console.log('✅ Établissement créé avec succès')
+    
+    // 4. Connecter directement l'utilisateur après l'inscription
+    console.log('🔑 Connexion automatique...')
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password
     })
+    
+    if (signInError) {
+      console.error('❌ Erreur de connexion automatique:', signInError)
+      // En cas d'échec de connexion automatique, rediriger vers login
+      navigateTo('/auth/login?registered=true&email=' + encodeURIComponent(form.email))
+      return
+    }
+    
+    console.log('✅ Connexion automatique réussie')
+    
+    // 5. L'utilisateur est maintenant connecté, le plugin auth.ts le redirigera automatiquement
+    // vers son dashboard car il a un établissement
+    showToast.success('Compte créé avec succès !', 'Redirection vers votre dashboard...')
+    
   } catch (err) {
-    console.error('Erreur inscription:', err)
+    console.error('❌ Erreur inscription:', err)
     errors.restaurantName = 'Une erreur inattendue est survenue'
   } finally {
     loading.value = false
@@ -428,11 +531,34 @@ const signInWithGoogle = async () => {
 
 const nextStep = () => {
   if (step.value === 1) {
-    // Validate first step
-    if (!form.fullName || !form.email || !form.password) {
+    // Validation complète de l'étape 1
+    let hasErrors = false
+    
+    if (!form.fullName || form.fullName.trim() === '') {
+      errors.fullName = 'Le nom complet est obligatoire'
+      hasErrors = true
+    }
+    
+    if (!form.email || form.email.trim() === '') {
+      errors.email = 'L\'email est obligatoire'
+      hasErrors = true
+    }
+    
+    if (!form.password || form.password.length < 6) {
+      errors.password = 'Le mot de passe doit contenir au moins 6 caractères'
+      hasErrors = true
+    }
+    
+    if (hasErrors) {
       return
     }
+    
+    // Si tout est valide, passer à l'étape 2
     step.value = 2
+    // Réinitialiser les erreurs
+    errors.fullName = ''
+    errors.email = ''
+    errors.password = ''
   }
 }
 

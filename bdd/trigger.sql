@@ -109,7 +109,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER user_last_login_trigger
-AFTER INSERT OR UPDATE ON auth.users
+AFTER INSERT OR UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION update_last_login();
 

@@ -227,7 +227,7 @@ CREATE TABLE IF NOT EXISTS order_items (
 
 
 CREATE INDEX IF NOT EXISTS idx_orders_establishment_id ON orders(establishment_id);
-CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_table_number ON orders(table_number);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON order_items(product_id);
@@ -317,12 +317,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger pour générer automatiquement le slug
-CREATE TRIGGER establishment_slug_trigger
-BEFORE INSERT OR UPDATE OF name ON establishments
-FOR EACH ROW
-WHEN (NEW.slug IS NULL OR OLD.name != NEW.name)
-EXECUTE FUNCTION generate_establishment_slug();
+-- Trigger pour générer automatiquement le slug (sera créé dans trigger.sql)
+-- CREATE TRIGGER establishment_slug_trigger
+-- BEFORE INSERT OR UPDATE OF name ON establishments
+-- FOR EACH ROW
+-- WHEN (NEW.slug IS NULL OR OLD.name != NEW.name)
+-- EXECUTE FUNCTION generate_establishment_slug();
 
 -- Ajout de la contrainte de clé étrangère entre order_items et products
 ALTER TABLE order_items
