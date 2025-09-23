@@ -347,7 +347,33 @@ const selectedType = computed(() =>
   establishmentTypes?.find((type: any) => type.id === form.type)
 )
 
+const route = useRoute()
 const step = ref(1)
+
+// Récupérer les données du callback si présentes
+onMounted(() => {
+  const stepParam = route.query.step
+  const dataParam = route.query.data
+  
+  if (stepParam === '2' && dataParam) {
+    try {
+      // Décoder les données utilisateur
+      const userData = JSON.parse(atob(dataParam as string))
+      console.log('📥 Données utilisateur reçues:', userData)
+      
+      // Pré-remplir le formulaire
+      form.email = userData.email
+      form.fullName = userData.fullName
+      
+      // Passer directement à l'étape 2
+      step.value = 2
+      
+      console.log('✅ Formulaire pré-rempli, étape 2 activée')
+    } catch (error) {
+      console.error('❌ Erreur décodage données utilisateur:', error)
+    }
+  }
+})
 
 const handleRegister = async () => {
   console.log('🚀 Début handleRegister')
@@ -380,10 +406,16 @@ const handleRegister = async () => {
     hasErrors = true
   }
   
-  if (!form.password || form.password.length < 6) {
-    console.log('❌ Mot de passe invalide:', form.password?.length)
-    errors.password = 'Le mot de passe doit contenir au moins 6 caractères'
-    hasErrors = true
+  // Vérifier si l'utilisateur est déjà connecté (venant du callback)
+  const { data: { user: currentUser } } = await supabase.auth.getUser()
+  const isAlreadyAuthenticated = !!currentUser
+  
+  if (!isAlreadyAuthenticated) {
+    if (!form.password || form.password.length < 6) {
+      console.log('❌ Mot de passe invalide:', form.password?.length)
+      errors.password = 'Le mot de passe doit contenir au moins 6 caractères'
+      hasErrors = true
+    }
   }
   
   if (!form.terms) {
@@ -402,63 +434,82 @@ const handleRegister = async () => {
   error.value = ''
   
   try {
-    // 1. Créer le compte auth
-    console.log('🔐 Création du compte auth...')
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        data: {
-          role: 'owner'
-        },
-        emailRedirectTo: `${window.location.origin}/auth/callback`
-      }
-    })
+    let userId = currentUser?.id
     
-    if (authError) {
-      console.error('❌ Erreur auth:', authError)
-      errors.email = authError.message === 'User already registered'
-        ? 'Cette adresse email est déjà utilisée'
-        : 'Une erreur est survenue lors de l\'inscription'
-      return
-    }
-
-    if (!authData.user?.id) {
-      console.error('❌ User ID non trouvé')
-      throw new Error('User ID not found')
-    }
-    
-    console.log('✅ Compte auth créé, ID:', authData.user.id)
-
-    // 2. Créer l'utilisateur dans la table users
-    console.log('👤 Création de l\'utilisateur dans la table users...')
-    const { error: userError } = await supabase
-      .from('users')
-      .insert({
-        id: authData.user.id,
-        full_name: form.fullName,
-        role: 'owner',
-        subscription_tier: 'free',
-        is_active: true,
-        phone: form.phone || null,
-        subscription_ends_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+    // 1. Créer le compte auth seulement si pas déjà connecté
+    if (!isAlreadyAuthenticated) {
+      console.log('🔐 Création du compte auth...')
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            role: 'owner'
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
       })
+      
+      if (authError) {
+        console.error('❌ Erreur auth:', authError)
+        errors.email = authError.message === 'User already registered'
+          ? 'Cette adresse email est déjà utilisée'
+          : 'Une erreur est survenue lors de l\'inscription'
+        return
+      }
 
-    if (userError) {
-      console.error('❌ Erreur création utilisateur:', userError)
-      throw userError
+      if (!authData.user?.id) {
+        console.error('❌ User ID non trouvé')
+        throw new Error('User ID not found')
+      }
+      
+      userId = authData.user.id
+      console.log('✅ Compte auth créé, ID:', userId)
+    } else {
+      console.log('✅ Utilisateur déjà authentifié, ID:', userId)
+    }
+
+    // 2. Créer l'utilisateur dans la table users (seulement si pas déjà créé)
+    console.log('👤 Vérification/création de l\'utilisateur dans la table users...')
+    const { data: existingUser, error: userCheckError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .single()
+    
+    if (userCheckError && userCheckError.code === 'PGRST116') {
+      // Utilisateur n'existe pas, le créer
+      const { error: userError } = await supabase
+        .from('users')
+        .insert({
+          id: userId,
+          full_name: form.fullName,
+          role: 'owner',
+          subscription_tier: 'free',
+          is_active: true,
+          phone: form.phone || null,
+          subscription_ends_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+        })
+
+      if (userError) {
+        console.error('❌ Erreur création utilisateur:', userError)
+        error.value = 'Une erreur est survenue lors de la création du profil'
+        return
+      }
+      
+      console.log('✅ Utilisateur créé dans la table users')
+    } else {
+      console.log('✅ Utilisateur existe déjà dans la table users')
     }
     
-    console.log('✅ Utilisateur créé dans la table users')
-
     // 3. Créer l'établissement
     console.log('🏪 Création de l\'établissement...')
     console.log('📝 Données établissement:', {
       name: form.restaurantName,
       slug: form.restaurantName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       type_id: form.type,
-      user_id: authData.user.id,
-      created_by: authData.user.id,
+      user_id: userId,
+      created_by: userId,
       is_active: true,
       subscription_type: 'basic',
       address: form.address || null,
@@ -471,8 +522,8 @@ const handleRegister = async () => {
         name: form.restaurantName,
         slug: form.restaurantName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         type_id: form.type,
-        user_id: authData.user.id,
-        created_by: authData.user.id,
+        user_id: userId,
+        created_by: userId,
         is_active: true,
         subscription_type: 'basic',
         address: form.address || null,
@@ -487,25 +538,25 @@ const handleRegister = async () => {
     
     console.log('✅ Établissement créé avec succès')
     
-    // 4. Connecter directement l'utilisateur après l'inscription
-    console.log('🔑 Connexion automatique...')
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password
-    })
-    
-    if (signInError) {
-      console.error('❌ Erreur de connexion automatique:', signInError)
-      // En cas d'échec de connexion automatique, rediriger vers login
-      navigateTo('/auth/login?registered=true&email=' + encodeURIComponent(form.email))
-      return
+    // 4. Si pas déjà connecté, connecter l'utilisateur
+    if (!isAlreadyAuthenticated) {
+      console.log('🔑 Connexion automatique...')
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password
+      })
+      
+      if (signInError) {
+        console.error('❌ Erreur de connexion automatique:', signInError)
+        navigateTo('/auth/login?registered=true&email=' + encodeURIComponent(form.email))
+        return
+      }
+      
+      console.log('✅ Connexion automatique réussie')
     }
     
-    console.log('✅ Connexion automatique réussie')
-    
     // 5. L'utilisateur est maintenant connecté, le plugin auth.ts le redirigera automatiquement
-    // vers son dashboard car il a un établissement
-    showToast.success('Compte créé avec succès !', 'Redirection vers votre dashboard...')
+    showToast.success('Configuration terminée !', 'Redirection vers votre dashboard...')
     
   } catch (err) {
     console.error('❌ Erreur inscription:', err)

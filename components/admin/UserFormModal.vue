@@ -73,13 +73,13 @@
                     <div>
                       <FloatLabelSelect
                         id="is_active"
-                        v-model="form.is_active"
+                        v-model="form.status"
                         label="Statut"
                         :error="errors.is_active"
                         required
                       >
-                        <option :value="true">Actif</option>
-                        <option :value="false">Inactif</option>
+                        <option value="active">Actif</option>
+                        <option value="inactive">Inactif</option>
                       </FloatLabelSelect>
                     </div>
                     
@@ -154,7 +154,14 @@ const props = defineProps({
     default: 'lg'
   }
 });
-const isOpen = ref(props.open);
+const isOpen = computed({
+  get: () => props.open,
+  set: (value) => {
+    if (!value) {
+      emit('close');
+    }
+  }
+});
 
 
 const emit = defineEmits(['close', 'submit']);
@@ -182,7 +189,7 @@ const form = ref({
   email: '',
   password: '',
   role: 'user',
-  is_active: true,
+  status: 'active', // Changé de is_active à status
   subscription_tier: 'free',
   subscription_ends_at: ''
 });
@@ -201,7 +208,7 @@ const resetForm = () => {
     email: '',
     password: '',
     role: 'user',
-    is_active: true,
+      status: 'active',
     subscription_tier: 'free',
     subscription_ends_at: ''
   };
@@ -218,17 +225,22 @@ const resetForm = () => {
 };
 
 // Observer les changements de l'utilisateur sélectionné
-watch(() => props.user, (newUser) => {
-  if (newUser) {
-    form.value = {
-      full_name: newUser.full_name || '',
-      email: newUser.email || '',
-      password: '',
-      role: newUser.role || 'user',
-      is_active: typeof newUser.is_active === 'boolean' ? newUser.is_active : true,
-      subscription_tier: newUser.subscription_tier || 'free',
-      subscription_ends_at: newUser.subscription_ends_at ? formatDateForInput(newUser.subscription_ends_at) : ''
-    };
+watch([() => props.user, () => props.open], ([newUser, isOpened]) => {
+  console.log('Modal watch triggered:', { newUser, isOpened });
+  if (isOpened) {
+    if (newUser) {
+      form.value = {
+        full_name: newUser.full_name || '',
+        email: newUser.email || '',
+        password: '',
+        role: newUser.role || 'user',
+        status: newUser.is_active ? 'active' : 'inactive',
+        subscription_tier: newUser.subscription_tier || 'free',
+        subscription_ends_at: newUser.subscription_ends_at ? formatDateForInput(newUser.subscription_ends_at) : ''
+      };
+    } else {
+      resetForm();
+    }
   } else {
     resetForm();
   }
@@ -291,7 +303,7 @@ const handleSubmit = async () => {
       full_name: form.value.full_name,
       email: form.value.email,
       role: form.value.role,
-      is_active: form.value.is_active,
+      is_active: form.value.status === 'active',
       subscription_tier: form.value.subscription_tier,
       subscription_ends_at: form.value.subscription_ends_at ? new Date(form.value.subscription_ends_at).toISOString() : null
     };
@@ -305,14 +317,19 @@ const handleSubmit = async () => {
       
       if (updateError) throw updateError;
       
-      // Si l'email a changé, mettre à jour l'authentification
+      // Si l'email a changé, mettre à jour via l'API
       if (props.user.email !== form.value.email) {
-        const { error: authUpdateError } = await supabase.auth.admin.updateUserById(
-          props.user.id,
-          { email: form.value.email }
-        );
+        const { error: emailUpdateError } = await useFetch('/api/admin/update-user-email', {
+          method: 'POST',
+          body: {
+            userId: props.user.id,
+            newEmail: form.value.email
+          }
+        });
         
-        if (authUpdateError) throw authUpdateError;
+        if (emailUpdateError) {
+          throw new Error('Impossible de mettre à jour l\'email. Veuillez réessayer.');
+        }
       }
       
       // Enregistrer l'activité

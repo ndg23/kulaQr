@@ -2,12 +2,12 @@
   <div class="min-h-screen bg-[#F5F5F7] relative">
     <PatternBackground :opacity="0.8" :duration="60" />
     <div class="relative z-50">
-      <!-- Background icons layer -->
-      <!--  -->
+      <!-- Navigation Bar -->
+      <Navbar />
 
       <!-- Hero Section with Logo Focus - Now with white design -->
       <!-- Hero Section -->
-      <section class="w-full min-h-[80vh] relative flex items-center justify-center bg-white overflow-hidden">
+      <section class="w-full min-h-[80vh] relative flex items-center justify-center bg-white overflow-hidden pt-16">
         <!-- Subtle gradient background -->
         <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white opacity-80"></div>
         
@@ -57,7 +57,7 @@
       </section>
 
       <!-- Features Section - Apple-inspired design -->
-      <section class="w-full py-24 md:py-32 bg-white text-black overflow-hidden">
+      <section id="features" class="w-full py-24 md:py-32 bg-white text-black overflow-hidden">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
           <div class="text-center mb-20">
             <span class="inline-block px-4 py-2 bg-black/5 rounded-full text-sm font-medium tracking-wide text-gray-800 mb-4">
@@ -183,7 +183,7 @@
       </section>
 
       <!-- Testimonials Section -->
-      <section class="w-full py-24 md:py-32 bg-white">
+      <section id="testimonials" class="w-full py-24 md:py-32 bg-white">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
           <div class="text-center mb-20">
             <span class="inline-block px-4 py-2 bg-black/5 rounded-full text-sm font-medium tracking-wide text-gray-800 mb-4">
@@ -248,7 +248,7 @@
       </section>
 
       <!-- CTA Section -->
-      <section class="w-full py-24 md:py-32 bg-white text-center relative overflow-hidden">
+      <section id="pricing" class="w-full py-24 md:py-32 bg-white text-center relative overflow-hidden">
         <!-- Background elements -->
         <div class="absolute inset-0 pointer-events-none hidden md:block">
           <!-- Icons -->
@@ -317,7 +317,7 @@
       </section>
       
       <!-- Footer - Minimal Apple-style design -->
-      <footer class="w-full bg-white py-12 md:py-16 border-t border-gray-100">
+      <footer id="contact" class="w-full bg-white py-12 md:py-16 border-t border-gray-100">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
           <!-- Main Footer Content -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
@@ -434,6 +434,11 @@ const testimonials = [
 
 <style scoped>
 html {
+  scroll-behavior: smooth;
+}
+
+/* Smooth scrolling for anchor links */
+a[href^="#"] {
   scroll-behavior: smooth;
 }
 

@@ -13,16 +13,21 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     if (event === 'SIGNED_IN') {
       console.log('User signed in')
       
+      // Ne pas rediriger si on est sur la page d'inscription
+      if (window.location.pathname === '/auth/register') {
+        return
+      }
+      
       // Fetch user's establishment
       const establishment = await fetchEstablishmentByUserId()
       
       // Redirect based on whether they have an establishment
       if (establishment) {
         // User has an establishment, redirect to dashboard
-        navigateTo(`/manager/${establishment.id}`)
+        navigateTo(`/manager/${establishment.slug}/menu`)
       } else {
-        // User doesn't have an establishment, redirect to onboarding
-        navigateTo('/onboarding')
+        // User doesn't have an establishment, redirect to register
+        navigateTo('/auth/register')
       }
     } else if (event === 'SIGNED_OUT') {
       console.log('User signed out')

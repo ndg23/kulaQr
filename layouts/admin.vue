@@ -54,7 +54,7 @@
         </nav>
   
         <!-- Action Button -->
-        <div class="px-3 mt-4">
+        <!-- <div class="px-3 mt-4">
           <NuxtLink 
             to="/admin/establishments/new" 
             class="flex items-center justify-center w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full transition-colors"
@@ -63,7 +63,7 @@
             <Plus class="w-5 h-5 mr-2" />
             Nouveau Restaurant
           </NuxtLink>
-        </div>
+        </div> -->
   
         <!-- User Menu -->
         <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
@@ -74,8 +74,8 @@
                   <User class="w-5 h-5 text-gray-500" />
                 </div>
                 <div class="ml-3 text-left">
-                  <p class="font-bold text-gray-900">Admin</p>
-                  <p class="text-gray-500 text-sm">@admin</p>
+                  <p class="font-bold text-gray-900">{{ user.full_name }}</p>
+                  <p class="text-gray-500 text-sm">{{ user.email }}</p>
                 </div>
               </div>
               <MoreHorizontal class="w-5 h-5 text-gray-500" />
@@ -161,11 +161,14 @@
   } from 'lucide-vue-next'
   import { useCustomToast } from '~/composables/useToast'
   import { ref, watch, onMounted, onUnmounted } from 'vue'
+// import { useSupabaseUser } from '~/composables/useSupabase'
   
   const route = useRoute()
   const router = useRouter()
   const { showToast } = useCustomToast()
-  
+    
+  const  user  = useSupabaseClient()
+    console.log(user)
   // State for mobile sidebar
   const isSidebarOpen = ref(false)
   
@@ -176,7 +179,7 @@
       icon: LayoutDashboard
     },
     {
-      name: 'establishments',
+      name: 'Établissements',
       to: '/admin/establishments',
       icon: Store
     },

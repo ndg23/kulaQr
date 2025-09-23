@@ -19,10 +19,42 @@ onMounted(async () => {
     const { error } = await supabase.auth.getSession()
     if (error) throw error
 
-    // Récupérer l'établissement de l'utilisateur
+    // Récupérer l'utilisateur
     const { data: user } = await supabase.auth.getUser()
     if (!user) throw new Error('Utilisateur non trouvé')
 
+    // Vérifier si l'utilisateur existe dans la table users
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id, full_name, email')
+      .eq('id', user.user.id)
+      .single()
+
+    // Si l'utilisateur n'existe pas dans notre table, le créer
+    if (userError && userError.code === 'PGRST116') {
+      console.log('👤 Création de l\'utilisateur dans la table users...')
+      
+      const { error: createUserError } = await supabase
+        .from('users')
+        .insert({
+          id: user.user.id,
+          full_name: user.user.user_metadata?.full_name || user.user.email?.split('@')[0],
+          email: user.user.email,
+          role: 'owner',
+          subscription_tier: 'free',
+          is_active: true,
+          subscription_ends_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+        })
+
+      if (createUserError) {
+        console.error('❌ Erreur création utilisateur:', createUserError)
+        throw createUserError
+      }
+      
+      console.log('✅ Utilisateur créé dans la table users')
+    }
+
+    // Vérifier si l'utilisateur a un établissement
     const { data: establishments, error: establishmentError } = await supabase
       .from('establishments')
       .select('id')
@@ -33,13 +65,26 @@ onMounted(async () => {
       throw establishmentError
     }
 
-    // Rediriger vers la configuration si pas d'établissement
+    // Rediriger vers l'inscription si pas d'établissement
     if (!establishments) {
-      router.push('/restaurant-setup')
+      console.log('🏪 Pas d\'établissement, redirection vers register avec données utilisateur')
+      
+      // Préparer les données utilisateur à passer au register
+      const userInfo = {
+        email: user.user.email,
+        fullName: user.user.user_metadata?.full_name || user.user.email?.split('@')[0],
+        provider: user.user.app_metadata?.provider || 'google'
+      }
+      
+      // Encoder les données en base64 pour les passer en paramètre
+      const encodedData = btoa(JSON.stringify(userInfo))
+      
+      router.push(`/auth/register?step=2&data=${encodedData}`)
       return
     }
 
     // Rediriger vers le dashboard
+    console.log('✅ Établissement trouvé, redirection vers dashboard')
     router.push('/manager')
   } catch (error) {
     console.error('Erreur de callback:', error)

@@ -134,9 +134,9 @@
               <span class="text-sm font-medium text-gray-900">
                 {{ formatDate(row.created_at, 'date') }}
               </span>
-              <span class="text-xs text-gray-500">
+              <!-- <span class="text-xs text-gray-500">
                 {{ formatDate(row.created_at, 'time') }}
-              </span>
+              </span> -->
             </div>
           </template>
   
@@ -148,6 +148,7 @@
               </span>
             </div>
           </template>
+          
   
           <!-- Actions Column -->
           <template #actions-data="{ row }">
@@ -223,9 +224,9 @@ import { useCustomToast } from '~/composables/useToast'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 // import { UTable, UPagination } from '@/components/ui/table'
 import { 
-  Plus,  Edit, Trash2, RefreshCw, X, CheckCircle, AlertTriangle, 
+  Plus, Edit, Trash2, RefreshCw, X, CheckCircle, AlertTriangle, 
   Info, Users, ChevronLeft, ChevronRight, Eye, EyeOff, User, Download,
-  UserPlus, UserCheck, UserX, Shield, Mail, Ban, Loader2
+  UserPlus, UserCheck, UserX, Shield, Mail, Ban, Loader2, Search
 } from 'lucide-vue-next';
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild, Switch } from '@headlessui/vue'
 import UserFormModal from '~/components/admin/UserFormModal.vue'

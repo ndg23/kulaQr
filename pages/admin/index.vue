@@ -440,13 +440,13 @@
   
   // Load initial data
   onBeforeMount(() => {
-    console.log('onBeforeMount')
+    // console.log('onBeforeMount')
     loadStats()
     loadRecentActivity()
     loadRecentEstablishments()
   })
   onMounted(() => {
-    console.log('onMounted')
+    // console.log('onMounted')
     loadStats()
     loadRecentActivity()
     loadRecentEstablishments()
