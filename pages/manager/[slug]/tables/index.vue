@@ -7,7 +7,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div class="bg-white rounded-2xl border border-gray-200 p-6">
         <div class="flex items-center justify-between">
           <div>
@@ -23,35 +23,23 @@
       <div class="bg-white rounded-2xl border border-gray-200 p-6">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-600">Occupées</p>
-            <p class="text-2xl font-bold text-orange-600">{{ occupiedTables }}</p>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center">
-            <Users class="w-6 h-6 text-orange-500" />
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Disponibles</p>
-            <p class="text-2xl font-bold text-green-600">{{ availableTables }}</p>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
-            <CheckCircle class="w-6 h-6 text-green-500" />
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Commandes Actives</p>
-            <p class="text-2xl font-bold text-purple-600">{{ activeOrders }}</p>
+            <p class="text-sm font-medium text-gray-600">Tables VIP</p>
+            <p class="text-2xl font-bold text-purple-600">{{ vipTables }}</p>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center">
-            <ShoppingCart class="w-6 h-6 text-purple-500" />
+            <Users class="w-6 h-6 text-purple-500" />
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-gray-200 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">QR Codes Générés</p>
+            <p class="text-2xl font-bold text-green-600">{{ qrCodesGenerated }}</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
+            <QrCode class="w-6 h-6 text-green-500" />
           </div>
         </div>
       </div>
@@ -125,40 +113,34 @@
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-3">
             <div :class="[
-              getTableStatusColor(table.status).bg,
+              table.type === 'VIP' ? 'bg-purple-50' : 'bg-blue-50',
               'w-12 h-12 rounded-2xl flex items-center justify-center'
             ]">
-              <Table class="w-6 h-6" :class="getTableStatusColor(table.status).text" />
+              <Table class="w-6 h-6" :class="table.type === 'VIP' ? 'text-purple-500' : 'text-blue-500'" />
             </div>
             <div>
               <h3 class="text-lg font-bold text-gray-900">Table {{ table.number }}</h3>
-              <p class="text-sm text-gray-500">{{ table.capacity }} places</p>
+              <p class="text-sm text-gray-500">{{ table.type }} • {{ table.zone }}</p>
             </div>
           </div>
           
           <div class="flex items-center gap-2">
             <span :class="[
-              getTableStatusColor(table.status).badge,
+              table.qr_code_generated ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700',
               'px-3 py-1 rounded-full text-xs font-semibold'
             ]">
-              {{ getTableStatusText(table.status) }}
+              {{ table.qr_code_generated ? 'QR Généré' : 'Pas de QR' }}
             </span>
           </div>
         </div>
 
         <!-- Table Info -->
         <div class="space-y-2 mb-4">
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-500">Zone:</span>
-            <span class="font-medium">{{ table.zone || 'Non définie' }}</span>
+          <div v-if="table.description" class="text-sm text-gray-600">
+            {{ table.description }}
           </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-500">QR Code:</span>
-            <span class="font-medium">{{ table.qr_code_generated ? 'Généré' : 'Non généré' }}</span>
-          </div>
-          <div v-if="table.current_order" class="flex justify-between text-sm">
-            <span class="text-gray-500">Commande:</span>
-            <span class="font-medium text-orange-600">#{{ table.current_order }}</span>
+          <div v-if="table.qr_code_url" class="text-xs text-blue-600 font-mono bg-blue-50 p-2 rounded">
+            {{ table.qr_code_url }}
           </div>
         </div>
 
@@ -171,10 +153,19 @@
             Modifier
           </button>
           <button
+            v-if="!table.qr_code_generated"
             @click="generateQrCode(table)"
             class="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-medium hover:bg-blue-200 transition-colors"
           >
-            QR Code
+            Générer QR
+          </button>
+          <button
+            v-else
+            @click="downloadQrCode(table)"
+            class="flex-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors flex items-center justify-center gap-1"
+          >
+            <Download class="w-4 h-4" />
+            Télécharger
           </button>
           <button
             @click="deleteTable(table.id)"
@@ -215,25 +206,27 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Capacité</label>
-              <input
-                v-model="tableForm.capacity"
-                type="number"
-                required
+              <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+              <select
+                v-model="tableForm.type"
                 class="w-full h-12 px-4 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
-                placeholder="Ex: 2, 4, 6..."
-              />
+              >
+                <option value="SIMPLE">SIMPLE</option>
+                <option value="VIP">VIP</option>
+              </select>
             </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Zone</label>
-            <input
+            <select
               v-model="tableForm.zone"
-              type="text"
               class="w-full h-12 px-4 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
-              placeholder="Ex: Terrasse, Intérieur, VIP..."
-            />
+            >
+              <option value="ETAGE">ETAGE</option>
+              <option value="TERRASSE">TERRASSE</option>
+              <option value="REZ_DE_CHAUSSEE">REZ DE CHAUSSEE</option>
+            </select>
           </div>
 
           <div>
@@ -244,17 +237,6 @@
               class="w-full px-4 py-3 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
               placeholder="Description de la table..."
             />
-          </div>
-
-          <div class="flex items-center gap-4">
-            <label class="flex items-center gap-2">
-              <input
-                v-model="tableForm.is_active"
-                type="checkbox"
-                class="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-              />
-              <span class="text-sm font-medium text-gray-700">Table active</span>
-            </label>
           </div>
 
           <div class="flex gap-3 pt-4">
@@ -283,7 +265,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { 
   Table, Users, CheckCircle, ShoppingCart, Plus, Search, 
-  RefreshCw, Loader2, Trash2, X 
+  RefreshCw, Loader2, Trash2, X, QrCode, Download 
 } from 'lucide-vue-next'
 import { useCustomToast } from '~/composables/useToast'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
@@ -291,7 +273,7 @@ import { useEstablishment } from '~/composables/useEstablishment'
 
 const { showToast } = useCustomToast()
 const { client: supabase } = useSupabaseWrapper()
-const { establishment, fetchEstablishmentFromRoute } = useEstablishment()
+const { establishment, fetchEstablishmentByUserId } = useEstablishment()
 
 // State
 const loading = ref(false)
@@ -303,10 +285,9 @@ const editingTable = ref<any>(null)
 // Form
 const tableForm = ref({
   number: '',
-  capacity: '',
-  zone: '',
-  description: '',
-  is_active: true
+  type: 'SIMPLE',
+  zone: 'ETAGE',
+  description: ''
 })
 
 // Computed
@@ -319,16 +300,12 @@ const filteredTables = computed(() => {
   )
 })
 
-const occupiedTables = computed(() => 
-  tables.value.filter(table => table.status === 'occupied').length
+const vipTables = computed(() => 
+  tables.value.filter(table => table.type === 'VIP').length
 )
 
-const availableTables = computed(() => 
-  tables.value.filter(table => table.status === 'available').length
-)
-
-const activeOrders = computed(() => 
-  tables.value.filter(table => table.current_order).length
+const qrCodesGenerated = computed(() => 
+  tables.value.filter(table => table.qr_code_generated).length
 )
 
 // Load tables
@@ -340,14 +317,7 @@ const loadTables = async () => {
     
     const { data, error } = await supabase
       .from('tables')
-      .select(`
-        *,
-        orders!current_order_id(
-          id,
-          status,
-          total_amount
-        )
-      `)
+      .select('*')
       .eq('establishment_id', establishment.value.id)
       .order('number', { ascending: true })
 
@@ -367,10 +337,9 @@ const openTableModal = () => {
   editingTable.value = null
   tableForm.value = {
     number: '',
-    capacity: '',
-    zone: '',
-    description: '',
-    is_active: true
+    type: 'SIMPLE',
+    zone: 'ETAGE',
+    description: ''
   }
   showTableModal.value = true
 }
@@ -379,10 +348,9 @@ const editTable = (table: any) => {
   editingTable.value = table
   tableForm.value = {
     number: table.number,
-    capacity: table.capacity,
-    zone: table.zone || '',
-    description: table.description || '',
-    is_active: table.is_active
+    type: table.type || 'SIMPLE',
+    zone: table.zone || 'ETAGE',
+    description: table.description || ''
   }
   showTableModal.value = true
 }
@@ -392,10 +360,9 @@ const closeTableModal = () => {
   editingTable.value = null
   tableForm.value = {
     number: '',
-    capacity: '',
-    zone: '',
-    description: '',
-    is_active: true
+    type: 'SIMPLE',
+    zone: 'ETAGE',
+    description: ''
   }
 }
 
@@ -407,10 +374,9 @@ const saveTable = async () => {
     
     const tableData = {
       number: parseInt(tableForm.value.number),
-      capacity: parseInt(tableForm.value.capacity),
+      type: tableForm.value.type,
       zone: tableForm.value.zone,
       description: tableForm.value.description,
-      is_active: tableForm.value.is_active,
       establishment_id: establishment.value.id
     }
 
@@ -472,56 +438,60 @@ const deleteTable = async (tableId: string) => {
   }
 }
 
-const generateQrCode = (table: any) => {
-  showToast.info('Fonctionnalité à venir', 'La génération de QR code par table sera disponible prochainement')
+const generateQrCode = async (table: any) => {
+  if (!establishment.value) return
+
+  try {
+    loading.value = true
+    
+    // Générer l'URL du menu pour cette table spécifique
+    const tableMenuUrl = `${window.location.origin}/menu/${establishment.value.id}?table=${table.number}`
+    
+    // Mettre à jour la table avec l'URL du QR code
+    const { error } = await supabase
+      .from('tables')
+      .update({
+        qr_code_url: tableMenuUrl,
+        qr_code_generated: true
+      })
+      .eq('id', table.id)
+
+    if (error) throw error
+
+    // Mettre à jour les données locales
+    const index = tables.value.findIndex(t => t.id === table.id)
+    if (index !== -1) {
+      tables.value[index].qr_code_url = tableMenuUrl
+      tables.value[index].qr_code_generated = true
+    }
+    
+    showToast.success('QR Code généré', `QR code généré pour la table ${table.number}`)
+  } catch (err) {
+    console.error('Error generating QR code:', err)
+    showToast.error('Erreur', 'Impossible de générer le QR code')
+  } finally {
+    loading.value = false
+  }
+}
+
+const downloadQrCode = (table: any) => {
+  if (!table.qr_code_url) {
+    showToast.error('Erreur', 'Aucun QR code disponible pour cette table')
+    return
+  }
+  
+  // Ouvrir l'URL dans un nouvel onglet pour téléchargement/impression
+  window.open(table.qr_code_url, '_blank')
+  showToast.success('Ouverture', 'QR code ouvert dans un nouvel onglet')
 }
 
 const refreshData = () => {
   loadTables()
 }
 
-// Utility functions
-const getTableStatusColor = (status: string) => {
-  switch (status) {
-    case 'occupied':
-      return {
-        bg: 'bg-orange-50',
-        text: 'text-orange-500',
-        badge: 'bg-orange-100 text-orange-700'
-      }
-    case 'reserved':
-      return {
-        bg: 'bg-yellow-50',
-        text: 'text-yellow-500',
-        badge: 'bg-yellow-100 text-yellow-700'
-      }
-    case 'maintenance':
-      return {
-        bg: 'bg-red-50',
-        text: 'text-red-500',
-        badge: 'bg-red-100 text-red-700'
-      }
-    default:
-      return {
-        bg: 'bg-green-50',
-        text: 'text-green-500',
-        badge: 'bg-green-100 text-green-700'
-      }
-  }
-}
-
-const getTableStatusText = (status: string) => {
-  switch (status) {
-    case 'occupied': return 'Occupée'
-    case 'reserved': return 'Réservée'
-    case 'maintenance': return 'Maintenance'
-    default: return 'Disponible'
-  }
-}
-
 // Initialize
 onMounted(async () => {
-  await fetchEstablishmentFromRoute()
+  await fetchEstablishmentByUserId()
   if (establishment.value) {
     loadTables()
   }

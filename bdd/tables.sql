@@ -3,13 +3,11 @@ CREATE TABLE IF NOT EXISTS tables (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     establishment_id UUID NOT NULL REFERENCES establishments(id) ON DELETE CASCADE,
     number INTEGER NOT NULL,
-    capacity INTEGER NOT NULL DEFAULT 2,
-    zone VARCHAR(100),
+    type VARCHAR(20) DEFAULT 'SIMPLE' CHECK (type IN ('VIP', 'SIMPLE')),
+    zone VARCHAR(100) DEFAULT 'ETAGE',
     description TEXT,
-    status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'occupied', 'reserved', 'maintenance')),
-    is_active BOOLEAN DEFAULT true,
+    qr_code_url TEXT,
     qr_code_generated BOOLEAN DEFAULT false,
-    current_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
@@ -19,7 +17,7 @@ CREATE TABLE IF NOT EXISTS tables (
 
 -- Index pour améliorer les performances
 CREATE INDEX IF NOT EXISTS idx_tables_establishment_id ON tables(establishment_id);
-CREATE INDEX IF NOT EXISTS idx_tables_status ON tables(status);
+CREATE INDEX IF NOT EXISTS idx_tables_type ON tables(type);
 CREATE INDEX IF NOT EXISTS idx_tables_number ON tables(establishment_id, number);
 
 -- Trigger pour mettre à jour updated_at
@@ -64,10 +62,9 @@ CREATE POLICY "Staff can view tables" ON tables
     );
 
 -- Commentaires
-COMMENT ON TABLE tables IS 'Tables des établissements avec leur statut et informations';
+COMMENT ON TABLE tables IS 'Tables des établissements avec QR codes uniques';
 COMMENT ON COLUMN tables.number IS 'Numéro de la table (unique par établissement)';
-COMMENT ON COLUMN tables.capacity IS 'Nombre de places disponibles à la table';
-COMMENT ON COLUMN tables.zone IS 'Zone de la table (ex: Terrasse, Intérieur, VIP)';
-COMMENT ON COLUMN tables.status IS 'Statut actuel de la table';
-COMMENT ON COLUMN tables.current_order_id IS 'ID de la commande actuelle sur cette table';
+COMMENT ON COLUMN tables.type IS 'Type de table: VIP ou SIMPLE';
+COMMENT ON COLUMN tables.zone IS 'Zone de la table (ex: ETAGE, TERRASSE)';
+COMMENT ON COLUMN tables.qr_code_url IS 'URL du QR code généré pour cette table';
 COMMENT ON COLUMN tables.qr_code_generated IS 'Indique si un QR code a été généré pour cette table';

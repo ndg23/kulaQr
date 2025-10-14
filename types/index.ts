@@ -74,6 +74,7 @@ export interface Establishment {
   review_count: number;
   user_id: string;
   is_active: boolean;
+  slug?: string;
 }
 
 export interface OrderItem {
