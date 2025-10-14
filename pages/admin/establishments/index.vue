@@ -39,12 +39,20 @@
               class="w-full h-12 pl-12 pr-4 rounded-2xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
             />
           </div>
-          <button
-            class="px-6 py-4 text-base font-semibold border border-gray-300 bg-sky-600 text-white hover:bg-sky-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-all"
-            @click="openRestaurantModal"
-          >
-            Ajouter un etablissement
-          </button>
+          <div class="flex gap-3">
+            <button
+              class="px-6 py-4 text-base font-semibold border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-all"
+              @click="navigateTo('/admin/establishments/manage')"
+            >
+              Gérer un établissement
+            </button>
+            <button
+              class="px-6 py-4 text-base font-semibold border border-gray-300 bg-sky-600 text-white hover:bg-sky-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-all"
+              @click="openRestaurantModal"
+            >
+              Ajouter un etablissement
+            </button>
+          </div>
         </div>
       </div>
 
@@ -160,15 +168,7 @@
         </template>
 
         <!-- Currency Column -->
-        <template #currency-data="{ row }">
-          <UBadge
-            color="blue"
-            variant="subtle"
-            size="sm"
-          >
-            {{ row.currency }}
-          </UBadge>
-        </template>
+      
 
         <!-- Max Categories/Products Column -->
         <template #max_categories-data="{ row }">
@@ -188,6 +188,11 @@
           <UDropdown
             :items="[
               [
+                {
+                  label: 'Gérer',
+                  icon: 'i-heroicons-cog-6-tooth',
+                  click: () => manageEstablishment(row)
+                },
                 {
                   label: 'Modifier',
                   icon: 'i-heroicons-pencil-square',
@@ -730,7 +735,7 @@ const handleRestaurantSubmitted = () => {
 }
 
 const deleteRestaurant = async (id) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ?')) return
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cet établissement ?')) return
 
   try {
     loading.value = true
@@ -741,7 +746,7 @@ const deleteRestaurant = async (id) => {
 
     if (error) throw error
 
-    showToast.success('Le restaurant a été supprimé avec succès', 'success')
+    showToast.success('L\'établissement a été supprimé avec succès', 'success')
     await loadRestaurants() // Reload restaurants list
     
   } catch (error) {
@@ -753,6 +758,11 @@ const deleteRestaurant = async (id) => {
 }
 
 // Méthodes pour les actions du menu déroulant
+const manageEstablishment = (restaurant) => {
+  // Rediriger vers la page de gestion de l'établissement
+  navigateTo('/admin/establishments/manage')
+}
+
 const viewRestaurantMenu = (restaurant) => {
   // Rediriger vers la page du menu du restaurant
   navigateTo(`/admin/restaurants/${restaurant.id}/menu`)

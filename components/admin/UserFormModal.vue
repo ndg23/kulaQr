@@ -20,7 +20,7 @@
                       />
                     </div>
                     
-                    <div>
+                    <div v-if="!isEdit">
                       <FloatLabelInput
                         id="email"
                         v-model="form.email"
@@ -42,7 +42,7 @@
                       />
                     </div>
                     
-                    <div>
+                    <div v-if="!isEdit">
                       <FloatLabelSelect
                         id="role"
                         v-model="form.role"
@@ -195,7 +195,7 @@ const form = ref({
 });
 
 // Fonction pour formater une date pour un input de type date
-const formatDateForInput = (date) => {
+const formatDateForInput = (date: string) => {
   if (!date) return '';
   const d = new Date(date);
   return d.toISOString().split('T')[0];
@@ -270,20 +270,17 @@ const validateForm = () => {
     isValid = false;
   }
 
-  if (!form.value.email || !form.value.email.trim()) {
+  if (!isEdit.value && (!form.value.email || !form.value.email.trim())) {
     errors.value.email = 'L\'email est requis';
     isValid = false;
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    errors.value.email = 'Format d\'email invalide';
+  }
+
+  if (!isEdit.value && (!form.value.password || form.value.password.length < 6)) {
+    errors.value.password = 'Le mot de passe doit contenir au moins 6 caractères';
     isValid = false;
   }
 
-  if (!isEdit.value && (!form.value.password || form.value.password.length < 8)) {
-    errors.value.password = 'Le mot de passe doit contenir au moins 8 caractères';
-    isValid = false;
-  }
-
-  if (!form.value.role) {
+  if (!isEdit.value && !form.value.role) {
     errors.value.role = 'Le rôle est requis';
     isValid = false;
   }
@@ -299,7 +296,15 @@ const handleSubmit = async () => {
     loading.value = true;
     error.value = '';
     
-    const userData = {
+    // Données différentes selon le mode (création vs édition)
+    const userData = isEdit.value ? {
+      // Édition : seulement les champs modifiables
+      full_name: form.value.full_name,
+      is_active: form.value.status === 'active',
+      subscription_tier: form.value.subscription_tier,
+      subscription_ends_at: form.value.subscription_ends_at ? new Date(form.value.subscription_ends_at).toISOString() : null
+    } : {
+      // Création : tous les champs
       full_name: form.value.full_name,
       email: form.value.email,
       role: form.value.role,
@@ -316,21 +321,6 @@ const handleSubmit = async () => {
         .eq('id', props.user.id);
       
       if (updateError) throw updateError;
-      
-      // Si l'email a changé, mettre à jour via l'API
-      if (props.user.email !== form.value.email) {
-        const { error: emailUpdateError } = await useFetch('/api/admin/update-user-email', {
-          method: 'POST',
-          body: {
-            userId: props.user.id,
-            newEmail: form.value.email
-          }
-        });
-        
-        if (emailUpdateError) {
-          throw new Error('Impossible de mettre à jour l\'email. Veuillez réessayer.');
-        }
-      }
       
       // Enregistrer l'activité
       const { data: { user } } = await supabase.auth.getUser();
@@ -364,7 +354,7 @@ const handleSubmit = async () => {
       const { error: insertError } = await supabase
         .from('users')
         .insert({
-          id: authData.user.id,
+          id: authData.user?.id,
           ...userData
         });
       
@@ -377,7 +367,7 @@ const handleSubmit = async () => {
           user_id: user.id,
           action_type: 'create',
           entity_type: 'user',
-          entity_id: authData.user.id,
+          entity_id: authData.user?.id,
           details: { email: form.value.email, role: form.value.role }
         });
       }
@@ -389,7 +379,7 @@ const handleSubmit = async () => {
     closeModal();
   } catch (err) {
     console.error('Erreur lors de la soumission du formulaire:', err);
-    error.value = err.message || 'Une erreur est survenue';
+    error.value = (err as any)?.message || 'Une erreur est survenue';
     showToast.error(error.value, 'error');
   } finally {
     loading.value = false;

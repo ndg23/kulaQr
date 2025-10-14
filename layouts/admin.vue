@@ -1,228 +1,286 @@
 <template>
-    <div class="min-h-screen bg-gray-50">
-      <!-- Mobile menu button -->
-      <div class="fixed top-4 left-4 z-50 md:hidden">
-        <button 
-          @click="isSidebarOpen = !isSidebarOpen" 
-          class="p-2 rounded-full bg-white shadow-md text-gray-700 hover:bg-gray-100 focus:outline-none"
-        >
-          <MenuIcon v-if="!isSidebarOpen" class="w-6 h-6" />
-          <X v-else class="w-6 h-6" />
-        </button>
+  <div class="min-h-screen bg-white">
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div class="px-4 py-3">
+        <div class="flex items-center justify-between">
+          <NuxtLink to="/admin" class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-full bg-black flex items-center justify-center">
+              <span class="text-white text-sm font-bold">Y</span>
+            </div>
+          </NuxtLink>
+          
+          <button
+            @click="showMobileMenu = !showMobileMenu"
+            class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <MenuIcon v-if="!showMobileMenu" class="w-5 h-5" />
+            <X v-else class="w-5 h-5" />
+          </button>
+        </div>
       </div>
-  
-      <!-- Sidebar backdrop for mobile -->
-      <div 
-        v-if="isSidebarOpen" 
-        class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-        @click="isSidebarOpen = false"
-      ></div>
-  
-      <!-- Sidebar -->
-      <aside 
-        class="fixed inset-y-0 left-0 z-40 bg-white border-r border-gray-100 transition-all duration-300 transform"
-        :class="[
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
-          'w-72'
-        ]"
-      >
-        <!-- Logo -->
-        <div class="h-16 flex items-center px-6 border-b border-gray-100">
-          <NuxtLink to="/admin" class="flex items-center">
-            <img src="~/assets/icon/logo.png" class="w-[50px] h-[50px]" alt="Logo" />
-            <span class="text-xl font-logo ml-3 text-gray-900">Kula QR</span>
+    </header>
+
+    <!-- Mobile Menu -->
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="showMobileMenu"
+        class="md:hidden fixed inset-0 bg-black/20 z-40"
+        @click="showMobileMenu = false"
+      />
+    </Transition>
+
+    <Transition
+      enter-active-class="transition-transform duration-200"
+      enter-from-class="-translate-x-full"
+      enter-to-class="translate-x-0"
+      leave-active-class="transition-transform duration-200"
+      leave-from-class="translate-x-0"
+      leave-to-class="-translate-x-full"
+    >
+      <div v-if="showMobileMenu" class="md:hidden fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-50">
+        <div class="p-4 border-b">
+          <NuxtLink to="/admin" class="flex items-center gap-3" @click="showMobileMenu = false">
+            <div class="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+              <span class="text-white text-xs font-bold">Y</span>
+            </div>
+            <span class="text-lg font-bold">Admin</span>
           </NuxtLink>
         </div>
-  
-        <!-- Navigation -->
-        <nav class="p-3 space-y-1 mt-2">
+
+        <nav class="p-2">
           <NuxtLink
             v-for="item in navigationItems"
-            :key="item.name"
-            :to="item.to"
+            :key="item.path"
+            :to="item.path"
+            class="flex items-center gap-4 px-4 py-3 rounded-full transition-colors"
             :class="[
-              isActive(item.to)
-                ? 'bg-blue-50 text-blue-500'
-                : 'text-gray-700 hover:bg-gray-50',
-              'flex items-center px-5 py-3 text-lg font-medium rounded-full transition-colors'
+              route.path === item.path || route.path.includes(item.active)
+                ? 'font-bold'
+                : 'hover:bg-gray-100'
             ]"
-            @click="isSidebarOpen = false"
+            @click="showMobileMenu = false"
           >
-            <component :is="item.icon" class="w-6 h-6 mr-4" />
-            {{ item.name }}
+            <component :is="item.icon" class="w-6 h-6" :stroke-width="route.path.includes(item.active) ? 2.5 : 2" />
+            <span class="text-lg">{{ item.name }}</span>
           </NuxtLink>
         </nav>
-  
-        <!-- Action Button -->
-        <!-- <div class="px-3 mt-4">
-          <NuxtLink 
-            to="/admin/establishments/new" 
-            class="flex items-center justify-center w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full transition-colors"
-            @click="isSidebarOpen = false"
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
+          <button
+            @click="handleLogout"
+            class="flex w-full items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <Plus class="w-5 h-5 mr-2" />
-            Nouveau Restaurant
+            <LogOut class="w-5 h-5" />
+            <span>Déconnexion</span>
+          </button>
+        </div>
+      </div>
+    </Transition>
+
+    <div class="hidden md:flex">
+      <!-- Desktop Sidebar - Twitter Style -->
+      <aside class="w-72 border-r border-gray-200 flex flex-col h-screen fixed left-0 top-0">
+        <!-- Logo -->
+        <div class="px-4 pt-2">
+          <NuxtLink 
+            to="/admin" 
+            class="w-12 h-12 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+          >
+            <div class="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+              <span class="text-white text-sm font-bold">Y</span>
+            </div>
           </NuxtLink>
-        </div> -->
-  
-        <!-- User Menu -->
-        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
-          <HeadlessMenu as="div" class="relative">
-            <MenuButton class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 rounded-full hover:bg-gray-50">
-              <div class="flex items-center flex-1">
-                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                  <User class="w-5 h-5 text-gray-500" />
-                </div>
-                <div class="ml-3 text-left">
-                  <p class="font-bold text-gray-900">{{ user.full_name }}</p>
-                  <p class="text-gray-500 text-sm">{{ user.email }}</p>
-                </div>
-              </div>
-              <MoreHorizontal class="w-5 h-5 text-gray-500" />
-            </MenuButton>
-  
-            <transition
-              enter-active-class="transition ease-out duration-100"
-              enter-from-class="transform opacity-0 scale-95"
-              enter-to-class="transform opacity-100 scale-100"
-              leave-active-class="transition ease-in duration-75"
-              leave-from-class="transform opacity-100 scale-100"
-              leave-to-class="transform opacity-0 scale-95"
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-2 pt-2 space-y-1">
+          <NuxtLink
+            v-for="item in navigationItems"
+            :key="item.path"
+            :to="item.path"
+            class="flex items-center gap-5 px-4 py-3 rounded-full transition-colors group"
+            :class="[
+              route.path === item.path || route.path.includes(item.active)
+                ? 'font-bold'
+                : 'hover:bg-gray-100'
+            ]"
+          >
+            <component 
+              :is="item.icon" 
+              class="w-7 h-7" 
+              :stroke-width="route.path.includes(item.active) ? 2.5 : 2" 
+            />
+            <span class="text-xl">{{ item.name }}</span>
+          </NuxtLink>
+
+          <!-- Post Button Style (Optional) -->
+          <button class="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full transition-colors">
+            Nouveau
+          </button>
+        </nav>
+
+        <!-- User Section -->
+        <div class="p-3 mb-4">
+          <div class="relative">
+            <button
+              @click="toggleUserMenu"
+              class="flex w-full items-center gap-3 px-3 py-3 rounded-full hover:bg-gray-100 transition-colors group"
             >
-              <MenuItems class="absolute bottom-full left-0 right-0 mb-2 w-full origin-bottom-right rounded-2xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div class="py-1">
-                  <MenuItem v-slot="{ active }">
-                    <NuxtLink
-                      to="/admin/settings"
-                      :class="[
-                        active ? 'bg-gray-50 text-gray-900' : 'text-gray-700',
-                        'block px-4 py-3 text-sm'
-                      ]"
-                      @click="isSidebarOpen = false"
-                    >
-                      <div class="flex items-center">
-                        <Settings class="w-5 h-5 mr-3" />
-                        Paramètres
-                      </div>
-                    </NuxtLink>
-                  </MenuItem>
-                  <MenuItem v-slot="{ active }">
-                    <button
-                      @click="handleLogout"
-                      :class="[
-                        active ? 'bg-gray-50 text-red-600' : 'text-red-600',
-                        'block w-full text-left px-4 py-3 text-sm'
-                      ]"
-                    >
-                      <div class="flex items-center">
-                        <LogOut class="w-5 h-5 mr-3" />
-                        Se déconnecter
-                      </div>
-                    </button>
-                  </MenuItem>
-                </div>
-              </MenuItems>
-            </transition>
-          </HeadlessMenu>
+              <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <User class="w-5 h-5 text-gray-600" />
+              </div>
+              <div class="flex-1 min-w-0 text-left">
+                <p class="text-sm font-bold text-gray-900 truncate">Administrateur</p>
+                <p class="text-sm text-gray-500 truncate">@admin</p>
+              </div>
+              <svg class="w-4 h-4 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 13.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0-5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 10a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
+              </svg>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <Transition
+              enter-active-class="transition duration-100 ease-out"
+              enter-from-class="transform scale-95 opacity-0"
+              enter-to-class="transform scale-100 opacity-100"
+              leave-active-class="transition duration-75 ease-in"
+              leave-from-class="transform scale-100 opacity-100"
+              leave-to-class="transform scale-95 opacity-0"
+            >
+              <div
+                v-if="showUserMenu"
+                class="absolute bottom-full left-0 mb-2 w-full bg-white shadow-xl rounded-2xl border border-gray-200 overflow-hidden"
+              >
+                <button
+                  @click="handleLogout"
+                  class="flex w-full items-center gap-3 px-4 py-3 text-sm font-bold hover:bg-gray-50 transition-colors"
+                >
+                  <LogOut class="w-4 h-4" />
+                  <span>Déconnexion @admin</span>
+                </button>
+              </div>
+            </Transition>
+          </div>
         </div>
       </aside>
-  
+
       <!-- Main Content -->
-      <main 
-        class="transition-all duration-300"
-        :class="[
-          'md:ml-72', // Always push content on desktop
-          'pt-16 md:pt-0' // Add padding top on mobile for the menu button
-        ]"
-      >
+      <main class="ml-72 flex-1 min-h-screen">
         <slot />
       </main>
     </div>
-  </template>
-  
-  <script setup lang="ts">
-  import {
-    Menu as HeadlessMenu,
-    MenuButton,
-    MenuItem,
-    MenuItems
-  } from '@headlessui/vue'
-  import {
-    LayoutDashboard,
-    Store,
-    Users,
-    Settings,
-    User,
-    MoreHorizontal,
-    LogOut,
-    Plus,
-    Menu as MenuIcon,
-    X
-  } from 'lucide-vue-next'
-  import { useCustomToast } from '~/composables/useToast'
-  import { ref, watch, onMounted, onUnmounted } from 'vue'
-// import { useSupabaseUser } from '~/composables/useSupabase'
-  
-  const route = useRoute()
-  const router = useRouter()
-  const { showToast } = useCustomToast()
-    
-  const  user  = useSupabaseClient()
-    console.log(user)
-  // State for mobile sidebar
-  const isSidebarOpen = ref(false)
-  
-  const navigationItems = [
-    {
-      name: 'Vue d\'ensemble',
-      to: '/admin',
-      icon: LayoutDashboard
-    },
-    {
-      name: 'Établissements',
-      to: '/admin/establishments',
-      icon: Store
-    },
-    {
-      name: 'Utilisateurs',
-      to: '/admin/users',
-      icon: Users
-    },
-    {
-      name: 'Paramètres',
-      to: '/admin/settings',
-      icon: Settings
-    }
-  ]
-  
-  const isActive = (path: string) => {
-    return route.path === path || route.path.startsWith(`${path}/`)
+
+    <!-- Mobile Main Content -->
+    <main class="md:hidden">
+      <slot />
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import {
+  LayoutDashboard,
+  Store,
+  Users,
+  Settings,
+  User,
+  LogOut,
+  Menu as MenuIcon,
+  X,
+  QrCode,
+  BarChart3
+} from 'lucide-vue-next'
+
+const route = useRoute()
+const router = useRouter()
+
+// State
+const showMobileMenu = ref(false)
+const showUserMenu = ref(false)
+
+// Navigation items
+const navigationItems = [
+  {
+    name: 'Accueil',
+    path: '/admin',
+    active: '/admin',
+    icon: LayoutDashboard
+  },
+  {
+    name: 'Établissements',
+    path: '/admin/establishments',
+    active: 'establishments',
+    icon: Store
+  },
+  {
+    name: 'Utilisateurs',
+    path: '/admin/users',
+    active: 'users',
+    icon: Users
+  },
+  {
+    name: 'QR Codes',
+    path: '/admin/qr-codes',
+    active: 'qr-codes',
+    icon: QrCode
+  },
+  {
+    name: 'Stats',
+    path: '/admin/stats',
+    active: 'stats',
+    icon: BarChart3
+  },
+  {
+    name: 'Paramètres',
+    path: '/admin/settings',
+    active: 'settings',
+    icon: Settings
   }
-  
-  const handleLogout = async () => {
-    // Logique de déconnexion
-    isSidebarOpen.value = false
-    router.push('/auth/login')
-    showToast.success('Déconnexion réussie', 'À bientôt !')
+]
+
+// Toggle user menu
+const toggleUserMenu = () => {
+  showUserMenu.value = !showUserMenu.value
+}
+
+// Handle logout
+const handleLogout = async () => {
+  try {
+    // Add your logout logic here
+    await router.push('/auth/login')
+  } catch (error) {
+    console.error('Logout error:', error)
   }
-  
-  // Close sidebar when route changes (for mobile)
-  watch(() => route.path, () => {
-    isSidebarOpen.value = false
-  })
-  
-  // Close sidebar when clicking outside on mobile
-  onMounted(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) { // md breakpoint
-        isSidebarOpen.value = false
-      }
-    }
-    
-    window.addEventListener('resize', handleResize)
-    
-    onUnmounted(() => {
-      window.removeEventListener('resize', handleResize)
-    })
-  })
-  </script>
+}
+
+// Close menus when clicking outside
+const handleClickOutside = (event: Event) => {
+  const target = event.target as HTMLElement
+  if (!target.closest('.group')) {
+    showUserMenu.value = false
+  }
+}
+
+// Close mobile menu when route changes
+watch(() => route.path, () => {
+  showMobileMenu.value = false
+})
+
+// Setup event listeners
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+</script>

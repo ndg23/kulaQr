@@ -258,7 +258,6 @@ const handleSubmit = async () => {
   }
 }
 </script>
-
 <style scoped>
 .backdrop-blur-sm {
   backdrop-filter: blur(8px);

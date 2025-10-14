@@ -338,12 +338,12 @@ const downloadQrCodeFallback = () => {
       return
     }
     
-    const link = document.createElement('a')
+  const link = document.createElement('a')
     link.download = `qr-code-${establishment.value?.name || 'restaurant'}-${new Date().toISOString().split('T')[0]}.png`
     link.href = qrCodeCardRef.value.qrCodeImage
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
     showToast.success('Téléchargé', 'QR code téléchargé (version simplifiée)')
   } catch (error) {
     console.error('Erreur fallback:', error)
@@ -589,21 +589,15 @@ const loadScanStats = async () => {
   try {
     if (!establishment.value?.id) return
     
-    const { data, error } = await supabase
-      .from('qr_scan_stats')
-      .select('*')
-      .eq('establishment_id', establishment.value.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
+    const { getQrScanStats } = useQrStats()
+    const stats = await getQrScanStats(establishment.value.id)
     
-    if (error) throw error
-    
-    if (data) {
       scanStats.value = {
-        total_scans: (data as any).total_scans || 0,
-        today_scans: (data as any).today_scans || 0,
-        conversion_rate: (data as any).conversion_rate || 0
-      }
+      total_scans: stats.total,
+      today_scans: stats.today,
+      this_week_scans: stats.thisWeek,
+      this_month_scans: stats.thisMonth,
+      conversion_rate: 0 // Calculer plus tard si nécessaire
     }
   } catch (err) {
     console.error('Error loading scan stats:', err)

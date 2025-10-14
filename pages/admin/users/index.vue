@@ -435,6 +435,8 @@ const getRoleColor = (role) => {
   switch (role) {
     case 'admin': return 'purple'
     case 'manager': return 'blue'
+    case 'staff': return 'green'
+    case 'owner': return 'orange'
     default: return 'gray'
   }
 }
@@ -461,7 +463,9 @@ const formatSubscriptionTier = (tier) => {
 const formatRole = (role) => {
   const roles = {
     'admin': 'Administrateur',
-    'manager': 'Gérant'
+    'manager': 'Gérant',
+    'staff': 'Staff',
+    'owner': 'Propriétaire'
   }
   return roles[role] || role
 }

@@ -93,29 +93,33 @@
   const qrCodeImage = ref('')
   const isGenerating = ref(false)
   
-  // Générer le QR code
-  const generateQrCode = async () => {
-    if (!props.menuLink) return
+// Générer le QR code avec tracking
+const generateQrCode = async () => {
+  if (!props.menuLink) return
+
+  isGenerating.value = true
+  try {
+    // Ajouter le paramètre de tracking à l'URL
+    const trackingUrl = new URL(props.menuLink)
+    trackingUrl.searchParams.set('scan', 'true')
     
-    isGenerating.value = true
-    try {
-      const qrCodeDataUrl = await QRCode.toDataURL(props.menuLink, {
-        width: 512,
-        margin: 2,
-        color: {
-          dark: '#1d1d1f',
-          light: '#FFFFFF'
-        },
-        errorCorrectionLevel: 'M'
-      })
-      
-      qrCodeImage.value = qrCodeDataUrl
-    } catch (err) {
-      console.error('QR code generation error:', err)
-    } finally {
-      isGenerating.value = false
-    }
+    const qrCodeDataUrl = await QRCode.toDataURL(trackingUrl.toString(), {
+      width: 512,
+      margin: 2,
+      color: {
+        dark: '#1d1d1f',
+        light: '#FFFFFF'
+      },
+      errorCorrectionLevel: 'M'
+    })
+
+    qrCodeImage.value = qrCodeDataUrl
+  } catch (err) {
+    console.error('QR code generation error:', err)
+  } finally {
+    isGenerating.value = false
   }
+}
   
   // Exposer l'image du QR code pour le téléchargement
   defineExpose({

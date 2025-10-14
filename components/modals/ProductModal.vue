@@ -127,7 +127,7 @@
                 type="file"
                 accept="image/*"
                 class="hidden"
-                @change="handleImageChange"
+                @change="handleFileChange"
               />
               <button
                 type="button"

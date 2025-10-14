@@ -114,9 +114,9 @@
               <span class="text-white text-lg font-bold">KQ</span>
             </div>
             <div>
-              <h1 class="text-xl font-bold text-gray-900">
-                {{ establishment?.name || 'Dashboard' }}
-              </h1>
+            <h1 class="text-xl font-bold text-gray-900">
+              {{ establishment?.name || 'Dashboard' }}
+            </h1>
               <p class="text-sm text-gray-500">Gestion</p>
             </div>
           </div>
@@ -163,7 +163,7 @@
               :class="{ 'rotate-180': showUserMenu }"
             />
           </div>
-
+          
           <!-- User Menu Dropdown -->
           <Transition
             enter-active-class="transition duration-200 ease-out"
@@ -198,7 +198,7 @@
       <!-- Desktop Main Content -->
       <main class="ml-64 flex-1 min-h-screen bg-gray-50">
         <div class="max-w-4xl mx-auto">
-          <slot />
+        <slot />
         </div>
       </main>
     </div>
@@ -222,7 +222,8 @@ import {
   Clock,
   List,
   ChevronDown,
-  Plus as PlusIcon
+  Plus as PlusIcon,
+  Table
 } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
@@ -253,6 +254,12 @@ const navigationItems = computed(() => [
     path: `/manager/${establishment.value?.id}/categories`,
     active: '/categories',
     icon: List
+  },
+  {
+    name: 'Tables',
+    path: `/manager/${establishment.value?.id}/tables`,
+    active: '/tables',
+    icon: Table
   },
   {
     name: 'QR Codes',
@@ -373,4 +380,4 @@ button:focus {
     width: 20rem;
   }
 }
-</style>
+</style> 
