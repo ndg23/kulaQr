@@ -516,7 +516,7 @@ const handleRegister = async () => {
       phone: form.phone || null
     })
     
-    const { error: establishmentError } = await supabase
+    const { data: establishment, error: establishmentError } = await supabase
       .from('establishments')
       .insert({
         name: form.restaurantName,
@@ -557,7 +557,8 @@ const handleRegister = async () => {
     
     // 5. L'utilisateur est maintenant connecté, le plugin auth.ts le redirigera automatiquement
     showToast.success('Configuration terminée !', 'Redirection vers votre dashboard...')
-    
+    navigateTo(`/manager/${establishment?.slug}`)
+    return
   } catch (err) {
     console.error('❌ Erreur inscription:', err)
     errors.restaurantName = 'Une erreur inattendue est survenue'

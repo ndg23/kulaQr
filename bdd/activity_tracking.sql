@@ -1,5 +1,5 @@
 -- Table activities pour suivre les actions des utilisateurs
-CREATE TABLE activities (
+CREATE TABLE IF NOT EXISTS activities (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   action_type VARCHAR(50) NOT NULL, -- 'create', 'update', 'delete', 'login', 'logout', etc.
@@ -12,14 +12,18 @@ CREATE TABLE activities (
 );
 
 -- Index pour optimiser les performances
-CREATE INDEX idx_activities_user_id ON activities(user_id);
-CREATE INDEX idx_activities_action_type ON activities(action_type);
-CREATE INDEX idx_activities_entity_type ON activities(entity_type);
-CREATE INDEX idx_activities_entity_id ON activities(entity_id);
-CREATE INDEX idx_activities_created_at ON activities(created_at);
+CREATE INDEX IF NOT EXISTS idx_activities_user_id ON activities(user_id);
+CREATE INDEX IF NOT EXISTS idx_activities_action_type ON activities(action_type);
+CREATE INDEX IF NOT EXISTS idx_activities_entity_type ON activities(entity_type);
+CREATE INDEX IF NOT EXISTS idx_activities_entity_id ON activities(entity_id);
+CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at);
 
 -- Enable RLS on activities table
 ALTER TABLE activities ENABLE ROW LEVEL SECURITY;
+
+-- Supprimer les politiques existantes si elles existent
+DROP POLICY IF EXISTS "Users can view their own activities" ON activities;
+DROP POLICY IF EXISTS "Admins can view all activities" ON activities;
 
 -- Policy for activities - users can only see their own activities
 CREATE POLICY "Users can view their own activities" 
@@ -109,6 +113,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Supprimer les triggers existants avant de les recréer
+DROP TRIGGER IF EXISTS track_user_changes ON users;
+DROP TRIGGER IF EXISTS track_establishment_changes ON establishments;
+DROP TRIGGER IF EXISTS track_category_changes ON categories;
+DROP TRIGGER IF EXISTS track_product_changes ON products;
+
 -- Fonction pour le trigger de suivi des modifications des utilisateurs
 CREATE OR REPLACE FUNCTION track_user_changes()
 RETURNS TRIGGER AS $$
@@ -163,7 +173,9 @@ BEGIN
     v_action_type,
     'user',
     CASE WHEN TG_OP = 'DELETE' THEN OLD.id ELSE NEW.id END,
-    v_details
+    v_details,
+    NULL,
+    NULL
   );
   
   RETURN NEW;
@@ -229,7 +241,9 @@ BEGIN
     v_action_type,
     'establishment',
     CASE WHEN TG_OP = 'DELETE' THEN OLD.id ELSE NEW.id END,
-    v_details
+    v_details,
+    NULL,
+    NULL
   );
   
   RETURN NEW;
@@ -299,7 +313,9 @@ BEGIN
     v_action_type,
     'category',
     CASE WHEN TG_OP = 'DELETE' THEN OLD.id ELSE NEW.id END,
-    v_details
+    v_details,
+    NULL,
+    NULL
   );
   
   RETURN NEW;
@@ -376,7 +392,9 @@ BEGIN
     v_action_type,
     'product',
     CASE WHEN TG_OP = 'DELETE' THEN OLD.id ELSE NEW.id END,
-    v_details
+    v_details,
+    NULL,
+    NULL
   );
   
   RETURN NEW;
@@ -399,37 +417,6 @@ FOR EACH ROW EXECUTE FUNCTION track_category_changes();
 CREATE TRIGGER track_product_changes
 AFTER INSERT OR UPDATE OR DELETE ON products
 FOR EACH ROW EXECUTE FUNCTION track_product_changes();
-
--- Fonction pour enregistrer les connexions utilisateur
-CREATE OR REPLACE FUNCTION log_auth_event()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF (TG_OP = 'INSERT' AND NEW.event = 'LOGIN') THEN
-    -- Mettre à jour last_login dans la table users
-    UPDATE users SET last_login = NOW() WHERE id = NEW.user_id;
-    
-    -- Enregistrer l'activité de connexion
-    PERFORM log_activity(
-      NEW.user_id,
-      'login',
-      'user',
-      NEW.user_id,
-      jsonb_build_object('auth_method', NEW.auth_method),
-      NEW.ip_address,
-      NEW.user_agent
-    );
-  END IF;
-  
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Créer le trigger pour les événements d'authentification
--- Note: Ceci suppose que vous avez une table auth.audit_log_entries
--- Si ce n'est pas le cas, vous devrez adapter cette partie
-CREATE TRIGGER log_auth_events
-AFTER INSERT ON auth.audit_log_entries
-FOR EACH ROW EXECUTE FUNCTION log_auth_event();
 
 -- Vue pour les activités récentes par établissement
 CREATE OR REPLACE VIEW establishment_activities AS

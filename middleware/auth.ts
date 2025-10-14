@@ -1,33 +1,24 @@
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 
-export default defineNuxtRouteMiddleware(async (to) => {
-  const { client: supabase } = useSupabaseWrapper()
+export default defineNuxtRouteMiddleware((to) => {
   const user = useSupabaseUser()
 
-  // Vérifier si l'utilisateur est connecté
+  // Pas de user → on redirige
   if (!user.value && !to.path.startsWith('/auth')) {
     return navigateTo('/auth/login')
   }
 
-  // Vérifier si la session est valide
-  const { data: { session }, error } = await supabase.auth.getSession()
-  
-  if (error || !session) {
-    // Déconnecter l'utilisateur si la session n'est plus valide
-    await supabase.auth.signOut()
-    return navigateTo('/auth/login')
-  }
-
-  // Rediriger vers le dashboard si déjà connecté
+  // User connecté → pas besoin d’aller sur /auth
   if (user.value && to.path.startsWith('/auth')) {
-    const { data: establishment } = await supabase
-      .from('establishments')
+    const { client: supabase } = useSupabaseWrapper()
+    supabase.from('establishments')
       .select('id, slug')
       .eq('user_id', user.value.id)
       .single()
-
-    if (establishment?.slug) {
-      return navigateTo(`/manager/${establishment.slug}/menu`)
-    }
+      .then(({ data: establishment }) => {
+        if (establishment?.slug) {
+          navigateTo(`/manager/${establishment.slug}/menu`)
+        }
+      })
   }
-}) 
+})

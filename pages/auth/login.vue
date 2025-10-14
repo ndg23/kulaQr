@@ -164,7 +164,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Eye, EyeOff, Loader2, CheckCircle } from 'lucide-vue-next'
 import FormError from '~/components/ui/FormError.vue'
@@ -208,7 +208,7 @@ const handleLogin = async () => {
     }
 
     // Rediriger vers le dashboard avec le slug de l'établissement
-    navigateTo(`/manager/${establishment.slug}/menu`)
+    navigateTo(`/manager/${establishment?.slug}`)
   } catch (err) {
     error.value = 'Une erreur inattendue est survenue'
   } finally {
@@ -220,6 +220,9 @@ const signInWithGoogle = async () => {
   try {
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
     })
     if (authError) {
       error.value = 'Erreur de connexion avec Google'
@@ -236,7 +239,9 @@ const togglePassword = () => {
 // Vérifier si on vient d'une erreur de callback
 onMounted(() => {
   if (route.query.error === 'callback') {
-    error.value = 'Erreur lors de la connexion avec Google'
+    const message = route.query.message ? decodeURIComponent(route.query.message as string) : 'Erreur lors de la connexion avec Google'
+    error.value = message
+    console.error('❌ Erreur de callback reçue:', message)
   }
 })
 

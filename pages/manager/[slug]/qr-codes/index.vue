@@ -1,109 +1,115 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header moderne et épuré -->
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4">
-      <div class="max-w-2xl mx-auto">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-              <QrCode class="w-4 h-4 text-white" />
+  <div class="min-h-screen bg-gray-100">
+    <!-- Modern Header -->
+    <div class="no-print">
+      <ManagerModernHeader
+        title="QR Code Menu"
+        subtitle="Partagez votre menu digital"
+        :icon="QrCode"
+        status="En ligne"
+        status-type="success"
+        :secondary-actions="[
+          {
+            label: 'Télécharger',
+            icon: Download,
+            action: downloadQrCode
+          },
+          {
+            label: 'Copier le lien',
+            icon: Clipboard,
+            action: copyLink
+          },
+        {
+          label: 'Nouveau numéro',
+          icon: MessageSquare,
+          action: generateTableNumber
+        },
+        {
+          label: 'Test QR',
+          icon: QrCode,
+          action: testQrCode
+        },
+        {
+          label: 'Imprimer',
+          icon: Printer,
+          action: printQrCard
+        }
+        ]"
+      />
             </div>
-            <h1 class="text-lg font-semibold text-gray-900">QR Code Menu</h1>
-          </div>
-          <div class="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full">
-            <div class="w-2 h-2 rounded-full bg-green-500"></div>
-            <span class="text-sm font-medium text-green-700">En ligne</span>
-          </div>
-        </div>
-      </div>
-    </header>
 
-    <main class="max-w-2xl mx-auto px-6 py-8">
-      <!-- Carte QR moderne -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <!-- QR Code Card -->
-        <div 
-          ref="qrCard"
-          class="aspect-[4/3] relative bg-gradient-to-br from-gray-50 to-white p-8 flex flex-col items-center justify-center"
-        >
-          <!-- Logo et nom -->
-          <div class="absolute top-6 left-6 right-6 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
-                <UtensilsCrossed class="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <span class="text-lg font-semibold text-gray-900">{{ establishment?.name || 'Restaurant' }}</span>
-                <p class="text-sm text-gray-500">Menu Digital</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- QR Code centré -->
-          <div class="w-64 h-64 p-4 bg-white rounded-2xl shadow-lg border border-gray-100">
-            <img 
-              v-if="menuQrGenerated" 
-              :src="menuQrImage" 
-              alt="QR Code Menu"
-              class="w-full h-full" 
-            />
-            <div v-else class="w-full h-full animate-pulse bg-gray-100 rounded-xl flex items-center justify-center">
-              <QrCode class="w-12 h-12 text-gray-300" />
-            </div>
-          </div>
-
-          <!-- Call to action -->
-          <div class="absolute bottom-6 left-6 right-6 text-center">
-            <p class="text-base font-medium text-gray-900 mb-2">Scannez pour voir notre menu</p>
-            <p class="text-sm text-gray-500 font-mono bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">{{ menuLink }}</p>
-          </div>
+    <main class="max-w-4xl mx-auto px-6 py-8">
+      <!-- Utilisation du composant QrCodeCard -->
+      <div ref="qrCard">
+        <QrCodeCard 
+          ref="qrCodeCardRef"
+          :restaurant-name="establishment?.name || 'Restaurant'"
+          :menu-link="menuLink"
+          :restaurant-id="establishment?.id || ''"
+        />
         </div>
 
         <!-- Actions modernes -->
-        <div class="border-t border-gray-100 p-6">
-          <div class="grid grid-cols-2 gap-3">
-            <button 
+      <div class="mt-8">
+        <ManagerModernCard>
+          <template #footer>
+            <div class="grid grid-cols-3 gap-3 no-print">
+              <ManagerModernButton
+                variant="secondary"
               @click="copyLink" 
-              class="flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-700 text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <Clipboard class="w-4 h-4" />
-              Copier le lien
-            </button>
-            <button 
-              @click="downloadQrCode()" 
-              class="flex items-center justify-center gap-2 py-3 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl text-white text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm"
-            >
-              <Download class="w-4 h-4" />
+                :icon="Clipboard"
+              >
+                Copier
+              </ManagerModernButton>
+              <ManagerModernButton
+                variant="primary"
+                @click="downloadQrCode"
+                :icon="Download"
+              >
               Télécharger
-            </button>
+              </ManagerModernButton>
+              <ManagerModernButton
+                variant="secondary"
+                @click="printQrCard"
+                :icon="Printer"
+              >
+                Imprimer
+              </ManagerModernButton>
           </div>
-        </div>
+          </template>
+        </ManagerModernCard>
       </div>
 
       <!-- Stats modernes -->
-      <div class="mt-8 space-y-4">
+      <div class="mt-8 space-y-6 no-print">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Statistiques</h2>
-        <div class="grid grid-cols-3 gap-4">
-          <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+        <div class="grid grid-cols-3 gap-6">
+          <ManagerModernCard class="p-6">
+            <div class="text-center">
             <div class="text-2xl font-bold text-gray-900">{{ scanStats.total_scans }}</div>
             <div class="text-sm text-gray-500 mt-1">Total scans</div>
           </div>
-          <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+          </ManagerModernCard>
+          <ManagerModernCard class="p-6">
+            <div class="text-center">
             <div class="text-2xl font-bold text-gray-900">{{ scanStats.today_scans }}</div>
             <div class="text-sm text-gray-500 mt-1">Aujourd'hui</div>
           </div>
-          <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+          </ManagerModernCard>
+          <ManagerModernCard class="p-6">
+            <div class="text-center">
             <div class="text-2xl font-bold text-gray-900">{{ scanStats.conversion_rate }}%</div>
             <div class="text-sm text-gray-500 mt-1">Conversion</div>
           </div>
+          </ManagerModernCard>
         </div>
 
         <!-- Dernier scan -->
-        <div v-if="lastScan" class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+        <ManagerModernCard v-if="lastScan" class="p-6">
           <div class="flex items-center gap-4">
             <div class="relative">
-              <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                <Smartphone class="w-5 h-5 text-blue-500" />
+              <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
+                <Smartphone class="w-5 h-5" style="color: #ff6b35;" />
               </div>
               <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
@@ -114,16 +120,15 @@
               </div>
             </div>
           </div>
-        </div>
+        </ManagerModernCard>
       </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import QRCode from 'qrcode'
-import { Share2, Download, Smartphone, QrCode, Clipboard, MessageSquare, UtensilsCrossed } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { Share2, Download, Smartphone, QrCode, Clipboard, MessageSquare, UtensilsCrossed, Printer } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useCustomToast } from '~/composables/useToast'
 import { useSupabaseClient } from '#imports'
@@ -133,10 +138,8 @@ const route = useRoute()
 const slug = route.params.slug as string
 
 // États
-const menuQrImage = ref('')
-const menuQrGenerated = ref(false)
 const menuLink = ref('')
-const qrColor = ref('#000000')
+const tableNumber = ref('')
 const { establishment } = useEstablishment()
 const {showToast} = useCustomToast()
 const scanStats = ref({
@@ -153,27 +156,7 @@ const generateStaticUrl = () => {
   return `${baseUrl}/menu/${slug}`
 }
 
-// Générer le QR code
-const generateQrCode = async () => {
-  if (!menuLink.value) return
-  
-  try {
-    const qrCodeDataUrl = await QRCode.toDataURL(menuLink.value, {
-      width: 512,
-      margin: 1,
-      color: {
-        dark: qrColor.value,
-        light: '#FFFFFF'
-      }
-    })
-    
-    menuQrImage.value = qrCodeDataUrl
-    menuQrGenerated.value = true
-  } catch (err) {
-    console.error('QR code generation error:', err)
-    showToast.error('Erreur', 'Impossible de générer le QR code')
-  }
-}
+// La génération du QR code est maintenant gérée par le composant QrCodeCard
 
 // Copier le lien du menu
 const copyLink = async () => {
@@ -186,15 +169,419 @@ const copyLink = async () => {
   }
 }
 
-// Télécharger le QR code
-const downloadQrCode = () => {
-  const link = document.createElement('a')
-  link.download = `menu-${establishment.value?.name || 'restaurant'}.png`
-  link.href = menuQrImage.value
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  showToast.success('Téléchargé', 'QR code téléchargé avec succès')
+// Références
+const qrCard = ref<HTMLElement>()
+const qrCodeCardRef = ref()
+
+// Télécharger la carte QR complète
+const downloadQrCode = async () => {
+  try {
+    if (!qrCodeCardRef.value?.qrCodeImage) {
+      showToast.error('Erreur', 'QR code non généré')
+      return
+    }
+    
+    // Créer un canvas temporaire pour composer l'image complète
+    const tempCanvas = document.createElement('canvas')
+    const ctx = tempCanvas.getContext('2d')
+    
+    // Obtenir les dimensions de la carte QR
+    const qrCardElement = qrCard.value
+    const width = qrCardElement.offsetWidth
+    const height = qrCardElement.offsetHeight
+    
+    // Configurer la taille du canvas (avec une résolution x2 pour meilleure qualité)
+    tempCanvas.width = width * 2
+    tempCanvas.height = height * 2
+    ctx.scale(2, 2) // Augmenter la résolution
+    
+    // Remplir le fond
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(0, 0, width, height)
+    
+    // Créer une image à partir du QR code
+    const qrImage = new Image()
+    
+    // Attendre que l'image QR soit chargée avant de continuer
+    await new Promise((resolve, reject) => {
+      qrImage.onload = resolve
+      qrImage.onerror = reject
+      qrImage.src = qrCodeCardRef.value.qrCodeImage
+    })
+    
+    // Recréer la structure de la carte QR avec les textes et l'image QR
+    
+    // 1. Dessiner l'arrière-plan et la bordure du conteneur
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(0, 0, width, height)
+    
+    // 2. Dessiner les éléments d'en-tête (nom du restaurant + "Menu")
+    ctx.font = '600 28px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#1d1d1f'
+    ctx.textAlign = 'center'
+    ctx.fillText(establishment.value?.name || 'Restaurant', width/2, 60)
+    
+    ctx.font = '400 15px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#86868b'
+    ctx.fillText('Menu', width/2, 85)
+    
+    // 3. Dessiner le conteneur du QR code (bordure orange)
+    const qrContainerWidth = 300
+    const qrContainerHeight = 300
+    const qrContainerX = (width - qrContainerWidth) / 2
+    const qrContainerY = 120
+    
+    // Bordure orange
+    ctx.strokeStyle = '#ff6b35'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.roundRect(qrContainerX, qrContainerY, qrContainerWidth, qrContainerHeight, 24)
+    ctx.stroke()
+    
+    // 4. Dessiner l'image QR à l'intérieur du conteneur
+    const qrSize = 280
+    const qrX = (width - qrSize) / 2
+    const qrY = qrContainerY + (qrContainerHeight - qrSize) / 2
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
+    
+    // 5. Dessiner les textes en dessous du QR code
+    ctx.font = '600 22px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#ff6b35'
+    ctx.fillText('Scannez pour voir le menu', width/2, qrContainerY + qrContainerHeight + 40)
+    
+    ctx.font = '400 15px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#86868b'
+    ctx.fillText('Pointez votre caméra vers le QR code', width/2, qrContainerY + qrContainerHeight + 70)
+    
+    // 6. Dessiner les features (Rapide, Sans contact)
+    // Indicateurs ✓
+    const featureY = qrContainerY + qrContainerHeight + 110
+    
+    // Premier indicateur
+    ctx.beginPath()
+    ctx.arc(width/2 - 50, featureY, 10, 0, Math.PI * 2)
+    ctx.fillStyle = '#ff6b35'
+    ctx.fill()
+    
+    ctx.fillStyle = '#FFFFFF'
+    ctx.font = '600 10px system-ui, -apple-system, sans-serif'
+    ctx.fillText('✓', width/2 - 50, featureY + 4)
+    
+    ctx.fillStyle = '#86868b'
+    ctx.font = '400 13px system-ui, -apple-system, sans-serif'
+    ctx.fillText('Rapide', width/2 - 20, featureY + 4)
+    
+    // Deuxième indicateur
+    ctx.beginPath()
+    ctx.arc(width/2 + 40, featureY, 10, 0, Math.PI * 2)
+    ctx.fillStyle = '#ff6b35'
+    ctx.fill()
+    
+    ctx.fillStyle = '#FFFFFF'
+    ctx.font = '600 10px system-ui, -apple-system, sans-serif'
+    ctx.fillText('✓', width/2 + 40, featureY + 4)
+    
+    ctx.fillStyle = '#86868b'
+    ctx.font = '400 13px system-ui, -apple-system, sans-serif'
+    ctx.fillText('Sans contact', width/2 + 90, featureY + 4)
+    
+    // 7. Dessiner la ligne de séparation (divider)
+    const dividerY = featureY + 40
+    const gradient = ctx.createLinearGradient(0, dividerY, width, dividerY)
+    gradient.addColorStop(0, 'rgba(255,255,255,0)')
+    gradient.addColorStop(0.5, '#d2d2d7')
+    gradient.addColorStop(1, 'rgba(255,255,255,0)')
+    
+    ctx.strokeStyle = gradient
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(width * 0.1, dividerY)
+    ctx.lineTo(width * 0.9, dividerY)
+    ctx.stroke()
+    
+    // 8. Dessiner le footer
+    const footerY = dividerY + 40
+    
+    // Point orange
+    ctx.beginPath()
+    ctx.arc(width/2 - 40, footerY, 3, 0, Math.PI * 2)
+    ctx.fillStyle = '#ff6b35'
+    ctx.fill()
+    
+    // Texte "Par Kula Qr"
+    ctx.fillStyle = '#86868b'
+    ctx.font = '400 13px system-ui, -apple-system, sans-serif'
+    ctx.fillText('Par Kula Qr', width/2 + 10, footerY + 4)
+    
+    // Télécharger l'image générée
+    const dataURL = tempCanvas.toDataURL('image/png')
+    const link = document.createElement('a')
+    link.download = `menu-${establishment.value?.name || 'restaurant'}-${new Date().toISOString().split('T')[0]}.png`
+    link.href = dataURL
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    showToast.success('Téléchargé', 'Carte QR téléchargée avec succès')
+    
+  } catch (error) {
+    console.error('Erreur de téléchargement:', error)
+    // Fallback au téléchargement direct du QR code
+    downloadQrCodeFallback()
+  }
+}
+// Méthode de fallback pour télécharger directement l'image QR
+const downloadQrCodeFallback = () => {
+  try {
+    if (!qrCodeCardRef.value?.qrCodeImage) {
+      showToast.error('Erreur', 'QR code non disponible')
+      return
+    }
+    
+    const link = document.createElement('a')
+    link.download = `qr-code-${establishment.value?.name || 'restaurant'}-${new Date().toISOString().split('T')[0]}.png`
+    link.href = qrCodeCardRef.value.qrCodeImage
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    showToast.success('Téléchargé', 'QR code téléchargé (version simplifiée)')
+  } catch (error) {
+    console.error('Erreur fallback:', error)
+    showToast.error('Erreur', 'Impossible de télécharger le QR code')
+  }
+}
+
+// Fonction de test pour vérifier le QR code
+const testQrCode = () => {
+  if (!qrCodeCardRef.value?.qrCodeImage) {
+    showToast.error('Test', 'QR code non généré')
+    return
+  }
+  
+  console.log('QR Code Image:', qrCodeCardRef.value.qrCodeImage)
+  console.log('Menu Link:', menuLink.value)
+  showToast.success('Test', 'QR code généré avec succès')
+}
+
+// Fonction d'impression directe
+const printQrCard = () => {
+  try {
+    if (!qrCard.value) {
+      showToast.error('Erreur', 'Carte QR non trouvée')
+      return
+    }
+    
+    // Vérifier que le QR code est généré
+    if (!qrCodeCardRef.value?.qrCodeImage) {
+      showToast.error('Erreur', 'QR code non généré')
+      return
+    }
+    
+    // Créer une nouvelle fenêtre pour l'impression
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      showToast.error('Erreur', 'Impossible d\'ouvrir la fenêtre d\'impression')
+      return
+    }
+    
+    // Générer le contenu HTML pour l'impression
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Menu QR Code - ${establishment.value?.name || 'Restaurant'}</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 20mm;
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              margin: 0;
+              padding: 0;
+              background: white;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 100vh;
+            }
+            .qr-card {
+              background: white;
+              border-radius: 32px;
+              padding: 40px;
+              max-width: 460px;
+              width: 100%;
+              text-align: center;
+              box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            }
+            .header {
+              margin-bottom: 40px;
+            }
+            .restaurant-name {
+              font-size: 28px;
+              font-weight: 600;
+              color: #1d1d1f;
+              margin-bottom: 6px;
+              letter-spacing: -0.6px;
+            }
+            .menu-label {
+              font-size: 15px;
+              color: #86868b;
+              font-weight: 400;
+              letter-spacing: -0.1px;
+            }
+            .qr-section {
+              margin: 0 auto 36px;
+            }
+            .qr-container {
+              margin: 0 auto;
+              width: fit-content;
+              padding: 12px;
+              border-radius: 24px;
+              border: 2px solid #ff6b35;
+            }
+            .qr-image {
+              background: white;
+              display: inline-block;
+              border-radius: 12px;
+              padding: 4px;
+              width: 280px;
+              height: 280px;
+            }
+            .qr-image img {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+            }
+            .scan-text {
+              color: #ff6b35;
+              font-size: 22px;
+              font-weight: 600;
+              margin-bottom: 8px;
+              letter-spacing: -0.4px;
+            }
+            .scan-subtitle {
+              color: #86868b;
+              font-size: 15px;
+              line-height: 1.5;
+              font-weight: 400;
+              letter-spacing: -0.1px;
+              margin-bottom: 32px;
+            }
+            .features {
+              display: flex;
+              justify-content: center;
+              gap: 24px;
+              margin-bottom: 32px;
+            }
+            .feature {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              color: #86868b;
+              font-size: 13px;
+            }
+            .feature-icon {
+              width: 20px;
+              height: 20px;
+              background: #ff6b35;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-size: 12px;
+            }
+            .divider {
+              width: 100%;
+              height: 1px;
+              background: linear-gradient(90deg, transparent, #d2d2d7, transparent);
+              margin-bottom: 24px;
+            }
+            .footer {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+              font-size: 13px;
+              color: #86868b;
+              font-weight: 400;
+            }
+            .footer-dot {
+              width: 6px;
+              height: 6px;
+              background: #ff6b35;
+              border-radius: 50%;
+            }
+            @media print {
+              body {
+                min-height: auto;
+              }
+              .qr-card {
+                box-shadow: none;
+                border: 1px solid #e5e5e7;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="qr-card">
+            <div class="header">
+              <div class="restaurant-name">${establishment.value?.name || 'Restaurant'}</div>
+              <div class="menu-label">Menu</div>
+            </div>
+            
+            <div class="qr-section">
+              <div class="qr-container">
+                <div class="qr-image">
+                  <img src="${qrCodeCardRef.value.qrCodeImage}" alt="QR Code Menu" />
+                </div>
+              </div>
+            </div>
+            
+            <div class="scan-text">Scannez pour voir le menu</div>
+            <div class="scan-subtitle">Pointez votre caméra vers le QR code</div>
+            
+            <div class="features">
+              <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>Rapide</span>
+              </div>
+              <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>Sans contact</span>
+              </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="footer">
+              <div class="footer-dot"></div>
+              <span>Par Kula Qr</span>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+    
+    // Écrire le contenu et déclencher l'impression
+    printWindow.document.write(printContent)
+    printWindow.document.close()
+    
+    // Attendre que les images soient chargées avant d'imprimer
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print()
+        printWindow.close()
+      }, 500)
+    }
+    
+    showToast.success('Impression', 'Fenêtre d\'impression ouverte')
+    
+  } catch (error) {
+    console.error('Erreur d\'impression:', error)
+    showToast.error('Erreur', 'Impossible d\'imprimer la carte QR')
+  }
 }
 
 // Charger les statistiques avec la vue qr_scan_stats
@@ -206,7 +593,8 @@ const loadScanStats = async () => {
       .from('qr_scan_stats')
       .select('*')
       .eq('establishment_id', establishment.value.id)
-      .single()
+      .order('created_at', { ascending: false })
+      .limit(1)
     
     if (error) throw error
     
@@ -237,7 +625,7 @@ const loadLastScan = async () => {
     
     if (error && error.code !== 'PGRST116') throw error
     
-    if (data) {
+    if (data && !error) {
       lastScan.value = data
     }
   } catch (err) {
@@ -269,11 +657,10 @@ const formatTimeAgo = (dateString: string) => {
 }
 
 // Configurer l'écoute des scans en temps réel
-let subscription: any;
+let subscription: any
 const setupRealtimeScans = () => {
   if (!establishment.value?.id) return
   
-  // Annuler l'abonnement existant
   if (subscription) {
     subscription.unsubscribe()
   }
@@ -291,59 +678,43 @@ const setupRealtimeScans = () => {
       (payload) => {
         console.log('Nouveau scan détecté:', payload)
         
-        // Mettre à jour les statistiques
         scanStats.value.total_scans++
         scanStats.value.today_scans++
         lastScan.value = payload.new
         
-        // Montrer une notification
         showToast.success('Nouveau scan', 'Quelqu\'un a scanné votre QR code')
       }
     )
     .subscribe()
   
-  // Nettoyage lors du démontage du composant
   onUnmounted(() => {
     if (subscription) subscription.unsubscribe()
   })
 }
 
-// Partager sur les réseaux sociaux
-const shareToService = async (platform: string) => {
-  try {
-    // Version simplifiée du partage
-    const text = `Découvrez notre menu digital : ${menuLink.value}`
-    
-    if (navigator.share) {
-      await navigator.share({
-        title: `Menu de ${establishment.value?.name || 'restaurant'}`,
-        text: text,
-        url: menuLink.value
-      })
-      showToast.success('Partagé', `Contenu partagé avec succès`)
-    } else {
-      // Fallback: copier le texte
-      await navigator.clipboard.writeText(text)
-      showToast.success('Copié', `Texte pour ${platform} copié`)
-    }
-  } catch (err) {
-    console.error('Error sharing:', err)
-    if (err.name !== 'AbortError') {
-      showToast.error('Erreur', 'Impossible de partager le contenu')
-    }
-  }
+// Générer un numéro de table aléatoire
+const generateTableNumber = () => {
+  tableNumber.value = String(Math.floor(Math.random() * 20) + 1)
 }
 
 // Initialisation
 onMounted(async () => {
   menuLink.value = generateStaticUrl()
+  generateTableNumber()
   await Promise.all([
     loadScanStats(),
-    loadLastScan(),
-    generateQrCode()
+    loadLastScan()
   ])
   setupRealtimeScans()
 })
+
+watch(() => route.path, async (newPath, oldPath) => {
+  if (newPath && newPath !== oldPath) {
+    console.log('🔄 Restaurant changed:', newPath)
+    await loadScanStats()
+    await loadLastScan()
+  }
+}, { immediate: true })
 
 definePageMeta({
   layout: 'manager'
@@ -351,9 +722,8 @@ definePageMeta({
 </script>
 
 <style scoped>
-/* Design moderne et épuré inspiré de Twitter 2024 */
+/* Apple-style design with orange accents */
 
-/* Transitions fluides */
 button {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -366,21 +736,10 @@ button:active {
   transform: translateY(0) scale(0.98);
 }
 
-/* Aspect ratio moderne */
-.aspect-4\/3 {
-  aspect-ratio: 4/3;
+img {
+  animation: fadeIn 0.3s ease-out;
 }
 
-/* Ombres subtiles et modernes */
-.rounded-2xl {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-
-.rounded-xl {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-/* Animation du QR code */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -392,40 +751,30 @@ button:active {
   }
 }
 
-img {
-  animation: fadeIn 0.3s ease-out;
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .bg-white {
+    background: white !important;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
-/* Gradient subtil pour le fond */
-.bg-gradient-to-br {
-  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
-}
-
-/* Hover effects pour les cartes */
-.bg-white:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: all 0.2s ease;
-}
-
-/* Focus states pour l'accessibilité */
 button:focus {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #ff6b35;
   outline-offset: 2px;
 }
 
-/* Responsive design */
 @media (max-width: 640px) {
   .grid-cols-3 {
     grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .w-64 {
-    width: 12rem;
-  }
-  
-  .h-64 {
-    height: 12rem;
   }
 }
 </style>

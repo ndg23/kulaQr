@@ -2,7 +2,6 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
-  ssr: false,
   modules: [
     '@nuxt/ui',
     '@nuxtjs/tailwindcss',
@@ -25,15 +24,19 @@ export default defineNuxtConfig({
   supabase: {
     url: process.env.SUPABASE_URL,
     key: process.env.SUPABASE_KEY,
-    redirect: false
+    redirect: false,
+    cookieOptions: {
+      secure: false,
+      sameSite: 'lax'
+    },
+    clientOptions: {
+      auth: {
+        detectSessionInUrl: false,
+        persistSession: false
+      }
+    }
   },
-  googleSignIn: {
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    scope: 'email profile',
-    prompt: 'consent',
-    access_type: 'offline',
-    redirect_uri: 'http://localhost:3200/auth/callback'
-  },
+ 
   compatibilityDate: '2025-04-23',
   tailwindcss: {
     cssPath: '~/assets/css/main.css',
@@ -56,12 +59,6 @@ export default defineNuxtConfig({
     }
   },
   // Ajouter des redirections pour les anciennes URLs
-  nitro: {
-    routeRules: {
-      '/waiter': { redirect: '/staff' },
-      '/waiter/**': { redirect: '/staff/**' }
-    }
-  },
   public: {
     qrSecretKey: process.env.QR_SECRET_KEY,
     baseURL: process.env.BASE_URL

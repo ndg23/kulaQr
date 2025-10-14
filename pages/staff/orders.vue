@@ -1,110 +1,95 @@
 <template>
-  <div class="min-h-screen bg-[#F5F5F7]">
-    <!-- Header -->
-    <header class="bg-white/70 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-100">
-      <div class="max-w-5xl mx-auto px-4 py-6 sm:px-6 flex justify-between items-center">
-        <div class="flex items-center">
-          <NuxtLink 
-            :to="`/staff/${establishmentId}`"
-            class="mr-4 text-gray-500 hover:text-gray-700"
-          >
-            <ArrowLeft class="w-6 h-6" />
-          </NuxtLink>
-          <h1 class="text-2xl font-bold text-gray-900">
-            Commandes
-          </h1>
-        </div>
-        <div class="flex items-center space-x-2">
-          <span v-if="realtimeStatus === 'connected'" class="flex items-center text-sm text-green-600">
-            <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-            En direct
-          </span>
-          <span v-else class="flex items-center text-sm text-gray-500">
-            <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
-            Hors ligne
-          </span>
-        </div>
-      </div>
-    </header>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Modern Header -->
+    <ManagerModernHeader
+      title="Commandes Staff"
+      subtitle="Gérez vos commandes en temps réel"
+      :icon="Clock"
+      :status="realtimeStatus === 'connected' ? 'En direct' : 'Hors ligne'"
+      :status-type="realtimeStatus === 'connected' ? 'success' : 'error'"
+      :secondary-actions="[
+        {
+          label: 'Retour',
+          icon: ArrowLeft,
+          action: () => navigateTo(`/staff/${establishmentId}`)
+        }
+      ]"
+    />
 
-    <!-- Filtres -->
-    <div class="border-b border-gray-100 bg-white">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6">
-        <div class="flex overflow-x-auto py-2 space-x-4">
+    <!-- Filtres optimisés pour mobile -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+      <ManagerModernCard class="p-4 sm:p-6">
+        <div class="flex overflow-x-auto space-x-2 sm:space-x-3 pb-2">
           <button 
             v-for="status in orderStatuses" 
             :key="status.value"
             @click="activeStatus = status.value"
-            class="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors"
+            class="px-3 py-2 sm:px-6 sm:py-3 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all flex-shrink-0"
             :class="[
               activeStatus === status.value 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-black text-white' 
+                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
             ]"
           >
             {{ status.label }}
-            <span class="ml-2 text-xs">
+            <span class="ml-1 sm:ml-2 text-xs font-bold">
               {{ getOrderCountByStatus(status.value) }}
             </span>
           </button>
         </div>
-      </div>
+      </ManagerModernCard>
     </div>
 
     <!-- Liste des commandes -->
-    <main class="max-w-5xl mx-auto px-4 py-6 sm:px-6">
-      <div v-if="loading" class="space-y-4">
-        <div v-for="i in 3" :key="i" class="animate-pulse">
-          <div class="bg-white rounded-2xl p-6">
-            <div class="flex items-center space-x-4">
-              <div class="h-12 w-12 bg-gray-200 rounded-2xl"></div>
-              <div class="flex-1">
-                <div class="h-4 bg-gray-200 rounded w-1/4"></div>
-                <div class="h-4 bg-gray-200 rounded w-1/2 mt-2"></div>
-              </div>
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div v-if="loading" class="space-y-4 sm:space-y-6">
+        <ManagerModernCard v-for="i in 3" :key="i" class="p-4 sm:p-6 animate-pulse">
+          <div class="flex items-center space-x-3 sm:space-x-4">
+            <div class="h-10 w-10 sm:h-12 sm:w-12 bg-gray-200 rounded-2xl"></div>
+            <div class="flex-1">
+              <div class="h-3 sm:h-4 bg-gray-200 rounded w-1/4"></div>
+              <div class="h-3 sm:h-4 bg-gray-200 rounded w-1/2 mt-2"></div>
             </div>
           </div>
-        </div>
+        </ManagerModernCard>
       </div>
 
-      <div v-else-if="filteredOrders.length === 0" 
-        class="flex flex-col items-center justify-center py-12"
-      >
-        <div class="rounded-full bg-gray-100 p-6 mb-4">
-          <ClipboardX class="h-8 w-8 text-gray-400" />
+      <ManagerModernCard v-else-if="filteredOrders.length === 0" class="p-8 sm:p-12 text-center">
+        <div class="rounded-full bg-gray-100 p-4 sm:p-6 mb-3 sm:mb-4 mx-auto w-fit">
+          <ClipboardX class="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
         </div>
-        <h3 class="text-lg font-medium text-gray-900">Aucune commande</h3>
-        <p class="mt-2 text-sm text-gray-500 max-w-sm text-center">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900">Aucune commande</h3>
+        <p class="mt-2 text-xs sm:text-sm text-gray-500 max-w-sm text-center">
           Il n'y a pas de commandes {{ getStatusText(activeStatus).toLowerCase() }} pour le moment.
         </p>
-      </div>
+      </ManagerModernCard>
 
-      <div v-else class="space-y-4">
-        <div 
+      <div v-else class="space-y-4 sm:space-y-6">
+        <ManagerModernCard
           v-for="order in filteredOrders" 
           :key="order.id"
-          class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all"
+          class="hover:shadow-md transition-all"
         >
-          <div class="p-6">
+          <div class="p-4 sm:p-6">
             <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <div class="h-12 w-12 bg-gray-100 rounded-2xl flex items-center justify-center">
-                  <span class="text-xl font-semibold text-gray-700">
+              <div class="flex items-center min-w-0 flex-1">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <span class="text-lg sm:text-xl font-semibold text-gray-700">
                     {{ order.table_number }}
                   </span>
                 </div>
-                <div class="ml-4">
-                  <div class="flex items-center">
-                    <span class="text-sm text-gray-500">
+                <div class="ml-3 sm:ml-4 min-w-0 flex-1">
+                  <div class="flex items-center flex-wrap gap-1 sm:gap-2">
+                    <span class="text-xs sm:text-sm text-gray-500">
                       {{ formatTime(order.created_at) }}
                     </span>
-                    <span class="mx-2 text-gray-300">•</span>
-                    <span class="text-sm font-medium text-gray-900">
+                    <span class="text-gray-300 hidden sm:inline">•</span>
+                    <span class="text-xs sm:text-sm font-medium text-gray-900">
                       {{ order.items.length }} article{{ order.items.length > 1 ? 's' : '' }}
                     </span>
                   </div>
                   <div class="mt-1">
-                    <span class="text-lg font-semibold text-gray-900">
+                    <span class="text-base sm:text-lg font-semibold text-gray-900 truncate">
                       {{ formatPrice(order.total_amount) }}
                     </span>
                   </div>
@@ -142,7 +127,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </ManagerModernCard>
       </div>
     </main>
   </div>

@@ -32,7 +32,6 @@
             v-model="search"
             class="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-12 pr-4 text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Rechercher un produit..."
-            @change="handleSearch"
           />
           <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search class="w-5 h-5 text-gray-400" />
@@ -253,8 +252,8 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { ref, computed, onMounted } from 'vue'
+const route = useRoute()
+import { ref, computed, onMounted, watch } from 'vue'
 import type { Product, Category } from '~/types'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useToast } from '~/composables/useToast'
@@ -288,7 +287,6 @@ import {
   TransitionChild
 } from '@headlessui/vue'
 
-const route = useRoute()
 const { client: supabase, withLoading } = useSupabaseWrapper()
 const toast = useToast()
 const slug = route.params.slug as string
@@ -440,6 +438,17 @@ const getCategoryName = (categoryId: string) => {
 
 // Initial load
 onMounted(loadData)
+
+// Watch for route changes to reload data
+// Supprimez la ligne : const slug = route.params.slug as string
+
+// Remplacez le watcher par :
+watch(() => route.params.slug, async (newSlug, oldSlug) => {
+  if (newSlug && newSlug !== oldSlug) {
+    console.log('🔄 Restaurant changed:', newSlug)
+    await loadData()
+  }
+}, { immediate: true }) // immediate: true remplace onMounted
 definePageMeta({
   layout: 'manager'
 })

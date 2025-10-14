@@ -1,132 +1,212 @@
 <template>
   <div class="min-h-screen bg-white">
-    <div class="mx-auto max-w-7xl flex h-screen">
-      <!-- Sidebar -->
-      <div class="w-[68px] md:w-[275px] flex flex-col h-full fixed border-r border-gray-100">
-        <!-- Logo -->
-        <div class="p-3">
-          <div class="md:hidden flex justify-center">
-            <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
-              <img 
-                :src="establishment?.image_url || '/default-logo.png'"
-                class="w-7 h-7"
-                alt="Logo"
-              />
-            </div>
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div class="px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+            <span class="text-white text-sm font-bold">KQ</span>
           </div>
-          <div class="hidden md:flex items-center gap-3 px-3">
-            <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-              <img 
-                :src="establishment?.image_url || '/default-logo.png'"
-                class="w-6 h-6"
-                alt="Logo"
-              />
+          <h1 class="text-lg font-semibold text-gray-900 truncate">
+            {{ establishment?.name || 'Dashboard' }}
+          </h1>
+        </div>
+        <button 
+          @click="toggleMobileMenu"
+          class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <MenuIcon class="w-5 h-5 text-gray-600" />
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div 
+        v-if="showMobileMenu"
+        class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-50"
+        @click="showMobileMenu = false"
+      ></div>
+    </Transition>
+
+    <!-- Mobile Menu -->
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="transform -translate-x-full"
+      enter-to-class="transform translate-x-0"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="transform translate-x-0"
+      leave-to-class="transform -translate-x-full"
+    >
+      <div 
+        v-if="showMobileMenu"
+        class="md:hidden fixed left-0 top-0 h-full w-80 bg-white shadow-2xl z-50"
+      >
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-black flex items-center justify-center">
+              <span class="text-white text-lg font-bold">KQ</span>
             </div>
-            <h1 class="text-xl font-bold text-gray-900">
-              {{ establishment?.name || 'Dashboard' }}
-            </h1>
+            <div>
+              <h1 class="text-xl font-bold text-gray-900">
+                {{ establishment?.name || 'Dashboard' }}
+              </h1>
+              <p class="text-sm text-gray-500">Gestion</p>
+            </div>
           </div>
         </div>
 
-        <!-- Navigation -->
-        <nav class="flex-1 px-2 mt-4">
+        <nav class="flex-1 p-4">
           <div class="space-y-1">
             <NuxtLink 
               v-for="item in navigationItems" 
               :key="item.path"
               :to="item.path"
-              class="flex items-center md:gap-4 p-3 rounded-full text-[17px] transition-colors"
+              @click="showMobileMenu = false"
+              class="flex items-center gap-4 p-3 rounded-full text-base transition-all"
               :class="[
                 route.path.includes(item.active)
-                  ? 'font-bold text-blue-500' 
-                  : 'text-gray-800 hover:text-blue-500 hover:bg-blue-50'
+                  ? 'bg-gray-100 text-gray-900 font-semibold' 
+                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
               ]"
             >
-              <component :is="item.icon" class="w-[26px] h-[26px] min-w-[26px]" />
-              <span class="hidden md:block">{{ item.name }}</span>
-              <span 
-                v-if="item.count"
-                class="ml-auto bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full"
-              >
-                {{ item.count }}
-              </span>
+              <component :is="item.icon" class="w-6 h-6" />
+              <span>{{ item.name }}</span>
             </NuxtLink>
           </div>
         </nav>
 
-        <!-- Tweet Button -->
-        <!-- <div class="px-3 mb-3">
-          <button 
-            @click="createNewItem"
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full transition-colors"
-          >
-            <span class="hidden md:inline">Créer</span>
-            <PlusIcon class="w-6 h-6 md:hidden mx-auto" />
-          </button>
-        </div> -->
-
-        <!-- User Menu -->
-        <div class="p-3 mt-auto relative">
-          <!-- User Menu Button -->
-          <div 
-            class="user-menu flex items-center w-full p-2.5 rounded-full hover:bg-blue-50 cursor-pointer" 
-            @click.stop="toggleUserMenu"
-          >
-            <img 
-              :src="user?.user_metadata?.avatar_url || '/default-avatar.png'"
-              class="w-10 h-10 rounded-full"
-              alt="Avatar"
-            />
-            <div class="hidden md:block flex-1 text-left ml-3">
-              <p class="text-[15px] font-bold truncate max-w-[130px]">
-                {{ user?.user_metadata?.full_name || user?.email }}
+        <div class="p-4 border-t border-gray-100">
+          <div class="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 cursor-pointer" @click="toggleUserMenu">
+            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+              <span class="text-gray-600 text-sm font-medium">
+                {{ getUserInitials() }}
+              </span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-gray-900 truncate">
+                {{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}
               </p>
-              <p class="text-[13px] text-gray-500 truncate max-w-[130px]">
-                @{{ user?.email?.split('@')[0] }}
+              <p class="text-xs text-gray-500 truncate">
+                @{{ (user as any)?.email?.split('@')[0] }}
+              </p>
+            </div>
+            <ChevronDown class="w-4 h-4 text-gray-400" />
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <div class="hidden md:flex">
+      <!-- Desktop Sidebar - Style Twitter 2024 -->
+      <aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen fixed left-0 top-0">
+        <!-- Logo Section -->
+        <div class="p-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center">
+              <span class="text-white text-lg font-bold">KQ</span>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold text-gray-900">
+                {{ establishment?.name || 'Dashboard' }}
+              </h1>
+              <p class="text-sm text-gray-500">Gestion</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-3">
+          <div class="space-y-1">
+            <NuxtLink 
+              v-for="item in navigationItems" 
+              :key="item.path"
+              :to="item.path"
+              class="flex items-center gap-4 p-3 rounded-full text-lg transition-all group"
+              :class="[
+                route.path.includes(item.active)
+                  ? 'bg-gray-100 text-gray-900 font-semibold' 
+                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+              ]"
+            >
+              <component :is="item.icon" class="w-6 h-6" />
+              <span>{{ item.name }}</span>
+            </NuxtLink>
+          </div>
+        </nav>
+
+        <!-- User Section -->
+        <div class="p-3">
+          <div class="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 cursor-pointer transition-colors" @click="toggleUserMenu">
+            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+              <span class="text-gray-600 text-sm font-medium">
+                {{ getUserInitials() }}
+              </span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-gray-900 truncate">
+                {{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}
+              </p>
+              <p class="text-xs text-gray-500 truncate">
+                @{{ (user as any)?.email?.split('@')[0] }}
               </p>
             </div>
             <ChevronDown 
-              class="hidden md:block w-4 h-4 text-gray-500 transition-transform duration-200"
+              class="w-4 h-4 text-gray-400 transition-transform duration-200"
               :class="{ 'rotate-180': showUserMenu }"
             />
           </div>
-          
+
           <!-- User Menu Dropdown -->
           <Transition
-            enter-active-class="transition duration-100 ease-out"
+            enter-active-class="transition duration-200 ease-out"
             enter-from-class="transform scale-95 opacity-0"
             enter-to-class="transform scale-100 opacity-100"
-            leave-active-class="transition duration-75 ease-in"
+            leave-active-class="transition duration-150 ease-in"
             leave-from-class="transform scale-100 opacity-100"
             leave-to-class="transform scale-95 opacity-0"
           >
             <div 
               v-if="showUserMenu"
-              class="user-menu absolute bottom-20 left-3 md:left-auto md:right-3 w-[250px] bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden z-50"
+              class="mt-2 bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden"
             >
               <div class="p-4 border-b border-gray-100">
-                <p class="text-[15px] font-bold">{{ user?.user_metadata?.full_name || user?.email }}</p>
-                <p class="text-[13px] text-gray-500">@{{ user?.email?.split('@')[0] }}</p>
+                <p class="text-sm font-semibold text-gray-900">{{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}</p>
+                <p class="text-xs text-gray-500">@{{ (user as any)?.email?.split('@')[0] }}</p>
               </div>
               <div class="p-2">
                 <button 
                   @click="handleLogout"
-                  class="flex w-full items-center gap-3 px-4 py-3 text-[15px] hover:bg-gray-50 rounded-xl transition-colors"
+                  class="flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-gray-100 rounded-xl transition-colors"
                 >
-                  <LogOut class="w-5 h-5" />
+                  <LogOut class="w-4 h-4" />
                   <span>Se déconnecter</span>
                 </button>
               </div>
             </div>
           </Transition>
         </div>
-      </div>
+      </aside>
 
-      <!-- Main Content -->
-      <main class="ml-[68px] md:ml-[275px] flex-1 min-w-0 border-x border-gray-100">
-        <slot />
+      <!-- Desktop Main Content -->
+      <main class="ml-64 flex-1 min-h-screen bg-gray-50">
+        <div class="max-w-4xl mx-auto">
+          <slot />
+        </div>
       </main>
     </div>
+
+    <!-- Mobile Main Content -->
+    <main class="md:hidden">
+      <slot />
+    </main>
   </div>
 </template>
 
@@ -150,9 +230,10 @@ import { ref, onMounted, onUnmounted, watch, watchEffect } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
-const { establishment } = useEstablishment()
+const { establishment, fetchEstablishmentByUserId } = useEstablishment()
 const { user, logout, isLoading } = useAuth()
 const showUserMenu = ref(false)
+const showMobileMenu = ref(false)
 
 const navigationItems = computed(() => [
   {
@@ -179,18 +260,11 @@ const navigationItems = computed(() => [
     active: '/qr-codes',
     icon: QrCode
   },
-  // {
-  //   name: 'Partage',
-  //   path: `/manager/${establishment.value?.id}/share`,
-  //   active: '/share',
-  //   icon: Share2
-  // },
   {
     name: 'Commandes',
     path: `/manager/${establishment.value?.id}/orders`,
     active: '/orders',
     icon: Clock
-    // count: 5
   },
   {
     name: 'Staff',
@@ -206,25 +280,25 @@ const navigationItems = computed(() => [
   }
 ])
 
+const getUserInitials = () => {
+  const name = (user.value as any)?.user_metadata?.full_name || (user.value as any)?.email
+  if (name) {
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+  }
+  return 'U'
+}
+
 const handleLogout = async () => {
   await logout()
   navigateTo('/auth/login')
 }
 
-const createNewItem = () => {
-  // Determine what to create based on current route
-  if (route.path.includes('/menu')) {
-    router.push(`/manager/${establishment.value?.id}/menu/new`)
-  } else if (route.path.includes('/categories')) {
-    router.push(`/manager/${establishment.value?.id}/categories/new`)
-  } else {
-    // Default action
-    router.push(`/manager/${establishment.value?.id}/menu/new`)
-  }
-}
-
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value
+}
+
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value
 }
 
 // Gestionnaire de clic en dehors du menu
@@ -250,38 +324,53 @@ onMounted(async () => {
     return
   }
 
+  // Charger l'établissement de l'utilisateur
+  if (user.value) {
+    await fetchEstablishmentByUserId()
+  }
+
   // Ajouter les event listeners
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('keydown', handleEscape)
 })
 
 // Watch pour la session
-watch(user, (newUser) => {
+watch(user, async (newUser) => {
   if (!newUser && !isLoading.value) {
     navigateTo('/auth/login')
+  } else if (newUser) {
+    // Recharger l'établissement quand l'utilisateur change
+    await fetchEstablishmentByUserId()
   }
 }, { immediate: true })
-
-// Debug
-watchEffect(() => {
-  console.log('Auth State:', {
-    user: user.value,
-    isLoading: isLoading.value,
-    email: user.value?.email,
-    metadata: user.value?.user_metadata
-  })
-})
 </script>
 
 <style scoped>
-/* Twitter blue color */
-:root {
-  --twitter-blue: #1DA1F2;
-  --twitter-blue-hover: #1a91da;
-  --twitter-black: #14171A;
-  --twitter-dark-gray: #657786;
-  --twitter-light-gray: #AAB8C2;
-  --twitter-extra-light-gray: #E1E8ED;
-  --twitter-extra-extra-light-gray: #F5F8FA;
+/* Design Twitter 2024 - Plus propre et moderne */
+.rounded-full {
+  border-radius: 9999px;
 }
-</style> 
+
+/* Transitions fluides */
+.transition-all {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effects subtils */
+.hover\:bg-gray-100:hover {
+  background-color: #f3f4f6;
+}
+
+/* Focus states pour l'accessibilité */
+button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .w-80 {
+    width: 20rem;
+  }
+}
+</style>

@@ -11,7 +11,7 @@
             <ArrowLeft class="w-6 h-6" />
           </NuxtLink>
           <h1 class="text-2xl font-bold text-gray-900">
-            Commande #{{ orderId.substring(0, 8) }}
+            Commande #{{ orderId ? orderId.substring(0, 8) : '---' }}
           </h1>
         </div>
         <div>
@@ -146,7 +146,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { 
@@ -160,8 +160,8 @@ const { showToast } = useCustomToast()
 const route = useRoute()
 const router = useRouter()
 
-const establishmentId = route.params.establishmentId
-const orderId = route.params.orderId
+const establishmentId = route.params.establishmentId as string
+const orderId = route.params.orderId as string
 const loading = ref(true)
 const order = ref({
   id: orderId,
@@ -178,6 +178,13 @@ const order = ref({
 const loadOrderDetails = async () => {
   try {
     loading.value = true
+    
+    // Vérifier que les paramètres existent
+    if (!orderId || !establishmentId) {
+      console.warn('Paramètres manquants, utilisation des données fictives')
+      order.value = generateMockOrderDetail()
+      return
+    }
     
     // Essayer de charger les détails réels de la commande
     const { data, error } = await supabase
@@ -267,6 +274,11 @@ const generateMockOrderDetail = () => {
 // Prendre en charge une commande
 const takeOrder = async () => {
   try {
+    if (!orderId) {
+      showToast.error('Erreur', 'ID de commande manquant')
+      return
+    }
+    
     const { error } = await supabase
       .from('orders')
       .update({ 
@@ -288,6 +300,11 @@ const takeOrder = async () => {
 // Marquer comme prêt à servir
 const markAsReady = async () => {
   try {
+    if (!orderId) {
+      showToast.error('Erreur', 'ID de commande manquant')
+      return
+    }
+    
     const { error } = await supabase
       .from('orders')
       .update({ 
@@ -309,6 +326,11 @@ const markAsReady = async () => {
 // Marquer comme servie
 const markAsDelivered = async () => {
   try {
+    if (!orderId) {
+      showToast.error('Erreur', 'ID de commande manquant')
+      return
+    }
+    
     const { error } = await supabase
       .from('orders')
       .update({ 
@@ -332,6 +354,11 @@ const cancelOrder = async () => {
   if (!confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) return
   
   try {
+    if (!orderId) {
+      showToast.error('Erreur', 'ID de commande manquant')
+      return
+    }
+    
     const { error } = await supabase
       .from('orders')
       .update({ 

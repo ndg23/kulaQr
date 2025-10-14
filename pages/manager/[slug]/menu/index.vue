@@ -1,172 +1,140 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <!-- Header with glass effect -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/20 shadow-sm">
-      <div class="max-w-[1400px] mx-auto px-6 sm:px-8 py-6">
-        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div class="max-w-2xl">
-            <div class="flex items-center gap-3 mb-2">
-              <h1 class="text-3xl font-bold text-gray-900">Menu</h1>
-              <div class="flex items-center gap-2 px-3 py-1 bg-gray-900/5 rounded-full">
-                <span class="text-sm font-medium text-gray-600">{{ categories.length }} catégories</span>
-                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                <span class="text-sm font-medium text-gray-600">{{ products.length }} produits</span>
-              </div>
-            </div>
-            <p class="text-base text-gray-500">Gérez votre menu et vos produits. Les modifications sont instantanément visibles pour vos clients.</p>
-          </div>
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div class="relative flex-1 sm:flex-none">
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Rechercher un produit..."
-                class="w-full sm:w-64 pl-10 pr-4 h-11 rounded-full bg-white shadow-sm border border-gray-200/30 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
-              />
-              <Search class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-            </div>
-           
-            <button 
-              @click="openAddProduct"
-              class="h-11 px-6 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
-            >
-              <Plus class="w-4 h-4" />
-              Nouveau produit
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Modern Header -->
+    <ManagerModernHeader
+      title="Menu"
+      subtitle="Gérez vos produits et catégories"
+      :icon="MenuIcon"
+      :primary-action="{
+        label: 'Nouveau produit',
+        icon: Plus,
+        action: openAddProduct
+      }"
+      :secondary-actions="[
+        {
+          label: 'Rechercher',
+          icon: Search,
+          action: () => {} // Will be handled by the search input
+        }
+      ]"
+    />
 
-    <main class="max-w-[1400px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
-        <div 
-          v-for="stat in quickStats" 
+    <!-- Search Bar -->
+    <div class="max-w-4xl mx-auto px-6 py-4">
+      <div class="relative">
+        <Search class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          v-model="search"
+          type="text"
+          placeholder="Rechercher un produit..."
+          class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
+        />
+      </div>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-6 py-8">
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <ManagerModernCard 
+          v-for="stat in quickStats"
           :key="stat.name"
-          class="group bg-white rounded-2xl shadow-sm hover:shadow-md p-5 sm:p-6 transition-all duration-300"
+          class="p-6"
         >
           <div class="flex items-center gap-4">
-            <div :class="[
-              stat.iconBg, 
-              'w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110'
-            ]">
-              <component :is="stat.icon" class="w-6 h-6 sm:w-7 sm:h-7" :class="stat.iconColor" />
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+              <component :is="stat.icon" class="w-6 h-6 text-gray-600" />
             </div>
             <div>
-              <p class="text-sm font-medium text-gray-500">{{ stat.name }}</p>
-              <p class="text-2xl sm:text-3xl font-bold text-gray-900 mt-0.5">{{ stat.value }}</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
+              <p class="text-sm text-gray-500">{{ stat.name }}</p>
             </div>
           </div>
+        </ManagerModernCard>
+      </div>
+
+      <!-- Categories -->
+      <div class="mb-8">
+        <div class="flex gap-3 overflow-x-auto pb-2">
+          <button
+            @click="activeCategory = 'all'"
+            class="px-6 py-3 rounded-full text-sm font-medium whitespace-nowrap transition-all"
+            :class="activeCategory === 'all' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100'"
+          >
+            Tout
+          </button>
+          <button
+            v-for="category in categories"
+            :key="category.id"
+            @click="activeCategory = category.id"
+            class="px-6 py-3 rounded-full text-sm font-medium whitespace-nowrap transition-all"
+            :class="activeCategory === category.id ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100'"
+          >
+            {{ category.name }}
+          </button>
         </div>
       </div>
 
-      <!-- Catégories -->
-      <div class="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
-        <button
-          v-for="category in categories"
-          :key="category.id"
-          @click="activeCategory = category.id"
-          class="h-11 px-5 rounded-full text-sm font-medium whitespace-nowrap transition-all"
-          :class="[
-            activeCategory === category.id
-              ? 'bg-green-600 text-white shadow-sm'
-              : 'bg-white text-gray-700 border border-gray-200/50 hover:bg-gray-50'
-          ]"
-        >
-          {{ category.name }}
-        </button>
-      </div>
-
-      <!-- Grid des produits -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
-        <div 
-          v-for="product in filteredProducts" 
+      <!-- Products Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ManagerModernCard
+          v-for="product in filteredProducts"
           :key="product.id"
-          class="group bg-white rounded-2xl hover:border-1 border hover:border-kula-500 overflow-hidden transition-all duration-300"
+          class="overflow-hidden"
         >
-          <!-- Image du produit -->
-          <div class="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
-            <img 
-              :src="product.image_url || '/placeholder-product.jpg'" 
+          <!-- Product Image -->
+          <div class="aspect-[4/3] relative bg-gray-100 -m-6 mb-6">
+            <img
+              :src="product.image_url || '/placeholder-product.jpg'"
               :alt="product.name"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              class="w-full h-full object-cover"
             />
-            
-            <!-- Status Badge -->
-            <div class="absolute top-3 left-3">
-              <div class="flex items-center gap-2 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm">
-                <div class="w-2 h-2 rounded-full" :class="product.is_available ? 'bg-green-500' : 'bg-gray-300'"></div>
-                <span class="text-xs font-medium text-gray-700">
-                  {{ product.is_available ? 'Disponible' : 'Indisponible' }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="absolute top-3 right-3 flex items-center gap-2 ">
-              <Switch
-                v-model="product.is_available"
-                @change="toggleAvailability(product)"
-                class="relative inline-flex h-6 w-11 items-center rounded-full bg-white/90 backdrop-blur-sm shadow-sm"
-              >
-                <span class="sr-only">Disponibilité</span>
-                <span
-                  class="inline-block h-4 w-4 transform rounded-full transition"
-                  :class="[
-                    product.is_available ? 'translate-x-6 bg-green-600' : 'translate-x-1 bg-gray-400'
-                  ]"
-                />
-              </Switch>
-              <button 
+            <div class="absolute top-3 right-3">
+              <button
                 @click="editProduct(product)"
-                class="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-sm"
+                class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
               >
-                <Pencil class="w-4 h-4 text-gray-700" />
+                <Pencil class="w-4 h-4 text-gray-600" />
               </button>
             </div>
           </div>
 
-          <!-- Infos produit -->
-          <div class="p-5">
-            <div class="flex items-start justify-between gap-4">
-              <div class="min-w-0">
-                <h3 class="font-semibold text-gray-900 truncate">{{ product.name }}</h3>
-                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ product.description }}</p>
-              </div>
-              <span class="text-sm font-bold text-gray-900 whitespace-nowrap">
-                {{ formatPrice(product.price) }}
-              </span>
+          <!-- Product Info -->
+          <div>
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <h3 class="font-semibold text-gray-900 text-lg leading-tight">{{ product.name }}</h3>
+              <span class="font-bold text-gray-900 text-lg">{{ formatPrice(product.price) }}</span>
             </div>
-            <div class="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
-              <span class="text-xs text-gray-500">
-                Catégorie: {{ getCategoryName(product.category_id) }}
-              </span>
-              <div 
-                class="text-xs font-medium px-2 py-1 rounded-full"
-                :class="product.is_available ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-500'"
-              >
-                {{ product.is_available ? 'En vente' : 'Masqué' }}
-              </div>
+
+            <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ product.description }}</p>
+
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500">{{ getCategoryName(product.category_id) }}</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="product.is_available"
+                  @change="toggleAvailability(product)"
+                  class="sr-only peer"
+                >
+                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+              </label>
             </div>
           </div>
-        </div>
+        </ManagerModernCard>
       </div>
-      
-      <!-- Empty state -->
-      <div v-if="filteredProducts.length === 0" class="py-16 flex flex-col items-center justify-center">
-        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-          <Search class="w-10 h-10 text-gray-300" />
+      <!-- Empty State -->
+      <div v-if="filteredProducts.length === 0" class="text-center py-16">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Search class="w-8 h-8 text-gray-400" />
         </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun produit trouvé</h3>
-        <p class="text-gray-500 text-center max-w-md">
-          {{ searchQuery ? "Aucun produit ne correspond à votre recherche." : "Aucun produit disponible dans cette catégorie." }}
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Aucun produit trouvé</h3>
+        <p class="text-gray-500 mb-6">
+          {{ search ? "Aucun produit ne correspond à votre recherche." : "Aucun produit dans cette catégorie." }}
         </p>
-        <button 
+        <button
           @click="openAddProduct"
-          class="mt-6 h-11 px-6 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+          class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors"
         >
-          <Plus class="w-4 h-4" />
           Ajouter un produit
         </button>
       </div>
@@ -215,18 +183,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { Switch, TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle } from '@headlessui/vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue'
 import {
-  Plus, UtensilsCrossed, Edit2, Trash2,
-  Coffee, Pizza, Store, TrendingUp, IceCream, Loader2,
-  Search, MoreVertical, ChevronDown, Pencil
+  Plus, UtensilsCrossed, Store, TrendingUp, Search, Pencil, List, Menu as MenuIcon
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
 import { useEstablishment } from '~/composables/useEstablishment'
 import ProductModal from '~/components/modals/ProductModal.vue'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 
 const route = useRoute()
 const slug = route.params.slug
@@ -236,10 +201,10 @@ const { establishment } = useEstablishment()
 
 // State
 const showAddProduct = ref(false)
-const editingProduct = ref(null)
+const editingProduct = ref(null as any)
 const activeCategory = ref('all')
-const categories = ref([])
-const products = ref([])
+const categories = ref<any[]>([])
+const products = ref<any[]>([])
 const loading = ref(true)
 const search = ref('')
 
@@ -250,13 +215,13 @@ const filteredProducts = computed(() => {
 
   // Filter by category
   if (activeCategory.value !== 'all') {
-    filtered = filtered.filter(product => product.category_id === activeCategory.value)
+    filtered = filtered.filter((product: any) => product.category_id === activeCategory.value)
   }
 
   // Filter by search
   if (search.value) {
     const searchLower = search.value.toLowerCase()
-    filtered = filtered.filter(product => 
+    filtered = filtered.filter((product: any) => 
       product.name.toLowerCase().includes(searchLower) ||
       product.description?.toLowerCase().includes(searchLower)
     )
@@ -269,36 +234,28 @@ const filteredProducts = computed(() => {
 const quickStats = computed(() => {
   return [
     {
-      name: 'Total produits',
+      name: 'Produits',
       value: products.value.length,
-      icon: UtensilsCrossed,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-500'
+      icon: UtensilsCrossed
     },
     {
       name: 'Catégories',
       value: categories.value.length,
-      icon: ChevronDown,
-      iconBg: 'bg-purple-50',
-      iconColor: 'text-purple-500'
+      icon: List
     },
     {
-      name: 'Produits actifs',
-      value: products.value.filter(p => p.is_available).length,
-      icon: Plus,
-      iconBg: 'bg-green-50',
-      iconColor: 'text-green-500'
+      name: 'Actifs',
+      value: products.value.filter((p: any) => p.is_available).length,
+      icon: Store
     },
     {
       name: 'Prix moyen',
       value: formatPrice(
         products.value.length
-          ? products.value.reduce((sum, p) => sum + p.price, 0) / products.value.length
+          ? products.value.reduce((sum: any, p: any) => sum + p.price, 0) / products.value.length
           : 0
       ),
-      icon: MoreVertical,
-      iconBg: 'bg-amber-50',
-      iconColor: 'text-amber-500'
+      icon: TrendingUp
     }
   ]
 })
@@ -315,8 +272,8 @@ const handleSearch = () => {
   }
 }
 
-const getCategoryName = (categoryId) => {
-  const category = categories.value.find(c => c.id === categoryId)
+const getCategoryName = (categoryId: string) => {
+  const category = categories.value.find((c: any) => c.id === categoryId) as any
   return category ? category.name : 'Sans catégorie'
 }
 
@@ -331,7 +288,7 @@ const loadData = async () => {
       .order('name')
 
     if (categoriesError) throw categoriesError
-    categories.value = categoriesData || []
+    categories.value = categoriesData as any[] || []
     
     // Load products directly by establishment_id
     const { data: productsData, error: productsError } = await supabase
@@ -341,7 +298,7 @@ const loadData = async () => {
       .order('name')
 
     if (productsError) throw productsError
-    products.value = productsData || []
+    products.value = productsData as any[] || []
   } catch (err) {
     console.error('Erreur chargement:', err)
     showToast.error('Erreur', 'Impossible de charger les données')
@@ -377,7 +334,7 @@ const closeModal = () => {
   editingProduct.value = null
 }
 
-const saveProduct = async (productData) => {
+const saveProduct = async (productData: any) => {
   try {
     // Make sure the product has a valid category_id that belongs to this establishment
     if (!productData.category_id) {
@@ -386,7 +343,7 @@ const saveProduct = async (productData) => {
     }
     
     // Verify the category belongs to this establishment
-    const categoryExists = categories.value.some(c => c.id === productData.category_id)
+    const categoryExists = categories.value.some((c: any) => c.id === productData.category_id)
     if (!categoryExists) {
       showToast.error('Erreur', 'Catégorie invalide')
       return
@@ -400,8 +357,7 @@ const saveProduct = async (productData) => {
       const { error } = await supabase
         .from('products')
         .update(productData)
-        .eq('id', editingProduct.value.id)
-
+        .eq('id', editingProduct.value?.id as string) as any as any
       if (error) throw error
     } else {
       // Create new product
@@ -410,7 +366,7 @@ const saveProduct = async (productData) => {
         .insert({
           ...productData,
           is_available: true
-        })
+        }) as any as any
 
       if (error) throw error
     }
@@ -428,24 +384,6 @@ const saveProduct = async (productData) => {
   }
 }
 
-const deleteProduct = async (id: string) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return
-
-  try {
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id)
-
-    if (error) throw error
-    await loadData()
-      showToast.success('Produit supprimé', 'Le produit a été supprimé')
-  } catch (err) {
-    console.error('Erreur suppression:', err)
-    showToast.error('Erreur', 'Impossible de supprimer le produit')
-  }
-}
-
 const openAddProduct = () => {
   editingProduct.value = null
   showAddProduct.value = true
@@ -454,20 +392,19 @@ const openAddProduct = () => {
 // Initial load
 onMounted(loadData)
 
+// Watch for route changes to reload data
+watch(() => route.path, async (newPath, oldPath) => {
+  if (newPath && newPath !== oldPath) {
+    await loadData()
+  }
+}, { immediate: true })
+
 definePageMeta({
   layout: 'manager'
 })
 </script>
 
 <style scoped>
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
 /* Smooth element appearance animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }

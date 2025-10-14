@@ -78,27 +78,32 @@ export interface Establishment {
 
 export interface OrderItem {
   id: string;
+  productId: string;
   name: string;
+  description?: string;
   quantity: number;
-  price: number;
-  note: string | null;
-  products?: {
-    name: string;
-  };
-  order_id?: string;
   unit_price: number;
+  price?: number;
+  notes?: string;
+  order_id?: string;
 }
 
 export interface Order {
   id: string;
-  orderNumber: string;
-  table: number;
+  orderNumber: number;
+  table_number?: number;
   status: OrderStatus;
   created_at: string;
-  total: number;
+  total_amount: number;
   items: OrderItem[];
-  table_number?: number;
-  total_amount?: number;
+  isExpanded?: boolean;
+  establishment_id?: string;
+  notes?: string;
+  payment_status?: string;
+  payment_method?: string;
+  rating?: number;
+  rating_comment?: string;
+  updated_at?: string;
 }
 
 export type OrderStatus = 'pending' | 'accepted' | 'preparing' | 'ready' | 'completed' | 'rejected' | 'cancelled';

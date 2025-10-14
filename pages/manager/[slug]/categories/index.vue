@@ -1,143 +1,114 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <!-- Header with glass effect -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/20 shadow-sm">
-      <div class="max-w-[1400px] mx-auto px-6 sm:px-8 py-6">
-        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div class="max-w-2xl">
-            <div class="flex items-center gap-3 mb-2">
-              <h1 class="text-3xl font-bold text-gray-900">Catégories</h1>
-              <div class="flex items-center gap-2 px-3 py-1 bg-gray-900/5 rounded-full">
-                <span class="text-sm font-medium text-gray-600">{{ categories.length }}</span>
-                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                <span class="text-sm font-medium text-gray-600">{{ getTotalProducts() }} produits</span>
-              </div>
-            </div>
-            <p class="text-base text-gray-500">Organisez votre menu en catégories pour une meilleure expérience client. Glissez-déposez pour réorganiser l'ordre d'affichage.</p>
-          </div>
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div class="relative flex-1 sm:flex-none">
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Rechercher une catégorie..."
-                class="w-full sm:w-64 pl-10 pr-4 h-11 rounded-full bg-white shadow-sm border border-gray-200/30 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
-              />
-              <Search class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-            </div>
-            <button
-              @click="openCategoryModal"
-              class="h-11 px-6 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
-            >
-              <Plus class="w-4 h-4" />
-              Nouvelle catégorie
-            </button>
-          </div>
-        </div>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Modern Header -->
+    <ManagerModernHeader
+      title="Catégories"
+      subtitle="Organisez vos produits en catégories"
+      :icon="List"
+      :primary-action="{
+        label: 'Nouvelle catégorie',
+        icon: Plus,
+        action: openCategoryModal
+      }"
+    />
+
+    <!-- Search Bar -->
+    <div class="max-w-4xl mx-auto px-6 py-4">
+      <div class="relative">
+        <Search class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Rechercher une catégorie..."
+          class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
+        />
       </div>
-    </header>
+    </div>
 
-    <main class="max-w-[1400px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
-      <!-- Quick Actions -->
-     
-
+    <main class="max-w-4xl mx-auto px-6 py-8">
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-20">
         <div class="w-16 h-16 relative">
-          <div class="w-16 h-16 rounded-2xl bg-gray-100 animate-pulse"></div>
-          <Loader2 class="w-8 h-8 text-gray-300 animate-spin absolute inset-0 m-auto" />
+          <div class="w-16 h-16 bg-gray-100 rounded-full animate-pulse"></div>
+          <Loader2 class="w-8 h-8 text-gray-400 animate-spin absolute inset-0 m-auto" />
         </div>
         <p class="text-sm text-gray-500 mt-4">Chargement des catégories...</p>
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="categories.length === 0" 
-        class="bg-white rounded-2xl shadow-md p-12 text-center max-w-lg mx-auto mt-12"
-      >
-        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gray-50 flex items-center justify-center">
-          <UtensilsCrossed class="w-10 h-10 text-gray-300" />
+      <div v-else-if="categories.length === 0" class="text-center py-16">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <UtensilsCrossed class="w-8 h-8 text-gray-400" />
         </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">Commencez votre menu</h3>
-        <p class="text-gray-500 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Commencez votre menu</h3>
+        <p class="text-gray-500 mb-6">
           Créez des catégories pour organiser vos produits et faciliter la navigation de vos clients.
         </p>
         <button
           @click="openCategoryModal"
-          class="px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 active:scale-95 transition-all inline-flex items-center gap-2"
+          class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors"
         >
-          <Plus class="w-5 h-5" />
           Créer votre première catégorie
         </button>
       </div>
 
       <!-- Categories Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
-        <div 
-          v-for="category in filteredCategories" 
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ManagerModernCard
+          v-for="category in filteredCategories"
           :key="category.id"
-          class="group bg-white rounded-2xl hover:border-1 border hover:border-kula-500 overflow-hidden transition-all duration-300"
+          class="overflow-hidden"
         >
-          <!-- Image Header avec effet amélioré -->
-          <div class="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
+          <!-- Category Image -->
+          <div class="aspect-[4/3] relative bg-gray-100 -m-6 mb-6">
             <img
               v-if="category.image_url"
               :src="category.image_url"
               :alt="category.name"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              class="w-full h-full object-cover"
             />
             <div v-else class="absolute inset-0 flex items-center justify-center">
-              <div class="text-center transform group-hover:scale-110 transition-all duration-300">
-                <div class="w-16 h-16 mx-auto rounded-2xl bg-gray-900/5 backdrop-blur flex items-center justify-center mb-3">
-                  <component 
-                    :is="category.icon || UtensilsCrossed" 
-                    class="w-8 h-8 text-gray-400"
-                  />
-                </div>
+              <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                <component
+                  :is="category.icon || UtensilsCrossed"
+                  class="w-6 h-6 text-gray-500"
+                />
               </div>
             </div>
-
-            <!-- Status Badge -->
-            <div class="absolute top-3 left-3">
-              <div class="flex items-center gap-2 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm">
-                <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                <span class="text-xs font-medium text-gray-700">{{ getProductCount(category.id) }} produits</span>
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="absolute top-3 right-3 flex items-center gap-2 ">
-              <button 
+            <div class="absolute top-3 right-3">
+              <button
                 @click="editCategory(category)"
-                class="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-sm"
+                class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
               >
-                <Edit2 class="w-4 h-4 text-gray-700" />
+                <Edit2 class="w-4 h-4 text-gray-600" />
               </button>
+            </div>
+          </div>
+
+          <!-- Category Info -->
+          <div class="p-4">
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <h3 class="font-semibold text-gray-900 text-lg leading-tight">{{ category.name }}</h3>
               <button
                 @click="deleteCategory(category.id)"
-                class="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-sm"
+                class="w-8 h-8 text-gray-400 hover:text-red-500 transition-colors"
               >
-                <Trash2 class="w-4 h-4 text-gray-700" />
+                <Trash2 class="w-4 h-4" />
               </button>
             </div>
-          </div>
 
-          <!-- Informations de la catégorie -->
-          <div class="p-5">
-            <h3 class="font-semibold text-gray-900 truncate">{{ category.name }}</h3>
-            <p class="text-sm text-gray-500 mt-1 mb-3 line-clamp-2">{{ category.description || 'Aucune description' }}</p>
-            
-            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-              <span class="text-xs text-gray-500">Créée le {{ formatDate(category.created_at) }}</span>
-              <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                {{ getProductCount(category.id) > 1 ? `${getProductCount(category.id)} produits` : `${getProductCount(category.id)} produit` }}
-              </span>
+            <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ category.description || 'Aucune description' }}</p>
+
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500">{{ getProductCount(category.id) }} produits</span>
+              <span class="text-xs text-gray-400">{{ formatDate(category.created_at) }}</span>
             </div>
           </div>
-        </div>
+        </ManagerModernCard>
       </div>
     </main>
 
-    <!-- Modal for Category Management -->
+    <!-- Modal -->
     <TransitionRoot appear :show="showCategoryModal" as="template">
       <Dialog as="div" class="relative z-50" @close="closeCategoryModal">
         <TransitionChild
@@ -149,11 +120,11 @@
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" />
+          <div class="fixed inset-0 bg-black bg-opacity-25" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
+          <div class="flex min-h-full items-center justify-center p-4">
             <TransitionChild
               as="template"
               enter="duration-300 ease-out"
@@ -163,13 +134,12 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-            <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
-
-              <CategoryModal
-                :category="editingCategory"
-                @close="closeCategoryModal"
-                @submit="saveCategory"
-              />
+              <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+                <CategoryModal
+                  :category="editingCategory"
+                  @close="closeCategoryModal"
+                  @submit="saveCategory"
+                />
               </DialogPanel>
             </TransitionChild>
           </div>
@@ -180,12 +150,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   Plus, Edit2, Trash2, UtensilsCrossed,
   Coffee, Pizza, IceCream, Wine, Beer, Loader2,
   ImageIcon, Search, ArrowUpDown, Upload, Download,
-  ArrowRight
+  ArrowRight, List
 } from 'lucide-vue-next'
 import CategoryModal from '~/components/modals/CategoryModal.vue'
 import {
@@ -208,7 +178,7 @@ const { establishment } = useEstablishment()
 
 // State
 const showCategoryModal = ref(false)
-const editingCategory = ref<Category | null>(null)
+const editingCategory = ref<Category | null>(null as any)
 const categories = ref<Category[]>([])
 const products = ref<Product[]>([])
 const loading = ref(true)
@@ -265,7 +235,7 @@ const saveCategory = async (categoryData: CategoryData) => {
           name: categoryData.name,
           order_number: categoryData.order_number,
           image_url: categoryData.image_url,
-          establishment_id: establishment.value?.id
+          establishment_id: establishment.value?.id as string
         })
         .eq('id', editingCategory.value.id)
         .select()
@@ -386,53 +356,20 @@ onMounted(async () => {
   await loadData()
 })
 
+// Watch for route changes to reload data
+// Supprimez la ligne : const slug = route.params.slug as string
+
+// Remplacez le watcher par :
+watch(() => route.params.slug, async (newSlug, oldSlug) => {
+  if (newSlug && newSlug !== oldSlug) {
+    console.log('🔄 Restaurant categories:', newSlug)
+    await loadData()
+  }
+}, { immediate: true }) // immediate: true remplace onMounted
 definePageMeta({
   layout: 'manager'
 })
 
-const handleUploadError = (error: Error): void => {
-  showToast.error('Erreur', error.message)
-}
-
-const handleUploadSuccess = () => {
-  showToast.success('Succès', 'Image téléchargée avec succès')
-}
-
-// Nouvelles données
-const quickActions = computed(() => [
-  {
-    name: 'Nouvelle catégorie',
-    description: 'Créer une catégorie',
-    icon: Plus,
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-500',
-    onClick: openCategoryModal
-  },
-  {
-    name: 'Réorganiser',
-    description: 'Modifier l\'ordre',
-    icon: ArrowUpDown,
-    iconBg: 'bg-purple-50',
-    iconColor: 'text-purple-500',
-    onClick: () => {} // À implémenter
-  },
-  {
-    name: 'Importer',
-    description: 'Depuis un fichier',
-    icon: Upload,
-    iconBg: 'bg-green-50',
-    iconColor: 'text-green-500',
-    onClick: () => {} // À implémenter
-  },
-  {
-    name: 'Exporter',
-    description: 'Sauvegarder',
-    icon: Download,
-    iconBg: 'bg-orange-50',
-    iconColor: 'text-orange-500',
-    onClick: () => {} // À implémenter
-  }
-])
 
 // Filtrage des catégories
 const filteredCategories = computed(() => {

@@ -311,6 +311,11 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
+    -- Ajouter une vérification rapide pour éviter des requêtes inutiles
+    IF user_uuid IS NULL THEN
+        RETURN FALSE;
+    END IF;
+    
     RETURN EXISTS (
         SELECT 1 FROM users 
         WHERE id = user_uuid AND role = 'admin'
@@ -484,18 +489,25 @@ CREATE POLICY "Users can insert establishments" ON establishments
     FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Staff policies
+-- Remplacer la politique actuelle par celle-ci
 CREATE POLICY "Staff viewable by establishment owners" ON staff
     FOR SELECT USING (
-        auth.uid() IN (
-            SELECT user_id FROM establishments WHERE id = staff.establishment_id
+        EXISTS (
+            SELECT 1 FROM establishments 
+            WHERE id = staff.establishment_id AND user_id = auth.uid()
         ) OR is_admin_user()
     );
 
-CREATE POLICY "Users can manage their establishment staff" ON staff
+-- Politique unifiée pour la gestion du staff
+CREATE OR REPLACE POLICY "Staff management policy" ON staff
     FOR ALL USING (
-        auth.uid() IN (
-            SELECT user_id FROM establishments WHERE id = staff.establishment_id
-        ) OR is_admin_user()
+        -- Les propriétaires d'établissement peuvent gérer leur staff
+        EXISTS (
+            SELECT 1 FROM establishments 
+            WHERE id = staff.establishment_id AND user_id = auth.uid()
+        ) OR
+        -- Les admins peuvent tout gérer
+        (SELECT role FROM users WHERE id = auth.uid()) = 'admin'
     );
 
 -- Categories policies
@@ -615,8 +627,7 @@ CREATE POLICY "Admins can manage everything - users" ON users
 CREATE POLICY "Admins can manage everything - establishments" ON establishments
     FOR ALL USING (is_admin_user());
 
-CREATE POLICY "Admins can manage everything - staff" ON staff
-    FOR ALL USING (is_admin_user());
+-- Politique supprimée pour éviter la récursion infinie
 
 CREATE POLICY "Admins can manage everything - categories" ON categories
     FOR ALL USING (is_admin_user());

@@ -17,8 +17,8 @@ export interface User {
 }
 
 export const useAuth = () => {
-  const user = useState('user', () => null)
-  const isLoading = useState('auth_loading', () => true)
+  const user = useState<User | null>('user', () => null)
+  const isLoading = useState<boolean>('auth_loading', () => true)
   const supabase = useSupabaseClient()
   const error = ref<string | null>(null)
 

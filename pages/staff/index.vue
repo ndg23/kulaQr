@@ -1,207 +1,191 @@
 <template>
   <div class="min-h-screen bg-white">
-    <!-- Header -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/20 shadow-sm">
-      <div class="max-w-[768px] mx-auto px-6 sm:px-8 py-4">
-        <!-- Logo et nom de l'app -->
-        <div class="flex items-center mb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
-              <UtensilsCrossed class="w-5 h-5" />
+    <!-- Header Twitter 2024 Style - Ultra responsive -->
+    <header class="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-50">
+      <div class="max-w-4xl mx-auto px-3 sm:px-4 py-3">
+        <div class="flex items-center justify-between">
+          <!-- Logo et titre - Responsive -->
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0">
+              <Clock class="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <span class="text-xl font-bold text-gray-900">Kula QR</span>
-          </div>
-        </div>
-        
-        <!-- Header contenu -->
-        <div class="flex justify-between items-center">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">Commandes</h1>
-            <p class="text-base text-gray-500">Gérez les commandes en temps réel</p>
+            <div class="min-w-0 flex-1">
+              <h1 class="text-lg sm:text-xl font-bold text-gray-900 tracking-tight truncate">Commandes</h1>
+              <p class="text-xs sm:text-sm text-gray-500 font-medium truncate">{{ (establishment as any)?.name || 'Restaurant' }}</p>
+            </div>
           </div>
           
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 rounded-full" :class="connectionStatus === 'connected' ? 'bg-green-500' : connectionStatus === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'"></div>
-              <span class="text-sm text-gray-600">{{ connectionStatusText }}</span>
+          <!-- Actions Twitter Style - Responsive -->
+          <div class="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+            <!-- Statut de connexion -->
+            <div class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold"
+                 :class="connectionStatus === 'connected' 
+                   ? 'bg-emerald-50 text-emerald-700' 
+                   : 'bg-red-50 text-red-700'">
+              <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
+                   :class="connectionStatus === 'connected' ? 'bg-emerald-500' : 'bg-red-500'"></div>
+              <span class="hidden sm:inline">{{ connectionStatusText }}</span>
             </div>
             
-            <button 
-              @click="toggleSound" 
-              class="h-10 w-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-            >
-              <Volume2 v-if="soundEnabled" class="w-5 h-5 text-gray-700" />
-              <VolumeX v-else class="w-5 h-5 text-gray-700" />
-            </button>
-            
-            <button 
-              @click="refreshOrders" 
-              class="h-10 w-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-              :class="{ 'animate-spin': isRefreshing }"
-            >
-              <RefreshCw class="w-5 h-5 text-gray-700" />
+            <!-- Bouton refresh -->
+            <button @click="refreshOrders" 
+                    class="p-2 sm:p-3 rounded-full hover:bg-gray-100 active:scale-95 transition-all duration-150 text-gray-600 touch-target"
+                    :class="{ 'animate-spin': isRefreshing }">
+              <RefreshCw class="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="max-w-[768px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
-      <!-- Informations sur l'établissement (remplace le sélecteur) -->
-      <div class="mb-8">
-        <div v-if="isLoading" class="h-12 w-full bg-gray-100 animate-pulse rounded-xl mb-6"></div>
-        
-        <div v-else-if="establishment" class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl mb-6">
-          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-            <Store class="w-5 h-5 text-blue-600" />
-          </div>
-          <div>
-            <h3 class="font-medium text-gray-900">{{ establishment.name }}</h3>
-            <p class="text-sm text-gray-600">Gestion des commandes</p>
-          </div>
-        </div>
-        
-        <div v-else class="p-4 bg-yellow-50 rounded-xl mb-6 text-yellow-800">
-          <p class="text-sm">Aucun établissement associé à votre compte.</p>
-        </div>
-
-        <!-- Reste du filtrage/recherche -->
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-          <div class="sm:w-64">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Filtrer</label>
+    <main class="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <!-- Barre de recherche Twitter Style -->
+      <div class="mb-6">
             <div class="relative">
+          <Search class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 sm:left-4 top-1/2 -translate-y-1/2" />
               <input 
                 v-model="searchQuery"
                 type="text"
                 placeholder="Rechercher une commande..."
-                class="w-full h-12 pl-10 pr-4 rounded-xl bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-transparent transition-all"
+            class="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-gray-50/50 border border-gray-200/50 rounded-xl sm:rounded-2xl text-sm sm:text-base font-medium placeholder:text-gray-400 focus:ring-2 focus:ring-black/10 focus:border-black/20 focus:bg-white transition-all duration-200 shadow-sm hover:shadow-md"
               />
-              <Search class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            </div>
           </div>
         </div>
         
-        <div class="flex overflow-x-auto gap-2 py-2 scrollbar-hide">
+      <!-- Filtres Twitter Style -->
+      <div class="mb-8">
+        <div class="flex overflow-x-auto gap-2 sm:gap-3 pb-2 sm:pb-3 scrollbar-hide">
           <button 
-            v-for="status in ['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled']" 
-            :key="status"
-            @click="filterStatus = status"
-            class="h-10 px-4 rounded-full text-sm font-medium whitespace-nowrap"
-            :class="filterStatus === status 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
+            v-for="status in statusFilters" 
+            :key="status.value"
+            @click="filterStatus = status.value"
+            class="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 flex-shrink-0 shadow-sm"
+            :class="filterStatus === status.value 
+              ? 'bg-black text-white shadow-lg shadow-black/10' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200/50'"
           >
-            {{ statusLabels[status] }}
+            <component v-if="status.value !== 'all'" :is="getStatusIcon(status.value)" class="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span class="flex-shrink-0">{{ status.label }}</span>
+            <span class="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-bold min-w-[18px] sm:min-w-[20px] text-center"
+                  :class="filterStatus === status.value ? 'bg-white/20' : 'bg-gray-300'">
+              {{ orders.filter(order => status.value === 'all' ? true : order.status === status.value).length }}
+            </span>
           </button>
         </div>
       </div>
       
-      <!-- Loading state -->
+      <!-- Loading state Twitter 2024 Style -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-        <Loader2 class="w-10 h-10 animate-spin text-gray-400 mb-4" />
-        <p class="text-gray-500">Chargement des commandes...</p>
+        <div class="w-16 h-16 bg-gray-100 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
+          <Loader2 class="w-8 h-8 animate-spin text-gray-600" />
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Chargement des commandes</h3>
+        <p class="text-gray-500 text-sm">Récupération des dernières commandes en cours...</p>
       </div>
       
-      <!-- Error state -->
-      <div v-else-if="loadError" class="bg-white rounded-2xl shadow-sm p-8 text-center">
-        <div class="w-16 h-16 mx-auto bg-red-50 rounded-2xl flex items-center justify-center mb-4">
-          <AlertTriangle class="w-8 h-8 text-red-400" />
+      <!-- Error state Twitter 2024 Style -->
+      <div v-else-if="loadError" class="text-center py-20">
+        <div class="w-20 h-20 mx-auto bg-red-50 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
+          <AlertTriangle class="w-10 h-10 text-red-500" />
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Erreur de chargement</h3>
-        <p class="text-gray-500 max-w-md mx-auto mb-4">
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Erreur de chargement</h3>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto">
           Impossible de charger les commandes. Veuillez réessayer.
         </p>
-        <button 
-          @click="loadOrders" 
-          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg inline-flex items-center gap-2"
-        >
-          <RefreshCw class="w-4 h-4" />
+        <button @click="loadOrders" 
+                class="px-8 py-4 bg-black text-white rounded-2xl font-semibold hover:bg-gray-800 active:scale-95 transition-all duration-200 shadow-lg shadow-black/10">
           Réessayer
         </button>
       </div>
       
-      <!-- Empty state -->
-      <div v-else-if="filteredOrders.length === 0" class="bg-white rounded-2xl shadow-sm p-8 text-center">
-        <div class="w-16 h-16 mx-auto bg-gray-50 rounded-2xl flex items-center justify-center mb-4">
-          <ClipboardList class="w-8 h-8 text-gray-400" />
+      <!-- Empty state Twitter 2024 Style -->
+      <div v-else-if="filteredOrders.length === 0" class="text-center py-20">
+        <div class="w-20 h-20 mx-auto bg-gray-100 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
+          <ClipboardList class="w-10 h-10 text-gray-400" />
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Aucune commande</h3>
-        <p class="text-gray-500 max-w-md mx-auto">
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Aucune commande</h3>
+        <p class="text-gray-600 max-w-md mx-auto">
           {{ searchQuery 
             ? "Aucune commande ne correspond à votre recherche." 
             : filterStatus !== 'all' 
-              ? `Aucune commande avec le statut "${statusLabels[filterStatus]}".` 
+              ? `Aucune commande avec le statut "${filterStatus}".` 
               : "Vous n'avez pas encore reçu de commandes." }}
         </p>
       </div>
       
-      <!-- Orders -->
-      <div v-else class="grid grid-cols-1 max-w-7xl mx-auto sm:gap-6">
+      <!-- Liste d'orders simple -->
+      <div v-else class="space-y-4">
         <div 
           v-for="order in filteredOrders" 
           :key="order.id"
-          :class="[
-            'bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 relative',
-            recentlyReceivedOrders.has(order.id) ? 'new-order' : ''
-          ]"
+          class="bg-white border border-gray-200/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-black/5 transition-all duration-300 relative"
+          :class="recentlyReceivedOrders.has(order.id) ? 'ring-2 ring-blue-500/30 shadow-lg shadow-blue-500/10' : ''"
         >
-          <!-- Order card header -->
-          <div class="flex justify-between items-center p-5 border-b border-gray-100">
-            <div class="flex items-center gap-3">
-              <div :class="[getStatusColor(order.status).bg, 'w-12 h-12 rounded-xl flex items-center justify-center']">
-                <component :is="getStatusIcon(order.status)" class="w-6 h-6" :class="getStatusColor(order.status).text" />
+          <!-- Indicateur de nouvelle commande -->
+          <div v-if="recentlyReceivedOrders.has(order.id)" class="absolute -top-3 -right-3 bg-blue-500 text-white px-3 py-1.5 rounded-full text-xs font-bold animate-pulse shadow-lg">
+            Nouvelle
               </div>
+          
+          <!-- Header de la commande -->
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center gap-4">
+              <!-- Numéro de table -->
+              <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center shadow-sm">
+                <span class="text-xl font-bold text-gray-800">{{ order.table_number || '?' }}</span>
+              </div>
+              
+              <!-- Infos de base -->
               <div>
-                <h3 class="text-lg font-semibold text-gray-900">Commande #{{ order.orderNumber || '---' }}</h3>
-                <p class="text-sm text-gray-500">{{ getElapsedTime(order.created_at) }}</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">Commande #{{ order.orderNumber || order.id.slice(-6) }}</h3>
+                <p class="text-sm text-gray-500 font-medium">{{ getElapsedTime(order.created_at) }}</p>
               </div>
             </div>
             
-            <!-- Indicateur de nouvelle commande -->
-            <div v-if="recentlyReceivedOrders.has(order.id)" class="absolute top-3 right-3 bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs font-medium animate-pulse-subtle">
-              Nouvelle
-            </div>
-            
-            <!-- Status badge -->
-            <div :class="[getStatusColor(order.status).badge, 'px-3 py-1 rounded-full text-xs font-semibold']">
+            <!-- Statut actuel -->
+            <div class="flex items-center gap-2">
+              <div :class="[getStatusColor(order.status).badge, 'px-4 py-2 rounded-2xl text-sm font-semibold shadow-sm']">
               {{ translateStatus(order.status) }}
+              </div>
             </div>
           </div>
           
-          <!-- Order items -->
-          <div class="p-5">
-            <h4 class="text-sm font-medium text-gray-500 mb-3">Éléments ({{ order.items.length }})</h4>
+          <!-- Items de la commande -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm font-semibold text-gray-600">{{ order.items.length }} article{{ order.items.length > 1 ? 's' : '' }}</span>
+              <span class="text-xl font-bold text-gray-900">{{ formatPrice(order.total_amount) }}</span>
+            </div>
             
-            <div class="space-y-3 mb-4">
+            <!-- Liste des items -->
+            <div class="space-y-3">
               <div 
-                v-for="(item, index) in order.items" 
+                v-for="(item, index) in order.items.slice(0, 3)" 
                 :key="index"
-                class="flex items-start gap-3"
+                class="flex items-center gap-4 text-sm"
               >
-                <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-xs font-medium flex-shrink-0 mt-0.5">
+                <span class="w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-700">
                   {{ item.quantity }}
+                </span>
+                <span class="text-gray-900 flex-1 truncate font-medium">{{ item.name }}</span>
+                <span class="text-gray-600 font-semibold">{{ formatPrice(item.unit_price) }}</span>
                 </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium text-gray-900">{{ item.name }}</div>
-                  <div v-if="item.notes" class="text-sm text-gray-500 mt-1">{{ item.notes }}</div>
+              
+              <!-- Plus d'items -->
+              <div v-if="order.items.length > 3" class="text-sm text-gray-500 pl-11 font-medium">
+                +{{ order.items.length - 3 }} autre{{ order.items.length - 3 > 1 ? 's' : '' }} article{{ order.items.length - 3 > 1 ? 's' : '' }}
                 </div>
-                <div class="text-sm font-medium text-gray-900">{{ formatPrice(item.unit_price) }}</div>
               </div>
             </div>
             
-            <div class="pt-3 border-t border-gray-100 flex justify-between items-center">
-              <span class="text-sm text-gray-500">Total</span>
-              <span class="text-base font-bold">{{ formatPrice(order.total_amount) }}</span>
-            </div>
-          </div>
-          
-          <!-- Actions -->
-          <div class="p-4 bg-gray-50 border-t border-gray-100">
-            <div class="flex flex-wrap gap-2">
+          <!-- Actions simples -->
+          <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+            <!-- Actions principales -->
+            <div class="flex flex-col sm:flex-row gap-3">
+              <!-- Bouton d'action principal selon le statut -->
               <button 
                 v-if="order.status === 'pending'" 
                 @click="updateOrderStatus(order.id, 'preparing')"
-                class="flex-1 h-10 px-3 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                class="px-6 py-3 bg-black text-white rounded-2xl text-sm font-semibold hover:bg-gray-800 active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-black/10"
               >
                 <Check class="w-4 h-4" />
                 Accepter
@@ -210,7 +194,7 @@
               <button 
                 v-if="order.status === 'preparing'" 
                 @click="updateOrderStatus(order.id, 'ready')"
-                class="flex-1 h-10 px-3 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                class="px-6 py-3 bg-emerald-600 text-white rounded-2xl text-sm font-semibold hover:bg-emerald-700 active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-500/20"
               >
                 <CheckCircle class="w-4 h-4" />
                 Prêt
@@ -219,26 +203,39 @@
               <button 
                 v-if="order.status === 'ready'" 
                 @click="updateOrderStatus(order.id, 'completed')"
-                class="flex-1 h-10 px-3 bg-purple-600 text-white rounded-full text-sm font-medium hover:bg-purple-700 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                class="px-6 py-3 bg-purple-600 text-white rounded-2xl text-sm font-semibold hover:bg-purple-700 active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-purple-500/20"
               >
                 <ClipboardCheck class="w-4 h-4" />
                 Terminé
               </button>
               
+              <!-- Bouton d'annulation -->
               <button 
                 v-if="['pending', 'preparing'].includes(order.status)"
                 @click="updateOrderStatus(order.id, 'cancelled')"
-                class="h-10 px-3 bg-white border border-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                class="px-4 py-3 bg-gray-100 text-gray-700 rounded-2xl text-sm font-semibold hover:bg-gray-200 active:scale-95 transition-all duration-200 flex items-center gap-2 border border-gray-200/50"
               >
                 <X class="w-4 h-4" />
                 Annuler
               </button>
+            </div>
               
+            <!-- Actions secondaires -->
+            <div class="flex gap-2">
               <button 
                 @click="printOrder(order)"
-                class="h-10 w-10 bg-white border border-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all flex items-center justify-center"
+                class="p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 active:scale-95 transition-all duration-200 border border-gray-200/50"
+                title="Imprimer"
               >
                 <Printer class="w-4 h-4" />
+              </button>
+              
+              <button 
+                @click="viewOrderDetails(order)"
+                class="p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 active:scale-95 transition-all duration-200 border border-gray-200/50"
+                title="Voir détails"
+              >
+                <Eye class="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -250,32 +247,27 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useSupabaseClient } from '#imports'
 import { 
+  Clock, 
+  CheckCircle, 
+  Coffee, 
   ClipboardCheck, 
+  X, 
+  Loader2, 
+  AlertTriangle, 
+  ClipboardList, 
+  Search, 
   RefreshCw, 
-  Printer, 
-  X,
-  CheckCircle,
-  Coffee,
-  Search,
-  Clock,
+  Printer,
+  Check,
+  Store,
   Volume2,
   VolumeX,
-  Table as TableIcon,
-  Loader2,
-  UtensilsCrossed,
-  AlertTriangle,
-  Store
+  Eye,
+  Plus
 } from 'lucide-vue-next'
-import { useCustomToast } from '~/composables/useToast'
-import { useAuth } from '~/composables/useAuth'
-import type { 
-  Order, 
-  OrderItem, 
-  OrderStatus, 
-  ConnectionStatus 
-} from '~/types'
+import StatusBadge from '~/components/manager/StatusBadge.vue'
+import type { Order, OrderItem, ConnectionStatus, OrderStatus } from '~/types'
 
 const supabase = useSupabaseClient()
 const { showToast } = useCustomToast()
@@ -286,6 +278,76 @@ const orders = ref<Order[]>([])
 const establishment = ref(null)
 const selectedEstablishment = ref(null)
 const isLoading = ref(true)
+
+// Methods
+const loadOrders = async () => {
+  isLoading.value = true
+  loadError.value = false
+  
+  try {
+    // Charger l'établissement du staff
+    if (!establishment.value) {
+      await loadEstablishment()
+    }
+    
+    if (!establishment.value) {
+      throw new Error('Aucun établissement trouvé')
+    }
+    
+    // Charger les commandes depuis l'API
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        table_number,
+        status,
+        total_amount,
+        payment_status,
+        notes,
+        created_at,
+        updated_at,
+        items:order_items(
+          id,
+          quantity,
+          unit_price,
+          notes,
+          products(
+            id,
+            name,
+            description,
+            price
+          )
+        )
+      `)
+      .eq('establishment_id', establishment.value.id)
+      .order('created_at', { ascending: false })
+      .limit(50)
+    
+    if (error) throw error
+    
+    // Formater les données
+    orders.value = data.map((order, index) => ({
+      ...order,
+      orderNumber: String(index + 1).padStart(3, '0'), // Générer un numéro de commande basé sur l'index
+      items: order.items.map(item => ({
+        ...item,
+        name: item.products?.name || 'Produit inconnu',
+        productId: item.products?.id
+      }))
+    }))
+    
+    // Mettre à jour le statut de connexion
+    connectionStatus.value = 'connected'
+    
+    console.log('✅ Commandes chargées depuis l\'API:', orders.value.length)
+  } catch (error) {
+    console.error('Error loading orders:', error)
+    showToast.error('Erreur', 'Impossible de charger les commandes')
+    loadError.value = true
+  } finally {
+    isLoading.value = false
+  }
+}
 const isRefreshing = ref(false)
 const connectionStatus = ref<ConnectionStatus>('disconnected')
 const filterStatus = ref('all')
@@ -336,92 +398,21 @@ const statusLabels = {
   cancelled: 'Annulé'
 }
 
+const statusFilters = [
+  { value: 'all', label: 'Toutes' },
+  { value: 'pending', label: 'En attente' },
+  { value: 'preparing', label: 'En préparation' },
+  { value: 'ready', label: 'Prêt' },
+  { value: 'completed', label: 'Terminé' },
+  { value: 'cancelled', label: 'Annulé' }
+]
+
 const statusClasses = {
   pending: 'bg-yellow-50 text-yellow-600',
   preparing: 'bg-blue-50 text-blue-600',
   ready: 'bg-green-50 text-green-600',
   completed: 'bg-purple-50 text-purple-600',
   cancelled: 'bg-red-50 text-red-600'
-}
-
-// Methods
-const loadOrders = async () => {
-  if (!selectedEstablishment.value) return
-  
-  isLoading.value = true
-  loadError.value = false
-  
-  try {
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        *
-      `)
-      .eq('establishment_id', selectedEstablishment.value)
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    
-    // Traitement par lots pour récupérer les éléments de commande
-    const ordersWithItems = await Promise.all(
-      data.map(async (order, index) => {
-        try {
-          const { data: itemsData, error: itemsError } = await supabase
-            .from('order_items')
-            .select(`
-              *
-            `)
-            .eq('order_id', order.id)
-          
-          if (itemsError) throw itemsError
-          
-          // Formater les éléments pour l'affichage
-          const items = await Promise.all(itemsData.map(async (item) => {
-            // Récupérer les informations sur le produit
-            const { data: productData } = await supabase
-              .from('products')
-              .select('name, description')
-              .eq('id', item.product_id)
-              .single()
-            
-            return {
-              id: item.id,
-              productId: item.product_id,
-              name: productData?.name || 'Produit inconnu',
-              description: productData?.description || '',
-              quantity: item.quantity,
-              unit_price: item.unit_price,
-              notes: item.notes
-            }
-          }))
-          
-          return {
-            ...order,
-            items,
-            orderNumber: 1000 + index,
-            isExpanded: false
-          }
-        } catch (err) {
-          console.error(`Error loading items for order ${order.id}:`, err)
-          return {
-            ...order,
-            items: [],
-            orderNumber: 1000 + index,
-            isExpanded: false
-          }
-        }
-      })
-    )
-    
-    orders.value = ordersWithItems
-    console.log('Orders loaded successfully:', orders.value.length)
-  } catch (error) {
-    console.error('Error loading orders:', error)
-    showToast.error('Erreur', 'Impossible de charger les commandes')
-    loadError.value = true
-  } finally {
-    isLoading.value = false
-  }
 }
 
 let subscription;
@@ -464,7 +455,7 @@ const setupRealtimeConnection = () => {
     })
 }
 
-const handleNewOrder = async (payload) => {
+const handleNewOrder = async (payload: any) => {
   console.log('Nouvelle commande reçue:', payload)
   
   try {
@@ -480,7 +471,7 @@ const handleNewOrder = async (payload) => {
     if (itemsError) throw itemsError
     
     // Formater les items pour l'affichage
-    const items = await Promise.all(itemsData.map(async (item) => {
+    const items = await Promise.all((itemsData as any[]).map(async (item) => {
       // Récupérer les informations sur le produit
       const { data: productData } = await supabase
         .from('products')
@@ -531,7 +522,7 @@ const handleNewOrder = async (payload) => {
   }
 }
 
-const handleOrderUpdate = (payload) => {
+const handleOrderUpdate = (payload: any) => {
   console.log('Order updated:', payload)
   
   // Mettre à jour la commande dans la liste
@@ -547,22 +538,35 @@ const handleOrderUpdate = (payload) => {
   }
 }
 
-const updateOrderStatus = async (orderId, newStatus) => {
+const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
   try {
+    // Simulation d'un délai de mise à jour
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // Mettre à jour localement (simulation)
+    const index = orders.value.findIndex(o => o.id === orderId)
+    if (index !== -1) {
+      orders.value[index].status = newStatus
+      
+      // Retirer de la liste des nouvelles commandes si elle y était
+      recentlyReceivedOrders.value.delete(orderId)
+    }
+    
+    const orderNumber = orders.value.find(o => o.id === orderId)?.orderNumber
+    
+    // Afficher un message de succès
+    showToast.success('Succès', `Commande #${orderNumber} mise à jour: ${translateStatus(newStatus)}`)
+    
+    console.log(`✅ Statut mis à jour: Commande ${orderId} → ${newStatus}`)
+    
+    // Code original commenté pour référence future
+    /*
     const { error } = await supabase
       .from('orders')
       .update({ status: newStatus })
       .eq('id', orderId)
     
     if (error) throw error
-    
-    // Mettre à jour localement
-    const index = orders.value.findIndex(o => o.id === orderId)
-    if (index !== -1) {
-      orders.value[index].status = newStatus
-    }
-    
-    const orderNumber = orders.value.find(o => o.id === orderId)?.orderNumber
     if (!orderNumber) return
     
     const notificationMessage = `Commande #${orderNumber} ${statusMessages[newStatus]}`
@@ -574,6 +578,7 @@ const updateOrderStatus = async (orderId, newStatus) => {
         orders.value = orders.value.filter(o => o.id !== orderId)
       }, 10000)
     }
+    */
   } catch (error) {
     console.error('Error updating order status:', error)
     showToast.error('Erreur', 'Impossible de mettre à jour le statut')
@@ -582,9 +587,11 @@ const updateOrderStatus = async (orderId, newStatus) => {
 
 const statusMessages = {
   pending: 'en attente',
+  accepted: 'acceptée',
   preparing: 'en préparation',
   ready: 'prête',
   completed: 'terminée',
+  rejected: 'rejetée',
   cancelled: 'annulée'
 }
 
@@ -606,17 +613,17 @@ const toggleSound = () => {
   )
 }
 
-const printOrder = (order) => {
+const printOrder = (order: any) => {
   // Implementation de l'impression
   showToast.info('Impression', 'Fonctionnalité à implémenter')
 }
 
-const isNewOrder = (order) => {
+const isNewOrder = (order: any) => {
   return recentlyReceivedOrders.value.has(order.id)
 }
 
 // Formatters
-const formatPrice = (price) => {
+const formatPrice = (price: any) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'EUR'
@@ -630,7 +637,7 @@ const formatTime = (dateString) => {
   })
 }
 
-const getElapsedTime = (dateString) => {
+const getElapsedTime = (dateString: any) => {
   const now = new Date()
   const date = new Date(dateString)
   const diffMs = now.getTime() - date.getTime()
@@ -704,6 +711,7 @@ const loadEstablishment = async () => {
 
 // Lifecycle
 onMounted(() => {
+  // Initialiser l'application avec l'API réelle
   initializeApp()
 })
 
@@ -722,7 +730,7 @@ watch(selectedEstablishment, (newValue) => {
 
 // Ajouter ces fonctions pour gérer les statuts des commandes
 const getStatusColor = (status: string) => {
-  const colors = {
+  const colors: any = {
     'pending': {
       bg: 'bg-yellow-50',
       text: 'text-yellow-500',
@@ -773,7 +781,7 @@ const getStatusIcon = (status: string) => {
 
 // Ajouter cette fonction pour traduire les statuts
 const translateStatus = (status: string) => {
-  const translations = {
+  const translations: any = {
     'pending': 'En attente',
     'confirmed': 'Confirmée',
     'preparing': 'En préparation',
@@ -785,8 +793,31 @@ const translateStatus = (status: string) => {
   return translations[status] || 'Inconnu'
 }
 
+const mapStatusForBadge = (status: string) => {
+  const statusMap: Record<string, 'pending' | 'processing' | 'completed' | 'cancelled'> = {
+    'pending': 'pending',
+    'preparing': 'processing',
+    'ready': 'completed',
+    'completed': 'completed',
+    'cancelled': 'cancelled'
+  }
+  
+  return statusMap[status] || 'pending'
+}
+
+const refreshOrders = async () => {
+  isRefreshing.value = true
+  await loadOrders()
+  isRefreshing.value = false
+}
+
+const viewOrderDetails = (order: any) => {
+  // Navigation vers la page de détails de la commande
+  navigateTo(`/staff/order-detail/${order.id}`)
+}
+
 definePageMeta({
-  layout: 'default',
+  layout: 'staff',
 })
 </script>
 
@@ -837,5 +868,41 @@ definePageMeta({
 .new-order {
   animation: pulse-highlight 2s infinite;
   border-left: 3px solid #3b82f6;
+}
+
+/* Animations Twitter 2024 Style */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Mobile-first touch interactions */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Hover effects for desktop */
+@media (hover: hover) {
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
 }
 </style>

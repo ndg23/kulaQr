@@ -1,19 +1,18 @@
 <template>
-  <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Gestion du personnel</h1>
-        <p class="mt-1 text-sm text-gray-500">Gérez les membres de votre équipe et leurs accès</p>
-      </div>
-      <button
-        @click="openStaffModal()"
-        class="inline-flex items-center px-4 py-2 bg-kula-500 text-white rounded-full text-sm font-medium hover:bg-kula-600 transition-colors"
-      >
-        <Plus class="w-4 h-4 mr-1.5" />
-        Ajouter un membre
-      </button>
-    </div>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Modern Header -->
+    <ManagerModernHeader
+      title="Gestion du personnel"
+      subtitle="Gérez les membres de votre équipe et leurs accès"
+      :icon="Users"
+      :primary-action="{
+        label: 'Ajouter un membre',
+        icon: Plus,
+        action: openStaffModal
+      }"
+    />
+
+    <main class="max-w-4xl mx-auto px-6 py-8">
 
     <!-- Loading State -->
     <div v-if="loading" class="flex flex-col items-center justify-center py-12">
@@ -21,29 +20,29 @@
       <p class="text-sm text-gray-500">Chargement du personnel...</p>
     </div>
 
-    <!-- Empty State -->
-    <div v-else-if="staffMembers.length === 0" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-kula-50 flex items-center justify-center">
-        <Users class="w-8 h-8 text-kula-500" />
-      </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun membre du personnel</h3>
-      <p class="text-gray-500 mb-6 max-w-md mx-auto">
-        Vous n'avez pas encore ajouté de membres à votre équipe. Commencez par ajouter votre premier membre.
-      </p>
-      <button
-        @click="openStaffModal()"
-        class="inline-flex items-center px-4 py-2 bg-kula-500 text-white rounded-full text-sm font-medium hover:bg-kula-600 transition-colors"
-      >
-        <Plus class="w-4 h-4 mr-1.5" />
-        Ajouter un membre
-      </button>
-    </div>
+      <!-- Empty State -->
+      <ManagerModernCard v-else-if="staffMembers.length === 0" class="p-12 text-center">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+          <Users class="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun membre du personnel</h3>
+        <p class="text-gray-500 mb-6 max-w-md mx-auto">
+          Vous n'avez pas encore ajouté de membres à votre équipe. Commencez par ajouter votre premier membre.
+        </p>
+        <ManagerModernButton
+          variant="primary"
+          @click="openStaffModal"
+          :icon="Plus"
+        >
+          Ajouter un membre
+        </ManagerModernButton>
+      </ManagerModernCard>
 
-    <!-- Staff List -->
-    <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-6 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">Membres de l'équipe</h2>
-      </div>
+      <!-- Staff List -->
+      <ManagerModernCard v-else class="overflow-hidden">
+        <template #header>
+          <h2 class="text-lg font-semibold text-gray-900">Membres de l'équipe</h2>
+        </template>
       
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -145,7 +144,8 @@
           </tbody>
         </table>
       </div>
-    </div>
+      </ManagerModernCard>
+    </main>
 
     <!-- Staff Modal -->
     <TransitionRoot appear :show="showStaffModal" as="template">
@@ -253,8 +253,8 @@
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { 
   TransitionRoot, 
@@ -282,7 +282,7 @@ const { showToast } = useCustomToast()
 const { slug } = route.params
 
 // State
-const staffMembers = ref([])
+const staffMembers = ref([] as any[])
 const loading = ref(true)
 const showStaffModal = ref(false)
 const editingStaff = ref(null)
@@ -299,7 +299,7 @@ definePageMeta({
   layout: 'manager'
 })
 // Get role name
-const getRoleName = (role) => {
+const getRoleName = (role: string) => {
   const roles = {
     manager: 'Manager',
     staff: 'Personnel',
@@ -318,10 +318,11 @@ const loadStaffMembers = async () => {
       .select('*')
       .eq('establishment_id', slug)
       .order('created_at', { ascending: false })
+      .limit(100)
     
     if (error) throw error
     
-    staffMembers.value = data || []
+    staffMembers.value = data || [] as any[]
   } catch (error) {
     console.error('Error loading staff members:', error)
     showToast.error('Erreur', 'Impossible de charger les membres du personnel')
@@ -479,7 +480,7 @@ const deleteStaff = async (id) => {
     if (error) throw error
     
     // Update local state
-    staffMembers.value = staffMembers.value.filter(s => s.id !== id)
+    staffMembers.value = staffMembers.value.filter((s: any) => s.id !== id)
     
     showToast.success('Succès', 'Membre supprimé avec succès')
   } catch (error) {
@@ -491,6 +492,14 @@ const deleteStaff = async (id) => {
 // Load data on mount
 onMounted(() => {
   loadStaffMembers()
+})
+
+// Watch for route changes to reload data
+watch(() => route.path, async (newPath, oldPath) => {
+  if (newPath !== oldPath) {
+    console.log('🔄 Route changed, reloading staff data for path:', newPath)
+    await loadStaffMembers()
+  }
 })
 </script>
 

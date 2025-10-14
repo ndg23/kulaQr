@@ -42,7 +42,7 @@ const props = defineProps({
   },
   defaultImage: {
     type: String,
-    default: '/images/default-restaurant-cover.jpg'
+    default: '/images/pexels.jpg'
   }
 })
 

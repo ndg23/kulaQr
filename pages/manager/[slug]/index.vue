@@ -1,21 +1,16 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <!-- Header -->
-    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100 shaodw--sm">
-      <div class="px-5 sm:px-10 py-5">
-        <div class="flex items-center justify-between">
-          <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <button 
-            @click="refreshData" 
-            class="flex items-center gap-2 px-5 py-2.5 text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shaodw--sm"
-            :disabled="isRefreshing"
-          >
-            <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
-            <span class="hidden sm:inline">Actualiser</span>
-          </button>
-        </div>
-      </div>
-    </header>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Modern Header -->
+    <ManagerModernHeader
+      title="Dashboard"
+      subtitle="Vue d'ensemble de votre établissement"
+      :icon="LayoutDashboard"
+      :primary-action="{
+        label: 'Actualiser',
+        icon: RefreshCw,
+        action: refreshData
+      }"
+    />
 
     <div class="max-w-6xl mx-auto px-5 sm:px-10 py-10 sm:py-14">
       <!-- Welcome section -->
@@ -31,23 +26,25 @@
 
       <div v-else class="space-y-14">
         <!-- Key metrics -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
-          <div 
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <ManagerModernCard 
             v-for="stat in dashboardSummary" 
             :key="stat.name"
-            class="bg-white rounded-3xl p-6 sm:p-8 shaodw--lg hover:shaodw--xl transition-all duration-300 border border-gray-100 overflow-hidden group"
+            class="p-6"
           >
-            <div class="flex flex-col">
+            <div class="flex items-center gap-4">
               <div :class="[
                 stat.iconBg, 
-                'w-12 h-12 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300'
+                'w-12 h-12 rounded-full flex items-center justify-center'
               ]">
                 <component :is="stat.icon" class="w-6 h-6" :class="stat.iconColor" />
               </div>
-              <p class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{{ stat.value }}</p>
-              <span class="text-gray-500 text-sm font-medium">{{ stat.name }}</span>
+              <div>
+                <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
+                <span class="text-sm text-gray-500">{{ stat.name }}</span>
+              </div>
             </div>
-          </div>
+          </ManagerModernCard>
         </div>
 
         <!-- Orders & Products -->
@@ -205,7 +202,8 @@ import {
   Check,
   CheckCircle,
   RefreshCw,
-  ArrowRight
+  ArrowRight,
+  LayoutDashboard
 } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
