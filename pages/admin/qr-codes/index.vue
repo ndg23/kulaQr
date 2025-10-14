@@ -70,15 +70,15 @@ const { client: supabase } = useSupabaseWrapper()
 const { showToast } = useCustomToast()
 
 // State
-const establishments = ref([])
+const establishments = ref<any[]>([])
 const selectedEstablishment = ref('')
-const establishmentData = ref(null)
-const qrCodeCardRef = ref(null)
+const establishmentData = ref<any>(null)
+const qrCodeCardRef = ref<any>(null)
 
 // Computed
 const menuLink = computed(() => {
   if (!establishmentData.value) return ''
-  return `${window.location.origin}/menu/${establishmentData.value.slug}`
+  return `${window.location.origin}/menu/${establishmentData.value.id}`
 })
 
 // Load establishments
@@ -128,6 +128,10 @@ const downloadQrCode = async () => {
     // Créer un canvas temporaire pour composer l'image complète
     const tempCanvas = document.createElement('canvas')
     const ctx = tempCanvas.getContext('2d')
+    if (!ctx) {
+      showToast.error('Erreur', 'Impossible de créer le contexte canvas')
+      return
+    }
     
     // Dimensions de la carte QR (basées sur le composant QrCodeCard)
     const width = 460
