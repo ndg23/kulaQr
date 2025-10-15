@@ -93,7 +93,7 @@
         
         <!-- Items list -->
         <div class="bg-white border border-gray-200/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm">
-          <h3 class="text-lg font-bold text-gray-900 mb-4">Articles commandés</h3>
+          <h3 class="text-lg font-bold text-gray-900 mb-4">Article.s commandés</h3>
           
           <div class="space-y-4">
             <div 
@@ -131,39 +131,20 @@
             <!-- Primary action based on status -->
             <button 
               v-if="isValidOrder && (order.status || 'pending') === 'pending'" 
-              @click="updateOrderStatus('preparing')"
+              @click="updateOrderStatus('processing')"
               class="flex-1 px-6 py-3 bg-black text-white rounded-2xl text-sm font-semibold hover:bg-gray-800 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-black/10 touch-target"
             >
               <Check class="w-4 h-4" />
-              Accepter la commande
+              Commencer le traitement
             </button>
             
             <button 
-              v-if="isValidOrder && (order.status || 'pending') === 'preparing'" 
-              @click="updateOrderStatus('ready')"
-              class="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-2xl text-sm font-semibold hover:bg-emerald-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 touch-target"
+              v-if="isValidOrder && (order.status || 'pending') === 'processing'" 
+              @click="updateOrderStatus('completed')"
+              class="flex-1 px-6 py-3 bg-green-600 text-white rounded-2xl text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 touch-target"
             >
               <CheckCircle class="w-4 h-4" />
-              Marquer comme prêt
-            </button>
-            
-            <button 
-              v-if="isValidOrder && (order.status || 'pending') === 'ready'" 
-              @click="updateOrderStatus('completed')"
-              class="flex-1 px-6 py-3 bg-purple-600 text-white rounded-2xl text-sm font-semibold hover:bg-purple-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 touch-target"
-            >
-              <ClipboardCheck class="w-4 h-4" />
               Marquer comme terminé
-            </button>
-            
-            <!-- Cancel button -->
-            <button 
-              v-if="isValidOrder && ['pending', 'preparing'].includes(order.status || 'pending')"
-              @click="updateOrderStatus('cancelled')"
-              class="px-6 py-3 bg-gray-100 text-gray-700 rounded-2xl text-sm font-semibold hover:bg-gray-200 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 border border-gray-200/50 touch-target"
-            >
-              <X class="w-4 h-4" />
-              Annuler
             </button>
           </div>
         </div>
@@ -347,10 +328,8 @@ const formatDateTime = (dateString: string) => {
 const translateStatus = (status: string) => {
   const statusMap: Record<string, string> = {
     pending: 'En attente',
-    preparing: 'En préparation',
-    ready: 'Prêt',
-    completed: 'Terminé',
-    cancelled: 'Annulé'
+    processing: 'En traitement',
+    completed: 'Terminé'
   }
   return statusMap[status] || status
 }
@@ -358,10 +337,8 @@ const translateStatus = (status: string) => {
 const getStatusColor = (status: string) => {
   const colors: Record<string, any> = {
     pending: { badge: 'bg-yellow-50 text-yellow-700 border border-yellow-200' },
-    preparing: { badge: 'bg-blue-50 text-blue-700 border border-blue-200' },
-    ready: { badge: 'bg-green-50 text-green-700 border border-green-200' },
-    completed: { badge: 'bg-purple-50 text-purple-700 border border-purple-200' },
-    cancelled: { badge: 'bg-red-50 text-red-700 border border-red-200' }
+    processing: { badge: 'bg-blue-50 text-blue-700 border border-blue-200' },
+    completed: { badge: 'bg-green-50 text-green-700 border border-green-200' }
   }
   return colors[status] || colors.pending
 }

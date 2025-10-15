@@ -184,39 +184,20 @@
               <!-- Bouton d'action principal selon le statut -->
               <button 
                 v-if="order.status === 'pending'" 
-                @click="updateOrderStatus(order.id, 'preparing')"
+                @click="updateOrderStatus(order.id, 'processing')"
                 class="px-6 py-3 bg-black text-white rounded-2xl text-sm font-semibold hover:bg-gray-800 active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-black/10"
               >
                 <Check class="w-4 h-4" />
-                Accepter
+                Commencer
               </button>
               
               <button 
-                v-if="order.status === 'preparing'" 
-                @click="updateOrderStatus(order.id, 'ready')"
-                class="px-6 py-3 bg-emerald-600 text-white rounded-2xl text-sm font-semibold hover:bg-emerald-700 active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+                v-if="order.status === 'processing'" 
+                @click="updateOrderStatus(order.id, 'completed')"
+                class="px-6 py-3 bg-green-600 text-white rounded-2xl text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-green-500/20"
               >
                 <CheckCircle class="w-4 h-4" />
-                Prêt
-              </button>
-              
-              <button 
-                v-if="order.status === 'ready'" 
-                @click="updateOrderStatus(order.id, 'completed')"
-                class="px-6 py-3 bg-purple-600 text-white rounded-2xl text-sm font-semibold hover:bg-purple-700 active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-lg shadow-purple-500/20"
-              >
-                <ClipboardCheck class="w-4 h-4" />
-                Terminé
-              </button>
-              
-              <!-- Bouton d'annulation -->
-              <button 
-                v-if="['pending', 'preparing'].includes(order.status)"
-                @click="updateOrderStatus(order.id, 'cancelled')"
-                class="px-4 py-3 bg-gray-100 text-gray-700 rounded-2xl text-sm font-semibold hover:bg-gray-200 active:scale-95 transition-all duration-200 flex items-center gap-2 border border-gray-200/50"
-              >
-                <X class="w-4 h-4" />
-                Annuler
+                Terminer
               </button>
             </div>
               
@@ -401,10 +382,8 @@ const statusLabels = {
 const statusFilters = [
   { value: 'all', label: 'Toutes' },
   { value: 'pending', label: 'En attente' },
-  { value: 'preparing', label: 'En préparation' },
-  { value: 'ready', label: 'Prêt' },
-  { value: 'completed', label: 'Terminé' },
-  { value: 'cancelled', label: 'Annulé' }
+  { value: 'processing', label: 'En traitement' },
+  { value: 'completed', label: 'Terminé' }
 ]
 
 const statusClasses = {
@@ -626,7 +605,7 @@ const isNewOrder = (order: any) => {
 const formatPrice = (price: any) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'EUR'
+    currency: 'XOF'
   }).format(price)
 }
 
@@ -736,30 +715,15 @@ const getStatusColor = (status: string) => {
       text: 'text-yellow-500',
       badge: 'bg-yellow-100 text-yellow-800'
     },
-    'confirmed': {
+    'processing': {
       bg: 'bg-blue-50',
       text: 'text-blue-500',
       badge: 'bg-blue-100 text-blue-800'
     },
-    'preparing': {
-      bg: 'bg-purple-50',
-      text: 'text-purple-500',
-      badge: 'bg-purple-100 text-purple-800'
-    },
-    'ready': {
+    'completed': {
       bg: 'bg-green-50',
       text: 'text-green-500',
       badge: 'bg-green-100 text-green-800'
-    },
-    'completed': {
-      bg: 'bg-gray-50',
-      text: 'text-gray-500',
-      badge: 'bg-gray-100 text-gray-800'
-    },
-    'cancelled': {
-      bg: 'bg-red-50',
-      text: 'text-red-500',
-      badge: 'bg-red-100 text-red-800'
     }
   }
   
@@ -769,11 +733,8 @@ const getStatusColor = (status: string) => {
 const getStatusIcon = (status: string) => {
   const icons = {
     'pending': Clock,
-    'confirmed': CheckCircle,
-    'preparing': Coffee,
-    'ready': ClipboardCheck,
-    'completed': CheckCircle,
-    'cancelled': X
+    'processing': Coffee,
+    'completed': CheckCircle
   }
   
   return icons[status] || Clock
@@ -783,23 +744,18 @@ const getStatusIcon = (status: string) => {
 const translateStatus = (status: string) => {
   const translations: any = {
     'pending': 'En attente',
-    'confirmed': 'Confirmée',
-    'preparing': 'En préparation',
-    'ready': 'Prête',
-    'completed': 'Terminée',
-    'cancelled': 'Annulée'
+    'processing': 'En traitement',
+    'completed': 'Terminée'
   }
   
   return translations[status] || 'Inconnu'
 }
 
 const mapStatusForBadge = (status: string) => {
-  const statusMap: Record<string, 'pending' | 'processing' | 'completed' | 'cancelled'> = {
+  const statusMap: Record<string, 'pending' | 'processing' | 'completed'> = {
     'pending': 'pending',
-    'preparing': 'processing',
-    'ready': 'completed',
-    'completed': 'completed',
-    'cancelled': 'cancelled'
+    'processing': 'processing',
+    'completed': 'completed'
   }
   
   return statusMap[status] || 'pending'

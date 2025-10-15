@@ -78,7 +78,7 @@ const qrCodeCardRef = ref<any>(null)
 // Computed
 const menuLink = computed(() => {
   if (!establishmentData.value) return ''
-  return `${window.location.origin}/menu/${establishmentData.value.id}`
+  return `${window.location.origin}/menu/${establishmentData.value.slug}`
 })
 
 // Load establishments

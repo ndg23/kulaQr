@@ -278,8 +278,7 @@ const loadOrders = async () => {
 const statusOptions = [
   { key: 'all', label: 'Toutes', icon: ClipboardList },
   { key: 'pending', label: 'En attente', icon: Clock },
-  { key: 'preparing', label: 'Préparation', icon: Coffee },
-  { key: 'ready', label: 'Prêtes', icon: CheckCircle },
+  { key: 'processing', label: 'En traitement', icon: Coffee },
   { key: 'completed', label: 'Terminées', icon: CheckCircle }
 ]
 
@@ -518,25 +517,15 @@ const getStatusColor = (status: string) => {
       text: 'text-yellow-500',
       badge: 'bg-yellow-100 text-yellow-800'
     },
-    'preparing': {
+    'processing': {
       bg: 'bg-blue-50',
       text: 'text-blue-500',
       badge: 'bg-blue-100 text-blue-800'
     },
-    'ready': {
+    'completed': {
       bg: 'bg-green-50',
       text: 'text-green-500',
       badge: 'bg-green-100 text-green-800'
-    },
-    'completed': {
-      bg: 'bg-gray-50',
-      text: 'text-gray-500',
-      badge: 'bg-gray-100 text-gray-800'
-    },
-    'cancelled': {
-      bg: 'bg-red-50',
-      text: 'text-red-500',
-      badge: 'bg-red-100 text-red-800'
     }
   }
   
@@ -546,10 +535,8 @@ const getStatusColor = (status: string) => {
 const getStatusIcon = (status: string) => {
   const icons = {
     'pending': Clock,
-    'preparing': Coffee,
-    'ready': CheckCircle,
-    'completed': CheckCircle,
-    'cancelled': X
+    'processing': Coffee,
+    'completed': CheckCircle
   }
   
   return icons[status] || Clock
@@ -559,10 +546,8 @@ const translateStatus = (status: string) => {
   const translations = {
     'all': 'Toutes',
     'pending': 'En attente',
-    'preparing': 'En préparation',
-    'ready': 'Prête',
-    'completed': 'Terminée',
-    'cancelled': 'Annulée'
+    'processing': 'En traitement',
+    'completed': 'Terminée'
   }
   
   return translations[status] || status
@@ -580,10 +565,8 @@ const getNextStatusText = (status: string) => {
 
 const getStatusMessage = (status) => {
   const messages = {
-    'preparing': 'est en préparation',
-    'ready': 'est prête',
-    'completed': 'est terminée',
-    'cancelled': 'a été annulée'
+    'processing': 'est en traitement',
+    'completed': 'est terminée'
   }
   
   return messages[status] || 'a changé de statut'

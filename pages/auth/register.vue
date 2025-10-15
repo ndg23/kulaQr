@@ -200,16 +200,9 @@
               v-model="form.address"
               label="Adresse"
               :error="errors.address"
-              placeholder="Adresse de votre restaurant"
+              placeholder="Adresse de votre établissement"
             />
-
-            <!-- Téléphone -->
-            <FormInput
-              v-model="form.phone"
-              label="Téléphone"
-              :error="errors.phone"
-              placeholder="Numéro de téléphone"
-            />
+<!--  -->
 
             <div class="flex items-start py-2">
               <input
@@ -389,7 +382,7 @@ const handleRegister = async () => {
   }
   
   if (!form.restaurantName || form.restaurantName.trim() === '') {
-    console.log('❌ Nom restaurant manquant:', form.restaurantName)
+    console.log('❌ Nom établissement manquant:', form.restaurantName)
     errors.restaurantName = 'Le nom du restaurant est obligatoire'
     hasErrors = true
   }

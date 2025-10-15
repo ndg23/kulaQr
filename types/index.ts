@@ -108,14 +108,12 @@ export interface Order {
   updated_at?: string;
 }
 
-export type OrderStatus = 'pending' | 'accepted' | 'preparing' | 'ready' | 'completed' | 'rejected' | 'cancelled';
+export type OrderStatus = 'pending' | 'processing' | 'completed';
 
 export interface StatusMessage {
   [key: string]: string;
-  accepted: string;
-  rejected: string;
-  preparing: string;
-  ready: string;
+  pending: string;
+  processing: string;
   completed: string;
 }
 
