@@ -104,7 +104,7 @@
         :order="confirmedOrder || undefined"
         :order-number="confirmedOrder?.orderNumber || ''"
         :table-number="tableNumber || undefined"
-        :establishment-name="establishment?.name || 'Restaurant'"
+        :establishment-name="establishment?.name || 'N/A'"
         :cancelable="orderStatus === 'waiting'"
         @close="handleOrderClose"
         @cancel="handleOrderCancel"
@@ -315,9 +315,7 @@
     if (orderSubscription) {
       orderSubscription.unsubscribe()
     }
-    
-    console.log('Abonnement aux mises à jour pour la commande:', orderId)
-    
+        
     // Créer un nouvel abonnement pour cette commande
     orderSubscription = supabase
       .channel(`order-status-${orderId}`)

@@ -12,12 +12,12 @@ export default defineNuxtRouteMiddleware((to) => {
   if (user.value && to.path.startsWith('/auth')) {
     const { client: supabase } = useSupabaseWrapper()
     supabase.from('establishments')
-      .select('id, slug')
+      .select('id')
       .eq('user_id', user.value.id)
       .single()
       .then(({ data: establishment }) => {
-        if (establishment?.slug) {
-          navigateTo(`/manager/${establishment.slug}/menu`)
+        if (establishment?.id) {
+          navigateTo(`/manager/${establishment.id}`)
         }
       })
   }

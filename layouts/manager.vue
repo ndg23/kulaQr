@@ -268,7 +268,10 @@ const { establishment, fetchEstablishmentByUserId } = useEstablishment()
 const { user, logout, isLoading } = useAuth()
 const showUserMenu = ref(false)
 const showMobileMenu = ref(false)
+definePageMeta({
 
+middleware: 'auth'
+})
 const navigationItems = computed(() => [
   {
     name: 'Accueil',

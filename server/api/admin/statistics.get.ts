@@ -1,46 +1,11 @@
-import { serverSupabaseClient } from '#supabase/server'
-
-interface UserData {
-  role: string
-}
+import { verifyAdminAccess } from '~/server/utils/adminAuth'
 
 export default defineEventHandler(async (event) => {
-  const client = await serverSupabaseClient(event)
-  
   // Vérifier les permissions admin
-  const { data: { user } } = await client.auth.getUser()
-  
-  if (!user?.id) {
-    throw createError({
-      statusCode: 401,
-      message: 'Non authentifié'
-    })
-  }
-
-  const { data: userData, error: userError } = await client
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (userError || !userData) {
-    throw createError({
-      statusCode: 500,
-      message: 'Erreur lors de la récupération des données utilisateur'
-    })
-  }
-
-  const typedUserData = userData as UserData
-
-  if (typedUserData.role !== 'admin') {
-    throw createError({
-      statusCode: 403,
-      message: 'Accès non autorisé'
-    })
-  }
+  const { supabase } = await verifyAdminAccess(event)
 
   // Récupérer les statistiques
-  const { data: stats, error: statsError } = await client
+  const { data: stats, error: statsError } = await supabase
     .from('admin_statistics')
     .select('*')
     .single()
@@ -53,7 +18,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Récupérer les statistiques de croissance
-  const { data: growthStats, error: growthError } = await client
+  const { data: growthStats, error: growthError } = await supabase
     .from('monthly_growth_stats')
     .select('*')
     .order('month', { ascending: false })

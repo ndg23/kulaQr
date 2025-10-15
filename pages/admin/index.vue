@@ -452,7 +452,8 @@
     loadRecentEstablishments()
   })
   
-  definePageMeta({
-    layout: 'admin'
-  })
+definePageMeta({
+  layout: 'admin',
+  middleware: 'admin-auth'
+})
   </script>

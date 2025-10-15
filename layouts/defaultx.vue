@@ -5,7 +5,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <NuxtLink to="/" class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <img src="/logo.png" class="w-6 h-6 text-white" />
+              <span class="text-white text-lg font-bold">KQ</span>
             </div>
             <span class="text-xl font-bold text-gray-900">KulaQr</span>
           </NuxtLink>
