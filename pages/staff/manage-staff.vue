@@ -72,7 +72,7 @@
               class="p-2 rounded-full"
               :class="staff.is_active ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-50'"
             >
-              <Toggle class="w-5 h-5" />
+              <ToggleLeft class="w-5 h-5" />
             </button>
             <button 
               @click="deleteStaff(staff.id)"
@@ -124,7 +124,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { 
   ArrowLeft, Plus, Users, User2,
-  RefreshCw, Toggle, Trash2
+  RefreshCw, ToggleLeft, Trash2
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'

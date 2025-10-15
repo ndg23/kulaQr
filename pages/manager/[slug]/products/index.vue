@@ -256,7 +256,7 @@ const route = useRoute()
 import { ref, computed, onMounted, watch } from 'vue'
 import type { Product, Category } from '~/types'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
-import { useToast } from '~/composables/useToast'
+import { useCustomToast } from '~/composables/useToast'
 import ProductModal from '~/components/modals/ProductModal.vue'
 import { 
   Search,
@@ -288,7 +288,7 @@ import {
 } from '@headlessui/vue'
 
 const { client: supabase, withLoading } = useSupabaseWrapper()
-const toast = useToast()
+const { showToast } = useCustomToast()
 const slug = route.params.slug as string
 
 // State
@@ -365,9 +365,9 @@ const toggleAvailability = async (product: Product) => {
   if (error) {
     console.error('Error toggling availability:', error)
     product.is_available = !product.is_available // Revert on error
-    toast.error('Erreur', 'Impossible de modifier la disponibilité')
+    showToast.error('Erreur', 'Impossible de modifier la disponibilité')
   } else {
-    toast.success('Mise à jour', 'Disponibilité mise à jour')
+    showToast.success('Mise à jour', 'Disponibilité mise à jour')
   }
 }
 
@@ -394,14 +394,14 @@ const saveProduct = async (productData: Partial<Product>) => {
 
     await loadData()
     closeModal()
-    toast.success(
+    showToast.success(
       'Produit sauvegardé',
       editingProduct.value?.id ? 'Le produit a été mis à jour' : 'Le produit a été créé'
     )
   })
 
   if (!result) {
-    toast.error('Erreur', 'Impossible de sauvegarder le produit')
+    showToast.error('Erreur', 'Impossible de sauvegarder le produit')
   }
 }
 
@@ -424,11 +424,11 @@ const confirmDelete = async () => {
 
     await loadData()
     showDeleteConfirm.value = false
-    toast.success('Produit supprimé', 'Le produit a été supprimé avec succès')
+    showToast.success('Produit supprimé', 'Le produit a été supprimé avec succès')
   })
 
   if (!result) {
-    toast.error('Erreur', 'Impossible de supprimer le produit')
+    showToast.error('Erreur', 'Impossible de supprimer le produit')
   }
 }
 

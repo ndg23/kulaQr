@@ -146,9 +146,9 @@ import {
   ArrowLeft, UtensilsCrossed, Coffee, Pizza,
   Sandwich, IceCream, Plus, Edit2, Trash2
 } from 'lucide-vue-next'
-import { useToast } from '~/composables/useToast'
+import { useCustomToast } from '~/composables/useToast'
 
-const toast = useToast()
+const { showToast } = useCustomToast()
 const route = useRoute()
 const restaurantId = route.params.id
 
@@ -244,13 +244,13 @@ const closeProductModal = () => {
 const handleProductSubmit = async (productData: any) => {
   try {
     // Logique de création/modification
-    toast.success(
+    showToast.success(
       selectedProduct.value ? 'Produit modifié' : 'Produit créé',
       selectedProduct.value ? 'Les modifications ont été enregistrées' : 'Le nouveau produit a été créé'
     )
     closeProductModal()
   } catch (error) {
-    toast.error('Erreur', "Une erreur s'est produite")
+    showToast.error('Erreur', "Une erreur s'est produite")
   }
 }
 
@@ -258,9 +258,9 @@ const deleteProduct = async (id: number) => {
   if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
     try {
       // Logique de suppression
-      toast.success('Produit supprimé', 'Le produit a été supprimé avec succès')
+      showToast.success('Produit supprimé', 'Le produit a été supprimé avec succès')
     } catch (error) {
-      toast.error('Erreur', "Une erreur s'est produite lors de la suppression")
+      showToast.error('Erreur', "Une erreur s'est produite lors de la suppression")
     }
   }
 }

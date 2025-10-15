@@ -40,42 +40,6 @@ export const useSupabaseWrapper = () => {
   }
 }
 
-export const useEstablishment = () => {
-  const { client } = useSupabaseWrapper()
-
-  const getEstablishment = async (id: string) => {
-    const { data, error } = await client
-      .from('establishments')
-      .select(`
-        *,
-        categories:categories(
-          *,
-          products:products(*)
-        )
-      `)
-      .eq('id', id)
-      .single()
-
-    if (error) throw error
-    return data
-  }
-
-  const createEstablishment = async (establishment: any) => {
-    const { data, error } = await client
-      .from('establishments')
-      .insert(establishment)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  }
-
-  return {
-    getEstablishment,
-    createEstablishment
-  }
-}
 
 export const useOrders = () => {
   const { client } = useSupabaseWrapper()
