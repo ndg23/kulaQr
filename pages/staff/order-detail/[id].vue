@@ -1,152 +1,127 @@
 <template>
   <div class="min-h-screen bg-white">
-    <!-- Header Twitter 2024 Style - Ultra responsive -->
-    <header class="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-50">
-      <div class="max-w-4xl mx-auto px-3 sm:px-4 py-3">
-        <div class="flex items-center justify-between">
-          <!-- Logo et titre - Responsive -->
-          <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <button @click="goBack" 
-                    class="p-2 rounded-full hover:bg-gray-100 active:scale-95 transition-all duration-150 touch-target">
-              <ArrowLeft class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-            </button>
-            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0">
-              <ClipboardList class="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            <div class="min-w-0 flex-1">
-              <h1 class="text-lg sm:text-xl font-bold text-gray-900 tracking-tight truncate">Détails Commande</h1>
-              <p class="text-xs sm:text-sm text-gray-500 font-medium truncate">#{{ (isValidOrder && order.orderNumber) || '---' }}</p>
-            </div>
-          </div>
-          
-          <!-- Actions Twitter Style - Responsive -->
-          <div class="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-            <button @click="printOrder" 
-                    class="p-2 sm:p-3 rounded-full hover:bg-gray-100 active:scale-95 transition-all duration-150 text-gray-600 touch-target"
-                    title="Imprimer">
-              <Printer class="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-          </div>
+    <!-- Header -->
+    <header class="border-b border-gray-100 py-6">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 flex justify-between items-center">
+        <div class="flex items-center">
+          <NuxtLink 
+            to="/staff"
+            class="mr-4 text-gray-500 hover:text-gray-700"
+          >
+            <ArrowLeft class="w-6 h-6" />
+          </NuxtLink>
+          <h1 class="text-2xl font-bold text-gray-900">
+            Commande #{{ orderId ? orderId.substring(0, 8) : '---' }}
+          </h1>
+        </div>
+        <div>
+          <span 
+            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+            :class="getStatusClass(order.status)"
+          >
+            {{ getStatusText(order.status) }}
+          </span>
         </div>
       </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-      <!-- Loading state -->
-      <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-        <div class="w-16 h-16 bg-gray-100 rounded-3xl flex items-center justify-center mb-6">
-          <Loader2 class="w-8 h-8 animate-spin text-gray-600" />
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Chargement de la commande</h3>
-        <p class="text-gray-500 text-sm">Veuillez patienter...</p>
+    <!-- Main content -->
+    <main class="max-w-5xl mx-auto px-4 py-8 sm:px-6">
+      <div v-if="loading" class="flex justify-center py-12">
+        <svg class="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
       </div>
-      
-      <!-- Error state -->
-      <div v-else-if="error" class="text-center py-20">
-        <div class="w-20 h-20 mx-auto bg-red-50 rounded-3xl flex items-center justify-center mb-6">
-          <AlertTriangle class="w-10 h-10 text-red-500" />
-        </div>
-        <h3 class="text-xl font-bold text-gray-900 mb-3">Commande introuvable</h3>
-        <p class="text-gray-600 mb-8 max-w-md mx-auto">
-          Cette commande n'existe pas ou a été supprimée.
-        </p>
-        <button @click="goBack" 
-                class="px-8 py-4 bg-black text-white rounded-2xl font-semibold hover:bg-gray-800 active:scale-95 transition-all duration-200 shadow-lg">
-          Retour aux commandes
-        </button>
-      </div>
-      
-      <!-- Order details -->
-      <div v-else-if="isValidOrder" class="space-y-4 sm:space-y-6">
-        <!-- Order header card -->
-        <div class="bg-white border border-gray-200/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm">
-          <div class="flex items-start justify-between mb-4">
-            <div class="flex items-center gap-3 sm:gap-4">
-              <!-- Table number -->
-              <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm">
-                <span class="text-lg sm:text-xl font-bold text-gray-800">{{ order.table_number || '?' }}</span>
-              </div>
-              
-              <!-- Order info -->
-              <div>
-                <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-1">Commande #{{ order.orderNumber || (isValidOrder && order.id ? order.id.slice(-6) : '---') }}</h2>
-                <p class="text-sm text-gray-500 font-medium">{{ (isValidOrder && order.created_at) ? formatDateTime(order.created_at) : '---' }}</p>
-              </div>
-            </div>
-            
-            <!-- Status badge -->
-            <div :class="[getStatusColor((isValidOrder && order.status) || 'pending').badge, 'px-4 py-2 rounded-2xl text-sm font-semibold shadow-sm']">
-              {{ translateStatus((isValidOrder && order.status) || 'pending') }}
-            </div>
+
+      <div v-else class="space-y-8">
+        <!-- Informations de base -->
+        <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+          <div class="px-6 py-5">
+            <h3 class="text-xl font-semibold text-gray-900">
+              Informations de la commande
+            </h3>
           </div>
-          
-          <!-- Order summary -->
-          <div class="flex items-center justify-between pt-4 border-t border-gray-100/50">
-            <div class="text-sm text-gray-600">
-              <span class="font-semibold">{{ (isValidOrder && order.items ? order.items : []).length }} article{{ (isValidOrder && order.items ? order.items : []).length > 1 ? 's' : '' }}</span>
-            </div>
-            <div class="text-xl font-bold text-gray-900">
-              {{ formatPrice((isValidOrder && order.total_amount) ? order.total_amount : 0) }}
-            </div>
+          <div class="border-t border-gray-100 px-6 py-5">
+            <dl class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
+              <div class="sm:col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Table</dt>
+                <dd class="mt-1 text-xl text-gray-900">{{ order.table_number }}</dd>
+              </div>
+              <div class="sm:col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Heure</dt>
+                <dd class="mt-1 text-xl text-gray-900">{{ formatDateTime(order.created_at) }}</dd>
+              </div>
+              <div class="sm:col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Total</dt>
+                <dd class="mt-1 text-xl font-bold text-gray-900">{{ formatPrice(order.total_amount) }}</dd>
+              </div>
+              <div class="sm:col-span-1">
+                <dt class="text-sm font-medium text-gray-500">Paiement</dt>
+                <dd class="mt-1 text-xl text-gray-900">
+                  <span 
+                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                    :class="order.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'"
+                  >
+                    {{ order.payment_status === 'paid' ? 'Payé' : 'En attente' }}
+                  </span>
+                </dd>
+              </div>
+              <div v-if="order.notes" class="sm:col-span-2">
+                <dt class="text-sm font-medium text-gray-500">Notes</dt>
+                <dd class="mt-1 text-xl text-gray-900">{{ order.notes }}</dd>
+              </div>
+            </dl>
           </div>
         </div>
-        
-        <!-- Items list -->
-        <div class="bg-white border border-gray-200/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm">
-          <h3 class="text-lg font-bold text-gray-900 mb-4">Article.s commandés</h3>
-          
-          <div class="space-y-4">
-            <div 
-              v-for="(item, index) in (isValidOrder && order.items ? order.items : [])" 
-              :key="index"
-              class="flex items-start gap-4 p-3 sm:p-4 bg-gray-50/50 rounded-xl sm:rounded-2xl"
-            >
-              <!-- Quantity -->
-              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
-                <span class="text-sm sm:text-base font-bold text-gray-800">{{ item.quantity || 0 }}</span>
-              </div>
-              
-              <!-- Item details -->
-              <div class="flex-1 min-w-0">
-                <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-1">{{ item.name || 'Article' }}</h4>
-                <p v-if="item.notes" class="text-sm text-gray-600 mb-2 italic">Note: {{ item.notes }}</p>
+
+        <!-- Articles de la commande -->
+        <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+          <div class="px-6 py-5">
+            <h3 class="text-xl font-semibold text-gray-900">
+              Articles commandés
+            </h3>
+          </div>
+          <div class="border-t border-gray-100">
+            <ul class="divide-y divide-gray-100">
+              <li v-for="item in order.items" :key="item.id" class="px-6 py-5">
                 <div class="flex items-center justify-between">
-                  <span class="text-sm text-gray-500">Prix unitaire</span>
-                  <span class="text-base font-semibold text-gray-900">{{ formatPrice(item.unit_price || 0) }}</span>
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12 bg-gray-50 rounded-xl flex items-center justify-center">
+                      <span class="text-gray-600 font-semibold">{{ item.quantity }}×</span>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-lg font-medium text-gray-900">{{ item.name }}</div>
+                      <div v-if="item.notes" class="text-sm text-gray-500 mt-1">{{ item.notes }}</div>
+                    </div>
+                  </div>
+                  <div class="text-lg font-semibold text-gray-900">{{ formatPrice(item.unit_price * item.quantity) }}</div>
                 </div>
-                <div class="flex items-center justify-between mt-1">
-                  <span class="text-sm text-gray-500">Total</span>
-                  <span class="text-lg font-bold text-gray-900">{{ formatPrice((item.unit_price || 0) * (item.quantity || 0)) }}</span>
-                </div>
-              </div>
-            </div>
+              </li>
+            </ul>
           </div>
         </div>
-        
-        <!-- Order actions -->
-        <div class="bg-white border border-gray-200/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm">
-          <h3 class="text-lg font-bold text-gray-900 mb-4">Actions</h3>
+
+        <!-- Actions -->
+        <div class="space-y-4">
+          <!-- Boutons d'action selon le statut -->
+          <button 
+            v-if="order.status === 'pending'"
+            @click="startProcessing"
+            class="w-full flex justify-center items-center px-6 py-5 border border-transparent text-xl font-medium rounded-2xl shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <CheckCircle class="w-6 h-6 mr-2" />
+            Commencer le traitement
+          </button>
           
-          <div class="flex flex-col sm:flex-row gap-3">
-            <!-- Primary action based on status -->
-            <button 
-              v-if="isValidOrder && (order.status || 'pending') === 'pending'" 
-              @click="updateOrderStatus('processing')"
-              class="flex-1 px-6 py-3 bg-black text-white rounded-2xl text-sm font-semibold hover:bg-gray-800 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-black/10 touch-target"
-            >
-              <Check class="w-4 h-4" />
-              Commencer le traitement
-            </button>
-            
-            <button 
-              v-if="isValidOrder && (order.status || 'pending') === 'processing'" 
-              @click="updateOrderStatus('completed')"
-              class="flex-1 px-6 py-3 bg-green-600 text-white rounded-2xl text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 touch-target"
-            >
-              <CheckCircle class="w-4 h-4" />
-              Marquer comme terminé
-            </button>
-          </div>
+          <button 
+            v-if="order.status === 'processing'"
+            @click="markAsCompleted"
+            class="w-full flex justify-center items-center px-6 py-5 border border-transparent text-xl font-medium rounded-2xl shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          >
+            <Check class="w-6 h-6 mr-2" />
+            Marquer comme terminé
+          </button>
         </div>
       </div>
     </main>
@@ -154,45 +129,60 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { 
-  ArrowLeft,
-  ClipboardList, 
-  Loader2, 
-  AlertTriangle, 
-  Printer,
-  Check,
-  CheckCircle,
-  ClipboardCheck,
-  X
-} from 'lucide-vue-next'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useCustomToast } from '~/composables/useToast'
+import { 
+  ArrowLeft, CheckCircle, Check
+} from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
+import { useCustomToast } from '~/composables/useToast'
 
+const { client: supabase } = useSupabaseWrapper()
+const { showToast } = useCustomToast()
 const route = useRoute()
 const router = useRouter()
-const { showToast } = useCustomToast()
-const { client: supabase } = useSupabaseWrapper()
 
-// State
-const order = ref<any>(undefined)
-const isLoading = ref(true)
+const orderId = route.params.id as string
+const loading = ref(true)
 const error = ref(false)
+interface OrderItem {
+  id: string
+  name: string
+  quantity: number
+  unit_price: number
+  notes?: string
+  productId?: string
+}
 
-// Computed
-const isValidOrder = computed(() => {
-  return order.value && order.value.id && typeof order.value.id === 'string'
+interface Order {
+  id: string
+  table_number: number
+  status: string
+  total_amount: number
+  payment_status: string
+  notes?: string
+  created_at: string
+  updated_at?: string
+  items: OrderItem[]
+}
+
+const order = ref<Order>({
+  id: orderId,
+  table_number: 0,
+  status: '',
+  total_amount: 0,
+  payment_status: '',
+  notes: '',
+  created_at: '',
+  updated_at: '',
+  items: []
 })
 
-
-// Methods
-const loadOrder = async () => {
-  isLoading.value = true
-  error.value = false
-  
+// Charger les détails de la commande
+const loadOrderDetails = async () => {
   try {
-    const orderId = route.params.id as string
+    loading.value = true
+    error.value = false
     
     // Récupérer la commande avec ses articles
     const { data, error: fetchError } = await supabase
@@ -232,7 +222,6 @@ const loadOrder = async () => {
       // Transformer les données pour correspondre au format attendu
       order.value = {
         id: data.id,
-        orderNumber: data.id.slice(-6), // Utiliser les 6 derniers caractères de l'ID
         table_number: data.table_number,
         status: data.status,
         total_amount: data.total_amount,
@@ -258,94 +247,112 @@ const loadOrder = async () => {
     console.error('Error loading order:', err)
     error.value = true
   } finally {
-    isLoading.value = false
+    loading.value = false
   }
 }
 
-const updateOrderStatus = async (newStatus: string) => {
-  if (!order.value) return
-  
+// Commencer le traitement de la commande
+const startProcessing = async () => {
   try {
-    // Mettre à jour le statut dans la base de données
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({ 
-        status: newStatus,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', order.value.id)
-    
-    if (updateError) {
-      console.error('Error updating order status:', updateError)
-      showToast.error('Erreur', 'Impossible de mettre à jour le statut')
+    if (!orderId) {
+      showToast.error('Erreur', 'ID de commande manquant')
       return
     }
     
-    // Mettre à jour l'état local
-    order.value.status = newStatus
-    order.value.updated_at = new Date().toISOString()
-    
-    showToast.success('Succès', `Commande mise à jour: ${translateStatus(newStatus)}`)
-    
-    console.log(`✅ Statut mis à jour: Commande ${order.value.id} → ${newStatus}`)
-  } catch (err) {
-    console.error('Error updating order status:', err)
-    showToast.error('Erreur', 'Impossible de mettre à jour le statut')
+    const { error } = await supabase
+      .from('orders')
+      .update({ 
+        status: 'processing',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+
+    if (error) throw error
+
+    showToast.success('Succès', 'Traitement de la commande commencé')
+    order.value.status = 'processing'
+  } catch (error) {
+    console.error('Erreur de mise à jour de la commande:', error)
+    showToast.error('Erreur', 'Impossible de mettre à jour la commande')
   }
 }
 
-const printOrder = () => {
-  if (!order.value) return
-  showToast.success('Impression', 'Commande envoyée à l\'imprimante')
-  console.log('🖨️ Impression de la commande:', order.value.id)
+// Marquer comme terminé
+const markAsCompleted = async () => {
+  try {
+    if (!orderId) {
+      showToast.error('Erreur', 'ID de commande manquant')
+      return
+    }
+    
+    const { error } = await supabase
+      .from('orders')
+      .update({ 
+        status: 'completed',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+
+    if (error) throw error
+
+    showToast.success('Succès', 'Commande terminée')
+    order.value.status = 'completed'
+  } catch (error) {
+    console.error('Erreur de mise à jour de la commande:', error)
+    showToast.error('Erreur', 'Impossible de mettre à jour la commande')
+  }
 }
 
-const goBack = () => {
-  router.push('/staff')
-}
-
-// Utility functions
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF'
-  }).format(price)
-}
-
-const formatDateTime = (dateString: string) => {
-  if (!dateString) return '---'
-  const date = new Date(dateString)
-  if (isNaN(date.getTime())) return '---'
-  return new Intl.DateTimeFormat('fr-FR', {
+// Formater la date et l'heure
+const formatDateTime = (timestamp: string) => {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  return date.toLocaleString('fr-FR', { 
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
+    hour: '2-digit', 
     minute: '2-digit'
-  }).format(date)
+  })
 }
 
-const translateStatus = (status: string) => {
-  const statusMap: Record<string, string> = {
-    pending: 'En attente',
-    processing: 'En traitement',
-    completed: 'Terminé'
+// Formater le prix
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('fr-FR', { 
+    style: 'currency', 
+    currency: 'XOF' 
+  }).format(price || 0)
+}
+
+// Obtenir la classe CSS pour le statut
+const getStatusClass = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800'
+    case 'processing':
+      return 'bg-blue-100 text-blue-800'
+    case 'completed':
+      return 'bg-green-100 text-green-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
   }
-  return statusMap[status] || status
 }
 
-const getStatusColor = (status: string) => {
-  const colors: Record<string, any> = {
-    pending: { badge: 'bg-yellow-50 text-yellow-700 border border-yellow-200' },
-    processing: { badge: 'bg-blue-50 text-blue-700 border border-blue-200' },
-    completed: { badge: 'bg-green-50 text-green-700 border border-green-200' }
+// Obtenir le texte du statut
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'En attente'
+    case 'processing':
+      return 'En traitement'
+    case 'completed':
+      return 'Terminée'
+    default:
+      return status
   }
-  return colors[status] || colors.pending
 }
 
-// Lifecycle
 onMounted(() => {
-  loadOrder()
+  loadOrderDetails()
 })
 
 definePageMeta({
@@ -354,18 +361,10 @@ definePageMeta({
 </script>
 
 <style scoped>
-/* Mobile-first touch interactions */
-@media (max-width: 768px) {
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
-
-/* Hover effects for desktop */
-@media (hover: hover) {
-  .hover-lift:hover {
-    transform: translateY(-2px);
+/* Styles pour optimiser l'affichage sur mobile */
+@media (max-width: 640px) {
+  .sm\:grid-cols-2 {
+    grid-template-columns: 1fr;
   }
 }
 </style>
