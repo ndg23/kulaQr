@@ -1,96 +1,134 @@
 <template>
   <div v-if="isVisible" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm transition-all duration-300">
-    <div class="bg-white/90 backdrop-blur-xl p-8 rounded-3xl max-w-md w-full mx-4 shadow-xl animate-fade-up border border-white/20">
-      <div class="flex flex-col items-center text-center">
-        
-        <!-- Loader de style Apple pour le chargement -->
-        <div v-if="status === 'loading'" class="mb-6">
-          <div class="relative w-20 h-20">
-            <!-- Cercle statique -->
-            <div class="absolute inset-0 rounded-full border-[3px] border-gray-100"></div>
-            <!-- Cercle animé -->
-            <div class="absolute inset-0 rounded-full border-[3px] border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent animate-spin-slow"></div>
-            <!-- Point central pulsant -->
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse-subtle"></div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Animation d'attente -->
-        <div v-else-if="status === 'waiting'" class="mb-6">
-          <div class="relative w-20 h-20">
-            <svg class="w-full h-full" viewBox="0 0 100 100">
-              <!-- Cercle de fond -->
-              <circle cx="50" cy="50" r="46" fill="none" stroke="#f3f4f6" stroke-width="4" />
-              
-              <!-- Cercles animés -->
-              <circle cx="50" cy="50" r="46" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"
-                stroke-dasharray="16 303" class="animate-dash-around origin-center" />
-              
-              <circle cx="50" cy="50" r="46" fill="none" stroke="#60a5fa" stroke-width="4" stroke-linecap="round"
-                stroke-dasharray="16 303" stroke-dashoffset="60" class="animate-dash-around origin-center" opacity="0.6" />
-              
-              <circle cx="50" cy="50" r="46" fill="none" stroke="#93c5fd" stroke-width="4" stroke-linecap="round"
-                stroke-dasharray="16 303" stroke-dashoffset="120" class="animate-dash-around origin-center" opacity="0.4" />
-              
-              <!-- Centre -->
-              <circle cx="50" cy="50" r="4" fill="#3b82f6" class="animate-pulse-subtle" />
-            </svg>
-          </div>
-        </div>
-        
-        <!-- Animation de succès -->
-        <div v-else-if="status === 'success'" class="mb-6">
-          <div class="relative w-20 h-20">
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center animate-scale-in">
-                <svg class="w-10 h-10 text-white transform animate-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Animation de rejet/erreur -->
-        <div v-else-if="status === 'rejected'" class="mb-6">
-          <div class="relative w-20 h-20">
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-20 h-20 bg-gradient-to-br from-red-400 to-red-500 rounded-full flex items-center justify-center animate-scale-in">
-                <svg class="w-10 h-10 text-white transform animate-cross" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <h3 class="text-xl font-semibold text-gray-900 mt-2 tracking-tight">
-          {{ title }}
-        </h3>
-        
-        <p class="text-gray-500 mt-2 max-w-xs text-md leading-relaxed">
-          {{ message || defaultMessage }}
-        </p>
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 animate-fade-up overflow-hidden">
+      
+      <!-- Header du ticket -->
+      <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 text-center">
+        <h2 class="text-2xl font-bold font-mono">TICKET DE COMMANDE</h2>
+        <p class="text-blue-100 text-sm mt-1">{{ establishmentName }}</p>
+      </div>
 
-        <!-- Bouton pour fermer (uniquement sur les états complétés) -->
-        <button 
-          v-if="status === 'success' || status === 'rejected'" 
-          @click="$emit('close')"
-          class="mt-6 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-2xl text-sm font-medium transition-colors duration-200"
-        >
-          Fermer
-        </button>
-        
-        <!-- Annulation possible pendant l'attente -->
-        <button 
-          v-else-if="status === 'waiting' && cancelable" 
-          @click="$emit('cancel')"
-          class="mt-6 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          Annuler
-        </button>
+      <!-- Contenu du ticket -->
+      <div class="p-6">
+        <!-- Informations de la commande -->
+        <div v-if="order" class="space-y-4 mb-6">
+          <!-- Numéro de commande -->
+          <div class="flex justify-between items-center py-2 border-b border-gray-100">
+            <span class="text-sm font-medium text-gray-600">Commande #</span>
+            <span class="font-mono text-sm font-bold text-gray-900">{{ orderNumber }}</span>
+          </div>
+
+          <!-- Table -->
+          <div v-if="tableNumber" class="flex justify-between items-center py-2 border-b border-gray-100">
+            <span class="text-sm font-medium text-gray-600">Table</span>
+            <span class="font-mono text-sm font-bold text-gray-900">{{ tableNumber }}</span>
+          </div>
+
+          <!-- Date/Heure -->
+          <div class="flex justify-between items-center py-2 border-b border-gray-100">
+            <span class="text-sm font-medium text-gray-600">Date</span>
+            <span class="font-mono text-sm text-gray-900">{{ formatDateTime(new Date()) }}</span>
+          </div>
+
+          <!-- Articles -->
+          <div class="space-y-2">
+            <h3 class="text-sm font-semibold text-gray-900 border-b border-gray-100 pb-2">Articles</h3>
+            <div 
+              v-for="item in order.items" 
+              :key="item.id"
+              class="flex justify-between items-center py-1"
+            >
+              <div class="flex-1">
+                <span class="text-sm text-gray-900">{{ item.name }}</span>
+                <span class="text-xs text-gray-500 ml-2">x{{ item.quantity }}</span>
+              </div>
+              <span class="font-mono text-sm font-medium text-gray-900">
+                {{ formatPrice(item.unit_price * item.quantity) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div class="border-t border-gray-200 pt-3">
+            <div class="flex justify-between items-center">
+              <span class="text-lg font-semibold text-gray-900">Total</span>
+              <span class="font-mono text-lg font-bold text-gray-900">{{ formatPrice(order.total_amount) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statut et message -->
+        <div class="text-center py-4">
+          <div class="mb-4">
+            <!-- Animation de statut -->
+            <div v-if="status === 'loading'" class="flex justify-center mb-3">
+              <div class="relative w-12 h-12">
+                <div class="absolute inset-0 rounded-full border-2 border-gray-200"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+              </div>
+            </div>
+            
+            <div v-else-if="status === 'waiting'" class="flex justify-center mb-3">
+              <div class="relative w-12 h-12">
+                <div class="absolute inset-0 rounded-full border-2 border-orange-200"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+              </div>
+            </div>
+            
+            <div v-else-if="status === 'success'" class="flex justify-center mb-3">
+              <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+            </div>
+            
+            <div v-else-if="status === 'rejected'" class="flex justify-center mb-3">
+              <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Badge de statut -->
+            <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                 :class="getStatusBadgeClass(status)">
+              {{ getStatusText(status) }}
+            </div>
+          </div>
+
+          <p class="text-gray-600 text-sm leading-relaxed">
+            {{ message || defaultMessage }}
+          </p>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3 mt-6">
+          <button 
+            v-if="status === 'success' || status === 'rejected'" 
+            @click="$emit('close')"
+            class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl text-sm font-medium transition-colors duration-200"
+          >
+            Fermer
+          </button>
+          
+          <button 
+            v-else-if="status === 'waiting' && cancelable" 
+            @click="$emit('cancel')"
+            class="flex-1 px-4 py-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl text-sm font-medium transition-colors duration-200"
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer du ticket avec loader de statut -->
+      <div v-if="status === 'waiting'" class="bg-gray-50 px-6 py-3 border-t border-gray-100">
+        <div class="flex items-center justify-center gap-2 text-xs text-gray-500">
+          <div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+          <span>Mise à jour du statut en temps réel...</span>
+        </div>
       </div>
     </div>
   </div>
@@ -120,35 +158,81 @@ const props = defineProps({
   cancelable: {
     type: Boolean,
     default: false
+  },
+  order: {
+    type: Object,
+    default: null
+  },
+  orderNumber: {
+    type: String,
+    default: ''
+  },
+  tableNumber: {
+    type: [String, Number],
+    default: null
+  },
+  establishmentName: {
+    type: String,
+    default: 'Restaurant'
   }
 })
 
 defineEmits(['close', 'cancel'])
 
-// Calculer dynamiquement le titre en fonction du statut
-const title = computed(() => {
-  if (props.titleOverride) return props.titleOverride
-  
-  switch (props.status) {
+// Fonctions utilitaires
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XOF'
+  }).format(price)
+}
+
+const formatDateTime = (date) => {
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
+const getStatusBadgeClass = (status) => {
+  switch (status) {
+    case 'loading':
+      return 'bg-blue-100 text-blue-700'
+    case 'waiting':
+      return 'bg-orange-100 text-orange-700'
+    case 'success':
+      return 'bg-green-100 text-green-700'
+    case 'rejected':
+      return 'bg-red-100 text-red-700'
+    default:
+      return 'bg-gray-100 text-gray-700'
+  }
+}
+
+const getStatusText = (status) => {
+  switch (status) {
     case 'loading':
       return 'Envoi en cours'
     case 'waiting':
-      return 'Traitement en cours'
+      return 'En préparation'
     case 'success':
-      return 'Commande confirmée'
+      return 'Confirmée'
     case 'rejected':
-      return 'Commande refusée'
+      return 'Refusée'
     default:
-      return 'Traitement en cours'
+      return 'En cours'
   }
-})
+}
 
 const defaultMessage = computed(() => {
   switch (props.status) {
     case 'loading':
       return 'Nous envoyons votre commande au restaurant...'
     case 'waiting':
-      return 'Votre commande est en cours de préparation. Merci de patienter un instant.'
+      return 'Votre commande est en cours de préparation. Vous serez notifié en temps réel des changements de statut.'
     case 'success':
       return 'Votre commande a été acceptée ! Vous serez notifié lorsqu\'elle sera prête.'
     case 'rejected':
@@ -167,67 +251,5 @@ const defaultMessage = computed(() => {
 
 .animate-fade-up {
   animation: fade-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes pulse-subtle {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 1.5s infinite;
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 1.2s linear infinite;
-}
-
-@keyframes scale-in {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.animate-scale-in {
-  animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes check {
-  from { stroke-dashoffset: 30; stroke-dasharray: 30; }
-  to { stroke-dashoffset: 0; stroke-dasharray: 30; }
-}
-
-.animate-check {
-  animation: check 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
-  stroke-dashoffset: 30;
-  stroke-dasharray: 30;
-  opacity: 0;
-  animation-fill-mode: forwards;
-}
-
-@keyframes cross {
-  from { stroke-dashoffset: 60; stroke-dasharray: 60; }
-  to { stroke-dashoffset: 0; stroke-dasharray: 60; }
-}
-
-.animate-cross {
-  animation: cross 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
-  stroke-dashoffset: 60;
-  stroke-dasharray: 60;
-  opacity: 0;
-  animation-fill-mode: forwards;
-}
-
-@keyframes dash-around {
-  to { transform: rotate(1turn); }
-}
-
-.animate-dash-around {
-  animation: dash-around 2s linear infinite;
 }
 </style> 
