@@ -110,7 +110,7 @@
 
             <button
               type="submit"
-              class="w-full h-[52px] bg-black text-white rounded-2xl font-medium hover:opacity-90 transition-all flex items-center justify-center shadow-lg shadow-black/[0.08] hover:shadow-black/[0.12]"
+              class="w-full h-[52px] bg-black text-white rounded-2xl font-medium hover:opacity-90 transition-all flex items-center justify-center -shadow-lg shadow-black/[0.08] hover:shadow-black/[0.12]"
             >
               Continuer
               <ArrowRight class="w-5 h-5 ml-2" />
@@ -122,7 +122,7 @@
         <div v-else class="space-y-8">
           <div class="text-center space-y-4">
             <h1 class="text-[2.5rem] leading-tight font-semibold text-gray-900">
-              Votre restaurant
+              Votre établissement
             </h1>
             <p class="text-xl text-gray-500 font-light">
               Personnalisez votre espace
@@ -444,6 +444,7 @@ const handleRegister = async () => {
         password: form.password,
         options: {
           data: {
+            full_name: form.fullName,
             role: 'owner'
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`
@@ -557,7 +558,7 @@ const handleRegister = async () => {
     
     // 5. L'utilisateur est maintenant connecté, le plugin auth.ts le redirigera automatiquement
     showToast.success('Configuration terminée !', 'Redirection vers votre dashboard...')
-    navigateTo(`/manager/${establishment?.slug}`)
+    navigateTo(`/manager/${establishment?.[0]?.slug || establishment?.[0]?.id}`)
     return
   } catch (err) {
     console.error('❌ Erreur inscription:', err)

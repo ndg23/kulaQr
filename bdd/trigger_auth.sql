@@ -10,6 +10,7 @@ BEGIN
   v_full_name := COALESCE(
     NEW.raw_user_meta_data->>'full_name',
     NEW.raw_user_meta_data->>'name',
+    SPLIT_PART(NEW.email, '@', 1), -- Utiliser la partie avant @ de l'email
     'Utilisateur'
   );
   
