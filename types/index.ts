@@ -51,6 +51,7 @@ export interface EstablishmentData {
 export interface OrderData {
   _id: string;
   establishmentId: string;
+  orderNumber?: string;
   products: {
     productId: string;
     quantity: number;

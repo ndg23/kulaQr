@@ -16,7 +16,7 @@
           </div>
           <div class="space-y-3">
             <h1 class="text-2xl font-semibold text-gray-900">
-              Restaurant introuvable
+              Etablissement introuvable
             </h1>
             <p class="text-gray-500 text-lg">
               Ce menu n'est plus disponible ou a été déplacé.
@@ -73,7 +73,7 @@
           </div>
           <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune catégorie</h3>
           <p class="text-gray-500 text-center max-w-xs">
-            Ce restaurant n'a pas encore ajouté de catégories à son menu.
+            Cet établissement n'a pas encore ajouté de catégories à son menu.
           </p>
         </div>
       </template>
@@ -93,6 +93,13 @@
         :is-visible="isWaiting" 
         :status="orderStatus"
         :status-message="statusMessage"
+        :order="confirmedOrder || undefined"
+        :order-number="confirmedOrder?.orderNumber || ''"
+        :table-number="tableNumber || undefined"
+        :establishment-name="establishment?.name || 'Restaurant'"
+        :cancelable="orderStatus === 'waiting'"
+        @close="handleOrderClose"
+        @cancel="handleOrderCancel"
       />
       
       <OrderSummaryTicket
@@ -156,7 +163,7 @@
   
   // State
   const establishment = ref(null)
-  const categories = ref([])
+  const categories = ref<any[]>([])
   const products = ref([])
   const activeCategory = ref('')
   const cart = ref<CartItem[]>([])
@@ -189,7 +196,7 @@
   }
   
   // Nouvelle propriété pour suivre l'abonnement aux changements de statut des commandes
-  let orderSubscription = null
+  let orderSubscription: any = null
   
   // Fetch data from Supabase
   const fetchData = async () => {
@@ -211,7 +218,7 @@
       const { data: categoriesData, error: categoriesError } = await supabase
         .from('categories')
         .select('*')
-        .eq('establishment_id', establishmentData.id)
+        .eq('establishment_id', establishmentData.id as string)
         .order('order_number')
       
       if (categoriesError) throw categoriesError
@@ -219,14 +226,14 @@
       
       // Set active category if we have categories
       if (categories.value.length > 0) {
-        activeCategory.value = categories.value[0].id
+        activeCategory.value = categories.value[0].id as string
       }
       
       // Fetch products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select('*')
-        .eq('establishment_id', establishmentData.id)
+        .eq('establishment_id', establishmentData.id as string)
         .eq('is_available', true)
       
       if (productsError) throw productsError
@@ -240,10 +247,10 @@
     }
   }
   const openAddNoteModal = (itemId: string) => {
-    addNoteModal.value.openModal(itemId)
+    addNoteModal.value?.openModal(itemId)
   }
   // Get products for a specific category
-  const getCategoryProducts = (categoryId) => {
+  const getCategoryProducts = (categoryId: string) => {
     return products.value.filter(product => product.category_id === categoryId)
   }
   
@@ -291,7 +298,7 @@
   }
   
   // Méthode pour s'abonner aux changements de statut de commande
-  const subscribeToOrderUpdates = (orderId) => {
+  const subscribeToOrderUpdates = (orderId: string) => {
     // Annuler l'abonnement existant s'il y en a un
     if (orderSubscription) {
       orderSubscription.unsubscribe()
@@ -316,7 +323,7 @@
           const newStatus = payload.new.status
           
           // Mettre à jour le statut dans l'objet confirmedOrder
-          if (confirmedOrder.value && confirmedOrder.value.id === orderId) {
+          if (confirmedOrder.value && confirmedOrder.value._id === orderId) {
             confirmedOrder.value.status = newStatus
           }
           
@@ -373,7 +380,7 @@
   }
   
   // Fonction d'aide pour convertir le statut en état d'attente
-  const getWaitingStatus = (orderStatus) => {
+  const getWaitingStatus = (orderStatus: string) => {
     const statusMap = {
       'pending': 'loading',
       'confirmed': 'waiting',
@@ -447,12 +454,29 @@
   // Mettre à jour la fonction handleOrderClose pour se désabonner 
   const handleOrderClose = () => {
     confirmedOrder.value = null
+    isWaiting.value = false
     
     // Se désabonner des mises à jour
     if (orderSubscription) {
       orderSubscription.unsubscribe()
       orderSubscription = null
     }
+  }
+
+  const handleOrderCancel = () => {
+    // Annuler la commande en cours
+    isWaiting.value = false
+    orderStatus.value = 'loading'
+    confirmedOrder.value = null
+    
+    // Se désabonner des mises à jour
+    if (orderSubscription) {
+      orderSubscription.unsubscribe()
+      orderSubscription = null
+    }
+    
+    // Optionnel: envoyer une requête pour annuler la commande côté serveur
+    // await cancelOrder(confirmedOrder.value?._id)
   }
   
   const toggleCategory = (categoryId: string) => {
@@ -464,7 +488,7 @@
   }
   
   // Format price helper
-  const formatPrice = (price) => {
+  const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XOF'
@@ -492,7 +516,7 @@
     if (!pendingData) return
     
     try {
-      const data = JSON.parse(pendingData)
+      const data = JSON.parse(pendingData as string)
       
       // Convertir slug en UUID si besoin
       let establishmentId = data.establishment_id

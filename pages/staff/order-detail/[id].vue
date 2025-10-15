@@ -187,10 +187,12 @@ import {
 } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import { useCustomToast } from '~/composables/useToast'
+import { useSupabaseWrapper } from '~/composables/useSupabase'
 
 const route = useRoute()
 const router = useRouter()
 const { showToast } = useCustomToast()
+const { client: supabase } = useSupabaseWrapper()
 
 // State
 const order = ref<any>(undefined)
@@ -202,61 +204,6 @@ const isValidOrder = computed(() => {
   return order.value && order.value.id && typeof order.value.id === 'string'
 })
 
-// Mock order data for development
-const mockOrders: any[] = [
-  {
-    id: '1',
-    orderNumber: '001',
-    table_number: 5,
-    status: 'pending',
-    total_amount: 24.50,
-    created_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-    items: [
-      { id: '1', name: 'Pizza Margherita', quantity: 1, unit_price: 12.50, notes: 'Sans olives', productId: 'pizza-1' },
-      { id: '2', name: 'Coca-Cola', quantity: 2, unit_price: 3.00, productId: 'drink-1' },
-      { id: '3', name: 'Tiramisu', quantity: 1, unit_price: 6.00, productId: 'dessert-1' }
-    ]
-  },
-  {
-    id: '2',
-    orderNumber: '002',
-    table_number: 12,
-    status: 'preparing',
-    total_amount: 18.75,
-    created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-    items: [
-      { id: '4', name: 'Burger Classic', quantity: 1, unit_price: 14.50, notes: 'Bien cuit', productId: 'burger-1' },
-      { id: '5', name: 'Frites', quantity: 1, unit_price: 4.25, productId: 'side-1' }
-    ]
-  },
-  {
-    id: '3',
-    orderNumber: '003',
-    table_number: 8,
-    status: 'ready',
-    total_amount: 32.00,
-    created_at: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-    items: [
-      { id: '6', name: 'Pâtes Carbonara', quantity: 1, unit_price: 16.00, productId: 'pasta-1' },
-      { id: '7', name: 'Salade César', quantity: 1, unit_price: 9.50, productId: 'salad-1' },
-      { id: '8', name: 'Eau minérale', quantity: 2, unit_price: 3.25, productId: 'drink-2' }
-    ]
-  },
-  {
-    id: '4',
-    orderNumber: '004',
-    table_number: 3,
-    status: 'pending',
-    total_amount: 45.75,
-    created_at: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-    items: [
-      { id: '9', name: 'Steak Frites', quantity: 1, unit_price: 22.50, notes: 'Saignant', productId: 'meat-1' },
-      { id: '10', name: 'Salade Verte', quantity: 1, unit_price: 8.50, productId: 'salad-2' },
-      { id: '11', name: 'Vin Rouge', quantity: 1, unit_price: 6.50, productId: 'wine-1' },
-      { id: '12', name: 'Café', quantity: 2, unit_price: 2.25, productId: 'coffee-1' }
-    ]
-  }
-]
 
 // Methods
 const loadOrder = async () => {
@@ -264,14 +211,65 @@ const loadOrder = async () => {
   error.value = false
   
   try {
-    // Simulate loading delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
     const orderId = route.params.id as string
-    const foundOrder = mockOrders.find(o => o.id === orderId)
     
-    if (foundOrder) {
-      order.value = foundOrder
+    // Récupérer la commande avec ses articles
+    const { data, error: fetchError } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        table_number,
+        status,
+        total_amount,
+        payment_status,
+        notes,
+        created_at,
+        updated_at,
+        items:order_items(
+          id,
+          quantity,
+          unit_price,
+          notes,
+          products(
+            id,
+            name,
+            description,
+            price
+          )
+        )
+      `)
+      .eq('id', orderId)
+      .single()
+    
+    if (fetchError) {
+      console.error('Error fetching order:', fetchError)
+      error.value = true
+      return
+    }
+    
+    if (data) {
+      // Transformer les données pour correspondre au format attendu
+      order.value = {
+        id: data.id,
+        orderNumber: data.id.slice(-6), // Utiliser les 6 derniers caractères de l'ID
+        table_number: data.table_number,
+        status: data.status,
+        total_amount: data.total_amount,
+        payment_status: data.payment_status,
+        notes: data.notes,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        items: data.items?.map((item: any) => ({
+          id: item.id,
+          name: item.products?.name || 'Produit inconnu',
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          notes: item.notes,
+          productId: item.products?.id
+        })) || []
+      }
+      
+      console.log('✅ Commande chargée depuis l\'API:', order.value)
     } else {
       error.value = true
     }
@@ -287,10 +285,25 @@ const updateOrderStatus = async (newStatus: string) => {
   if (!order.value) return
   
   try {
-    // Simulate update delay
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Mettre à jour le statut dans la base de données
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ 
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', order.value.id)
     
+    if (updateError) {
+      console.error('Error updating order status:', updateError)
+      showToast.error('Erreur', 'Impossible de mettre à jour le statut')
+      return
+    }
+    
+    // Mettre à jour l'état local
     order.value.status = newStatus
+    order.value.updated_at = new Date().toISOString()
+    
     showToast.success('Succès', `Commande mise à jour: ${translateStatus(newStatus)}`)
     
     console.log(`✅ Statut mis à jour: Commande ${order.value.id} → ${newStatus}`)
@@ -314,7 +327,7 @@ const goBack = () => {
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'EUR'
+    currency: 'XOF'
   }).format(price)
 }
 
