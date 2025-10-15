@@ -1,3 +1,4 @@
+
 <template>
   <div class="w-full">
     <!-- Hero Section -->
@@ -171,6 +172,7 @@
 </template>
 
 <script setup lang="ts">
+import { useSeo } from '~/composables/useSeo'
 import { 
   Check, 
   ArrowRight, 
@@ -204,6 +206,10 @@ const team = [
     twitter: '#'
   }
 ]
+
+// Configuration SEO pour la page À propos
+const { setAboutMeta } = useSeo()
+setAboutMeta()
 </script>
 
 <style scoped>

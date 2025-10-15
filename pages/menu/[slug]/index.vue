@@ -166,8 +166,12 @@
   import { useSupabaseClient } from '#imports'
   import AddNote from '~/components/AddNote.vue'
   import { useCart } from '~/composables/useCart'
+  import { useSeo } from '~/composables/useSeo'
+  import { useStructuredData } from '~/composables/useStructuredData'
   
   const route = useRoute()
+  const { setRestaurantMeta } = useSeo()
+  const { generateRestaurantSchema, generateBreadcrumbSchema } = useStructuredData()
   const slug = route.params.slug as string
   const supabase = useSupabaseClient()
   const { loadCartWithRecovery, clearCartAndCompleteOrder } = useCart()
@@ -225,6 +229,32 @@
       
       if (establishmentError) throw establishmentError
       establishment.value = establishmentData
+      
+      // Configuration SEO pour le restaurant
+      if (establishmentData) {
+        setRestaurantMeta(establishmentData)
+        
+        // Données structurées pour le restaurant
+        const restaurantSchema = generateRestaurantSchema(establishmentData)
+        const breadcrumbSchema = generateBreadcrumbSchema([
+          { name: 'Accueil', url: 'https://kulaqr.com' },
+          { name: 'Restaurants', url: 'https://kulaqr.com/restaurant' },
+          { name: establishmentData.name, url: `https://kulaqr.com/menu/${establishmentData.slug}` }
+        ])
+        
+        useHead({
+          script: [
+            {
+              type: 'application/ld+json',
+              innerHTML: JSON.stringify(restaurantSchema)
+            },
+            {
+              type: 'application/ld+json',
+              innerHTML: JSON.stringify(breadcrumbSchema)
+            }
+          ]
+        })
+      }
       
       // Fetch categories
       const { data: categoriesData, error: categoriesError } = await supabase

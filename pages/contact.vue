@@ -1,3 +1,4 @@
+
 <template>
   <div class="w-full">
     <!-- Hero Section -->
@@ -168,6 +169,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useSeo } from '~/composables/useSeo'
 import { Mail, Phone, MapPin, Loader2 } from 'lucide-vue-next'
 
 const loading = ref(false)
@@ -197,6 +199,10 @@ const faqs = [
     answer: "Oui, notre équipe basée à Dakar propose un support en français et en wolof, disponible 7j/7."
   }
 ]
+
+// Configuration SEO pour la page Contact
+const { setContactMeta } = useSeo()
+setContactMeta()
 
 const handleSubmit = async () => {
   loading.value = true

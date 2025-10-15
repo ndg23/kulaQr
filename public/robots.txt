@@ -1,2 +1,13 @@
-User-Agent: *
-Disallow:
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /manager/
+Disallow: /staff/
+Disallow: /auth/
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://kulaqr.com/sitemap.xml
+
+# Crawl-delay pour éviter la surcharge
+Crawl-delay: 1

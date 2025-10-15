@@ -1,3 +1,4 @@
+
 <template>
   <div class="min-h-screen bg-[#F5F5F7] relative">
     <PatternBackground :opacity="0.8" :duration="60" />
@@ -384,6 +385,8 @@
 </template>
 
 <script setup lang="ts">
+import { useSeo } from '~/composables/useSeo'
+import { useStructuredData } from '~/composables/useStructuredData'
 import {
   QrCode,
   ArrowRight,
@@ -430,6 +433,26 @@ const testimonials = [
     text: "Depuis que nous utilisons KulaQr, nos clients sont plus satisfaits et nos serveurs plus efficaces. Un vrai plus pour notre restaurant !"
   }
 ]
+
+// Configuration SEO pour la page d'accueil
+const { setHomeMeta } = useSeo()
+setHomeMeta()
+
+// Données structurées pour la page d'accueil
+const { generateWebSiteSchema, generateOrganizationSchema } = useStructuredData()
+
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(generateWebSiteSchema())
+    },
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(generateOrganizationSchema())
+    }
+  ]
+})
 </script>
 
 <style scoped>
