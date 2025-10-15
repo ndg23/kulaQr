@@ -84,21 +84,52 @@
         </nav>
 
         <div class="p-4 border-t border-gray-100">
-          <div class="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 cursor-pointer" @click="toggleUserMenu">
-            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-              <span class="text-gray-600 text-sm font-medium">
-                {{ getUserInitials() }}
-              </span>
+          <div class="relative">
+            <div class="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 cursor-pointer user-menu" @click="toggleUserMenu">
+              <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <span class="text-gray-600 text-sm font-medium">
+                  {{ getUserInitials() }}
+                </span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900 truncate">
+                  {{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}
+                </p>
+                <p class="text-xs text-gray-500 truncate">
+                  @{{ (user as any)?.email?.split('@')[0] }}
+                </p>
+              </div>
+              <ChevronDown class="w-4 h-4 text-gray-400" />
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-gray-900 truncate">
-                {{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}
-              </p>
-              <p class="text-xs text-gray-500 truncate">
-                @{{ (user as any)?.email?.split('@')[0] }}
-              </p>
-            </div>
-            <ChevronDown class="w-4 h-4 text-gray-400" />
+            
+            <!-- Mobile User Menu Dropdown -->
+            <Transition
+              enter-active-class="transition duration-200 ease-out"
+              enter-from-class="transform scale-95 opacity-0"
+              enter-to-class="transform scale-100 opacity-100"
+              leave-active-class="transition duration-150 ease-in"
+              leave-from-class="transform scale-100 opacity-100"
+              leave-to-class="transform scale-95 opacity-0"
+            >
+              <div 
+                v-if="showUserMenu"
+                class="absolute bottom-full left-0 mb-2 w-full bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden z-10"
+              >
+                <div class="p-3 border-b border-gray-100">
+                  <p class="text-sm font-semibold text-gray-900">{{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}</p>
+                  <p class="text-xs text-gray-500">@{{ (user as any)?.email?.split('@')[0] }}</p>
+                </div>
+                <div class="p-1">
+                  <button
+                    @click="handleLogout"
+                    class="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  >
+                    <LogOut class="w-4 h-4" />
+                    <span>Se déconnecter</span>
+                  </button>
+                </div>
+              </div>
+            </Transition>
           </div>
         </div>
       </div>
@@ -144,54 +175,56 @@
 
         <!-- User Section -->
         <div class="p-3">
-          <div class="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 cursor-pointer transition-colors" @click="toggleUserMenu">
-            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-              <span class="text-gray-600 text-sm font-medium">
-                {{ getUserInitials() }}
-              </span>
+          <div class="relative">
+            <div class="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 cursor-pointer transition-colors user-menu" @click="toggleUserMenu">
+              <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <span class="text-gray-600 text-sm font-medium">
+                  {{ getUserInitials() }}
+                </span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900 truncate">
+                  {{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}
+                </p>
+                <p class="text-xs text-gray-500 truncate">
+                  @{{ (user as any)?.email?.split('@')[0] }}
+                </p>
+              </div>
+              <ChevronDown 
+                class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                :class="{ 'rotate-180': showUserMenu }"
+              />
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-gray-900 truncate">
-                {{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}
-              </p>
-              <p class="text-xs text-gray-500 truncate">
-                @{{ (user as any)?.email?.split('@')[0] }}
-              </p>
-            </div>
-            <ChevronDown 
-              class="w-4 h-4 text-gray-400 transition-transform duration-200"
-              :class="{ 'rotate-180': showUserMenu }"
-            />
-          </div>
-          
-          <!-- User Menu Dropdown -->
-          <Transition
-            enter-active-class="transition duration-200 ease-out"
-            enter-from-class="transform scale-95 opacity-0"
-            enter-to-class="transform scale-100 opacity-100"
-            leave-active-class="transition duration-150 ease-in"
-            leave-from-class="transform scale-100 opacity-100"
-            leave-to-class="transform scale-95 opacity-0"
-          >
-            <div 
-              v-if="showUserMenu"
-              class="mt-2 bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden"
+            
+            <!-- Desktop User Menu Dropdown -->
+            <Transition
+              enter-active-class="transition duration-200 ease-out"
+              enter-from-class="transform scale-95 opacity-0"
+              enter-to-class="transform scale-100 opacity-100"
+              leave-active-class="transition duration-150 ease-in"
+              leave-from-class="transform scale-100 opacity-100"
+              leave-to-class="transform scale-95 opacity-0"
             >
-              <div class="p-4 border-b border-gray-100">
-                <p class="text-sm font-semibold text-gray-900">{{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}</p>
-                <p class="text-xs text-gray-500">@{{ (user as any)?.email?.split('@')[0] }}</p>
+              <div 
+                v-if="showUserMenu"
+                class="absolute bottom-full left-0 mb-2 w-full bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden z-10"
+              >
+                <div class="p-3 border-b border-gray-100">
+                  <p class="text-sm font-semibold text-gray-900">{{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}</p>
+                  <p class="text-xs text-gray-500">@{{ (user as any)?.email?.split('@')[0] }}</p>
+                </div>
+                <div class="p-1">
+                  <button
+                    @click="handleLogout"
+                    class="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  >
+                    <LogOut class="w-4 h-4" />
+                    <span>Se déconnecter</span>
+                  </button>
+                </div>
               </div>
-              <div class="p-2">
-                <button 
-                  @click="handleLogout"
-                  class="flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-gray-100 rounded-xl transition-colors"
-                >
-                  <LogOut class="w-4 h-4" />
-                  <span>Se déconnecter</span>
-                </button>
-              </div>
-            </div>
-          </Transition>
+            </Transition>
+          </div>
         </div>
       </aside>
 
@@ -227,7 +260,7 @@ import {
 } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
-import { ref, onMounted, onUnmounted, watch, watchEffect } from 'vue'
+import { ref, onMounted, onUnmounted, watch, watchEffect, computed } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -350,6 +383,12 @@ watch(user, async (newUser) => {
     await fetchEstablishmentByUserId()
   }
 }, { immediate: true })
+
+// Nettoyer les event listeners
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('keydown', handleEscape)
+})
 </script>
 
 <style scoped>
