@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import { useSessionRecovery } from './useSessionRecovery'
 
 export interface CartItem {
   id: string
@@ -17,6 +18,8 @@ export interface Cart {
 }
 
 export const useCart = () => {
+  const { saveSession, recoverSession, markOrderCompleted } = useSessionRecovery()
+  
   const cart = ref<Cart>({
     items: [],
     establishmentId: '',
@@ -35,9 +38,39 @@ export const useCart = () => {
     }
   }
 
-  // Sauvegarder le panier
+  // Charger le panier avec récupération de session
+  const loadCartWithRecovery = (establishmentId: string) => {
+    // D'abord essayer de récupérer une session
+    const sessionData = recoverSession(establishmentId)
+    if (sessionData && sessionData.cart.length > 0) {
+      cart.value = {
+        items: sessionData.cart,
+        establishmentId: sessionData.establishmentId,
+        tableNumber: sessionData.tableNumber,
+        notes: sessionData.notes
+      }
+      console.log('🔄 Panier récupéré depuis la session:', cart.value)
+      return true // Indique qu'une session a été récupérée
+    }
+    
+    // Sinon charger normalement
+    loadCart(establishmentId)
+    return false
+  }
+
+  // Sauvegarder le panier avec session
   const saveCart = () => {
     localStorage.setItem(`cart-${cart.value.establishmentId}`, JSON.stringify(cart.value))
+    
+    // Sauvegarder aussi la session pour récupération
+    if (cart.value.items.length > 0) {
+      saveSession(
+        cart.value.items,
+        cart.value.establishmentId,
+        cart.value.tableNumber,
+        cart.value.notes
+      )
+    }
   }
 
   // Ajouter un produit
@@ -80,6 +113,12 @@ export const useCart = () => {
     saveCart()
   }
 
+  // Vider le panier et marquer la commande comme terminée
+  const clearCartAndCompleteOrder = () => {
+    clearCart()
+    markOrderCompleted(cart.value.establishmentId)
+  }
+
   // Calculer le total
   const total = computed(() => {
     return cart.value.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
@@ -96,8 +135,10 @@ export const useCart = () => {
     addToCart,
     updateQuantity,
     clearCart,
+    clearCartAndCompleteOrder,
     total,
     setTableNumber,
-    loadCart
+    loadCart,
+    loadCartWithRecovery
   }
 } 

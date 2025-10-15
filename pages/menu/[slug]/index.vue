@@ -1,5 +1,13 @@
-<template>
+  <template>
     <div class="font-sans bg-white min-h-screen max-w-lg mx-auto pb-24">
+      <!-- Bannière de récupération de session -->
+      <SessionRecoveryBanner 
+        v-if="establishment"
+        :establishment-id="establishment.id"
+        @continue="handleSessionRecovery"
+        @dismiss="dismissSessionBanner"
+      />
+      
       <ErrorMessage v-if="error" :message="error" />
       
       <div v-if="loading" class="min-h-screen flex items-center justify-center bg-white">
@@ -154,12 +162,15 @@
   import OrderSummaryTicket from '~/components/OrderSummaryTicket.vue'
   import WaitingLoader from '~/components/WaitingLoader.vue'
   import ErrorMessage from '~/components/ErrorMessage.vue'
+  import SessionRecoveryBanner from '~/components/SessionRecoveryBanner.vue'
   import { useSupabaseClient } from '#imports'
   import AddNote from '~/components/AddNote.vue'
+  import { useCart } from '~/composables/useCart'
   
   const route = useRoute()
   const slug = route.params.slug as string
   const supabase = useSupabaseClient()
+  const { loadCartWithRecovery, clearCartAndCompleteOrder } = useCart()
   
   // State
   const establishment = ref(null)
@@ -175,6 +186,7 @@
   const loading = ref(true)
   const addNoteModal = ref(null)
   const debugQrTracking = ref('')
+  const sessionRecovered = ref(false)
   
   // Nouvelles propriétés pour gérer les notifications
   const statusMessage = ref('')
@@ -373,6 +385,11 @@
             // Vider le panier et fermer l'interface de panier
             cart.value = []
             isCartExpanded.value = false
+            
+            // Nettoyer la session après commande réussie
+            if (establishment.value?.id) {
+              clearCartAndCompleteOrder()
+            }
           }
         }
       )
@@ -495,6 +512,22 @@
     }).format(price)
   }
   
+  // Gestion de la récupération de session
+  const handleSessionRecovery = (sessionData: any) => {
+    cart.value = sessionData.cart
+    if (sessionData.tableNumber) {
+      tableNumber.value = sessionData.tableNumber
+    }
+    sessionRecovered.value = true
+    isCartExpanded.value = true
+    console.log('✅ Session récupérée:', sessionData)
+  }
+
+  const dismissSessionBanner = () => {
+    // L'utilisateur choisit de ne pas récupérer la session
+    console.log('❌ Session ignorée par l\'utilisateur')
+  }
+
   // Load data on mount
   onMounted(() => {
     fetchData()
