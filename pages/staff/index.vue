@@ -129,14 +129,14 @@
             
             <!-- Ticket Body -->
             <div class="p-4">
-              <div class="font-mono text-xs- mb-3">
+              <div class="font-mono text-xs mb-3">
                 <div 
                   v-for="(item, index) in order.items.slice(0, 3)" 
-                :key="index"
+                  :key="index"
                   class="flex justify-between mb-2 text-gray-600"
-              >
+                >
                   <span class="flex-1 text-slate-700">{{ item.quantity }}x {{ item.name }}</span>
-                  <span class="font-normal- text-gray-800">{{ formatPrice(item.unit_price * item.quantity) }}</span>
+                  <span class="font-normal text-gray-800">{{ formatPrice(item.unit_price * item.quantity) }}</span>
                 </div>
                 <div v-if="order.items.length > 3" class="text-center text-gray-400 text-xs my-2">
                   +{{ order.items.length - 3 }} autre{{ order.items.length - 3 > 1 ? 's' : '' }}

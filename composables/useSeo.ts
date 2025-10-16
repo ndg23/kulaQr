@@ -16,7 +16,7 @@ export const useSeo = () => {
     const title = meta.title ? `${meta.title} | ${siteName}` : siteName
     
     // Description
-    const description = meta.description || 'Transformez votre restaurant avec des menus digitaux QR code. Solution moderne, sans contact et écologique.'
+    const description = meta.description || 'Transformez votre activité commerciale avec des menus digitaux QR code. Solution moderne, sans contact et écologique.'
     
     // Image
     const image = meta.image || `${baseUrl}/og-image.jpg`
@@ -28,7 +28,7 @@ export const useSeo = () => {
     const type = meta.type || 'website'
     
     // Keywords
-    const keywords = meta.keywords || 'QR code, menu digital, restaurant, sans contact, menu électronique, commande en ligne'
+    const keywords = meta.keywords || 'QR code, menu digital, activité commerciale, sans contact, menu électronique, commande en ligne'
 
     useHead({
       title,
@@ -52,46 +52,46 @@ export const useSeo = () => {
     })
   }
 
-  const setRestaurantMeta = (restaurant: Establishment) => {
-    const title = `Menu ${restaurant.name} - QR Code Digital`
-    const description = `Découvrez le menu de ${restaurant.name}. Commandez facilement avec notre menu digital QR code. ${restaurant.description || ''}`
-    const image = restaurant.image_url || 'https://kula-qr.vercel.app/og-restaurant.jpg'
-    const url = `/menu/${restaurant.slug}`
+  const setRestaurantMeta = (establishment: Establishment) => {
+    const title = `Menu ${establishment.name} - QR Code Digital`
+    const description = `Découvrez le menu de ${establishment.name}. Commandez facilement avec notre menu digital QR code. ${establishment.description || ''}`
+    const image = establishment.image_url || 'https://kula-qr.vercel.app/images/pexels.jpg'
+    const url = `/menu/${establishment.slug}`
     
     setPageMeta({
       title,
       description,
       image,
       url,
-      type: 'restaurant',
-      keywords: `menu ${restaurant.name}, ${restaurant.cuisine_type || 'restaurant'}, QR code, commande en ligne, ${restaurant.city || ''}`
+      type: 'website',
+      keywords: `menu ${establishment.name}, QR code, commande en ligne, ${establishment.address || ''}`
     })
   }
 
   const setHomeMeta = () => {
     setPageMeta({
-      title: 'Menu Digital QR Code pour Restaurants',
-      description: 'Transformez votre restaurant avec des menus digitaux QR code. Solution moderne, sans contact et écologique. Créez votre menu en quelques minutes.',
+      title: 'Menu Digital QR Code pour Commerces',
+      description: 'Transformez votre commerce avec des menus digitaux QR code. Solution moderne, sans contact et écologique. Créez votre menu en quelques minutes.',
       url: '/',
-      keywords: 'QR code restaurant, menu digital, sans contact, menu électronique, solution restaurant, commande en ligne'
+      keywords: 'QR code commerciale, menu digital, sans contact, menu électronique, solution commerciale, commande en ligne'
     })
   }
 
   const setAboutMeta = () => {
     setPageMeta({
       title: 'À propos de Kula Qr',
-      description: 'Découvrez comment Kula Qr révolutionne l\'expérience restaurant avec des menus digitaux QR code. Solution moderne et écologique.',
+      description: 'Découvrez comment Kula Qr révolutionne l\'expérience commerciale avec des menus digitaux QR code. Solution moderne et écologique.',
       url: '/about',
-      keywords: 'à propos kula qr, menu digital, solution restaurant, QR code, innovation'
+      keywords: 'à propos kula qr, menu digital, solution commerciale, QR code, innovation'
     })
   }
 
   const setContactMeta = () => {
     setPageMeta({
       title: 'Contact - Kula Qr',
-      description: 'Contactez l\'équipe Kula Qr pour toute question sur nos solutions de menu digital QR code pour restaurants.',
+      description: 'Contactez l\'équipe Kula Qr pour toute question sur nos solutions de menu digital QR code pour commerces.',
       url: '/contact',
-      keywords: 'contact kula qr, support, aide, menu digital, QR code restaurant'
+      keywords: 'contact kula qr, support, aide, menu digital, QR code activité commerciale'
     })
   }
 

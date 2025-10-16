@@ -23,7 +23,7 @@ const baseUrl = 'https://kula-qr.vercel.app'
 
 // Construction des meta tags
 const title = props.title ? `${props.title} | ${siteName}` : siteName
-const description = props.description || 'Transformez votre restaurant avec des menus digitaux QR code. Solution moderne, sans contact et écologique.'
+const description = props.description || 'Transformez votre activité commerciale avec des menus digitaux QR code. Solution moderne, sans contact et écologique.'
 const image = props.image || `${baseUrl}/og-image.jpg`
 const url = props.url ? `${baseUrl}${props.url}` : baseUrl
 const robots = props.noindex ? 'noindex, nofollow' : 'index, follow'
@@ -32,7 +32,7 @@ useHead({
   title,
   meta: [
     { name: 'description', content: description },
-    { name: 'keywords', content: props.keywords || 'QR code, menu digital, restaurant, sans contact, menu électronique, commande en ligne' },
+    { name: 'keywords', content: props.keywords || 'QR code, menu digital, activité commerciale, sans contact, menu électronique, commande en ligne' },
     { name: 'robots', content: robots },
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },

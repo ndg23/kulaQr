@@ -152,8 +152,8 @@ const supabase = useSupabaseClient()
 
 // Générer l'URL du menu
 const generateStaticUrl = () => {
-  const baseUrl = useRuntimeConfig().public.baseURL || window.location.origin
-  return `${baseUrl}/menu/${slug}`
+  const baseUrl = window.location.origin
+  return `${baseUrl}/menu/${establishment.value?.slug}`
 }
 
 // La génération du QR code est maintenant gérée par le composant QrCodeCard

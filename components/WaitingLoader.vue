@@ -230,13 +230,13 @@ const getStatusText = (status) => {
 const defaultMessage = computed(() => {
   switch (props.status) {
     case 'loading':
-      return 'Nous envoyons votre commande au restaurant...'
+      return 'Nous envoyons votre commande à l\'établissement...'
     case 'waiting':
       return 'Votre commande est en cours de préparation. Vous serez notifié en temps réel des changements de statut.'
     case 'success':
       return 'Votre commande a été acceptée ! Vous serez notifié lorsqu\'elle sera prête.'
     case 'rejected':
-      return 'Le restaurant n\'a pas pu accepter votre commande. Veuillez réessayer ou contacter l\'établissement.'
+      return 'L\'établissement n\'a pas pu accepter votre commande. Veuillez réessayer ou contacter l\'établissement.'
     default:
       return 'Veuillez patienter...'
   }
