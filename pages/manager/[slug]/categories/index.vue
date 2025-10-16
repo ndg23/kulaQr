@@ -16,15 +16,15 @@
     <div class="max-w-7xl mx-auto px-6 py-4">
       <div class="relative">
         <Search class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Rechercher une catégorie..."
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Rechercher une catégorie..."
           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
         />
       </div>
     </div>
-
+     
     <main class="max-w-7xl mx-auto px-6 py-8">
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-20">
@@ -55,7 +55,7 @@
       <!-- Categories Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ManagerModernCard
-          v-for="category in filteredCategories"
+          v-for="category in filteredCategories" 
           :key="category.id"
           class="overflow-hidden"
         >
@@ -69,14 +69,14 @@
             />
             <div v-else class="absolute inset-0 flex items-center justify-center">
               <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                <component
-                  :is="category.icon || UtensilsCrossed"
+                  <component 
+                    :is="category.icon || UtensilsCrossed" 
                   class="w-6 h-6 text-gray-500"
-                />
+                  />
               </div>
             </div>
             <div class="absolute top-3 right-3">
-              <button
+              <button 
                 @click="editCategory(category)"
                 class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
               >
@@ -95,7 +95,7 @@
               >
                 <Trash2 class="w-4 h-4" />
               </button>
-            </div>
+          </div>
 
             <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ category.description || 'Aucune description' }}</p>
 
@@ -134,12 +134,12 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
-                <CategoryModal
-                  :category="editingCategory"
-                  @close="closeCategoryModal"
-                  @submit="saveCategory"
-                />
+            <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+              <CategoryModal
+                :category="editingCategory"
+                @close="closeCategoryModal"
+                @submit="saveCategory"
+              />
               </DialogPanel>
             </TransitionChild>
           </div>

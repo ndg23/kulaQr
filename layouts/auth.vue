@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-screen bg-[#FFFBFB] flex items-center justify-center">
     <!-- Back Button -->
     <div class="fixed top-0 w-full space-x-2- border-b border-gray-200 z-50 bg-white">
       <div class="flex items-center space-x-2 max-w-5xl mx-auto left-8 flex justify-between items-center">

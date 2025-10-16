@@ -1,6 +1,6 @@
 
 <template>
-  <div class="min-h-screen bg-[#F5F5F7] relative">
+  <div class="min-h-screen bg-[#FFFBFB] relative">
     <PatternBackground :opacity="0.8" :duration="60" />
     <div class="relative z-50">
       <!-- Navigation Bar -->
@@ -159,22 +159,22 @@
           </div>
           
           <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div class="group bg-white p-8 rounded-2xl -shadow-lg hover:-shadow-2xl transition-all duration-300">
-              <span class="block text-7xl md:text-8xl font-bold text-gray-900 mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div class="group bg-white- p-8 rounded-2xl -shadow-lg hover:-shadow-2xl transition-all duration-300">
+              <span class="block text-7xl md:text-8xl font-bold text-kula-500 mb-4 group-hover:scale-110 transition-transform duration-300">
                 50+
               </span>
-              <span class="text-xl text-gray-500">Restaurants</span>
+              <span class="text-xl text-gray-500">Etablissements</span>
             </div>
             
-            <div class="group bg-white p-8 rounded-2xl -shadow-lg hover:-shadow-2xl transition-all duration-300">
-              <span class="block text-7xl md:text-8xl font-bold text-gray-900 mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div class="group bg-white- p-8 rounded-2xl -shadow-lg hover:-shadow-2xl transition-all duration-300">
+              <span class="block text-7xl md:text-8xl font-bold text-kula-500 mb-4 group-hover:scale-110 transition-transform duration-300">
                 1K+
               </span>
-              <span class="text-xl text-gray-500">Scans par jour</span>
+              <span class="text-xl text-gray-500">Scans par mois</span>
             </div>
             
-            <div class="group bg-white p-8 rounded-2xl -shadow-lg hover:-shadow-2xl transition-all duration-300">
-              <span class="block text-7xl md:text-8xl font-bold text-gray-900 mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div class="group bg-white- p-8 rounded-2xl -shadow-lg hover:-shadow-2xl transition-all duration-300">
+              <span class="block text-7xl md:text-8xl font-bold text-kula-500 mb-4 group-hover:scale-110 transition-transform duration-300">
                 15%
               </span>
               <span class="text-xl text-gray-500">Gain de temps moyen</span>
@@ -249,9 +249,9 @@
       </section>
 
       <!-- CTA Section -->
-      <section id="pricing" class="w-full py-24 md:py-32 bg-white text-center relative overflow-hidden">
+      <section id="pricing" class="w-full py-24 md:py-32 bg-white text-center relative overflo w-hidden">
         <!-- Background elements -->
-        <div class="absolute inset-0 pointer-events-none hidden md:block">
+        <div class="absolute inset-0 pointer-events-none  -md:block">
           <!-- Icons -->
           <div class="absolute w-32 h-32 border-2 border-gray-100 rounded-2xl -top-10 -right-10 opacity-20 overflow-hidden">
             <div class="absolute inset-0 flex items-center justify-center">
@@ -288,7 +288,7 @@
             </div>
           </div>
         </div>
-
+       
         <!-- Content -->
         <div class="max-w-6xl mx-auto px-4 sm:px-6 relative">
           <div class="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-12 border border-gray-100 -shadow-sm">
@@ -296,7 +296,7 @@
               Prêt à digitaliser votre menu ?
             </h2>
             <p class="text-lg md:text-xl text-gray-500 mb-12 max-w-2xl mx-auto">
-              Rejoignez les restaurants qui ont déjà adopté KulaQr pour moderniser leur service
+              Rejoignez les établissements qui ont déjà adopté KulaQr pour moderniser leur service
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
               <NuxtLink 
@@ -306,12 +306,12 @@
                 <span>Commencer gratuitement</span>
                 <ArrowRight class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
               </NuxtLink>
-              <a 
+              <!-- <a 
                 href="#pricing"
                 class="w-full sm:w-auto px-8 py-4 bg-gray-100 text-gray-900 rounded-full text-lg font-medium hover:bg-gray-200 transition-all"
               >
                 Découvrir nos tarifs
-              </a>
+              </a> -->
             </div>
           </div>
         </div>
@@ -415,25 +415,69 @@ const navItems = [
 
 const testimonials = [
   {
-    name: 'Jean Dupont',
-    role: 'Restaurant Le Gourmet',
-    image: 'https://images.pexels.com/photos/3814446/pexels-photo-3814446.jpeg',
+    name: 'Aminata Diallo',
+    role: 'Restaurant Le Teranga',
+    image: 'https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     text: "KulaQr a transformé notre service. Les clients adorent scanner le QR code et notre équipe gagne un temps précieux. Le support est excellent !"
   },
   {
-    name: 'Marie Martin',
-    role: 'Café des Arts',
-    image: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg',
+    name: 'Moussa Ndiaye',
+    role: 'Café Touba',
+    image: 'https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     text: "Une solution intuitive qui nous a permis de moderniser notre établissement. Les mises à jour du menu sont instantanées et les statistiques très utiles."
   },
   {
-    name: 'Pierre Dubois',
-    role: 'Bistrot du Coin',
-    image: 'https://images.pexels.com/photos/2544829/pexels-photo-2544829.jpeg',
-    text: "Depuis que nous utilisons KulaQr, nos clients sont plus satisfaits et nos serveurs plus efficaces. Un vrai plus pour notre restaurant !"
+    name: 'Fatou Sarr',
+    role: 'Chez Fatou',
+    image: 'https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    text: "Depuis que nous utilisons KulaQr, nos clients sont plus satisfaits et nos serveurs plus efficaces. Un vrai plus pour notre établissement !"
   }
 ]
 
+const testimonialsDakar = [
+  {
+    name: 'Moussa Sow',
+    role: 'Le Patio Restaurant',
+    location: 'Almadies',
+    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
+    text: "Nos clients VIP apprécient de ne plus attendre. Ils scannent le QR à l'entrée et on les notifie sur WhatsApp. Service 5 étoiles avec Yepp !"
+  },
+  {
+    name: 'Ndèye Bineta',
+    role: 'Trésor Beach',
+    location: 'NGor',
+    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop',
+    text: "Pour notre plage privée, c'est idéal. Les clients commandent via QR depuis leur transat et nous gérons tout depuis notre téléphone. Moderne et efficace !"
+  },
+  {
+    name: 'Ousmane Thiam',
+    role: 'Garage Auto Thiam',
+    location: 'Grand Yoff',
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop',
+    text: "Avant, les clients venaient 3 fois pour rien. Maintenant avec Yepp, ils savent exactement quand venir chercher leur voiture. Zéro perte de temps !"
+  },
+  {
+    name: 'Mariama Cissé',
+    role: 'Boutique Orange - HLM',
+    location: 'Grand Dakar',
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop',
+    text: "On fait recharges, paiements, SIM... Yepp nous permet de gérer plusieurs services en même temps sans confusion. Les clients adorent voir leur position dans la file."
+  },
+  {
+    name: 'Abdoulaye Kane',
+    role: 'Pressing Excellence',
+    location: 'Sacré-Cœur',
+    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop',
+    text: "Mes clients déposent leur linge le matin, scannent le QR et je les notifie quand c'est prêt. Simple, pro et ça fait sérieux. Yepp c'est top !"
+  },
+  {
+    name: 'Khady Diagne',
+    role: 'Centre de Santé Yaye Khady',
+    location: 'Parcelles Assainies',
+    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
+    text: "Dans un centre de santé, l'organisation c'est crucial. Avec Yepp, on gère consultations, vaccins et prélèvements sans mélanger. Les mamans avec bébés n'attendent plus longtemps !"
+  }
+]
 // Configuration SEO pour la page d'accueil
 const { setHomeMeta } = useSeo()
 setHomeMeta()

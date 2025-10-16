@@ -66,8 +66,8 @@
         <div class="flex items-center justify-center gap-1.5 text-[13px] text-gray-500 font-normal">
           <div class="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
           <span>Par Kula Qr</span>
-        </div>
       </div>
+    </div>
   </template>
   
   <script setup>

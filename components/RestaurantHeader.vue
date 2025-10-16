@@ -13,8 +13,8 @@
     
     <!-- Restaurant Info -->
     <div class="absolute bottom-0 left-0 w-full p-4 text-white">
-      <h1 class="text-2xl font-bold">{{ data.name }}</h1>
-      <p class="text-sm opacity-90">{{ data.description || 'Menu digital' }}</p>
+      <h1 class="text-2xl font-black">{{ data.name }}</h1>
+      <p class="text-sm opacity-90">{{ data.description || 'Menu' }}</p>
       
       <div class="flex items-center mt-2 space-x-4">
         <div v-if="data.opening_hours" class="flex items-center text-xs">

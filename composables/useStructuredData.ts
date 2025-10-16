@@ -22,7 +22,7 @@ export const useStructuredData = () => {
         longitude: restaurant.longitude
       } : undefined,
       openingHours: restaurant.opening_hours || 'Mo-Su 00:00-23:59',
-      priceRange: '€€',
+      priceRange: 'XOF',
       servesCuisine: restaurant.cuisine_type || 'Française',
       hasMenu: {
         '@type': 'Menu',
@@ -42,7 +42,7 @@ export const useStructuredData = () => {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
       name: 'Kula Qr',
-      description: 'Solution de menu digital QR code pour restaurants',
+      description: 'Solution de menu digital QR code pour tous.',
       url: 'https://kula-qr.vercel.app',
       potentialAction: {
         '@type': 'SearchAction',
@@ -57,12 +57,12 @@ export const useStructuredData = () => {
       '@context': 'https://schema.org',
       '@type': 'Organization',
       name: 'Kula Qr',
-      description: 'Plateforme de menu digital pour restaurants',
+      description: 'Plateforme de menu digital pour tous.',
       url: 'https://kula-qr.vercel.app',
       logo: 'https://kula-qr.vercel.app/logo.png',
       contactPoint: {
         '@type': 'ContactPoint',
-        telephone: '+33-1-23-45-67-89',
+        telephone: '+221-77-749-39-10',
         contactType: 'customer service',
         availableLanguage: 'French'
       },

@@ -23,10 +23,10 @@
     <div class="max-w-7xl mx-auto px-6 py-4">
       <div class="relative">
         <Search class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-        <input
+              <input
           v-model="search"
-          type="text"
-          placeholder="Rechercher un produit..."
+                type="text"
+                placeholder="Rechercher un produit..."
           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
         />
       </div>
@@ -36,7 +36,7 @@
       <!-- Stats -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         <ManagerModernCard 
-          v-for="stat in quickStats"
+          v-for="stat in quickStats" 
           :key="stat.name"
           class="p-6"
         >
@@ -62,34 +62,34 @@
           >
             Tout
           </button>
-          <button
-            v-for="category in categories"
-            :key="category.id"
-            @click="activeCategory = category.id"
+        <button
+          v-for="category in categories"
+          :key="category.id"
+          @click="activeCategory = category.id"
             class="px-6 py-3 rounded-full text-sm font-medium whitespace-nowrap transition-all"
             :class="activeCategory === category.id ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100'"
-          >
-            {{ category.name }}
-          </button>
+        >
+          {{ category.name }}
+        </button>
         </div>
       </div>
 
       <!-- Products Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ManagerModernCard
-          v-for="product in filteredProducts"
+          v-for="product in filteredProducts" 
           :key="product.id"
           class="overflow-hidden"
         >
           <!-- Product Image -->
           <div class="aspect-[4/3] relative bg-gray-100 -m-6 mb-6">
-            <img
-              :src="product.image_url || '/placeholder-product.jpg'"
+            <img 
+              :src="product.image_url || '/placeholder-product.jpg'" 
               :alt="product.name"
               class="w-full h-full object-cover"
             />
             <div class="absolute top-3 right-3">
-              <button
+              <button 
                 @click="editProduct(product)"
                 class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
               >
@@ -131,7 +131,7 @@
         <p class="text-gray-500 mb-6">
           {{ search ? "Aucun produit ne correspond à votre recherche." : "Aucun produit dans cette catégorie." }}
         </p>
-        <button
+        <button 
           @click="openAddProduct"
           class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors"
         >

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#FBsFBFD]">
+  <div class="min-h-screen my-20 md:p-5 bg-white items-center justify-center">
     <!-- Logo -->
     <!-- <div class="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 z-50">
       <div class="max-w-xl mx-auto px-4 h-full flex items-center">
@@ -10,16 +10,17 @@
     </div> -->
 
     <!-- Main Content -->
-    <div class="lg:pt-32 pt-20 pb-16 px-4">
+    <div class="lg:pt-32- pt-20- py-16 px-4">
       <div class="max-w-md mx-auto">
         <!-- Progress Steps -->
         <div class="flex items-center justify-between mb-12">
           <div class="flex items-center">
-            <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-medium">
+            <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-medium"
+            :class="step === 1 ? 'bg-kula-500 text-white' : 'bg-gray-500 text-white'">
               1
             </div>
             <div class="ml-3">
-              <p class="text-sm font-medium" :class="step === 1 ? 'text-black' : 'text-gray-500'">
+              <p class="text-sm font-medium" :class="step === 1 ? 'text-kula-500' : 'text-gray-500'">
                 Compte
               </p>
             </div>
@@ -27,11 +28,11 @@
           <div class="h-px w-16 bg-gray-200"></div>
           <div class="flex items-center">
             <div class="w-8 h-8 rounded-full flex items-center justify-center font-medium"
-              :class="step === 2 ? 'bg-black text-white' : 'bg-gray-100 text-gray-400'">
+              :class="step === 2 ? 'bg-kula-500 text-white' : 'bg-gray-500 text-white'">
               2
             </div>
             <div class="ml-3">
-              <p class="text-sm font-medium" :class="step === 2 ? 'text-black' : 'text-gray-500'">
+              <p class="text-sm font-medium" :class="step === 2 ? 'text-kula-500' : 'text-gray-500'">
                 Etablissement
               </p>
             </div>
@@ -52,8 +53,8 @@
           <!-- Google Sign Up -->
           <button 
             @click="signInWithGoogle"
-            class="w-full h-[52px] bg-white border border-gray-200 rounded-2xl font-medium flex items-center justify-center hover:bg-gray-50 transition-all group shadow-sm"
-          >
+            class="w-full h-12 border border-gray-300 rounded-full font-medium flex items-center justify-center hover:bg-gray-50 transition-all"
+            >
             <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -73,26 +74,29 @@
           </div>
 
           <form @submit.prevent="nextStep" class="space-y-5">
-            <FormInput
+            <FloatLabelInput
               v-model="form.fullName"
+              id="fullName"
               type="text"
               label="Nom complet"
               :error="errors.fullName"
               required
             />
 
-            <FormInput
+            <FloatLabelInput
               v-model="form.email"
               type="email"
-              label="Email professionnel"
+              label="Adresse email"
               :error="errors.email"
               required
             />
 
-            <FormInput
+            <FloatLabelInput
               v-model="form.password"
+              id="password"
               :type="showPassword ? 'text' : 'password'"
               label="Mot de passe"
+              minlength="6"
               :error="errors.password"
               required
             >
@@ -106,14 +110,18 @@
                   <EyeOff v-else class="w-5 h-5" />
                 </button>
               </template>
-            </FormInput>
+            </FloatLabelInput>
 
             <button
               type="submit"
-              class="w-full h-[52px] bg-black text-white rounded-2xl font-medium hover:opacity-90 transition-all flex items-center justify-center -shadow-lg shadow-black/[0.08] hover:shadow-black/[0.12]"
-            >
-              Continuer
-              <ArrowRight class="w-5 h-5 ml-2" />
+              class="w-full h-14 border bg-kula-500 text-white border-kula-500 rounded-full font-medium flex items-center justify-center hover:bg-kula-600 transition-all"
+              >
+              <span v-if="!loading" class="text-white font-medium text-lg text-center">Continuer</span>
+              <span v-else class="flex items-center">
+                <Loader2 class="w-5 h-5 animate-spin mr-2" />
+                <span class="text-white font-medium text-lg text-center">Chargement en cours...</span>
+              </span>
+              <ArrowRight class="w-5 h-5 ml-2 text-white" />
             </button>
           </form>
         </div>
@@ -130,7 +138,7 @@
           </div>
 
           <form @submit.prevent="handleRegister" class="space-y-5">
-            <FormInput
+            <FloatLabelInput
               v-model="form.restaurantName"
               label="Nom de l'établissement"
               :error="errors.restaurantName"
@@ -139,12 +147,13 @@
 
             <!-- Restaurant Type Selection -->
             <div class="space-y-2">
-              <label class="block text-sm font-medium text-gray-700">Type d'établissement</label>
-              <div class="relative">
+              <!-- <label class="block text-sm font-medium text-gray-700">Type d'établissement</label> -->
+              <!-- <div class="relative">
+
                 <Listbox v-model="form.type">
                   <div class="relative">
                     <ListboxButton 
-                      class="relative w-full h-[52px] px-4 text-left bg-white border border-gray-200 rounded-2xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                      class="relative w-full h-12 px-4 text-left bg-white border border-gray-200 rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                       :class="{ 'border-red-300': errors.type }"
                     >
                       <span v-if="selectedType" class="flex items-center">
@@ -191,33 +200,30 @@
                     </transition>
                   </div>
                 </Listbox>
-              </div>
+              </div> -->
+              <FloatLabelSelect
+                id="type"
+                v-model="form.type"
+                label="Type d'établissement"
+                :error="errors.type"
+                required
+              >
+                <option v-for="type in establishmentTypes" :key="type.id" :value="type.id">{{ type.name }}</option>
+              </FloatLabelSelect>
               <p v-if="errors.type" class="text-sm text-red-600 mt-1">{{ errors.type }}</p>
             </div>
 
             <!-- Adresse -->
-            <FormInput
+            <FloatLabelInput
               v-model="form.address"
               label="Adresse"
               :error="errors.address"
               placeholder="Adresse de votre établissement"
             />
+             
 <!--  -->
 
-            <div class="flex items-start py-2">
-              <input
-                v-model="form.terms"
-                type="checkbox"
-                required
-                class="mt-1 h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
-              />
-              <label class="ml-3 text-sm text-gray-500">
-                J'accepte les <a href="/legal/terms" class="text-black font-medium hover:opacity-70">conditions d'utilisation</a> et la 
-                <a href="/legal/privacy" class="text-black font-medium hover:opacity-70">politique de confidentialité</a>
-              </label>
-            </div>
-            <p v-if="errors.terms" class="text-sm text-red-600 mt-1">{{ errors.terms }}</p>
-
+             
             <div class="flex gap-4">
               <button
                 type="button"
@@ -230,13 +236,13 @@
 
               <button
                 type="submit"
-                class="w-2/3 h-[52px] bg-black text-white rounded-2xl font-medium hover:opacity-90 transition-all flex items-center justify-center shadow-lg shadow-black/[0.08] hover:shadow-black/[0.12]"
+                class="w-2/3 h-14 border bg-kula-500 text-white border-kula-500 rounded-full font-medium flex items-center justify-center hover:bg-kula-600 transition-all"
                 :disabled="loading"
               >
-                <span v-if="!loading">Créer mon compte</span>
+                <span v-if="!loading" class="text-white font-medium text-lg text-center">Créer mon compte</span>
                 <span v-else class="flex items-center">
                   <Loader2 class="w-5 h-5 animate-spin mr-2" />
-                  Création en cours...
+                  <span class="text-white font-medium text-lg text-center">Création en cours...</span>
                 </span>
               </button>
             </div>
@@ -294,7 +300,9 @@ import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
 
 import FormInput from '~/components/ui/FormInput.vue'
-
+import FloatLabelInput from '~/components/FloatLabelInput.vue'
+// import MapPin from '~/components/icons/MapPin.vue'
+import { MapPin as MapPinIcon } from 'lucide-vue-next'
 const restaurantName = ref('')
 // const selectedType = ref(null)
 const email = ref('')
@@ -312,7 +320,6 @@ const form = reactive({
   type: null as number | null,
   address: '',
   phone: '',
-  terms: false
 })
 
 const errors = reactive({
@@ -323,7 +330,6 @@ const errors = reactive({
   type: '',
   address: '',
   phone: '',
-  terms: ''
 })
 
 const { client: supabase } = useSupabaseWrapper()

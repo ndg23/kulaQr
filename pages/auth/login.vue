@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white items- center ju stify-center">
+  <div class="min-h-screen bg-white my-20 lg:p-5 items- center ju stify-center">
     <!-- Main Content -->
     <div class="max-w-md mx-auto items-cen ter jus tify-center px-6 pt-24 pb-16 flex flex-col min-h-screen">
       <!-- Logo centered at top -->
@@ -9,7 +9,7 @@
 
       <!-- Titre principal -->
       <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">
-       Se connecter à KulaQr
+       Se connecter à Kula <span class="text-kula-500 font-bold- font-black">Qr</span>
       </h1>
 
       <!-- Alert de succès -->
@@ -158,7 +158,7 @@
 
       <!-- Footer with subtle branding -->
       <div class="text-center text-xs text-gray-400 mt-10">
-        © {{ new Date().getFullYear() }} KulaQr. Tous droits réservés.
+        © {{ new Date().getFullYear() }} Kula Qr. Tous droits réservés.
       </div>
     </div>
   </div>

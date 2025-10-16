@@ -32,10 +32,10 @@
             :key="stat.name"
             class="p-6 text-center"
           >
-            <div :class="[
-              stat.iconBg, 
+              <div :class="[
+                stat.iconBg, 
               'w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4'
-            ]">
+              ]">
               <component :is="stat.icon" class="w-8 h-8" :class="stat.iconColor" />
             </div>
             <p class="text-3xl font-bold text-gray-900 mb-2">{{ stat.value }}</p>
@@ -45,8 +45,8 @@
 
         <!-- Actions rapides -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <NuxtLink 
-            :to="`/manager/${establishment?.id}/orders`"
+              <NuxtLink 
+                :to="`/manager/${establishment?.id}/orders`"
             class="group"
           >
             <ManagerModernCard class="p-6 text-center hover:shadow-lg transition-all duration-200">
@@ -57,9 +57,9 @@
               <p class="text-sm text-gray-500">{{ recentOrders.length }} commandes récentes</p>
             </ManagerModernCard>
           </NuxtLink>
-
-          <NuxtLink 
-            :to="`/manager/${establishment?.id}/menu`"
+            
+              <NuxtLink 
+                :to="`/manager/${establishment?.id}/menu`"
             class="group"
           >
             <ManagerModernCard class="p-6 text-center hover:shadow-lg transition-all duration-200">
