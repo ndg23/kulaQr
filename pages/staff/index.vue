@@ -1,173 +1,147 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <!-- Header -->
-    <header class="border-b border-gray-100 py-6">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 flex justify-between items-center">
-        <div class="flex items-center">
-          <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mr-4">
-            <Clock class="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Commandes</h1>
-            <p class="text-sm text-gray-500">{{ (establishment as any)?.name || 'Restaurant' }}</p>
+  <div class="min-h-screen bg-gray-100">
+    <!-- Header - Ticket Style -->
+    <header class="bg-white border-b-4 border-black sticky top-0 z-50">
+      <div class="max-w-4xl mx-auto px-4 py-4">
+        <div class="flex justify-between items-center mb-4">
+          <h1 class="text-2xl font-bold font-mono">TICKETS</h1>
+          <div class="flex gap-2 items-center">
+            <!-- Connection Status -->
+            <div class="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold"
+                 :class="connectionStatus === 'connected' 
+                   ? 'bg-green-100 text-green-800' 
+                   : 'bg-red-100 text-red-800'">
+              <div class="w-2 h-2 rounded-full"
+                   :class="connectionStatus === 'connected' ? 'bg-green-600' : 'bg-red-600'"></div>
+              <span class="hidden sm:inline">{{ connectionStatusText }}</span>
+            </div>
+            
+            <!-- Refresh Button -->
+            <button @click="refreshOrders" 
+                    class="w-10 h-10 border-none bg-white rounded-full cursor-pointer flex items-center justify-center transition-all hover:bg-gray-100"
+                    :class="{ 'animate-spin': isRefreshing }">
+              <RefreshCw class="w-5 h-5 text-gray-700" />
+            </button>
           </div>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full" :class="connectionStatus === 'connected' ? 'bg-green-500' : 'bg-red-500'"></div>
-            <span class="text-sm text-gray-500">{{ connectionStatusText }}</span>
-          </div>
-          <button @click="refreshOrders" 
-                  class="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  :class="{ 'animate-spin': isRefreshing }">
-            <RefreshCw class="w-5 h-5 text-gray-600" />
+        
+        <!-- Search -->
+        <div class="relative mb-4">
+          <Search class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+          <input 
+            v-model="searchQuery"
+            type="text"
+            placeholder="Rechercher..."
+            class="w-full pl-12 pr-4 py-3 bg-gray-100 border-none rounded-xl text-sm transition-all focus:outline-none focus:bg-white focus:ring-2 focus:ring-black"
+          />
+        </div>
+        
+        <!-- Filters -->
+        <div class="grid grid-cols-4 bg-gray-300 gap-px">
+          <button 
+            v-for="status in statusFilters" 
+            :key="status.value"
+            @click="filterStatus = status.value"
+            class="bg-white border-none p-3 cursor-pointer transition-all flex flex-col items-center gap-1 hover:bg-gray-50"
+            :class="filterStatus === status.value ? 'bg-black text-white' : ''"
+          >
+            <component v-if="status.value !== 'all'" :is="getStatusIcon(status.value)" class="w-5 h-5 mb-1" />
+            <span class="text-xs font-bold">{{ status.label }}</span>
+            <span class="text-xs font-mono"
+                  :class="filterStatus === status.value ? 'text-gray-300' : 'text-gray-400'">
+              {{ orders.filter(order => status.value === 'all' ? true : order.status === status.value).length }}
+            </span>
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Main content -->
-    <main class="max-w-5xl mx-auto px-4 py-8 sm:px-6">
-      <!-- Search and Filters -->
-      <div class="mb-8">
-        <div class="flex flex-col sm:flex-row gap-4">
-          <!-- Search -->
-          <div class="flex-1">
-            <div class="relative">
-              <Search class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input 
-                v-model="searchQuery"
-                type="text"
-                placeholder="Rechercher une commande..."
-                class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-          </div>
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-4 pb-16">
+      <div id="ordersContainer">
+      
+        <!-- Loading State - Ticket style -->
+        <div v-if="isLoading" class="text-center py-20">
+          <Loader2 class="w-12 h-12 mx-auto mb-4 text-gray-400 animate-spin" />
+          <p class="text-sm text-gray-600">Chargement...</p>
         </div>
         
-          <!-- Status Filters -->
-          <div class="flex gap-2">
-          <button 
-            v-for="status in statusFilters" 
-            :key="status.value"
-            @click="filterStatus = status.value"
-              class="px-4 py-3 rounded-xl text-sm font-medium transition-colors"
-            :class="filterStatus === status.value 
-              ? 'bg-blue-500 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-            >
-              {{ status.label }}
-              <span class="ml-2 px-2 py-0.5 rounded-full text-xs"
-                    :class="filterStatus === status.value ? 'bg-white/20' : 'bg-gray-300'">
-                {{ orders.filter(order => status.value === 'all' ? true : order.status === status.value).length }}
-            </span>
+        <!-- Error State - Ticket style -->
+        <div v-else-if="loadError" class="text-center py-20">
+          <AlertTriangle class="w-12 h-12 mx-auto mb-4 text-red-500" />
+          <h3 class="text-lg font-bold mb-2">Erreur</h3>
+          <p class="text-sm text-gray-600 mb-6">Impossible de charger les commandes</p>
+          <button @click="loadOrders" 
+                  class="px-6 py-3 bg-black text-white rounded-xl font-bold cursor-pointer transition-all hover:bg-gray-800">
+            Réessayer
           </button>
-          </div>
         </div>
-      </div>
+        
+        <!-- Empty State - Ticket style -->
+        <div v-else-if="filteredOrders.length === 0" class="text-center py-20">
+          <ClipboardList class="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <h3 class="text-lg font-bold mb-2">Aucun ticket</h3>
+          <p class="text-sm text-gray-600">
+            {{ searchQuery ? 'Aucun résultat trouvé' : 'Aucune commande en cours' }}
+          </p>
+        </div>
       
-      <!-- Loading State -->
-      <div v-if="isLoading" class="flex justify-center py-12">
-        <svg class="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      </div>
-      
-      <!-- Error State -->
-      <div v-else-if="loadError" class="text-center py-12">
-        <AlertTriangle class="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Erreur de chargement</h3>
-        <p class="text-gray-600 mb-6">Impossible de charger les commandes</p>
-        <button @click="loadOrders" 
-                class="px-6 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors">
-          Réessayer
-        </button>
-      </div>
-      
-      <!-- Empty State -->
-      <div v-else-if="filteredOrders.length === 0" class="text-center py-12">
-        <ClipboardList class="w-12 h-12 text-gray-300 mx-auto mb-4" />
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Aucune commande</h3>
-        <p class="text-gray-500">
-          {{ searchQuery ? 'Aucune commande trouvée pour cette recherche' : 'Aucune commande en cours' }}
-        </p>
-      </div>
-      
-      <!-- Orders List -->
-      <div v-else class="space-y-6">
-        <div 
-          v-for="order in filteredOrders" 
-          :key="order.id"
-          class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          @click="viewOrderDetails(order)"
-        >
-          <!-- Order Header -->
-          <div class="px-6 py-5 border-b border-gray-100">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center">
-                  <span class="text-lg font-bold text-gray-700">{{ order.table_number }}</span>
-                </div>
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900">Commande #{{ order.orderNumber || order.id.slice(-6) }}</h3>
-                  <p class="text-sm text-gray-500">{{ formatDateTime(order.created_at) }}</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="px-3 py-1 rounded-full text-sm font-medium"
-                      :class="getStatusColor(order.status).badge">
-                  {{ translateStatus(order.status) }}
-                </span>
-                <span class="text-lg font-bold text-gray-900">{{ formatPrice(order.total_amount) }}</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Order Items Preview -->
-          <div class="px-6 py-5">
-            <div class="space-y-3">
-              <div 
-                v-for="(item, index) in order.items.slice(0, 3)" 
-                :key="index"
-                class="flex items-center justify-between"
-              >
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span class="text-sm font-medium text-gray-600">{{ item.quantity }}×</span>
+        <!-- Orders Grid - Ticket style -->
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div 
+            v-for="order in filteredOrders" 
+            :key="order.id"
+            class="bg-white border-4 border-black rounded-xl overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
+            @click="viewOrderDetails(order)"
+          >
+            <!-- Ticket Header -->
+            <div class="p-4 border-b-4 border-black"
+                 :class="{
+                   'bg-yellow-100': order.status === 'pending',
+                   'bg-blue-100': order.status === 'processing', 
+                   'bg-green-100': order.status === 'completed'
+                 }">
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold">
+                    {{ order.table_number }}
                   </div>
-                  <span class="text-gray-700">{{ item.name }}</span>
+                  <div>
+                    <div class="text-xs text-gray-600 font-medium">Table {{ order.table_number }}</div>
+                    <div class="text-sm font-bold font-mono">#{{ order.orderNumber || order.id.slice(-6) }}</div>
+                  </div>
                 </div>
-                <span class="text-sm font-medium text-gray-600">{{ formatPrice(item.unit_price * item.quantity) }}</span>
+                <div class="px-2 py-1 rounded text-xs font-bold font-mono"
+                     :class="{
+                       'bg-yellow-200 text-yellow-800': order.status === 'pending',
+                       'bg-blue-200 text-blue-800': order.status === 'processing',
+                       'bg-green-200 text-green-800': order.status === 'completed'
+                     }">
+                  {{ translateStatus(order.status).toUpperCase() }}
                 </div>
-              
-              <div v-if="order.items.length > 3" class="text-sm text-gray-500 pl-11">
-                +{{ order.items.length - 3 }} autre{{ order.items.length - 3 > 1 ? 's' : '' }}
               </div>
+              <div class="text-xs text-gray-600">{{ formatRelativeTime(order.created_at) }}</div>
             </div>
-          </div>
-          
-          <!-- Action Button -->
-          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-              <button 
-                v-if="order.status === 'pending'" 
-              @click.stop="updateOrderStatus(order.id, 'processing')"
-              class="w-full py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors"
-              >
-              Commencer le traitement
-              </button>
+            
+            <!-- Ticket Body -->
+            <div class="p-4">
+              <div class="font-mono text-xs mb-3">
+                <div 
+                  v-for="(item, index) in order.items.slice(0, 3)" 
+                  :key="index"
+                  class="flex justify-between mb-2 text-gray-700"
+                >
+                  <span class="flex-1">{{ item.quantity }}x {{ item.name }}</span>
+                  <span class="font-bold text-black">{{ formatPrice(item.unit_price * item.quantity) }}</span>
+                </div>
+                <div v-if="order.items.length > 3" class="text-center text-gray-400 text-xs my-2">
+                  +{{ order.items.length - 3 }} autre{{ order.items.length - 3 > 1 ? 's' : '' }}
+                </div>
+              </div>
               
-              <button 
-              v-else-if="order.status === 'processing'"
-              @click.stop="updateOrderStatus(order.id, 'completed')"
-              class="w-full py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
-            >
-              Marquer comme terminé
-              </button>
-              
-            <div v-else class="flex items-center justify-center py-3">
-              <div class="flex items-center gap-2 px-4 py-2 bg-green-100 rounded-xl">
-                <CheckCircle class="w-4 h-4 text-green-600" />
-                <span class="text-sm font-medium text-green-700">Commande terminée</span>
+              <div class="border-t-2 border-dashed border-gray-300 pt-3 flex justify-between font-mono font-bold text-sm">
+                <span>TOTAL</span>
+                <span>{{ formatPrice(order.total_amount) }}</span>
               </div>
             </div>
           </div>
@@ -183,9 +157,11 @@ import {
   Clock, 
   Search,
   RefreshCw,
+  Loader2, 
   AlertTriangle, 
   ClipboardList, 
-  CheckCircle
+  CheckCircle,
+  Coffee
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
@@ -219,10 +195,12 @@ const statusFilters = [
 const filteredOrders = computed(() => {
   let filtered = orders.value
 
+  // Filter by status
   if (filterStatus.value !== 'all') {
     filtered = filtered.filter(order => order.status === filterStatus.value)
   }
   
+  // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(order => 
@@ -291,7 +269,7 @@ const loadOrders = async () => {
     
     connectionStatus.value = 'connected'
     
-    console.log('✅ Commandes chargées:', orders.value.length)
+    console.log('✅ Commandes chargées depuis l\'API:', orders.value.length)
   } catch (error) {
     console.error('Error loading orders:', error)
     showToast.error('Erreur', 'Impossible de charger les commandes')
@@ -327,17 +305,18 @@ const updateOrderStatus = async (orderId: string, newStatus: string) => {
     
     if (error) throw error
     
+    // Update local state
     const orderIndex = orders.value.findIndex(order => order.id === orderId)
     if (orderIndex !== -1) {
       orders.value[orderIndex].status = newStatus
     }
     
-    showToast.success('Succès', `Commande mise à jour`)
+    showToast.success('Succès', `Commande mise à jour: ${translateStatus(newStatus)}`)
     
-    console.log(`✅ Statut mis à jour: ${orderId} → ${newStatus}`)
+    console.log(`✅ Statut mis à jour: Commande ${orderId} → ${newStatus}`)
   } catch (err) {
     console.error('Error updating order status:', err)
-    showToast.error('Erreur', 'Impossible de mettre à jour')
+    showToast.error('Erreur', 'Impossible de mettre à jour le statut')
   }
 }
 
@@ -349,8 +328,7 @@ const viewOrderDetails = (order: any) => {
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'XOF',
-    maximumFractionDigits: 0
+    currency: 'XOF'
   }).format(price)
 }
 
@@ -359,8 +337,9 @@ const formatDateTime = (dateString: string) => {
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return '---'
   return new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   }).format(date)
@@ -370,10 +349,21 @@ const translateStatus = (status: string) => {
   const translations: any = {
     'pending': 'En attente',
     'processing': 'En traitement',
-    'completed': 'Terminé'
+    'completed': 'Terminée'
   }
   
   return translations[status] || 'Inconnu'
+}
+
+const formatRelativeTime = (dateString: string) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000)
+  
+  if (diffInMinutes < 1) return 'maintenant'
+  if (diffInMinutes < 60) return `${diffInMinutes}m`
+  if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h`
+  return `${Math.floor(diffInMinutes / 1440)}j`
 }
 
 const getStatusColor = (status: string) => {
@@ -390,6 +380,16 @@ const getStatusColor = (status: string) => {
   }
   
   return colors[status] || colors.pending
+}
+
+const getStatusIcon = (status: string) => {
+  const icons = {
+    'pending': Clock,
+    'processing': Coffee,
+    'completed': CheckCircle
+  }
+  
+  return icons[status as keyof typeof icons] || Clock
 }
 
 // Realtime subscription
@@ -441,8 +441,68 @@ definePageMeta({
 </script>
 
 <style scoped>
-/* Simple transitions */
-button, input {
-  transition: all 150ms ease-in-out;
+/* Ticket Style Custom Styles */
+.font-mono {
+  font-family: 'Courier New', monospace;
+}
+
+/* Custom scrollbar */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Ticket hover effects */
+.hover\:-translate-y-1:hover {
+  transform: translateY(-4px);
+}
+
+/* Smooth transitions */
+* {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced shadows for tickets */
+.shadow-lg {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+}
+
+/* Animation for refresh button */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 </style>

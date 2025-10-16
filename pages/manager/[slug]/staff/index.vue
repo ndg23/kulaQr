@@ -412,7 +412,7 @@ const saveStaff = async () => {
     closeStaffModal()
   } catch (error) {
     console.error('Error saving staff:', error)
-    showToast.error('Erreur', error.message || 'Une erreur est survenue')
+    showToast.error('Erreur', 'Impossible de sauvegarder le membre, veuillez vérifier les champs')
   } finally {
     formLoading.value = false
   }
@@ -433,7 +433,7 @@ const generatePin = async (staff) => {
     await loadStaffMembers()
     
     // Show PIN to manager
-    showToast.success('PIN généré', `PIN: ${data.pin}`, 10000)
+    showToast.success('PIN généré', `PIN: ${data.pin}`)
   } catch (error) {
     console.error('Error generating PIN:', error)
     showToast.error('Erreur', 'Impossible de générer un PIN')
@@ -455,7 +455,7 @@ const regeneratePin = async (staff) => {
       staffMembers.value[index].pin = data
     }
     
-    showToast.success('PIN régénéré', `Nouveau PIN: ${data}`, 10000)
+    showToast.success('PIN régénéré', `Nouveau PIN: ${data}`)
   } catch (error) {
     console.error('Error regenerating PIN:', error)
     showToast.error('Erreur', 'Impossible de régénérer le PIN')

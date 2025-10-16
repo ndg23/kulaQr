@@ -27,8 +27,8 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-4">Email</h3>
             <p class="text-gray-500 mb-4">Notre équipe vous répond sous 24h</p>
-            <a href="mailto:hello@kulaqr.com" class="text-black hover:text-gray-600 font-medium">
-              hello@kulaqr.com
+            <a href="mailto:ndgallogho@gmail.com" class="text-black hover:text-gray-600 font-medium">
+              ndgallogho@gmail.com
             </a>
           </div>
 
@@ -59,7 +59,7 @@
         </div>
 
         <!-- Contact Form -->
-        <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="max-w-2xl d-none mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <form @submit.prevent="handleSubmit" class="p-8 md:p-12">
             <div class="space-y-6">
               <!-- Name -->
@@ -171,7 +171,9 @@
 import { ref } from 'vue'
 import { useSeo } from '~/composables/useSeo'
 import { Mail, Phone, MapPin, Loader2 } from 'lucide-vue-next'
+import { useCustomToast } from '~/composables/useToast'
 
+const { showToast } = useCustomToast()
 const loading = ref(false)
 const form = ref({
   name: '',
@@ -188,7 +190,7 @@ const faqs = [
   },
   {
     question: "Proposez-vous une démonstration gratuite ?",
-    answer: "Oui, nous proposons une démo gratuite de 14 jours avec toutes les fonctionnalités premium pour tester notre solution."
+    answer: "Oui, nous proposons une démo gratuite de 7 jours avec toutes les fonctionnalités premium pour tester notre solution."
   },
   {
     question: "Quels sont les moyens de paiement acceptés ?",
@@ -217,9 +219,10 @@ const handleSubmit = async () => {
       subject: '',
       message: ''
     }
-    alert('Message envoyé avec succès !')
+    await window.open('mailto:ndgallogho@gmail.com?subject=' + encodeURIComponent('Nouveau message de ' + form.value.name + ' - ' + form.value.email) + '&body=' + encodeURIComponent(form.value.message + '\n\n' + 'Téléphone: ' + form.value.phone + '\n\n' + 'Sujet: ' + form.value.subject), '_blank')
+    showToast.success('Message envoyé avec succès !')
   } catch (error) {
-    alert('Une erreur est survenue. Veuillez réessayer.')
+    showToast.error('Une erreur est survenue. Veuillez réessayer.')
   } finally {
     loading.value = false
   }

@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<SeoMetaProps>(), {
 })
 
 const siteName = 'Kula Qr'
-const baseUrl = 'https://kulaqr.com'
+const baseUrl = 'https://kula-qr.vercel.app'
 
 // Construction des meta tags
 const title = props.title ? `${props.title} | ${siteName}` : siteName

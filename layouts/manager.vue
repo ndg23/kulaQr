@@ -4,10 +4,10 @@
     <header class="md:hidden bg-white border-b border-gray-100 sticky top-0 z-40">
       <div class="px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-full bg-black flex items-center justify-center">
-            <span class="text-white text-sm font-bold">KQ</span>
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+            <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
           </div>
-          <h1 class="text-lg font-semibold text-gray-900 truncate">
+          <h1 class="text-xl font-semibold text-orange-500 truncate">
             {{ establishment?.name || 'Dashboard' }}
           </h1>
         </div>
@@ -15,7 +15,7 @@
           @click="toggleMobileMenu"
           class="p-2 rounded-full hover:bg-gray-100 transition-colors"
         >
-          <MenuIcon class="w-5 h-5 text-gray-600" />
+          <Menu class="w-5 h-5 text-gray-600" />
         </button>
       </div>
     </header>
@@ -51,11 +51,11 @@
       >
         <div class="p-6 border-b border-gray-100">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full bg-black flex items-center justify-center">
-              <span class="text-white text-lg font-bold">KQ</span>
+            <div class="w-12 h-12 rounded-lg flex items-center justify-center">
+              <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <div>
-              <h1 class="text-xl font-bold text-gray-900">
+              <h1 class="text-xl font-bold text-orange-500">
                 {{ establishment?.name || 'Dashboard' }}
               </h1>
               <p class="text-sm text-gray-500">Gestion</p>
@@ -141,11 +141,11 @@
         <!-- Logo Section -->
         <div class="p-6">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center">
-              <span class="text-white text-lg font-bold">KQ</span>
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center">
+              <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <div>
-            <h1 class="text-xl font-bold text-gray-900">
+            <h1 class="text-xl font-bold text-orange-500">
               {{ establishment?.name || 'Dashboard' }}
             </h1>
               <p class="text-sm text-gray-500">Gestion</p>
@@ -230,7 +230,7 @@
 
       <!-- Desktop Main Content -->
       <main class="ml-64 flex-1 min-h-screen bg-gray-50">
-        <div class="max-w-4xl mx-auto">
+        <div class="max-w-7xl mx-auto">
         <slot />
         </div>
       </main>
@@ -247,6 +247,8 @@
 import { 
   Home as LayoutDashboard,
   BookOpen as MenuIcon,
+  Menu,
+  List as CategoriesIcon,
   QrCode,
   Share2,
   Settings,
@@ -291,12 +293,12 @@ const navigationItems = computed(() => [
     active: '/categories',
     icon: List
   },
-  {
-    name: 'Tables',
-    path: `/manager/${establishment.value?.id}/tables`,
-    active: '/tables',
-    icon: Table
-  },
+  // {
+  //   name: 'Tables',
+  //   path: `/manager/${establishment.value?.id}/tables`,
+  //   active: '/tables',
+  //   icon: Table
+  // },
   {
     name: 'QR Codes',
     path: `/manager/${establishment.value?.id}/qr-codes`,

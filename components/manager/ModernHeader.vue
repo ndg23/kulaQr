@@ -1,6 +1,6 @@
 <template>
   <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
-    <div class="max-w-4xl mx-auto px-6 py-4">
+    <div class="max-w-7xl mx-auto px-6 py-4">
       <div class="flex items-center justify-between">
         <!-- Left side - Title and breadcrumb -->
         <div class="flex items-center gap-4">

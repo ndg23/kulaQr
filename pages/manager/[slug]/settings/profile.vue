@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="p-6 border-b border-gray-100">
         <h1 class="text-xl font-semibold text-gray-900">Profil utilisateur</h1>

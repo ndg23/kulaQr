@@ -237,9 +237,9 @@
         // Données structurées pour le restaurant
         const restaurantSchema = generateRestaurantSchema(establishmentData)
         const breadcrumbSchema = generateBreadcrumbSchema([
-          { name: 'Accueil', url: 'https://kulaqr.com' },
-          { name: 'Restaurants', url: 'https://kulaqr.com/restaurant' },
-          { name: establishmentData.name, url: `https://kulaqr.com/menu/${establishmentData.slug}` }
+          { name: 'Accueil', url: 'https://kula-qr.vercel.app' },
+          { name: 'Restaurants', url: 'https://kula-qr.vercel.app/restaurant' },
+          { name: establishmentData.name, url: `https://kula-qr.vercel.app/menu/${establishmentData.slug}` }
         ])
         
         useHead({

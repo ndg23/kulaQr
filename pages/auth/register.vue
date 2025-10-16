@@ -45,7 +45,7 @@
               Créez votre compte
             </h1>
             <p class="text-xl text-gray-500 font-light">
-              Commencez votre essai gratuit de 14 jours
+              Commencez votre essai gratuit de 7 jours
             </p>
           </div>
 

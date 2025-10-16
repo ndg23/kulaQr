@@ -7,7 +7,7 @@ Disallow: /auth/
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://kulaqr.com/sitemap.xml
+Sitemap: https://kula-qr.vercel.app/sitemap.xml
 
 # Crawl-delay pour éviter la surcharge
 Crawl-delay: 1

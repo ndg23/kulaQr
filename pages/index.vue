@@ -350,7 +350,7 @@
             <div>
               <h3 class="text-sm font-medium text-gray-900 mb-4">Contact</h3>
               <ul class="space-y-3">
-                <li class="text-sm text-gray-500">hello@kulaqr.com</li>
+                <li class="text-sm text-gray-500">ndgallogho@gmail.com</li>
                 <li class="text-sm text-gray-500">+221 77 749 39 10</li>
                 <li class="text-sm text-gray-500">Dakar, Senegal</li>
               </ul>

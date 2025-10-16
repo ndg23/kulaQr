@@ -6,7 +6,7 @@
       subtitle="Gérez vos produits et catégories"
       :icon="MenuIcon"
       :primary-action="{
-        label: 'Nouveau produit',
+        label: 'Nouveau menu',
         icon: Plus,
         action: openAddProduct
       }"
@@ -20,7 +20,7 @@
     />
 
     <!-- Search Bar -->
-    <div class="max-w-4xl mx-auto px-6 py-4">
+    <div class="max-w-7xl mx-auto px-6 py-4">
       <div class="relative">
         <Search class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
@@ -32,7 +32,7 @@
       </div>
     </div>
 
-    <main class="max-w-4xl mx-auto px-6 py-8">
+    <main class="max-w-7xl mx-auto px-6 py-8">
       <!-- Stats -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         <ManagerModernCard 

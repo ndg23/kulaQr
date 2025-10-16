@@ -7,8 +7,8 @@ export const useStructuredData = () => {
       '@type': 'Restaurant',
       name: restaurant.name,
       description: restaurant.description || `Menu digital de ${restaurant.name}`,
-      url: `https://kulaqr.com/menu/${restaurant.slug}`,
-      image: restaurant.image_url || 'https://kulaqr.com/logo.png',
+      url: `https://kula-qr.vercel.app/menu/${restaurant.slug}`,
+      image: restaurant.image_url || 'https://kula-qr.vercel.app/logo.png',
       telephone: restaurant.phone,
       address: {
         '@type': 'PostalAddress',
@@ -27,7 +27,7 @@ export const useStructuredData = () => {
       hasMenu: {
         '@type': 'Menu',
         name: `Menu de ${restaurant.name}`,
-        url: `https://kulaqr.com/menu/${restaurant.slug}`
+        url: `https://kula-qr.vercel.app/menu/${restaurant.slug}`
       },
       aggregateRating: {
         '@type': 'AggregateRating',
@@ -43,10 +43,10 @@ export const useStructuredData = () => {
       '@type': 'WebSite',
       name: 'Kula Qr',
       description: 'Solution de menu digital QR code pour restaurants',
-      url: 'https://kulaqr.com',
+      url: 'https://kula-qr.vercel.app',
       potentialAction: {
         '@type': 'SearchAction',
-        target: 'https://kulaqr.com/search?q={search_term_string}',
+        target: 'https://kula-qr.vercel.app/search?q={search_term_string}',
         'query-input': 'required name=search_term_string'
       }
     }
@@ -58,8 +58,8 @@ export const useStructuredData = () => {
       '@type': 'Organization',
       name: 'Kula Qr',
       description: 'Plateforme de menu digital pour restaurants',
-      url: 'https://kulaqr.com',
-      logo: 'https://kulaqr.com/logo.png',
+      url: 'https://kula-qr.vercel.app',
+      logo: 'https://kula-qr.vercel.app/logo.png',
       contactPoint: {
         '@type': 'ContactPoint',
         telephone: '+33-1-23-45-67-89',

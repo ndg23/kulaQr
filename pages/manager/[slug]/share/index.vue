@@ -213,7 +213,7 @@ const qrColor = ref('#111827')
 
 // Computed
 const menuLink = computed(() => {
-  return `https://kulaqr.com/menu/${establishment.value?.id}`
+  return `https://kula-qr.vercel.app/menu/${establishment.value?.id}`
 })
 
 // Methods

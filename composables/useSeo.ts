@@ -10,7 +10,7 @@ export const useSeo = () => {
     keywords?: string
   }) => {
     const siteName = 'Kula Qr'
-    const baseUrl = 'https://kulaqr.com'
+    const baseUrl = 'https://kula-qr.vercel.app'
     
     // Title
     const title = meta.title ? `${meta.title} | ${siteName}` : siteName
@@ -55,7 +55,7 @@ export const useSeo = () => {
   const setRestaurantMeta = (restaurant: Establishment) => {
     const title = `Menu ${restaurant.name} - QR Code Digital`
     const description = `Découvrez le menu de ${restaurant.name}. Commandez facilement avec notre menu digital QR code. ${restaurant.description || ''}`
-    const image = restaurant.image_url || 'https://kulaqr.com/og-restaurant.jpg'
+    const image = restaurant.image_url || 'https://kula-qr.vercel.app/og-restaurant.jpg'
     const url = `/menu/${restaurant.slug}`
     
     setPageMeta({

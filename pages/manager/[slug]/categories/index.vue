@@ -13,7 +13,7 @@
     />
 
     <!-- Search Bar -->
-    <div class="max-w-4xl mx-auto px-6 py-4">
+    <div class="max-w-7xl mx-auto px-6 py-4">
       <div class="relative">
         <Search class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <main class="max-w-4xl mx-auto px-6 py-8">
+    <main class="max-w-7xl mx-auto px-6 py-8">
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-20">
         <div class="w-16 h-16 relative">

@@ -6,10 +6,10 @@
         <div class="flex items-center">
           <NuxtLink to="/" class="flex items-center space-x-2 group">
             <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-              <span class="text-white text-sm font-bold">KQ</span>
+              <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <span class="text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
-              KulaQr
+              Kula <span class="text-kula-500 fontex-bold font-black">Qr</span>
             </span>
           </NuxtLink>
         </div>
@@ -49,7 +49,7 @@
             <div class="relative" ref="userDropdown">
               <button 
                 @click="toggleUserMenu"
-                class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
+                class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors user-menu"
               >
                 <!-- Avatar -->
                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-medium text-sm"
@@ -393,7 +393,7 @@ const cancelLogout = () => {
 const fetchUserData = async () => {
   try {
     const { data: { user: authUser } } = await supabase.auth.getUser()
-    console.log('🔍 Auth user:', authUser)
+    // console.log('🔍 Auth user:', authUser)
     
     if (authUser) {
       // Get user data from our users table
@@ -473,17 +473,26 @@ onMounted(() => {
       mobileMenuOpen.value = false
     }
     
-    // Close user menu
-    if (userMenuOpen.value && userDropdown.value && !userDropdown.value.contains(target)) {
+    // Close user menu - utiliser la même logique que manager.vue
+    if (userMenuOpen.value && !target.closest('.user-menu')) {
       console.log('🔄 Closing user menu - clicked outside')
+      userMenuOpen.value = false
+    }
+  }
+
+  // Gestionnaire de touche Echap
+  const handleEscape = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && userMenuOpen.value) {
       userMenuOpen.value = false
     }
   }
   
   document.addEventListener('click', handleClickOutside)
+  document.addEventListener('keydown', handleEscape)
   
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
+    document.removeEventListener('keydown', handleEscape)
     subscription.unsubscribe()
   })
 })

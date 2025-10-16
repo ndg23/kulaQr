@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-2xl font-bold text-gray-900">Paramètres</h1>
@@ -15,7 +15,7 @@
         <div class="p-6 space-y-6">
           <!-- Restaurant Name -->
           <div class="relative group">
-            <FormInput
+            <FloatLabelInput
               v-model="form.name"
               type="text"
               required
@@ -76,21 +76,22 @@
       <!-- Contact Info Card -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-6 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">Contact</h2>
+          <h2 class="text-lg font-semibold text-gray-900">Contact de l'établissement</h2>
         </div>
         <div class="p-6 space-y-6">
           <!-- Phone -->
           <div class="relative group">
-            <FormInput
+            <FloatLabelInput
               v-model="form.phone"
               type="tel"
+              required
               label="Téléphone"
             />
           </div>
 
           <!-- Address -->
           <div class="relative group">
-            <FormInput
+            <FloatLabelInput
               v-model="form.address"
               placeholder=" "
               label="Adresse"
@@ -99,21 +100,7 @@
         </div>
       </div>
 
-      <!-- Opening Hours Card -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">Horaires d'ouverture</h2>
-        </div>
-        <div class="p-6">
-          <div class="relative group">
-            <FormInput
-              v-model="form.opening_hours"
-              label="Horaires d'ouverture"
-              placeholder=" "
-            />
-          </div>
-        </div>
-      </div>
+   
 
       <!-- Submit Button -->
       <div class="flex justify-end">
@@ -138,7 +125,7 @@ import { ref, reactive } from 'vue'
 import { ImageIcon, Upload, Loader2 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
-import FormInput from '~/components/ui/FormInput.vue'
+import FloatLabelInput from '~/components/FloatLabelInput.vue'
 definePageMeta({
   layout: 'manager'
 })
@@ -158,7 +145,6 @@ const form = reactive({
   image_url: '',
   phone: '',
   address: '',
-  opening_hours: ''
 })
 
 // Load establishment data
@@ -187,7 +173,8 @@ const handleImageChange = (event: Event) => {
 }
 
 const saveSettings = async () => {
-  const result = await withLoading(async () => {
+  try {
+    loading.value = true
     const { error } = await supabase
       .from('establishments')
       .update(form)
@@ -196,10 +183,11 @@ const saveSettings = async () => {
     if (error) throw error
 
     showToast.success('Succès', 'Les modifications ont été enregistrées')
-  })
-
-  if (!result) {
+  } catch (error) {
     showToast.error('Erreur', 'Impossible de sauvegarder les modifications')
+    console.error(error)
+  } finally {
+    loading.value = false
   }
 }
 

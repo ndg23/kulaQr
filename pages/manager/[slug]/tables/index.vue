@@ -274,7 +274,9 @@ import { useEstablishment } from '~/composables/useEstablishment'
 const { showToast } = useCustomToast()
 const { client: supabase } = useSupabaseWrapper()
 const { establishment, fetchEstablishmentByUserId } = useEstablishment()
-
+definePageMeta({
+  layout: 'manager'
+})
 // State
 const loading = ref(false)
 const tables = ref<any[]>([])

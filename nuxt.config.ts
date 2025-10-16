@@ -11,12 +11,12 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Kula Qr - Menu Digital pour Restaurants',
+      title: 'Kula Qr - Menu Digital pour vos commerces',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Transformez votre restaurant avec des menus digitaux QR code. Solution moderne, sans contact et écologique pour les restaurants.' },
-        { name: 'keywords', content: 'QR code, menu digital, restaurant, sans contact, menu électronique, commande en ligne' },
+        { name: 'description', content: 'Transformez votre commerce avec des menus digitaux QR code. Solution moderne, sans contact et écologique pour les commerces.' },
+        { name: 'keywords', content: 'QR code, menu digital, commerce, sans contact, menu électronique, commande en ligne' },
         { name: 'author', content: 'Kula Qr' },
         { name: 'robots', content: 'index, follow' },
         { property: 'og:type', content: 'website' },
@@ -26,8 +26,8 @@ export default defineNuxtConfig({
         { name: 'twitter:site', content: '@kulaqr' }
       ],
       link: [
-        { rel: 'canonical', href: 'https://kulaqr.com' },
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+        { rel: 'canonical', href: 'https://kula-qr.vercel.app' },
+        { rel: 'icon', type: 'image/x-icon', href: '/logo.ico' }
       ]
     },
     pageTransition: { name: 'page', mode: 'out-in' }
@@ -35,7 +35,7 @@ export default defineNuxtConfig({
 
   // Configuration SEO
   site: {
-    url: 'https://kulaqr.com',
+    url: 'https://kula-qr.vercel.app',
     name: 'Kula Qr',
     description: 'Transformez votre établissement avec des menus digitaux QR code. Solution moderne, sans contact et écologique.',
     defaultLocale: 'fr'
@@ -43,7 +43,7 @@ export default defineNuxtConfig({
 
   // Configuration du sitemap
   sitemap: {
-    hostname: 'https://kulaqr.com',
+    hostname: 'https://kula-qr.vercel.app',
     gzip: true,
     routes: async () => {
       // Routes statiques
@@ -58,14 +58,14 @@ export default defineNuxtConfig({
         '/legal/terms'
       ]
       
-      // Routes dynamiques pour les restaurants
+      // Routes dynamiques pour les commerces
       // Note: En production, vous devriez récupérer ces données depuis votre base de données
-      const restaurantRoutes = [
-        '/restaurant',
+      const commerceRoutes = [
+        '/commerce',
         '/menu'
       ]
       
-      return [...staticRoutes, ...restaurantRoutes]
+      return [...staticRoutes, ...commerceRoutes]
     }
   },
 
@@ -73,8 +73,8 @@ export default defineNuxtConfig({
   robots: {
     UserAgent: '*',
     Allow: '/',
-    Disallow: ['/admin', '/manager', '/staff', '/auth'],
-    Sitemap: 'https://kulaqr.com/sitemap.xml'
+    Disallow: ['/admin', '/manager', '/staff'],
+    Sitemap: 'https://kula-qr.vercel.app/sitemap.xml'
   },
   supabase: {
     url: process.env.SUPABASE_URL,
