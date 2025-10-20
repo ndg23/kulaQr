@@ -51,7 +51,7 @@
                 </div>
   
                 <!-- Footer -->
-                <slot name="footer">
+                <slot name="footer" v-if="showButtons">
                   <div class="mt-8 flex justify-end space-x-4">
                     <button
                       class="px-6 py-4 text-base font-semibold border border-gray-300 bg-white text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-all"
@@ -97,6 +97,10 @@
     actionButtonText: {
       type: String,
       default: 'Enregistrer',
+    },
+    showButtons: {
+      type: Boolean,
+      default: true,
     },
     size: {
       type: String,

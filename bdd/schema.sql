@@ -170,26 +170,26 @@ CREATE TABLE products (
 );
 
 -- Restaurant Tables
-CREATE TABLE restaurant_tables (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    establishment_id UUID NOT NULL REFERENCES establishments(id) ON DELETE CASCADE,
-    table_number VARCHAR(10) NOT NULL,
-    capacity INT,
-    status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'occupied', 'reserved', 'maintenance')),
-    qr_code_id UUID,
-    location_description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    created_by UUID REFERENCES auth.users(id),
-    is_active BOOLEAN DEFAULT true,
-    UNIQUE(establishment_id, table_number)
-);
+-- CREATE TABLE restaurant_tables (
+--     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--     establishment_id UUID NOT NULL REFERENCES establishments(id) ON DELETE CASCADE,
+--     table_number VARCHAR(10) NOT NULL,
+--     capacity INT,
+--     status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'occupied', 'reserved', 'maintenance')),
+--     qr_code_id UUID,
+--     location_description TEXT,
+--     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+--     created_by UUID REFERENCES auth.users(id),
+--     is_active BOOLEAN DEFAULT true,
+--     UNIQUE(establishment_id, table_number)
+-- );
 
 -- Orders table
 CREATE TABLE orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
-    table_id UUID REFERENCES restaurant_tables(id),
+    table_id UUID REFERENCES tables(id),
     table_number INTEGER,
     status VARCHAR(50) NOT NULL DEFAULT 'pending',
     total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,

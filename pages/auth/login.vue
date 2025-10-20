@@ -208,7 +208,7 @@ const handleLogin = async () => {
     }
 
     // Rediriger vers le dashboard avec le slug de l'établissement
-    navigateTo(`/manager/${establishment?.slug}`)
+    navigateTo(`/manager/${establishment?.id}`)
   } catch (err) {
     error.value = 'Une erreur inattendue est survenue'
   } finally {

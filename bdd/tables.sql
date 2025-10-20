@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS tables (
     number INTEGER NOT NULL,
     type VARCHAR(20) DEFAULT 'SIMPLE' CHECK (type IN ('VIP', 'SIMPLE')),
     zone VARCHAR(100) DEFAULT 'ETAGE',
+    status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'occupied', 'reserved', 'maintenance')),
     description TEXT,
     qr_code_url TEXT,
     qr_code_generated BOOLEAN DEFAULT false,
@@ -28,6 +29,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE TRIGGER trigger_update_tables_updated_at
     BEFORE UPDATE ON tables

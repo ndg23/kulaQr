@@ -1,11 +1,11 @@
 <template>
-      <div class="bg-white rounded-[32px] px-10 py-12 pb-15 max-w-[460px] w-full  text-center">
+      <div class="bg-white rounded-[32px] px-10 py-2 pb-15 max-w-[360px] w-full  text-center">
         <!-- Header -->
         <div class="mb-10">
-          <div class="text-[28px] font-semibold text-gray-900 mb-1.5 tracking-tight">
+          <div class="text-[28px] font-bold text-gray-900 mb-1.5 tracking-tight">
             {{ restaurantName }}
           </div>
-          <div class="text-[15px] text-gray-500 font-normal tracking-tight">
+          <div class="text-[16px] text-black -500 font-black trac-king-tight">
             Menu
           </div>
         </div>
@@ -19,7 +19,7 @@
                 v-if="qrCodeImage" 
                 :src="qrCodeImage" 
                 alt="QR Code Menu"
-                class="block w-[280px] h-[280px]"
+                class="block w-[300px] h-[280px]"
               />
               <div v-else class="w-[280px] h-[280px] flex items-center justify-center">
                 <div class="text-center">

@@ -103,7 +103,8 @@
                  :class="{
                    'bg-yellow-100': order.status === 'pending',
                    'bg-blue-100': order.status === 'processing', 
-                   'bg-green-100': order.status === 'completed'
+                   'bg-green-100': order.status === 'completed',
+                   'bg-red-100': order.status === 'cancelled'
                  }">
               <div class="flex justify-between items-center mb-2">
                 <div class="flex items-center gap-2">
@@ -129,14 +130,14 @@
             
             <!-- Ticket Body -->
             <div class="p-4">
-              <div class="font-mono text-xs mb-3">
+              <div class="font-mono text-xs- mb-3">
                 <div 
                   v-for="(item, index) in order.items.slice(0, 3)" 
-                  :key="index"
+                :key="index"
                   class="flex justify-between mb-2 text-gray-600"
-                >
+              >
                   <span class="flex-1 text-slate-700">{{ item.quantity }}x {{ item.name }}</span>
-                  <span class="font-normal text-gray-800">{{ formatPrice(item.unit_price * item.quantity) }}</span>
+                  <span class="font-normal- text-gray-800">{{ formatPrice(item.unit_price * item.quantity) }}</span>
                 </div>
                 <div v-if="order.items.length > 3" class="text-center text-gray-400 text-xs my-2">
                   +{{ order.items.length - 3 }} autre{{ order.items.length - 3 > 1 ? 's' : '' }}
@@ -148,27 +149,41 @@
                 <span>{{ formatPrice(order.total_amount) }}</span>
               </div>
               
-              <!-- Action Button - Twitter style -->
-              <div class="mt-4">
-              <button 
-                  v-if="order.status === 'pending'" 
-                  @click.stop="updateOrderStatus(order.id, 'processing')"
-                  class="w-full py-2 px-4 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition-colors"
-                >
-                  Commencer
-              </button>
-              
-              <button 
-                  v-else-if="order.status === 'processing'"
-                  @click.stop="updateOrderStatus(order.id, 'completed')"
-                  class="w-full py-2 px-4 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors"
-                >
-                  Terminer
-              </button>
-              
-                <div v-else class="text-center py-2 text-sm text-gray-500 font-medium">
+              <!-- Action Buttons - Twitter style -->
+              <div class="mt-4 space-y-2">
+                <!-- Main Action Button -->
+                <button 
+                    v-if="order.status === 'pending'" 
+                    @click.stop="updateOrderStatus(order.id, 'processing')"
+                    class="w-full py-2 px-4 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    Commencer
+                </button>
+                
+                <button 
+                    v-else-if="order.status === 'processing'"
+                    @click.stop="updateOrderStatus(order.id, 'completed')"
+                    class="w-full py-2 px-4 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors"
+                  >
+                    Terminer
+                </button>
+                
+                <div v-else-if="order.status === 'completed'" class="text-center py-2 text-sm text-gray-500 font-medium">
                   Commande terminée
                 </div>
+                
+                <div v-else-if="order.status === 'cancelled'" class="text-center py-2 text-sm text-red-500 font-medium">
+                  Commande annulée
+                </div>
+                
+                <!-- Cancel Button (for pending and processing orders) -->
+                <button 
+                    v-if="canCancelOrder(order.status)"
+                    @click.stop="cancelOrder(order.id)"
+                    class="w-full py-2 px-4 bg-red-50 text-red-600 rounded-full text-sm font-medium hover:bg-red-100 transition-colors border border-red-200"
+                  >
+                    Annuler
+                </button>
               </div>
             </div>
           </div>
@@ -188,7 +203,8 @@ import {
   AlertTriangle, 
   ClipboardList, 
   CheckCircle,
-  Coffee
+  Coffee,
+  X
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
@@ -216,7 +232,8 @@ const statusFilters = [
   { value: 'all', label: 'Toutes' },
   { value: 'pending', label: 'En attente' },
   { value: 'processing', label: 'En traitement' },
-  { value: 'completed', label: 'Terminé' }
+  { value: 'completed', label: 'Terminé' },
+  { value: 'cancelled', label: 'Annulées' }
 ]
 
 const filteredOrders = computed(() => {
@@ -347,6 +364,24 @@ const updateOrderStatus = async (orderId: string, newStatus: string) => {
   }
 }
 
+const cancelOrder = async (orderId: string) => {
+  if (!confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) {
+    return
+  }
+  
+  try {
+    await updateOrderStatus(orderId, 'cancelled')
+    showToast.success('Commande annulée', 'La commande a été annulée avec succès')
+  } catch (err) {
+    console.error('Error cancelling order:', err)
+    showToast.error('Erreur', 'Impossible d\'annuler la commande')
+  }
+}
+
+const canCancelOrder = (status: string) => {
+  return status === 'pending' || status === 'processing'
+}
+
 const viewOrderDetails = (order: any) => {
   navigateTo(`/staff/order-detail/${order.id}`)
 }
@@ -376,7 +411,8 @@ const translateStatus = (status: string) => {
   const translations: any = {
     'pending': 'En attente',
     'processing': 'En traitement',
-    'completed': 'Terminée'
+    'completed': 'Terminée',
+    'cancelled': 'Annulée'
   }
   
   return translations[status] || 'Inconnu'
@@ -410,6 +446,9 @@ const getStatusColor = (status: string) => {
     },
     'completed': {
       badge: 'bg-green-100 text-green-800'
+    },
+    'cancelled': {
+      badge: 'bg-red-100 text-red-800'
     }
   }
   
@@ -420,7 +459,8 @@ const getStatusIcon = (status: string) => {
   const icons = {
     'pending': Clock,
     'processing': Coffee,
-    'completed': CheckCircle
+    'completed': CheckCircle,
+    'cancelled': X
   }
   
   return icons[status as keyof typeof icons] || Clock
@@ -449,6 +489,7 @@ const setupRealtimeConnection = () => {
       (payload) => {
         console.log('🔄 Mise à jour en temps réel:', payload)
         loadOrders()
+        playNotificationSound()
       }
     )
     .subscribe((status) => {
@@ -456,6 +497,12 @@ const setupRealtimeConnection = () => {
     })
 }
 
+const playNotificationSound = () => {
+  const audio = new Audio('/sounds/new-order.mp3')
+  audio.play().catch(() => {
+    // Gérer l'erreur silencieusement (les navigateurs peuvent bloquer l'autoplay)
+  })
+}
 // Lifecycle
 onMounted(async () => {
   await loadEstablishment()

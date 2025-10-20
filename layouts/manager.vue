@@ -293,12 +293,12 @@ const navigationItems = computed(() => [
     active: '/categories',
     icon: List
   },
-  // {
-  //   name: 'Tables',
-  //   path: `/manager/${establishment.value?.id}/tables`,
-  //   active: '/tables',
-  //   icon: Table
-  // },
+  {
+    name: 'Tables',
+    path: `/manager/${establishment.value?.id}/tables`,
+    active: '/tables',
+    icon: Table
+  },
   {
     name: 'QR Codes',
     path: `/manager/${establishment.value?.id}/qr-codes`,

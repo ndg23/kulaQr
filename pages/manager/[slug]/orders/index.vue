@@ -279,7 +279,8 @@ const statusOptions = [
   { key: 'all', label: 'Toutes', icon: ClipboardList },
   { key: 'pending', label: 'En attente', icon: Clock },
   { key: 'processing', label: 'En traitement', icon: Coffee },
-  { key: 'completed', label: 'Terminées', icon: CheckCircle }
+  { key: 'completed', label: 'Terminées', icon: CheckCircle },
+  { key: 'cancelled', label: 'Annulées', icon: X }
 ]
 
 // Get status count
@@ -526,6 +527,11 @@ const getStatusColor = (status: string) => {
       bg: 'bg-green-50',
       text: 'text-green-500',
       badge: 'bg-green-100 text-green-800'
+    },
+    'cancelled': {
+      bg: 'bg-red-50',
+      text: 'text-red-500',
+      badge: 'bg-red-100 text-red-800'
     }
   }
   
@@ -536,7 +542,8 @@ const getStatusIcon = (status: string) => {
   const icons = {
     'pending': Clock,
     'processing': Coffee,
-    'completed': CheckCircle
+    'completed': CheckCircle,
+    'cancelled': X
   }
   
   return icons[status] || Clock
@@ -547,7 +554,8 @@ const translateStatus = (status: string) => {
     'all': 'Toutes',
     'pending': 'En attente',
     'processing': 'En traitement',
-    'completed': 'Terminée'
+    'completed': 'Terminée',
+    'cancelled': 'Annulée'
   }
   
   return translations[status] || status

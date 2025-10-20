@@ -103,44 +103,69 @@
       </button>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6">
       <div
         v-for="table in filteredTables"
         :key="table.id"
-        class="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-200"
+        class="group bg-white rounded-3xl border border-gray-100 p-6 hover:shadow-lg- hover:border-red-200 transition-all duration-300 hover:-translate-y-0.5"
       >
         <!-- Table Header -->
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3">
+        <div class="flex items-center justify-between mb-5">
+          <div class="flex items-center gap-4">
             <div :class="[
-              table.type === 'VIP' ? 'bg-purple-50' : 'bg-blue-50',
-              'w-12 h-12 rounded-2xl flex items-center justify-center'
+              table.type === 'VIP' ? 'bg-gradient-to-br from-purple-50 to-purple-100' : 'bg-gradient-to-br from-blue-50 to-blue-100',
+              'w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm'
             ]">
-              <Table class="w-6 h-6" :class="table.type === 'VIP' ? 'text-purple-500' : 'text-blue-500'" />
+              <Table class="w-7 h-7" :class="table.type === 'VIP' ? 'text-purple-600' : 'text-blue-600'" />
             </div>
             <div>
-              <h3 class="text-lg font-bold text-gray-900">Table {{ table.number }}</h3>
-              <p class="text-sm text-gray-500">{{ table.type }} • {{ table.zone }}</p>
+              <h3 class="text-xl font-bold text-gray-900 mb-1">Table {{ table.number }}</h3>
+              <div class="flex items-center gap-2">
+                <span :class="[
+                  table.type === 'VIP' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700',
+                  'px-2 py-1 rounded-lg text-xs font-medium'
+                ]">
+                  {{ table.type }}
+                </span>
+                <span class="text-sm text-gray-500">{{ table.zone }}</span>
+              </div>
             </div>
           </div>
           
           <div class="flex items-center gap-2">
             <span :class="[
-              table.qr_code_generated ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700',
-              'px-3 py-1 rounded-full text-xs font-semibold'
+              table.qr_code_generated ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-50 text-gray-600 border-gray-200',
+              'px-3 py-1.5 rounded-full text-xs font-medium border'
             ]">
-              {{ table.qr_code_generated ? 'QR Généré' : 'Pas de QR' }}
+              {{ table.qr_code_generated ? 'QR Prêt' : 'Pas de QR' }}
             </span>
           </div>
         </div>
 
         <!-- Table Info -->
-        <div class="space-y-2 mb-4">
-          <div v-if="table.description" class="text-sm text-gray-600">
+        <div class="space-y-3 mb-6">
+          <div v-if="table.description" class="text-sm text-gray-600 bg-gray-50 p-3 rounded-xl">
             {{ table.description }}
           </div>
-          <div v-if="table.qr_code_url" class="text-xs text-blue-600 font-mono bg-blue-50 p-2 rounded">
+          <div v-if="table.qr_code_url" class="text-xs text-blue-600 font-mono bg-blue-50 p-3 rounded-xl break-all">
             {{ table.qr_code_url }}
+          </div>
+        </div>
+
+        <!-- QR Code Preview (si généré) -->
+        <div v-if="table.qr_code_generated" class="mb-6 p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl border border-orange-200">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold text-orange-800">Aperçu QR Code</h4>
+            <button
+              @click="showQrCodeCard(table)"
+              class="p-2 text-orange-600 hover:text-orange-700 hover:bg-orange-200 rounded-lg transition-colors"
+              title="Voir le QR Code Card"
+            >
+              <Eye class="w-4 h-4" />
+            </button>
+          </div>
+          <div class="text-xs text-orange-700">
+            Cliquez sur l'œil pour voir le QR Code Card complet
           </div>
         </div>
 
@@ -148,28 +173,37 @@
         <div class="flex gap-2">
           <button
             @click="editTable(table)"
-            class="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors"
+            class="flex-1 px-4 py-2.5 bg-gray-50 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors border border-gray-200"
           >
             Modifier
           </button>
           <button
             v-if="!table.qr_code_generated"
             @click="generateQrCode(table)"
-            class="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-medium hover:bg-blue-200 transition-colors"
+            class="flex-1 px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors border border-blue-200"
           >
             Générer QR
           </button>
           <button
             v-else
-            @click="downloadQrCode(table)"
-            class="flex-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors flex items-center justify-center gap-1"
+            @click="viewMenuTable(table)"
+            class="flex-1 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-medium hover:bg-emerald-100 transition-colors border border-emerald-200 flex items-center justify-center gap-1.5"
           >
-            <Download class="w-4 h-4" />
-            Télécharger
+            <ArrowRight class="w-4 h-4" />
+            Voir le menu
+          </button>
+          <button
+            v-if="table.qr_code_generated"
+              @click="showQrCodeCard(table)"
+            class="px-4 py-2.5 bg-orange-50 text-orange-700 rounded-xl text-sm font-medium hover:bg-orange-100 transition-colors border border-orange-200 flex items-center justify-center gap-1.5"
+            title="Imprimer QR Code Card"
+          >
+            <QrCode class="w-4 h-4" />
           </button>
           <button
             @click="deleteTable(table.id)"
-            class="px-3 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition-colors"
+            class="px-4 py-2.5 bg-red-50 text-red-700 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors border border-red-200"
+            title="Supprimer la table"
           >
             <Trash2 class="w-4 h-4" />
           </button>
@@ -178,7 +212,7 @@
     </div>
 
     <!-- Table Modal -->
-    <UModal v-model="showTableModal" size="lg">
+    <UModal v-model="showTableModal" size="lg" :show-buttons="false" >
       <div class="p-6">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-semibold text-gray-900">
@@ -192,42 +226,38 @@
           </button>
         </div>
 
-        <form @submit.prevent="saveTable" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Numéro de table</label>
-              <input
-                v-model="tableForm.number"
-                type="number"
-                required
-                class="w-full h-12 px-4 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
-                placeholder="Ex: 1, 2, 3..."
-              />
-            </div>
+        <form @submit.prevent="saveTable" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FloatLabelInput
+              id="table-number"
+              v-model="tableForm.number"
+              label="Numéro de table"
+              type="number"
+              required
+              placeholder="Ex: 1, 2, 3..."
+            />
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
-              <select
-                v-model="tableForm.type"
-                class="w-full h-12 px-4 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
-              >
-                <option value="SIMPLE">SIMPLE</option>
-                <option value="VIP">VIP</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Zone</label>
-            <select
-              v-model="tableForm.zone"
-              class="w-full h-12 px-4 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
+            <FloatLabelSelect
+              id="table-type"
+              v-model="tableForm.type"
+              label="Type"
+              required
             >
-              <option value="ETAGE">ETAGE</option>
-              <option value="TERRASSE">TERRASSE</option>
-              <option value="REZ_DE_CHAUSSEE">REZ DE CHAUSSEE</option>
-            </select>
+              <option value="SIMPLE">SIMPLE</option>
+              <option value="VIP">VIP</option>
+            </FloatLabelSelect>
           </div>
+
+          <FloatLabelSelect
+            id="table-zone"
+            v-model="tableForm.zone"
+            label="Zone"
+            required
+          >
+            <option value="ETAGE">ETAGE</option>
+            <option value="TERRASSE">TERRASSE</option>
+            <option value="REZ_DE_CHAUSSEE">REZ DE CHAUSSEE</option>
+          </FloatLabelSelect>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
@@ -239,7 +269,7 @@
             />
           </div>
 
-          <div class="flex gap-3 pt-4">
+          <div class="flex gap-3 pt-4 d-none-">
             <button
               type="button"
               @click="closeTableModal"
@@ -258,6 +288,49 @@
         </form>
       </div>
     </UModal>
+
+    <!-- QR Code Modal -->
+    <UModal v-model="showQrModal" size="md" :show-buttons="false">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xl font-semibold text-gray-900">
+            QR Code - Table {{ selectedTableForQr?.number }}
+          </h2>
+          <button
+            @click="showQrModal = false"
+            class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <X class="w-5 h-5" />
+          </button>
+        </div>
+
+        <div class="flex justify-center-">
+          <QrCodeCard
+            v-if="selectedTableForQr"
+            :restaurant-name="establishment?.name || 'Menu'"
+            :menu-link="selectedTableForQr.qr_code_url"
+            :restaurant-id="establishment?.id"
+          />
+        </div>
+
+        <div class="flex gap-3 pt-6 border-t border-gray-100">
+          <button
+            @click="downloadQrCode(selectedTableForQr)"
+            class="flex-1 px-6 py-3 bg-blue-50 text-blue-700 rounded-2xl font-semibold hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+          >
+            <Download class="w-4 h-4" />
+            Télécharger
+          </button>
+          <button
+            @click="showQrCodeCard(selectedTableForQr)"
+            class="flex-1 px-6 py-3 bg-orange-50 text-orange-700 rounded-2xl font-semibold hover:bg-orange-100 transition-colors flex items-center justify-center gap-2"
+          >
+            <QrCode class="w-4 h-4" />
+            Imprimer
+          </button>
+        </div>
+      </div>
+    </UModal>
   </div>
 </template>
 
@@ -265,11 +338,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { 
   Table, Users, CheckCircle, ShoppingCart, Plus, Search, 
-  RefreshCw, Loader2, Trash2, X, QrCode, Download 
+  RefreshCw, Loader2, Trash2, X, QrCode, Download, Eye, View, ArrowRight 
 } from 'lucide-vue-next'
 import { useCustomToast } from '~/composables/useToast'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useEstablishment } from '~/composables/useEstablishment'
+import QrCodeCard from '~/components/QrCodeCard.vue'
+import FloatLabelInput from '~/components/FloatLabelInput.vue'
+import FloatLabelSelect from '~/components/FloatLabelSelect.vue'
 
 const { showToast } = useCustomToast()
 const { client: supabase } = useSupabaseWrapper()
@@ -283,6 +359,8 @@ const tables = ref<any[]>([])
 const searchQuery = ref('')
 const showTableModal = ref(false)
 const editingTable = ref<any>(null)
+const showQrModal = ref(false)
+const selectedTableForQr = ref<any>(null)
 
 // Form
 const tableForm = ref({
@@ -334,6 +412,11 @@ const loadTables = async () => {
   }
 }
 
+const viewMenuTable = (table: any) => {
+  navigateTo(`/menu/${establishment.value?.slug}?table=${table.number}`)
+  showToast.success('Ouverture', 'Menu ouvert dans un nouvel onglet')
+}
+
 // Table actions
 const openTableModal = () => {
   editingTable.value = null
@@ -379,6 +462,7 @@ const saveTable = async () => {
       type: tableForm.value.type,
       zone: tableForm.value.zone,
       description: tableForm.value.description,
+      qr_url: editingTable.value ? editingTable.value.qr_code_url : null,
       establishment_id: establishment.value.id
     }
 
@@ -447,7 +531,7 @@ const generateQrCode = async (table: any) => {
     loading.value = true
     
     // Générer l'URL du menu pour cette table spécifique
-    const tableMenuUrl = `${window.location.origin}/menu/${establishment.value.id}?table=${table.number}`
+    const tableMenuUrl = `${window.location.origin}/menu/${establishment.value.slug}?table=${table.number}`
     
     // Mettre à jour la table avec l'URL du QR code
     const { error } = await supabase
@@ -490,6 +574,13 @@ const downloadQrCode = (table: any) => {
 const refreshData = () => {
   loadTables()
 }
+
+const showQrCodeCard = (table: any) => {
+  selectedTableForQr.value = table
+  showQrModal.value = true
+}
+
+
 
 // Initialize
 onMounted(async () => {

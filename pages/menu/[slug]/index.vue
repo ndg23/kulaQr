@@ -50,8 +50,18 @@
           v-if="establishment" 
         />
         
-        <div v-if="showTableBanner" class="bg-blue-50 p-4 rounded-xl mb-6 text-center">
-          <p class="text-blue-700 font-medium">Table {{ tableNumber }}</p>
+        <div v-if="showTableBanner" class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-6 rounded-2xl mb-8 text-center shadow-sm">
+          <div class="flex items-center justify-center gap-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm text-blue-600 font-medium">Vous êtes à la</p>
+              <p class="text-xl font-bold text-blue-900">Table {{ tableNumber }}</p>
+            </div>
+          </div>
         </div>
         
         <div class="pb-24" v-if="categories.length > 0">
@@ -232,7 +242,13 @@
       
       // Configuration SEO pour le restaurant
       if (establishmentData) {
-        setRestaurantMeta(establishmentData)
+        const pageTitle = tableNumber.value 
+          ? `Table ${tableNumber.value} - ${establishmentData.name}` 
+          : `Menu ${establishmentData.name} - QR Code Digital`
+        
+        const description = `Découvrez le menu de ${establishmentData.name}. Commandez facilement avec notre menu digital QR code. ${establishmentData.description || ''}`
+        const image = establishmentData.image_url || 'https://kula-qr.vercel.app/images/pexels.jpg'
+        const url = `/menu/${establishmentData.slug}`
         
         // Données structurées pour le restaurant
         const restaurantSchema = generateRestaurantSchema(establishmentData)
@@ -243,6 +259,20 @@
         ])
         
         useHead({
+          title: `${pageTitle} | Kula Qr`,
+          meta: [
+            { name: 'description', content: description },
+            { property: 'og:title', content: `${pageTitle} | Kula Qr` },
+            { property: 'og:description', content: description },
+            { property: 'og:image', content: image },
+            { property: 'og:url', content: `https://kula-qr.vercel.app${url}` },
+            { property: 'og:type', content: 'website' },
+            { property: 'og:site_name', content: 'Kula Qr' },
+            { name: 'twitter:title', content: `${pageTitle} | Kula Qr` },
+            { name: 'twitter:description', content: description },
+            { name: 'twitter:image', content: image },
+            { name: 'twitter:card', content: 'summary_large_image' }
+          ],
           script: [
             {
               type: 'application/ld+json',
@@ -450,7 +480,7 @@
         .from('orders')
         .insert({
           establishment_id: establishment.value?.id,
-          table_number: Math.floor(Math.random() * 20) + 1,
+          table_number: tableNumber.value || Math.floor(Math.random() * 20) + 1,
           status: 'pending',
           total_amount: cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0),
           notes: cart.value.filter(item => item.notes).map(item => `${item.name}: ${item.notes}`).join('\n')

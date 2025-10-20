@@ -358,7 +358,7 @@ onMounted(() => {
     try {
       // Décoder les données utilisateur
       const userData = JSON.parse(atob(dataParam as string))
-      console.log('📥 Données utilisateur reçues:', userData)
+      // console.log('📥 Données utilisateur reçues:', userData)
       
       // Pré-remplir le formulaire
       form.email = userData.email
@@ -367,7 +367,7 @@ onMounted(() => {
       // Passer directement à l'étape 2
       step.value = 2
       
-      console.log('✅ Formulaire pré-rempli, étape 2 activée')
+      // console.log('✅ Formulaire pré-rempli, étape 2 activée')
     } catch (error) {
       console.error('❌ Erreur décodage données utilisateur:', error)
     }
@@ -375,32 +375,32 @@ onMounted(() => {
 })
 
 const handleRegister = async () => {
-  console.log('🚀 Début handleRegister')
-  console.log('📋 Form data:', form)
+  // console.log('🚀 Début handleRegister')
+  // console.log('📋 Form data:', form)
   
   // Validation complète avant soumission
   let hasErrors = false
   
   if (!form.type) {
-    console.log('❌ Type manquant:', form.type)
+    // console.log('❌ Type manquant:', form.type)
     errors.type = 'Veuillez sélectionner un type de restaurant'
     hasErrors = true
   }
   
   if (!form.restaurantName || form.restaurantName.trim() === '') {
-    console.log('❌ Nom établissement manquant:', form.restaurantName)
+    // console.log('❌ Nom établissement manquant:', form.restaurantName)
     errors.restaurantName = 'Le nom du restaurant est obligatoire'
     hasErrors = true
   }
   
   if (!form.fullName || form.fullName.trim() === '') {
-    console.log('❌ Nom complet manquant:', form.fullName)
+    // console.log('❌ Nom complet manquant:', form.fullName)
     errors.fullName = 'Le nom complet est obligatoire'
     hasErrors = true
   }
   
   if (!form.email || form.email.trim() === '') {
-    console.log('❌ Email manquant:', form.email)
+    // console.log('❌ Email manquant:', form.email)
     errors.email = 'L\'email est obligatoire'
     hasErrors = true
   }
@@ -411,24 +411,20 @@ const handleRegister = async () => {
   
   if (!isAlreadyAuthenticated) {
     if (!form.password || form.password.length < 6) {
-      console.log('❌ Mot de passe invalide:', form.password?.length)
+      // console.log('❌ Mot de passe invalide:', form.password?.length)
       errors.password = 'Le mot de passe doit contenir au moins 6 caractères'
       hasErrors = true
     }
   }
   
-  if (!form.terms) {
-    console.log('❌ Conditions d\'utilisation non acceptées')
-    errors.terms = 'Vous devez accepter les conditions d\'utilisation'
-    hasErrors = true
-  }
+
 
   if (hasErrors) {
-    console.log('❌ Erreurs de validation détectées')
+    // console.log('❌ Erreurs de validation détectées')
     return
   }
   
-  console.log('✅ Validation OK, début de l\'inscription')
+  // console.log('✅ Validation OK, début de l\'inscription')
   loading.value = true
   error.value = ''
   
@@ -437,7 +433,7 @@ const handleRegister = async () => {
     
     // 1. Créer le compte auth seulement si pas déjà connecté
     if (!isAlreadyAuthenticated) {
-      console.log('🔐 Création du compte auth...')
+      // console.log('🔐 Création du compte auth...')
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -451,7 +447,7 @@ const handleRegister = async () => {
       })
       
       if (authError) {
-        console.error('❌ Erreur auth:', authError)
+        // console.error('❌ Erreur auth:', authError)
         errors.email = authError.message === 'User already registered'
           ? 'Cette adresse email est déjà utilisée'
           : 'Une erreur est survenue lors de l\'inscription'
@@ -459,7 +455,7 @@ const handleRegister = async () => {
       }
 
       if (!authData.user?.id) {
-        console.error('❌ User ID non trouvé')
+        // console.error('❌ User ID non trouvé')
         throw new Error('User ID not found')
       }
       
@@ -470,7 +466,7 @@ const handleRegister = async () => {
     }
 
     // 2. Créer l'utilisateur dans la table users (seulement si pas déjà créé)
-    console.log('👤 Vérification/création de l\'utilisateur dans la table users...')
+    // console.log('👤 Vérification/création de l\'utilisateur dans la table users...')
     const { data: existingUser, error: userCheckError } = await supabase
       .from('users')
       .select('id')

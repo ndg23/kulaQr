@@ -122,6 +122,22 @@
             <Check class="w-6 h-6 mr-2" />
             Marquer comme terminé
           </button>
+          
+          <!-- Bouton d'annulation pour les commandes en attente ou en traitement -->
+          <button 
+            v-if="canCancelOrder(order.status)"
+            @click="cancelOrder"
+            class="w-full flex justify-center items-center px-6 py-5 border border-red-300 text-xl font-medium rounded-2xl shadow-sm text-red-600 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            <X class="w-6 h-6 mr-2" />
+            Annuler la commande
+          </button>
+          
+          <!-- Message pour les commandes annulées -->
+          <div v-if="order.status === 'cancelled'" class="w-full flex justify-center items-center px-6 py-5 border border-red-200 text-xl font-medium rounded-2xl text-red-600 bg-red-50">
+            <X class="w-6 h-6 mr-2" />
+            Commande annulée
+          </div>
         </div>
       </div>
     </main>
@@ -132,7 +148,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { 
-  ArrowLeft, CheckCircle, Check
+  ArrowLeft, CheckCircle, Check, X
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
@@ -303,6 +319,41 @@ const markAsCompleted = async () => {
   }
 }
 
+// Annuler la commande
+const cancelOrder = async () => {
+  if (!confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) {
+    return
+  }
+  
+  try {
+    if (!orderId) {
+      showToast.error('Erreur', 'ID de commande manquant')
+      return
+    }
+    
+    const { error } = await supabase
+      .from('orders')
+      .update({ 
+        status: 'cancelled',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId)
+
+    if (error) throw error
+
+    showToast.success('Succès', 'Commande annulée avec succès')
+    order.value.status = 'cancelled'
+  } catch (error) {
+    console.error('Erreur lors de l\'annulation de la commande:', error)
+    showToast.error('Erreur', 'Impossible d\'annuler la commande')
+  }
+}
+
+// Vérifier si la commande peut être annulée
+const canCancelOrder = (status: string) => {
+  return status === 'pending' || status === 'processing'
+}
+
 // Formater la date et l'heure
 const formatDateTime = (timestamp: string) => {
   if (!timestamp) return ''
@@ -332,6 +383,8 @@ const getStatusClass = (status: string) => {
       return 'bg-blue-100 text-blue-800'
     case 'completed':
       return 'bg-green-100 text-green-800'
+    case 'cancelled':
+      return 'bg-red-100 text-red-800'
     default:
       return 'bg-gray-100 text-gray-800'
   }
@@ -346,6 +399,8 @@ const getStatusText = (status: string) => {
       return 'En traitement'
     case 'completed':
       return 'Terminée'
+    case 'cancelled':
+      return 'Annulée'
     default:
       return status
   }

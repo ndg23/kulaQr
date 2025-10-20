@@ -108,13 +108,14 @@ export interface Order {
   updated_at?: string;
 }
 
-export type OrderStatus = 'pending' | 'processing' | 'completed';
+export type OrderStatus = 'pending' | 'processing' | 'completed' | 'cancelled';
 
 export interface StatusMessage {
   [key: string]: string;
   pending: string;
   processing: string;
   completed: string;
+  cancelled: string;
 }
 
 // Types pour la base de données
