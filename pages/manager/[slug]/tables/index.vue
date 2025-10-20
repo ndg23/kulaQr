@@ -462,7 +462,7 @@ const saveTable = async () => {
       type: tableForm.value.type,
       zone: tableForm.value.zone,
       description: tableForm.value.description,
-      qr_url: editingTable.value ? editingTable.value.qr_code_url : null,
+      qr_code_url: editingTable.value ? editingTable.value.qr_code_url : null,
       establishment_id: establishment.value.id
     }
 

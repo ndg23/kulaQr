@@ -10,9 +10,9 @@
           >
             <ArrowLeft class="w-6 h-6" />
           </NuxtLink>
+          <!-- <span class="text-gray-500 font-medium text-xl font-bold text-blue-600 ml-2">Commande</span> -->
           <h1 class="text-2xl font-bold text-gray-900">
-            Commande #{{ orderId ? orderId.substring(0, 8) : '---' }}
-          </h1>
+Details de la commande          </h1>
         </div>
         <div>
           <span 
@@ -358,12 +358,7 @@ const canCancelOrder = (status: string) => {
 const formatDateTime = (timestamp: string) => {
   if (!timestamp) return ''
   const date = new Date(timestamp)
-  return date.toLocaleString('fr-FR', { 
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit', 
-    minute: '2-digit'
-  })
+  return date.toLocaleString('fr-FR')
 }
 
 // Formater le prix

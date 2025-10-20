@@ -2,7 +2,7 @@
   <div>
     <!-- Header principal avec le nom de l'établissement -->
     <header class="bg-white/70 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-100">
-      <div class="max-w-5xl mx-auto px-4 py-4 sm:px-6 flex justify-between items-center">
+      <div class="max-w-4xl mx-auto px-4 py-4 sm:px-6 flex justify-between items-center">
         <div class="flex items-center">
           <img class="h-8 w-auto mr-3" src="~/assets/icon/logo.png" alt="Logo" />
           <h1 class="text-xl font-bold text-gray-900">
@@ -11,16 +11,16 @@
         </div>
         <div class="flex items-center space-x-4">
           <!-- Indicateur de connexion en temps réel -->
-          <span v-if="realtimeStatus === 'connected'" class="hidden sm:flex items-center text-sm text-green-600">
+          <!-- <span v-if="realtimeStatus === 'connected'" class="hidden sm:flex items-center text-sm text-green-600">
             <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
             En direct
-          </span>
+          </span> -->
           
           <!-- Badge du rôle -->
-          <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+          <!-- <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
             :class="getRoleBadgeClass(staffSession.role)">
             {{ getRoleName(staffSession.role) }}
-          </span>
+          </span> -->
           
           <!-- Menu utilisateur -->
           <div class="relative" ref="userMenuContainer">
@@ -54,12 +54,11 @@
     </header>
 
     <!-- Navigation principale -->
-    <nav class="bg-white border-b border-gray-100">
+    <!-- <nav class="bg-white border-b border-gray-100">
       <div class="max-w-5xl mx-auto px-4 sm:px-6">
         <div class="flex justify-between h-14">
           <div class="flex">
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <!-- Liens de navigation -->
               <NuxtLink 
                 to="/staff" 
                 class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
@@ -102,7 +101,6 @@
             </div>
           </div>
           
-          <!-- Navigation mobile -->
           <div class="sm:hidden">
             <button 
               @click="mobileMenuOpen = !mobileMenuOpen" 
@@ -116,7 +114,6 @@
         </div>
       </div>
       
-      <!-- Menu mobile -->
       <div v-if="mobileMenuOpen" class="sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
           <NuxtLink 
@@ -160,7 +157,7 @@
           </NuxtLink>
         </div>
       </div>
-    </nav>
+    </nav> -->
   </div>
 </template>
 
