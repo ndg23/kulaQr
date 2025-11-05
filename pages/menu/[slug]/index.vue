@@ -152,11 +152,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { UtensilsCrossed, Store, Loader2 } from 'lucide-vue-next'
-import type { CartItem, OrderData, Product } from '~/types'
+import { decodeTableHashids } from '~/utils/secure-encoding'
 
 const route = useRoute()
 const slug = route.params.slug as string
 const supabase = useSupabaseClient()
+
+// Utiliser le composable de tracking QR
+const { trackScan } = useQRTracking()
 
 // State
 const establishment = ref(null)
@@ -215,6 +218,14 @@ const fetchData = async () => {
     
     if (establishmentError) throw establishmentError
     establishment.value = establishmentData
+    
+    // Tracker le scan maintenant que l'établissement est chargé
+    // if (tableNumber.value) {
+    //   await trackScan({
+    //     establishmentId: establishmentData.id,
+    //     tableNumber: tableNumber.value
+    //   })
+    // }
     
     const { data: categoriesData, error: categoriesError } = await supabase
       .from('categories')
@@ -387,6 +398,12 @@ const placeOrder = async () => {
     
     if (orderError) throw orderError
     
+    // Tracker l'événement de commande passée
+    await trackScan({
+      establishmentId: establishment.value?.id,
+      tableNumber: tableNumber.value
+    })
+    
     // Sauvegarder l'ID de la commande
     currentOrderId.value = orderData.id
     
@@ -473,10 +490,35 @@ const dismissSessionBanner = () => {
   console.log('❌ Session ignorée')
 }
 
-const tableNumber = computed(() => route.query.table ? Number(route.query.table) : null)
+const tableNumber = computed(() => {
+  const encodedTable = route.query.table as string
+  if (!encodedTable) return null
+  
+  // Si c'est déjà un numéro (rétrocompatibilité), utiliser directement
+  const parsed = parseInt(encodedTable)
+  if (!isNaN(parsed)) return parsed
+  
+  // Sinon, essayer de décoder si l'établissement est chargé
+  if (establishment.value?.id) {
+    try {
+      const decoded = decodeTableHashids(encodedTable, establishment.value.id)
+      console.log('Table décodée avec succès:', decoded)
+      return decoded
+    } catch (error) {
+      console.warn('Erreur de décodage du numéro de table:', error)
+      return null
+    }
+  }
+  
+  return null
+})
 const showTableBanner = computed(() => tableNumber.value !== null)
 
 onMounted(() => {
+//   if (!useCookie('kula_scan_session').value) {
+//   return navigateTo('/invalid') // pas issu d’un scan
+// }
+
   fetchData()
 })
 </script>

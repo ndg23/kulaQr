@@ -250,3 +250,248 @@ BEGIN
     RAISE NOTICE '   - get_restaurant_dashboard_kpis(establishment_uuid) [MAIN FUNCTION]';
     RAISE NOTICE '✅ Ready to use in dashboard!';
 END $$;
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION get_restaurant_kpis(establishment_uuid UUID)
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+  today_start TIMESTAMP;
+  yesterday_start TIMESTAMP;
+BEGIN
+  today_start := CURRENT_DATE;
+  yesterday_start := CURRENT_DATE - INTERVAL '1 day';
+
+  SELECT json_build_object(
+    -- ========== COMMANDES ==========
+    'orders_count_today', (
+      SELECT COUNT(*)
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND created_at >= today_start
+        AND status != 'cancelled'
+    ),
+    
+    'orders_count_yesterday', (
+      SELECT COUNT(*)
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND created_at >= yesterday_start
+        AND created_at < today_start
+        AND status != 'cancelled'
+    ),
+    
+    'orders_count_total', (
+      SELECT COUNT(*)
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND status != 'cancelled'
+    ),
+    
+    -- ========== MONTANT TOTAL ==========
+    'revenue_today', (
+      SELECT COALESCE(SUM(total_amount), 0)
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND created_at >= today_start
+        AND status IN ('confirmed', 'processing', 'completed')
+    ),
+    
+    'revenue_yesterday', (
+      SELECT COALESCE(SUM(total_amount), 0)
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND created_at >= yesterday_start
+        AND created_at < today_start
+        AND status IN ('confirmed', 'processing', 'completed')
+    ),
+    
+    'revenue_total', (
+      SELECT COALESCE(SUM(total_amount), 0)
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND status IN ('confirmed', 'processing', 'completed')
+    ),
+    
+    'revenue_this_month', (
+      SELECT COALESCE(SUM(total_amount), 0)
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
+        AND status IN ('confirmed', 'processing', 'completed')
+    ),
+    
+    -- ========== PANIER MOYEN ==========
+    'avg_order_value_today', (
+      SELECT COALESCE(ROUND(AVG(total_amount), 0), 0)
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND created_at >= today_start
+        AND status IN ('confirmed', 'processing', 'completed')
+    ),
+    
+    'avg_order_value_overall', (
+      SELECT COALESCE(ROUND(AVG(total_amount), 0), 0)
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND status IN ('confirmed', 'processing', 'completed')
+    ),
+    
+    -- ========== SCANS QR ==========
+    'qr_scans_today', (
+      SELECT COUNT(*)
+      FROM qr_scans
+      WHERE establishment_id = establishment_uuid
+        AND created_at >= today_start
+    ),
+    
+    'qr_scans_yesterday', (
+      SELECT COUNT(*)
+      FROM qr_scans
+      WHERE establishment_id = establishment_uuid
+        AND created_at >= yesterday_start
+        AND created_at < today_start
+    ),
+    
+    'qr_scans_total', (
+      SELECT COUNT(*)
+      FROM qr_scans
+      WHERE establishment_id = establishment_uuid
+    ),
+    
+    -- ========== TAUX DE CONVERSION QR ==========
+    -- 'conversion_rate', (
+    --   WITH qr_sessions AS (
+    --     SELECT DISTINCT session_id
+    --     FROM qr_scans
+    --     WHERE establishment_id = establishment_uuid
+    --       AND created_at >= today_start
+    --       AND session_id IS NOT NULL
+    --   ),
+    --   orders_from_qr AS (
+    --     SELECT COUNT(DISTINCT o.id) as order_count
+    --     FROM orders o
+    --     INNER JOIN qr_scans qs ON o.establishment_id = qs.establishment_id
+    --       AND o.table_number = qs.table_number
+    --       AND o.created_at >= qs.created_at
+    --       AND o.created_at <= qs.created_at + INTERVAL '30 minutes'
+    --     WHERE o.establishment_id = establishment_uuid
+    --       AND o.created_at >= today_start
+    --       AND o.status != 'cancelled'
+    --   )
+    --   SELECT CASE 
+    --     WHEN (SELECT COUNT(*) FROM qr_sessions) > 0
+    --     THEN ROUND(((SELECT order_count FROM orders_from_qr)::DECIMAL / (SELECT COUNT(*) FROM qr_sessions) * 100), 1)
+    --     ELSE 0
+    --   END
+    -- ),
+    
+    -- ========== PANIER MOYEN QR ==========
+    'avg_qr_order_value', (
+      SELECT COALESCE(ROUND(AVG(o.total_amount), 0), 0)
+      FROM orders o
+      INNER JOIN qr_scans qs ON o.establishment_id = qs.establishment_id
+        AND o.table_number = qs.table_number
+        AND o.created_at >= qs.created_at
+        AND o.created_at <= qs.created_at + INTERVAL '30 minutes'
+      WHERE o.establishment_id = establishment_uuid
+        AND o.created_at >= today_start
+        AND o.status IN ('confirmed', 'processing', 'completed')
+    ),
+    
+    -- ========== CROISSANCE ==========
+    'orders_growth', (
+      SELECT CASE 
+        WHEN COUNT(*) FILTER (WHERE created_at >= yesterday_start AND created_at < today_start) > 0
+        THEN ROUND(
+          ((COUNT(*) FILTER (WHERE created_at >= today_start)::DECIMAL 
+          - COUNT(*) FILTER (WHERE created_at >= yesterday_start AND created_at < today_start))
+          / COUNT(*) FILTER (WHERE created_at >= yesterday_start AND created_at < today_start) * 100), 1
+        )
+        ELSE CASE 
+          WHEN COUNT(*) FILTER (WHERE created_at >= today_start) > 0 THEN 100
+          ELSE 0
+        END
+      END
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND status != 'cancelled'
+    ),
+    
+    'revenue_growth', (
+      SELECT CASE 
+        WHEN COALESCE(SUM(total_amount) FILTER (WHERE created_at >= yesterday_start AND created_at < today_start), 0) > 0
+        THEN ROUND(
+          ((COALESCE(SUM(total_amount) FILTER (WHERE created_at >= today_start), 0) 
+          - COALESCE(SUM(total_amount) FILTER (WHERE created_at >= yesterday_start AND created_at < today_start), 0))
+          / COALESCE(SUM(total_amount) FILTER (WHERE created_at >= yesterday_start AND created_at < today_start), 1) * 100), 1
+        )
+        ELSE CASE 
+          WHEN COALESCE(SUM(total_amount) FILTER (WHERE created_at >= today_start), 0) > 0 THEN 100
+          ELSE 0
+        END
+      END
+      FROM orders
+      WHERE establishment_id = establishment_uuid
+        AND status IN ('confirmed', 'processing', 'completed')
+    ),
+    
+    'scans_growth', (
+      SELECT CASE 
+        WHEN COUNT(*) FILTER (WHERE created_at >= yesterday_start AND created_at < today_start) > 0
+        THEN ROUND(
+          ((COUNT(*) FILTER (WHERE created_at >= today_start)::DECIMAL 
+          - COUNT(*) FILTER (WHERE created_at >= yesterday_start AND created_at < today_start))
+          / COUNT(*) FILTER (WHERE created_at >= yesterday_start AND created_at < today_start) * 100), 1
+        )
+        ELSE CASE 
+          WHEN COUNT(*) FILTER (WHERE created_at >= today_start) > 0 THEN 100
+          ELSE 0
+        END
+      END
+      FROM qr_scans
+      WHERE establishment_id = establishment_uuid
+    ),
+    
+    -- ========== STATUTS DES COMMANDES ==========
+    'orders_by_status', (
+      SELECT json_object_agg(status, count)
+      FROM (
+        SELECT status, COUNT(*) as count
+        FROM orders
+        WHERE establishment_id = establishment_uuid
+          AND created_at >= today_start
+        GROUP BY status
+      ) status_counts
+    ),
+    
+    -- ========== TOP 5 PRODUITS ==========
+    'top_products', (
+      SELECT json_agg(row_to_json(t))
+      FROM (
+        SELECT 
+          p.name,
+          SUM(oi.quantity) as quantity_sold,
+          SUM(oi.subtotal) as revenue
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        JOIN orders o ON oi.order_id = o.id
+        WHERE o.establishment_id = establishment_uuid
+          AND o.created_at >= today_start
+          AND o.status IN ('confirmed', 'processing', 'completed')
+        GROUP BY p.id, p.name
+        ORDER BY quantity_sold DESC
+        LIMIT 5
+      ) t
+    )
+    
+  ) INTO result;
+  
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql;

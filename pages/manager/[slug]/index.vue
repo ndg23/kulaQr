@@ -212,7 +212,8 @@ import {
   ArrowRight,
   QrCode,
   Target,
-  Eye
+  Eye,
+  DollarSignIcon
 } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
@@ -256,7 +257,7 @@ const loadData = async () => {
     if (!establishment.value?.id) return
     
     const { data: kpiData, error: kpiError } = await (supabase as any)
-      .rpc('get_restaurant_dashboard_kpis', { establishment_uuid: establishment.value.id })
+      .rpc('get_restaurant_kpis', { establishment_uuid: establishment.value.id })
     
     if (kpiError) throw kpiError
     
@@ -269,9 +270,14 @@ const loadData = async () => {
         icon: QrCode
       },
       {
-        name: 'Taux de conversion',
-        value: `${kpis.conversion_rate || 0}%`,
-        icon: Target
+name: 'Commandes aujourd\'hui',
+        value: kpis.orders_count_today?.toString() || '0',
+        icon: ShoppingCart
+      },
+      {
+        name: 'Montant total des commandes',
+        value: formatPrice(kpis.revenue_today || 0),
+        icon: DollarSignIcon
       },
       {
         name: 'Panier moyen',

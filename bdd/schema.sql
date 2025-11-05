@@ -228,6 +228,8 @@ CREATE TABLE qr_codes (
 CREATE TABLE qr_scans (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     establishment_id UUID REFERENCES establishments(id),
+    table_number INTEGER,
+    session_id TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     user_agent TEXT,
     ip_address INET,
@@ -294,6 +296,7 @@ CREATE INDEX IF NOT EXISTS idx_qr_codes_establishment_id ON qr_codes(establishme
 
 -- QR scans indexes
 CREATE INDEX IF NOT EXISTS idx_qr_scans_establishment_id ON qr_scans(establishment_id);
+CREATE INDEX IF NOT EXISTS idx_qr_scans_session_id ON qr_scans(session_id);
 CREATE INDEX IF NOT EXISTS idx_qr_scans_created_at ON qr_scans(created_at);
 
 -- Staff activity indexes

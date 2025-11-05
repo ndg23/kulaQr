@@ -1,4 +1,5 @@
 import { serverSupabaseClient } from '#supabase/server'
+import { encodeTableHashids,decodeTableHashids } from '~/utils/secure-encoding'
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id
@@ -10,44 +11,70 @@ export default defineEventHandler(async (event) => {
     })
   }
   
-  const supabase = serverSupabaseClient(event)
+  const supabase = await serverSupabaseClient(event)
+  const query = getQuery(event)
+  const tableParam = query.table as string | undefined
   
   try {
-    // Récupérer les informations du QR code
-    const { data: qrData, error: qrError } = await supabase
-      .from('qr_codes')
-      .select('id, table_number, establishment_id, establishments(id, name, slug)')
+    // Récupérer les informations de l'établissement
+    const { data: establishmentData, error: establishmentError } = await supabase
+      .from('establishments')
+      .select('*')
       .eq('id', id)
-      .single()
-    
-    if (qrError || !qrData) {
+      .single() 
+    console.log('====================================');
+    console.log(establishmentData);
+    console.log('====================================');
+    if (establishmentError || !establishmentData) {
       throw createError({
         statusCode: 404,
-        message: 'QR code non trouvé'
+        message: 'Établissement non trouvé'
       })
+    }
+    
+    // Décoder le numéro de table si fourni
+    let actualTableNumber = null
+    if (tableParam) {
+      const decoded = decodeTableHashids(tableParam, establishmentData.id)
+      if (decoded !== null) {
+        actualTableNumber = decoded
+      }
     }
     
     // Récupérer les informations de la requête
     const headers = getRequestHeaders(event)
     const userAgent = headers['user-agent'] || 'unknown'
     const referer = headers['referer'] || 'direct'
-    
+      const ip = headers['x-forwarded-for'] || headers['x-real-ip'] || ''
+
     // Enregistrer le scan dans la base de données
-    await supabase.from('qr_scans').insert({
-      qr_code_id: id,
-      establishment_id: qrData.establishment_id,
-      user_agent: userAgent,
-      referrer: referer,
-      table_number: qrData.table_number
+    const { error: scanError } = await supabase
+      .from('qr_scans')
+      .insert({
+        establishment_id: establishmentData.id,
+        table_number: actualTableNumber,
+        user_agent: userAgent,
+        referrer: referer,
+        ip_address: ip
+      } as any)
+    
+    setCookie(event, 'kula_scan_session', 'ok', {
+      maxAge: 60 * 5, // 5 minutes
+      httpOnly: false,
+      sameSite: 'lax',
     })
     
+    if (scanError) {
+      console.error('Erreur enregistrement scan QR:', scanError)
+    }
+    console.log('✅ Scan QR enregistré pour établissement', establishmentData.id, 'table', actualTableNumber)
     // Retourner les informations nécessaires pour la redirection
     return {
-      slug: qrData.establishments.slug,
-      table: qrData.table_number,
+      slug: establishmentData.slug,
+      table: actualTableNumber,
       establishment: {
-        id: qrData.establishment_id,
-        name: qrData.establishments.name
+        id: establishmentData.id,
+        name: establishmentData.name
       }
     }
     

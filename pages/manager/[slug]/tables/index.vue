@@ -326,8 +326,7 @@ import { useCustomToast } from '~/composables/useToast'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useEstablishment } from '~/composables/useEstablishment'
 import QrCodeCard from '~/components/QrCodeCard.vue'
-import FloatLabelInput from '~/components/FloatLabelInput.vue'
-import FloatLabelSelect from '~/components/FloatLabelSelect.vue'
+import { encodeTableHashids } from '~/utils/secure-encoding'
 
 const { showToast } = useCustomToast()
 const { client: supabase } = useSupabaseWrapper()
@@ -397,7 +396,7 @@ const loadTables = async () => {
 }
 
 const viewMenuTable = (table: any) => {
-  navigateTo(`/menu/${establishment.value?.slug}?table=${table.number}`)
+  navigateTo(`/qr/${establishment.value?.id}?table=${table.number}`)
   showToast.success('Ouverture', 'Menu ouvert dans un nouvel onglet')
 }
 
@@ -441,8 +440,11 @@ const generateQrCode = async (table: any) => {
   try {
     loading.value = true
     
-    // Générer l'URL du menu pour cette table spécifique
-    const tableMenuUrl = `${window.location.origin}/qr/${establishment.value.id}?table=${table.number}`
+    // Encoder le numéro de table pour le cacher
+    const encodedTableNumber = encodeTableHashids(table.number, establishment.value.id)
+    
+    // Générer l'URL du menu pour cette table spécifique avec le numéro encodé
+    const tableMenuUrl = `${window.location.origin}/qr/${establishment.value.id}?table=${encodedTableNumber}`
     
     // Mettre à jour la table avec l'URL du QR code
     const { error } = await supabase
