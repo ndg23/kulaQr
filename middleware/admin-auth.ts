@@ -19,7 +19,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     // Vérifier si l'utilisateur a le rôle admin
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('role, status')
+      .select('role, is_active')
       .eq('id', user.id)
       .single()
 
@@ -39,7 +39,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     }
 
     // Vérifier le statut actif
-    if (userData.status !== 'active') {
+    if (userData.is_active !== true) {
       throw createError({
         statusCode: 403,
         message: 'Compte désactivé'

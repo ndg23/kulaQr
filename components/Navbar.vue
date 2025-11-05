@@ -1,6 +1,6 @@
 <template>
-  <nav class="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100/50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <nav class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100">
+    <div class="max-w-7xl bg-white mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
         <div class="flex items-center">
@@ -8,7 +8,7 @@
             <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
               <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
             </div>
-            <span class="text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
+            <span class="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
               Kula <span class="text-kula-500 fontex-bold font-black">Qr</span>
             </span>
           </NuxtLink>
@@ -154,10 +154,10 @@
         </div>
 
         <!-- Mobile menu button -->
-        <div class="md:hidden">
-          <button 
-            @click="mobileMenuOpen = !mobileMenuOpen"
-            class="text-gray-600 hover:text-gray-900 transition-colors p-2"
+        <div class="md:hidden ">
+          <button
+            @click="toggleMobileMenu"
+            class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 p-3"
           >
             <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -170,7 +170,7 @@
       </div>
 
       <!-- Mobile Navigation Menu -->
-      <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-xl">
+      <div v-if="mobileMenuOpen" class="border-t border-gray-100 bg-white/95 backdrop-blur-xl">
         <div class="px-2 pt-2 pb-3 space-y-1">
           <a href="#features" @click="mobileMenuOpen = false" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
             Fonctionnalités
@@ -349,6 +349,12 @@ const getUserInitials = (name: string | null) => {
 const toggleUserMenu = () => {
   console.log('🔄 Toggle user menu:', !userMenuOpen.value)
   userMenuOpen.value = !userMenuOpen.value
+}
+
+// Toggle mobile menu
+const toggleMobileMenu = () => {
+  console.log('🔄 Toggle mobile menu:', !mobileMenuOpen.value)
+  mobileMenuOpen.value = !mobileMenuOpen.value
 }
 
 // Handle logout

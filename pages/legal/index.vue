@@ -5,10 +5,8 @@
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-center justify-between h-16 sm:h-20">
           <NuxtLink to="/" class="flex items-center">
-            <div class="w-8 sm:w-10 h-8 sm:h-10 bg-black rounded-lg flex items-center justify-center mr-3">
-              <span class="text-white text-lg sm:text-xl font-bold">KQ</span>
-            </div>
-            <span class="text-black text-lg sm:text-xl font-medium">KulaQr</span>
+           <img src="/images/logo.png" alt="Kula QR" class="h-8 sm:h-10" />
+            <span class="text-black text-lg sm:text-xl font-medium">Kula QR</span>
           </NuxtLink>
           <NuxtLink to="/" class="text-sm text-gray-500 hover:text-black transition-colors">
             Retour à l'accueil
@@ -67,7 +65,7 @@
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex flex-col sm:flex-row justify-between items-center">
           <div class="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-0">
-            © 2025 KulaQr. Tous droits réservés.
+            © 2025 Kula QR. Tous droits réservés.
           </div>
           <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
             <NuxtLink to="/" class="text-gray-500 text-xs sm:text-sm hover:text-black transition-colors">

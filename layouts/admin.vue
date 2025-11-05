@@ -197,7 +197,8 @@ import {
   Menu as MenuIcon,
   X,
   QrCode,
-  BarChart3
+  BarChart3,
+  Headphones
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -232,6 +233,12 @@ const navigationItems = [
     path: '/admin/qr-codes',
     active: 'qr-codes',
     icon: QrCode
+  },
+  {
+    name: 'Support QR',
+    path: '/admin/qr-support-requests',
+    active: 'qr-support-requests',
+    icon: Headphones
   },
   {
     name: 'Stats',

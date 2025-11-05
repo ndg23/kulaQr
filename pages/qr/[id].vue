@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const id = route.params.id as string
+const tableParam = route.query.table as string | undefined
 
 const { data, error } = await useFetch(`/api/qr/scan/${id}`, {
   method: 'POST'
@@ -13,8 +14,8 @@ if (error.value) {
   })
 }
 
-// Rediriger vers le menu de l'établissement
-navigateTo(`/menu/${data.value?.slug}`)
+// Rediriger vers le menu de l'établissement avec le numéro de table
+navigateTo(`/menu/${data.value?.slug}?table=${tableParam}`)
 </script>
 
 <template>

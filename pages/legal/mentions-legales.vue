@@ -8,7 +8,7 @@
             <div class="w-8 sm:w-10 h-8 sm:h-10 bg-black rounded-lg flex items-center justify-center mr-3">
               <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
             </div>
-            <span class="text-black text-lg sm:text-xl font-medium">Kula <span class="text-kula-500 font-bold font-black">Qr</span></span>
+            <span class="text-black text-lg sm:text-xl font-medium">Kula <span class="text-kula-500 font-bold font-black">QR</span></span>
           </NuxtLink>
           <div class="flex items-center space-x-6">
             <NuxtLink to="/legal/cgu" class="text-sm text-gray-500 hover:text-black transition-colors">
@@ -39,7 +39,7 @@
 
             <h2 class="text-xl sm:text-2xl font-medium text-black mt-8 mb-4">Éditeur du site</h2>
             <p>
-              <strong>Kula Qr SARL</strong><br>
+              <strong>Kula QR SARL</strong><br>
               Société par actions simplifiée au capital de 100 000 FCFA<br>
               Siège social : Point E, Rue de Saint-Louis, Dakar, Sénégal<br>
               Directeur de la publication : Nd Gallogho NDIAYE
@@ -82,7 +82,7 @@
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex flex-col sm:flex-row justify-between items-center">
           <div class="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-0">
-            © 2025 Kula Qr. Tous droits réservés.
+            © 2025 Kula QR. Tous droits réservés.
           </div>
           <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
             <NuxtLink to="/" class="text-gray-500 text-xs sm:text-sm hover:text-black transition-colors">

@@ -1,7 +1,7 @@
 <template>
-  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md w-full border-b border-gray-100">
     <div class="max-w-7xl mx-auto px-6 py-4">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between flex-wrap">
         <!-- Left side - Title and breadcrumb -->
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-3">

@@ -1,25 +1,25 @@
 <template>
-      <div class="bg-white rounded-[32px] px-10 py-2 pb-15 max-w-[360px] w-full  text-center">
+      <div class="bg-white rounded-[32px]  w-full  text-center">
         <!-- Header -->
-        <div class="mb-10">
+        <div class="mb-1">
           <div class="text-[28px] font-bold text-gray-900 mb-1.5 tracking-tight">
             {{ restaurantName }}
           </div>
-          <div class="text-[16px] text-black -500 font-black trac-king-tight">
-            Menu
+          <div class="text-[16px] text-black -500 font-black tracking-tight">
+            {{Number.isNaN(Number(tableNumber)) ? '' : `N° ${tableNumber}`}}
           </div>
         </div>
         
         <!-- QR Section -->
-        <div class="mx-auto mb-9">
-          <div class=" mx-auto w-fit p-3 rounded-3xl border-2 border-orange-200">
-            <div class="bg-white inline-block rounded-xl p-1">
+        <div class="mx-auto mb-2">
+          <div class=" mx-auto w-fit p-3 rounded-s3xl- border-s2-- ---border-orange-200">
+            <div class="bg-white inline-block rounded-3xl p-1">
               <!-- QR Code dynamique -->
-              <img 
-                v-if="qrCodeImage" 
-                :src="qrCodeImage" 
+              <img
+                v-if="qrCodeImage"
+                :src="qrCodeImage"
                 alt="QR Code Menu"
-                class="block w-[300px] h-[280px]"
+                class="block w-[300px] h-[300px] object-contain"
               />
               <div v-else class="w-[280px] h-[280px] flex items-center justify-center">
                 <div class="text-center">
@@ -36,15 +36,15 @@
         </div>
         
         <!-- Scan Text -->
-        <div class="text-orange-500 text-[22px] font-semibold mb-2 tracking-tight">
-          Scannez pour voir le menu
-        </div>
-        <div class="text-gray-500 text-[15px] leading-relaxed font-normal tracking-tight mb-8">
+        <h3 class="text-orange-500 text-[22px] font-semibold mb-2 track-ing-tight">
+          Scannez pour commander
+        </h3>
+        <h4 class="text-gray-500 text-[15px] leading-relaxed font-normal tracki-ng-tight mb-8">
           Pointez votre caméra vers le QR code
-        </div>
+        </h4>
         
         <!-- Features -->
-        <div class="flex justify-center gap-6 mb-8">
+        <!-- <div class="flex justify-center gap-6 mb-8">
           <div class="flex items-center gap-2 text-gray-500 text-[13px]">
             <div class="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs">
               ✓
@@ -57,15 +57,15 @@
             </div>
             <span>Sans contact</span>
           </div>
-        </div>
+        </div> -->
         
         <!-- Divider -->
         <div class="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-6"></div>
         
         <!-- Footer -->
         <div class="flex items-center justify-center gap-1.5 text-[13px] text-gray-500 font-normal">
-          <div class="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
-          <span>Par Kula Qr</span>
+          <span>Propulsé par</span>
+          <span class="font-bold text-gray-900">KulaQR</span>
       </div>
     </div>
   </template>
@@ -86,13 +86,49 @@
     restaurantId: {
       type: String,
       default: ''
+    },
+    tableNumber: {
+      type: [String, Number],
+      default: ''
     }
   })
   
   // État du QR code
   const qrCodeImage = ref('')
-  const isGenerating = ref(false)
-  
+const isGenerating = ref(false)
+
+const roundImageCorners = (dataUrl, radius = 40) => {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      
+      canvas.width = img.width
+      canvas.height = img.height
+      
+      // Créer un chemin avec coins arrondis
+      ctx.beginPath()
+      ctx.moveTo(radius, 0)
+      ctx.lineTo(canvas.width - radius, 0)
+      ctx.quadraticCurveTo(canvas.width, 0, canvas.width, radius)
+      ctx.lineTo(canvas.width, canvas.height - radius)
+      ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width - radius, canvas.height)
+      ctx.lineTo(radius, canvas.height)
+      ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height - radius)
+      ctx.lineTo(0, radius)
+      ctx.quadraticCurveTo(0, 0, radius, 0)
+      ctx.closePath()
+      ctx.clip()
+      
+      // Dessiner l'image
+      ctx.drawImage(img, 0, 0)
+      
+      resolve(canvas.toDataURL('image/png'))
+    }
+    img.src = dataUrl
+  })
+}  
 // Générer le QR code avec tracking
 const generateQrCode = async () => {
   if (!props.menuLink) return
@@ -107,13 +143,15 @@ const generateQrCode = async () => {
       width: 512,
       margin: 2,
       color: {
-        dark: '#1d1d1f',
-        light: '#FFFFFF'
+        dark: '#FFFFFF',
+        light: '#f91919'
       },
       errorCorrectionLevel: 'M'
     })
 
-    qrCodeImage.value = qrCodeDataUrl
+    // Arrondir les coins de l'image QR code
+    qrCodeImage.value = await roundImageCorners(qrCodeDataUrl, 40)
+    
   } catch (err) {
     console.error('QR code generation error:', err)
   } finally {
@@ -159,14 +197,6 @@ const generateQrCode = async () => {
   @media print {
     .bg-gradient-to-b {
       background: white !important;
-    }
-    
-    .shadow-\[0_8px_32px_rgba\(0,0,0,0\.08\)\] {
-      box-shadow: none !important;
-    }
-    
-    .shadow-\[0_4px_24px_rgba\(255,107,53,0\.12\),0_0_0_1px_rgba\(255,107,53,0\.08\)\] {
-      box-shadow: 0 0 0 1px #ff6b35 !important;
     }
   }
   

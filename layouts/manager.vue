@@ -258,7 +258,8 @@ import {
   List,
   ChevronDown,
   Plus as PlusIcon,
-  Table
+  Table,
+  HelpCircle
 } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
@@ -310,6 +311,12 @@ const navigationItems = computed(() => [
     path: `/manager/${establishment.value?.id}/orders`,
     active: '/orders',
     icon: Clock
+  },
+  {
+    name: 'Support QR',
+    path: `/manager/${establishment.value?.id}/qr-support`,
+    active: '/qr-support',
+    icon: HelpCircle
   },
   {
     name: 'Staff',

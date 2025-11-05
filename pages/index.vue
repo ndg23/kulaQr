@@ -1,6 +1,6 @@
 
 <template>
-  <div class="min-h-screen bg-[#FFFBFB] relative">
+  <div class="min-h-screen bg-[#FFFBFB] relative overflow-hidden">
     <PatternBackground :opacity="0.8" :duration="60" />
     <div class="relative z-50">
       <!-- Navigation Bar -->
@@ -158,7 +158,7 @@
             </h2>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center items-center">
             <div class="group bg-white- p-8 rounded-2xl -shadow-lg hover:-shadow-2xl transition-all duration-300">
               <span class="block text-7xl md:text-8xl font-bold text-kula-500 mb-4 group-hover:scale-110 transition-transform duration-300">
                 50+
@@ -299,12 +299,12 @@
               Rejoignez les établissements qui ont déjà adopté KulaQr pour moderniser leur service
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <NuxtLink 
+              <NuxtLink
                 to="/auth/register"
-                class="w-full sm:w-auto px-8 py-4 bg-black text-white rounded-full text-lg font-medium hover:opacity-90 transition-all -shadow-lg hover:-shadow-xl hover:scale-[1.02] flex items-center justify-center group"
+                class="group w-full sm:w-auto px-8 py-4 bg-white border border-1 border-orange-500 text-gray-700 rounded-full text-lg font-medium hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 flex items-center justify-center shadow-sm hover:shadow-md"
               >
-                <span>Commencer gratuitement</span>
-                <ArrowRight class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                <span class="text-kula-500">Commencer gratuitement</span>
+                <ArrowRight class="w-5 h-5 ml-2 text-kula-500 transition-transform duration-300 ease-in-out group-hover:translate-x-1" />
               </NuxtLink>
               <!-- <a 
                 href="#pricing"
@@ -325,41 +325,41 @@
             <!-- Brand Column -->
             <div class="col-span-2 md:col-span-1">
               <div class="flex items-center mb-6">
-                <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center mr-3">
+                <!-- <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center mr-3">
                   <span class="text-white text-sm font-medium">KQ</span>
-                </div>
+                </div> -->
                 <span class="text-black text-lg font-medium">KulaQr</span>
               </div>
               <p class="text-gray-500 text-sm leading-relaxed">
                 La solution intelligente de menu QR code qui transforme l'expérience client.
               </p>
             </div>
-            
-           
-            
+
+
+
             <!-- Company -->
             <div>
               <h3 class="text-sm font-medium text-gray-900 mb-4">Entreprise</h3>
               <ul class="space-y-3">
-                <li><a href="/about" class="text-sm text-gray-500 hover:text-black transition-colors">À propos</a></li>
+                <!-- <li><a href="/about" class="text-sm text-gray-500 hover:text-black transition-colors">À propos</a></li> -->
                 <li><a href="/contact" class="text-sm text-gray-500 hover:text-black transition-colors">Contact</a></li>
               </ul>
             </div>
-            
+
             <!-- Contact -->
             <div>
               <h3 class="text-sm font-medium text-gray-900 mb-4">Contact</h3>
               <ul class="space-y-3">
                 <li class="text-sm text-gray-500">ndgallogho@gmail.com</li>
-                <li class="text-sm text-gray-500">+221 77 749 39 10</li>
+                <li class="text-sm text-gray-500">+221 77 749 ** **</li>
                 <li class="text-sm text-gray-500">Dakar, Senegal</li>
               </ul>
             </div>
           </div>
-          
+
           <!-- Footer Bottom -->
           <div class="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-6">
+            <!-- <div class="flex items-center gap-6">
               <a href="#" class="text-gray-400 hover:text-black">
                 <Twitter class="w-5 h-5" />
               </a>
@@ -369,40 +369,49 @@
               <a href="#" class="text-gray-400 hover:text-black">
                 <Linkedin class="w-5 h-5" />
               </a>
-            </div>
-            
+            </div> -->
+
             <div class="flex flex-wrap justify-center gap-6">
               <a href="/legal/mentions-legales" class="text-xs text-gray-500 hover:text-black">Mentions légales</a>
               <a href="/legal/privacy" class="text-xs text-gray-500 hover:text-black">Confidentialité</a>
               <a href="/legal/terms" class="text-xs text-gray-500 hover:text-black">CGU</a>
-              <span class="text-xs text-gray-500">© 2024 KulaQr</span>
+              <span class="text-xs text-gray-500">© 2025 Kula Qr</span>
             </div>
           </div>
         </div>
       </footer>
+
+      <!-- Auto-scroll Control Button -->
+      <!-- <button
+        @click="toggleAutoScroll"
+        class="fixed bottom-20 right-6 z-40 w-12 h-12 bg-white border border-gray-200 rounded-full shadow-lg hover:shadow-xl text-gray-700 hover:text-gray-900 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 flex items-center justify-center group"
+        :class="{ 'bg-kula-50 border-kula-300 text-kula-700': isAutoScrolling }"
+        aria-label="Contrôler le défilement automatique"
+      >
+        <svg v-if="!isAutoScrolling" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l.707.707A1 1 0 0012.414 11H13m-3 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </button> -->
     </div>
   </div>
 </template>
 
+
 <script setup lang="ts">
-import { useSeo } from '~/composables/useSeo'
+import { useSeo, useAutoScroll } from '~/composables/useSeo'
 import { useStructuredData } from '~/composables/useStructuredData'
 import {
   QrCode,
   ArrowRight,
-  Play,
   TrendingUp,
-  Users,
   Clock,
-  ChartBar,
   Shield,
   Check,
   Star,
-  Building2,
   UtensilsCrossed,
-  Twitter,
-  Instagram,
-  Linkedin,
   Menu,
   BarChart2
 } from 'lucide-vue-next'
@@ -434,50 +443,25 @@ const testimonials = [
   }
 ]
 
-const testimonialsDakar = [
-  {
-    name: 'Moussa Sow',
-    role: 'Le Patio Restaurant',
-    location: 'Almadies',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
-    text: "Nos clients VIP apprécient de ne plus attendre. Ils scannent le QR à l'entrée et on les notifie sur WhatsApp. Service 5 étoiles avec Yepp !"
-  },
-  {
-    name: 'Ndèye Bineta',
-    role: 'Trésor Beach',
-    location: 'NGor',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop',
-    text: "Pour notre plage privée, c'est idéal. Les clients commandent via QR depuis leur transat et nous gérons tout depuis notre téléphone. Moderne et efficace !"
-  },
-  {
-    name: 'Ousmane Thiam',
-    role: 'Garage Auto Thiam',
-    location: 'Grand Yoff',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop',
-    text: "Avant, les clients venaient 3 fois pour rien. Maintenant avec Yepp, ils savent exactement quand venir chercher leur voiture. Zéro perte de temps !"
-  },
-  {
-    name: 'Mariama Cissé',
-    role: 'Boutique Orange - HLM',
-    location: 'Grand Dakar',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop',
-    text: "On fait recharges, paiements, SIM... Yepp nous permet de gérer plusieurs services en même temps sans confusion. Les clients adorent voir leur position dans la file."
-  },
-  {
-    name: 'Abdoulaye Kane',
-    role: 'Pressing Excellence',
-    location: 'Sacré-Cœur',
-    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop',
-    text: "Mes clients déposent leur linge le matin, scannent le QR et je les notifie quand c'est prêt. Simple, pro et ça fait sérieux. Yepp c'est top !"
-  },
-  {
-    name: 'Khady Diagne',
-    role: 'Centre de Santé Yaye Khady',
-    location: 'Parcelles Assainies',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
-    text: "Dans un centre de santé, l'organisation c'est crucial. Avec Yepp, on gère consultations, vaccins et prélèvements sans mélanger. Les mamans avec bébés n'attendent plus longtemps !"
-  }
-]
+// Auto-scroll functionality
+// const {
+//   isAutoScrolling,
+//   startAutoScroll,
+//   stopAutoScroll,
+//   goToSection
+// } = useAutoScroll()
+
+// Toggle auto-scroll
+// const toggleAutoScroll = () => {
+//   if (isAutoScrolling.value) {
+//     stopAutoScroll()
+//   } else {
+//     // Define sections to auto-scroll through
+//     const sections = ['features', 'testimonials', 'pricing', 'contact']
+//     startAutoScroll(sections, 5000) // 5 seconds per section
+//   }
+// }
+
 // Configuration SEO pour la page d'accueil
 const { setHomeMeta } = useSeo()
 setHomeMeta()

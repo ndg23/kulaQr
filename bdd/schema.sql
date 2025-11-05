@@ -191,6 +191,7 @@ CREATE TABLE orders (
     establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
     table_id UUID REFERENCES tables(id),
     table_number INTEGER,
+    staff_id UUID REFERENCES staff(id) ON DELETE SET NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'ready', 'completed', 'cancelled')),
     total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
     payment_status VARCHAR(50) DEFAULT 'unpaid',
@@ -282,6 +283,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_table_id ON orders(table_id);
 CREATE INDEX IF NOT EXISTS idx_orders_table_number ON orders(table_number);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_staff_id ON orders(staff_id);
 
 -- Order items indexes
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);

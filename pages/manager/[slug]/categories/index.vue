@@ -12,99 +12,164 @@
       }"
     />
 
-    <!-- Search Bar -->
-    <div class="max-w-7xl mx-auto px-6 py-4">
-      <div class="relative">
-        <Search class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Rechercher une catégorie..."
-          class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
-        />
-      </div>
-    </div>
-     
-    <main class="max-w-7xl mx-auto px-6 py-8">
-      <!-- Loading State -->
-      <div v-if="loading" class="flex flex-col items-center justify-center py-20">
-        <div class="w-16 h-16 relative">
-          <div class="w-16 h-16 bg-gray-100 rounded-full animate-pulse"></div>
-          <Loader2 class="w-8 h-8 text-gray-400 animate-spin absolute inset-0 m-auto" />
+    <main class="max-w-7xl mx-auto px-8 pb-16 mt-2">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div
+          v-for="stat in quickStats"
+          :key="stat.name"
+          class="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
+        >
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center">
+              <component :is="stat.icon" class="w-6 h-6 text-gray-600" />
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
+              <p class="text-sm text-gray-500 mt-1">{{ stat.name }}</p>
+            </div>
+          </div>
         </div>
-        <p class="text-sm text-gray-500 mt-4">Chargement des catégories...</p>
       </div>
 
-      <!-- Empty State -->
-      <div v-else-if="categories.length === 0" class="text-center py-16">
-        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <UtensilsCrossed class="w-8 h-8 text-gray-400" />
+      <!-- Filters -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div class="flex flex-wrap gap-4 items-center">
+          <div class="flex items-center gap-2">
+            <Search class="w-5 h-5 text-gray-400" />
+            <span class="text-sm font-medium text-gray-700">Rechercher:</span>
+          </div>
+
+          <div class="relative flex-1 max-w-sm">
+            <Search class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Rechercher une catégorie..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Commencez votre menu</h3>
-        <p class="text-gray-500 mb-6">
-          Créez des catégories pour organiser vos produits et faciliter la navigation de vos clients.
-        </p>
-        <button
-          @click="openCategoryModal"
-          class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors"
-        >
-          Créer votre première catégorie
-        </button>
       </div>
 
       <!-- Categories Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <ManagerModernCard
-          v-for="category in filteredCategories" 
-          :key="category.id"
-          class="overflow-hidden"
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- Loading State -->
+        <div v-if="loading" class="col-span-full flex flex-col items-center justify-center py-20">
+          <div class="w-16 h-16 relative">
+            <div class="w-16 h-16 bg-gray-100 rounded-full animate-pulse"></div>
+            <Loader2 class="w-8 h-8 text-gray-400 animate-spin absolute inset-0 m-auto" />
+          </div>
+          <p class="text-sm text-gray-500 mt-4">Chargement des catégories...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="filteredCategories.length === 0" class="col-span-full text-center py-16">
+          <div class="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <UtensilsCrossed class="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">
+            {{ categories.length === 0 ? 'Commencez votre menu' : 'Aucune catégorie trouvée' }}
+          </h3>
+          <p class="text-gray-500 mb-6">
+            {{ categories.length === 0 
+              ? 'Créez des catégories pour organiser vos produits et faciliter la navigation de vos clients.'
+              : searchQuery ? "Aucune catégorie ne correspond à votre recherche." : "Aucune catégorie disponible." 
+            }}
+          </p>
+          <button
+            v-if="categories.length === 0"
+            @click="openCategoryModal"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors"
+          >
+            Créer votre première catégorie
+          </button>
+        </div>
+
+        <!-- Category Cards -->
+       <template v-else>
+  <div
+    v-for="category in filteredCategories"
+    :key="category.id"
+    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
+  >
+    <!-- Category Image -->
+    <div class="relative aspect-[4/3] overflow-hidden bg-gray-50">
+      <!-- Image principale -->
+      <img
+        v-if="category.image_url && !category.imageError"
+        :src="category.image_url"
+        :alt="category.name"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        @error="handleImageError(category)"
+        @load="handleImageLoad(category)"
+      />
+      
+      <!-- Fallback icon si pas d'image ou erreur -->
+      <div
+        v-else
+        class="absolute inset-0 flex items-center justify-center"
+      >
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center shadow-sm">
+          <component
+            :is="getCategoryIcon(category)"
+            class="w-8 h-8 text-blue-600"
+          />
+        </div>
+      </div>
+
+      <!-- Loading overlay pendant le chargement de l'image -->
+      <div
+        v-if="category.image_url && category.imageLoading"
+        class="absolute inset-0 flex items-center justify-center bg-gray-100/80 backdrop-blur-sm"
+      >
+        <div class="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Bouton Edit -->
+      <div class="absolute top-3 right-3">
+        <button
+          @click="editCategory(category)"
+          class="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 z-10"
         >
-          <!-- Category Image -->
-          <div class="aspect-[4/3] relative bg-gray-100 -m-6 mb-6">
-            <img
-              v-if="category.image_url"
-              :src="category.image_url"
-              :alt="category.name"
-              class="w-full h-full object-cover"
-            />
-            <div v-else class="absolute inset-0 flex items-center justify-center">
-              <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                  <component 
-                    :is="category.icon || UtensilsCrossed" 
-                  class="w-6 h-6 text-gray-500"
-                  />
-              </div>
-            </div>
-            <div class="absolute top-3 right-3">
-              <button 
-                @click="editCategory(category)"
-                class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
-              >
-                <Edit2 class="w-4 h-4 text-gray-600" />
-              </button>
-            </div>
-          </div>
+          <Edit2 class="w-5 h-5 text-gray-700" />
+        </button>
+      </div>
+    </div>
 
-          <!-- Category Info -->
-          <div class="p-4">
-            <div class="flex items-start justify-between gap-3 mb-2">
-              <h3 class="font-semibold text-gray-900 text-lg leading-tight">{{ category.name }}</h3>
-              <button
-                @click="deleteCategory(category.id)"
-                class="w-8 h-8 text-gray-400 hover:text-red-500 transition-colors"
-              >
-                <Trash2 class="w-4 h-4" />
-              </button>
-          </div>
+    <!-- Category Info -->
+    <div class="p-4">
+      <div class="flex items-start justify-between mb-2">
+        <div class="flex-1">
+          <h3 class="font-semibold text-gray-900 text-lg leading-tight mb-1">
+            {{ category.name }}
+          </h3>
+          <p class="text-sm text-gray-500">
+            {{ getProductCount(category.id) }} produit{{ getProductCount(category.id) > 1 ? 's' : '' }}
+          </p>
+        </div>
+        <button
+          @click="deleteCategory(category.id)"
+          class="w-10 h-10 border rounded-full text-gray-400 hover:text-red-500 transition-colors ml-2 flex items-center justify-center"
+        >
+          <X class="w-5 h-5" />
+        </button>
+      </div>
 
-            <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ category.description || 'Aucune description' }}</p>
+      <!-- Category Description -->
+      <p v-if="category.description" class="text-sm text-gray-600 mb-3 line-clamp-2">
+        {{ category.description }}
+      </p>
 
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-gray-500">{{ getProductCount(category.id) }} produits</span>
-              <span class="text-xs text-gray-400">{{ formatDate(category.created_at) }}</span>
-            </div>
-          </div>
-        </ManagerModernCard>
+      <!-- Creation Date -->
+      <div class="flex items-center justify-end">
+        <span class="text-xs text-gray-400">
+          Ajouté le {{ formatDate(category.created_at) }}
+        </span>
+      </div>
+    </div>
+  </div>
+</template>
       </div>
     </main>
 
@@ -153,9 +218,10 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import {
   Plus, Edit2, Trash2, UtensilsCrossed,
+  X,
   Coffee, Pizza, IceCream, Wine, Beer, Loader2,
   ImageIcon, Search, ArrowUpDown, Upload, Download,
-  ArrowRight, List
+  ArrowRight, List, TrendingUp
 } from 'lucide-vue-next'
 import CategoryModal from '~/components/modals/CategoryModal.vue'
 import {
@@ -202,6 +268,29 @@ const getCategoryProducts = (categoryId: string): Product[] => {
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(price)
+}
+
+const handleImageError = (category: Category) => {
+  category.imageError = true
+  category.imageLoaded = false
+}
+
+const handleImageLoad = (category: Category) => {
+  category.imageLoaded = true
+  category.imageError = false
+}
+
+const getCategoryIcon = (category: Category) => {
+  // Return appropriate icon based on category name or use default
+  const name = category.name?.toLowerCase() || ''
+  
+  if (name.includes('pizza') || name.includes('pâte')) return Pizza
+  if (name.includes('boisson') || name.includes('vin') || name.includes('bière')) return Wine
+  if (name.includes('glace') || name.includes('dessert')) return IceCream
+  if (name.includes('café') || name.includes('thé')) return Coffee
+  if (name.includes('bière') || name.includes('alcool')) return Beer
+  
+  return category.icon || UtensilsCrossed
 }
 
 const openCategoryModal = () => {
@@ -251,6 +340,8 @@ const saveCategory = async (categoryData: CategoryData) => {
         categories.value[index] = {
           ...categories.value[index],
           ...updatedCategory,
+          imageError: false,
+          imageLoaded: false,
           iconBg: 'bg-blue-50',
           iconColor: 'text-blue-500'
         }
@@ -272,6 +363,8 @@ const saveCategory = async (categoryData: CategoryData) => {
       // Ajout local
       categories.value.push({
         ...data,
+        imageError: false,
+        imageLoaded: false,
         iconBg: 'bg-blue-50',
         iconColor: 'text-blue-500'
       })
@@ -332,7 +425,13 @@ const loadData = async () => {
       .order('order_number')
 
     if (categoriesError) throw categoriesError
-    categories.value = categoriesData || []
+    
+    // Initialize image loading states for categories
+    categories.value = (categoriesData || []).map(cat => ({
+      ...cat,
+      imageError: false,
+      imageLoaded: false
+    }))
     
     // Load products
     const { data: productsData, error: productsError } = await supabase
@@ -381,11 +480,47 @@ const filteredCategories = computed(() => {
   )
 })
 
+// Quick stats
+const quickStats = computed(() => {
+  const categoriesWithProducts = categories.value.filter(cat => getProductCount(cat.id) > 0).length
+  const avgProductsPerCategory = categories.value.length > 0 
+    ? Math.round(products.value.length / categories.value.length) 
+    : 0
+
+  return [
+    {
+      name: 'Catégories',
+      value: categories.value.length,
+      icon: List
+    },
+    {
+      name: 'Produits',
+      value: products.value.length,
+      icon: UtensilsCrossed
+    },
+    {
+      name: 'Avec produits',
+      value: categoriesWithProducts,
+      icon: Coffee
+    },
+    {
+      name: 'Moy. produits/catégorie',
+      value: avgProductsPerCategory,
+      icon: TrendingUp
+    }
+  ]
+})
+
 // Formatage de la date
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('fr-FR', {
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
     day: 'numeric',
-    month: 'long'
+    month: 'long',
+    year: 'numeric',
+    
   })
 }
 </script>

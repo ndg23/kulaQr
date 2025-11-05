@@ -25,6 +25,8 @@ export interface Category {
   icon?: any;
   iconBg?: string;
   iconColor?: string;
+  imageError?: boolean;
+  imageLoaded?: boolean;
 }
 
 export interface CartItem {
@@ -140,4 +142,26 @@ export interface DatabaseOrderItem {
   };
 }
 
-export type ConnectionStatus = 'connected' | 'disconnected' | 'connecting'; 
+export type ConnectionStatus = 'connected' | 'disconnected' | 'connecting';
+
+// QR Support Request Types
+export interface QrSupportRequest {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  establishment_id: string;
+  requested_by: string;
+  request_type: 'new_qr' | 'qr_replacement' | 'qr_update' | 'qr_deactivation' | 'bulk_qr_generation' | 'qr_customization' | 'technical_issue';
+  table_number: number | null;
+  title: string;
+  description: string | null;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
+  assigned_to: string | null;
+  resolved_at: string | null;
+  resolved_by: string | null;
+  resolution_notes: string | null;
+  attachments: any;
+  internal_notes: string | null;
+  estimated_completion: string | null;
+} 

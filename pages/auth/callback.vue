@@ -142,9 +142,12 @@ onMounted(async () => {
     loadingMessage.value = 'Redirection vers votre tableau de bord...'
     
     // Petit délai pour que l'utilisateur voie le message
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    await router.push(`/manager/${establishments.id}`)
+    await new Promise(resolve => setTimeout(resolve, 900))
+    if (establishments) {
+      await router.push(`/manager/${establishments.id}`)
+    } else {
+      await router.push('/admin')
+    }
   } catch (error) {
     console.error('❌ Erreur de callback:', error)
     console.error('❌ URL actuelle:', window.location.href)

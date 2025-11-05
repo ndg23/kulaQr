@@ -12,7 +12,7 @@
       }"
     />
 
-    <main class="max-w-4xl mx-auto px-6 py-8">
+    <main class="max-w-7xl mx-auto px-6 py-8">
 
     <!-- Loading State -->
     <div v-if="loading" class="flex flex-col items-center justify-center py-12">

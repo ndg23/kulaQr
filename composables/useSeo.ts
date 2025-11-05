@@ -1,5 +1,99 @@
 import type { Establishment } from '~/types'
 
+export const useAutoScroll = () => {
+  const isAutoScrolling = ref(false)
+  const currentSection = ref(0)
+  const sections = ref<string[]>([])
+  const autoScrollInterval = ref<NodeJS.Timeout | null>(null)
+
+  const startAutoScroll = (sectionIds: string[], intervalMs: number = 4000) => {
+    if (isAutoScrolling.value) return
+
+    sections.value = sectionIds
+    isAutoScrolling.value = true
+    currentSection.value = 0
+
+    // Scroll to first section immediately
+    scrollToSection(sections.value[0])
+
+    // Start auto-scrolling through sections
+    autoScrollInterval.value = setInterval(() => {
+      currentSection.value = (currentSection.value + 1) % sections.value.length
+      scrollToSection(sections.value[currentSection.value])
+    }, intervalMs)
+  }
+
+  const stopAutoScroll = () => {
+    if (autoScrollInterval.value) {
+      clearInterval(autoScrollInterval.value)
+      autoScrollInterval.value = null
+    }
+    isAutoScrolling.value = false
+  }
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      const offsetTop = element.offsetTop - 80 // Account for navbar height
+      window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  const goToSection = (sectionId: string) => {
+    stopAutoScroll() // Stop auto-scroll when user manually navigates
+    scrollToSection(sectionId)
+  }
+
+  // Pause auto-scroll on user interaction
+  const pauseAutoScroll = () => {
+    if (isAutoScrolling.value) {
+      stopAutoScroll()
+    }
+  }
+
+  // Resume auto-scroll after user interaction
+  const resumeAutoScroll = (delayMs: number = 10000) => {
+    setTimeout(() => {
+      if (!isAutoScrolling.value && sections.value.length > 0) {
+        startAutoScroll(sections.value)
+      }
+    }, delayMs)
+  }
+
+  // Handle user scroll events
+  const handleUserScroll = () => {
+    if (isAutoScrolling.value) {
+      pauseAutoScroll()
+      resumeAutoScroll()
+    }
+  }
+
+  onMounted(() => {
+    window.addEventListener('wheel', handleUserScroll)
+    window.addEventListener('touchstart', handleUserScroll)
+  })
+
+  onUnmounted(() => {
+    stopAutoScroll()
+    window.removeEventListener('wheel', handleUserScroll)
+    window.removeEventListener('touchstart', handleUserScroll)
+  })
+
+  return {
+    isAutoScrolling,
+    currentSection,
+    startAutoScroll,
+    stopAutoScroll,
+    scrollToSection,
+    goToSection,
+    pauseAutoScroll,
+    resumeAutoScroll
+  }
+}
+
 export const useSeo = () => {
   const setPageMeta = (meta: {
     title?: string

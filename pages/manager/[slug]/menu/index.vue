@@ -6,137 +6,187 @@
       subtitle="Gérez vos produits et catégories"
       :icon="MenuIcon"
       :primary-action="{
-        label: 'Nouveau menu',
+        label: 'Ajouter',
         icon: Plus,
         action: openAddProduct
       }"
-      :secondary-actions="[
-        {
-          label: 'Rechercher',
-          icon: Search,
-          action: () => {} // Will be handled by the search input
-        }
-      ]"
+    
     />
 
     <!-- Search Bar -->
-    <div class="max-w-7xl mx-auto px-6 py-4">
+    <!-- <div class="max-w-7xl mx-auto px-8 py-6">
       <div class="relative">
-        <Search class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <Search class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input
           v-model="search"
                 type="text"
                 placeholder="Rechercher un produit..."
-          class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
+          class="w-full pl-12 pr-6 py-4 bg-white border border-gray-200 rounded-2xl text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
         />
       </div>
-    </div>
+    </div> -->
 
-    <main class="max-w-7xl mx-auto px-6 py-8">
-      <!-- Stats -->
+    <main class="max-w-7xl mx-auto px-8 pb-16 mt-2">
+      <!-- Stats Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <ManagerModernCard 
-          v-for="stat in quickStats" 
+        <div
+          v-for="stat in quickStats"
           :key="stat.name"
-          class="p-6"
+          class="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
         >
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+            <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center">
               <component :is="stat.icon" class="w-6 h-6 text-gray-600" />
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
-              <p class="text-sm text-gray-500">{{ stat.name }}</p>
+              <p class="text-sm text-gray-500 mt-1">{{ stat.name }}</p>
             </div>
           </div>
-        </ManagerModernCard>
+        </div>
       </div>
 
-      <!-- Categories -->
-      <div class="mb-8">
-        <div class="flex gap-3 overflow-x-auto pb-2">
-          <button
-            @click="activeCategory = 'all'"
-            class="px-6 py-3 rounded-full text-sm font-medium whitespace-nowrap transition-all"
-            :class="activeCategory === 'all' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100'"
+      <!-- Filters -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div class="flex flex-wrap gap-4 items-center">
+          <div class="flex items-center gap-2">
+            <List class="w-5 h-5 text-gray-400" />
+            <span class="text-sm font-medium text-gray-700">Filtrer par:</span>
+          </div>
+
+          <select
+            v-model="activeCategory"
+            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            Tout
-          </button>
-        <button
-          v-for="category in categories"
-          :key="category.id"
-          @click="activeCategory = category.id"
-            class="px-6 py-3 rounded-full text-sm font-medium whitespace-nowrap transition-all"
-            :class="activeCategory === category.id ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100'"
-        >
-          {{ category.name }}
-        </button>
+            <option value="all">Toutes les catégories</option>
+            <option
+              v-for="category in categories"
+              :key="category.id"
+              :value="category.id"
+            >
+              {{ category.name }}
+            </option>
+          </select>
+
+          <div class="relative flex-1 max-w-sm">
+            <Search class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              v-model="search"
+              type="text"
+              placeholder="Rechercher un produit..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              @input="handleSearch"
+            />
+          </div>
         </div>
       </div>
 
       <!-- Products Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <ManagerModernCard
-          v-for="product in filteredProducts" 
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Loading State -->
+        <div v-if="loading" class="col-span-full flex flex-col items-center justify-center py-20">
+          <div class="w-16 h-16 relative">
+            <div class="w-16 h-16 bg-gray-100 rounded-full animate-pulse"></div>
+            <div class="w-8 h-8 text-gray-400 animate-spin absolute inset-0 m-auto" />
+          </div>
+          <p class="text-sm text-gray-500 mt-4">Chargement...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="filteredProducts.length === 0" class="col-span-full text-center py-16">
+          <div class="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <Search class="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun produit trouvé</h3>
+          <p class="text-gray-500 mb-6">
+            {{ search ? "Aucun produit ne correspond à votre recherche." : "Aucun produit dans cette catégorie." }}
+          </p>
+          <button
+            @click="openAddProduct"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+          >
+            Ajouter un produit
+          </button>
+        </div>
+
+        <!-- Product Cards -->
+        <div
+          v-for="product in filteredProducts"
           :key="product.id"
-          class="overflow-hidden"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group"
         >
           <!-- Product Image -->
-          <div class="aspect-[4/3] relative bg-gray-100 -m-6 mb-6">
-            <img 
-              :src="product.image_url || '/placeholder-product.jpg'" 
+          <div class="relative aspect-[4/3] overflow-hidden">
+            <img
+              :src="product.image_url || '/images/product-empty.png'"
               :alt="product.name"
-              class="w-full h-full object-cover"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
+            <!-- Availability Toggle -->
             <div class="absolute top-3 right-3">
-              <button 
-                @click="editProduct(product)"
-                class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
+              <button
+                @click="toggleAvailability(product)"
+                class="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-200 hover:shadow-md transition-all duration-200"
+                :class="product.is_available ? 'text-green-600' : 'text-gray-400'"
               >
-                <Pencil class="w-4 h-4 text-gray-600" />
+                <Store class="w-5 h-5" />
               </button>
+            </div>
+            <!-- Status Badge -->
+            <div class="absolute top-3 left-3">
+              <span
+                class="px-2 py-1 text-xs font-medium rounded-full"
+                :class="product.is_available
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-gray-100 text-gray-600'"
+              >
+                {{ product.is_available ? 'Disponible' : 'Indisponible' }}
+              </span>
             </div>
           </div>
 
           <!-- Product Info -->
-          <div>
-            <div class="flex items-start justify-between gap-3 mb-2">
-              <h3 class="font-semibold text-gray-900 text-lg leading-tight">{{ product.name }}</h3>
-              <span class="font-bold text-gray-900 text-lg">{{ formatPrice(product.price) }}</span>
+          <div class="p-4">
+            <div class="flex items-start justify-between mb-2">
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-900 text-lg leading-tight mb-1">
+                  {{ product.name }}
+                </h3>
+                <p class="text-sm text-gray-500">
+                  {{ getCategoryName(product.category_id) }}
+                </p>
+              </div>
+              <div class="text-right ml-2">
+                <p class="font-bold text-lg text-gray-900">
+                  {{ formatPrice(product.price) }}
+                </p>
+              </div>
             </div>
 
-            <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ product.description }}</p>
+            <!-- Product Description -->
+            <p v-if="product.description" class="text-sm text-gray-600 mb-4 line-clamp-2">
+              {{ product.description }}
+            </p>
 
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-gray-500">{{ getCategoryName(product.category_id) }}</span>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  v-model="product.is_available"
-                  @change="toggleAvailability(product)"
-                  class="sr-only peer"
-                >
-                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
-              </label>
+            <!-- Action Buttons -->
+            <div class="flex gap-2">
+              <button
+                @click="editProduct(product)"
+                class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-200"
+              >
+                <Pencil class="w-4 h-4" />
+                Modifier
+              </button>
+              <button
+                @click="confirmDeleteProduct(product)"
+                class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors duration-200"
+              >
+                <Trash2 class="w-4 h-4" />
+                Supprimer
+              </button>
             </div>
           </div>
-        </ManagerModernCard>
-      </div>
-      <!-- Empty State -->
-      <div v-if="filteredProducts.length === 0" class="text-center py-16">
-        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Search class="w-8 h-8 text-gray-400" />
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Aucun produit trouvé</h3>
-        <p class="text-gray-500 mb-6">
-          {{ search ? "Aucun produit ne correspond à votre recherche." : "Aucun produit dans cette catégorie." }}
-        </p>
-        <button 
-          @click="openAddProduct"
-          class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors"
-        >
-          Ajouter un produit
-        </button>
       </div>
     </main>
 
@@ -156,7 +206,7 @@
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
+          <div class="flex min-h-full items-center justify-center p-8">
             <TransitionChild
               as="template"
               enter="duration-300 ease-out"
@@ -166,7 +216,7 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+              <DialogPanel class="w-full max-w-2xl transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
                 <ProductModal
                   :product="editingProduct"
                   :categories="categories"
@@ -186,7 +236,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue'
 import {
-  Plus, UtensilsCrossed, Store, TrendingUp, Search, Pencil, List, Menu as MenuIcon
+  Plus, UtensilsCrossed, Store, TrendingUp, Search, Pencil, List, Menu as MenuIcon, Trash2
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
@@ -232,6 +282,10 @@ const filteredProducts = computed(() => {
 
 // Quick stats
 const quickStats = computed(() => {
+  const avgPrice = products.value.length
+    ? products.value.reduce((sum: any, p: any) => sum + p.price, 0) / products.value.length
+    : 0
+
   return [
     {
       name: 'Produits',
@@ -250,11 +304,7 @@ const quickStats = computed(() => {
     },
     {
       name: 'Prix moyen',
-      value: formatPrice(
-        products.value.length
-          ? products.value.reduce((sum: any, p: any) => sum + p.price, 0) / products.value.length
-          : 0
-      ),
+      value: avgPrice > 0 ? formatPrice(avgPrice) : '0 F CFA',
       icon: TrendingUp
     }
   ]
@@ -311,7 +361,7 @@ const toggleAvailability = async (product: any) => {
   try {
     const { error } = await supabase
       .from('products')
-      .update({ is_available: product.is_available })
+      .update({ is_available: !product.is_available })
       .eq('id', product.id)
 
     if (error) throw error
@@ -327,6 +377,34 @@ const toggleAvailability = async (product: any) => {
 const editProduct = (product: any) => {
   editingProduct.value = { ...product }
   showAddProduct.value = true
+}
+
+const confirmDeleteProduct = (product: any) => {
+  if (confirm(`Êtes-vous sûr de vouloir supprimer le produit "${product.name}" ? Cette action est irréversible.`)) {
+    deleteProduct(product)
+  }
+}
+
+const deleteProduct = async (product: any) => {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', product.id)
+
+    if (error) throw error
+
+    // Remove from local state
+    const index = products.value.findIndex((p: any) => p.id === product.id)
+    if (index !== -1) {
+      products.value.splice(index, 1)
+    }
+
+    showToast.success('Produit supprimé', 'Le produit a été supprimé avec succès')
+  } catch (err) {
+    console.error('Erreur suppression:', err)
+    showToast.error('Erreur', 'Impossible de supprimer le produit')
+  }
 }
 
 const closeModal = () => {
@@ -406,13 +484,19 @@ definePageMeta({
 
 <style scoped>
 /* Smooth element appearance animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .grid > div {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeInUp 0.4s ease-out;
   animation-fill-mode: both;
 }
 
@@ -424,4 +508,52 @@ definePageMeta({
 .grid > div:nth-child(6) { animation-delay: 0.3s; }
 .grid > div:nth-child(7) { animation-delay: 0.35s; }
 .grid > div:nth-child(8) { animation-delay: 0.4s; }
+.grid > div:nth-child(9) { animation-delay: 0.45s; }
+.grid > div:nth-child(10) { animation-delay: 0.5s; }
+.grid > div:nth-child(11) { animation-delay: 0.55s; }
+.grid > div:nth-child(12) { animation-delay: 0.6s; }
+
+/* Enhanced hover effects */
+.ManagerModernCard {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ManagerModernCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Improved focus states */
+input:focus, button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Better scrollbar styling */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+}
 </style> 

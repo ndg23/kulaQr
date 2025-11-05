@@ -93,14 +93,14 @@
 
           <!-- Remember me & Forgot password -->
           <div class="flex items-center justify-between">
-            <label class="flex items-center">
+            <!-- <label class="flex items-center">
               <input
                 v-model="rememberMe"
                 type="checkbox"
                 class="w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
               />
               <span class="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
-            </label>
+            </label> -->
             <NuxtLink 
               to="/auth/forgot-password"
               class="text-sm text-blue-500 hover:text-blue-600 transition-colors"
@@ -125,15 +125,15 @@
         </form>
 
         <!-- Sign up link -->
-        <p class="pt-6 text-center text-gray-600">
-          Pas encore inscrit ?{' '}
+        <div class="flex-col pt-6 text-center text-gray-600">
+          Pas encore inscrit ?
           <NuxtLink 
             to="/auth/register" 
             class="text-blue-500 hover:text-blue-600 font-medium transition-colors"
           >
             Créer un compte
           </NuxtLink>
-        </p>
+        </div>
 
         <!-- Ajouter ce lien à la fin du formulaire -->
         <!-- <div class="text-center mt-4">
@@ -205,6 +205,14 @@ const handleLogin = async () => {
     if (establishmentError) {
       error.value = 'Erreur lors de la récupération des données'
       return
+    }
+    if (!establishment) {
+      error.value = "Aucun établissement trouvé pour cet utilisateur"
+      return
+    }
+    if (!!data.user.role || data.user.role !== 'manager') {
+
+    navigateTo(`/admin`)
     }
 
     // Rediriger vers le dashboard avec le slug de l'établissement

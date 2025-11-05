@@ -63,7 +63,7 @@
           </div>
           
           <div class="text-center mt-4">
-            <NuxtLink to="/auth/login" class="text-sm text-gray-600 hover:text-gray-900">
+            <NuxtLink to="/auth/login" class="text-sm text-blue-500 hover:text-blue-900">
               Retour à la connexion classique
             </NuxtLink>
           </div>
