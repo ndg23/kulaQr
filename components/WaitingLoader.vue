@@ -36,9 +36,13 @@
             <span class="font-medium text-gray-900">#{{ orderNumber }}</span>
           </div>
           <div v-if="tableNumber" class="flex items-center justify-between">
-            <span class="text-sm text-gray-500">Table</span>
+            <span class="text-sm text-gray-500">Emplacement N°</span>
             <span class="font-medium text-gray-900">{{ tableNumber }}</span>
           </div>
+          <!-- <div v-for="order   in source" class="flex items-center justify-between">
+            <span class="text-sm text-gray-500">Établissement</span>
+            <span class="font-medium text-gray-900">{{ establishmentName }}</span>
+          </div> -->
           <div class="flex items-center justify-between pt-3 border-t border-gray-200">
             <span class="text-sm text-gray-500">Total</span>
             <span class="font-semibold text-gray-900 text-lg">{{ formatPrice(order?.total_amount) }}</span>
@@ -69,7 +73,7 @@
       <!-- Actions -->
       <div v-if="status !== 'loading'" class="px-10 pb-10 flex gap-3">
         <button
-          v-if="['pending', 'confirmed', 'processing'].includes(status) && cancelable"
+          v-if="['pending'].includes(status) && cancelable"
           @click="$emit('cancel')"
           class="flex-1 h-12 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-900 rounded-full font-medium text-sm transition-all"
         >

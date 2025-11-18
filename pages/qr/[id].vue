@@ -3,7 +3,7 @@ import { useQRTracking } from '~/composables/useQRTracking'
 
 const route = useRoute()
 const id = route.params.id as string
-const tableParam = route.query.table as string | undefined
+const tableParam = route.query.q as string | undefined
 
 // Utiliser le composable de tracking QR
 const { trackScan } = useQRTracking()
@@ -21,7 +21,7 @@ if (error.value) {
     message: 'Menu non trouvé'
   })
 }
-console.log('Tracker le scan après avoir récupéré les infos de l\'établissement', data.value)
+// console.log('Tracker le scan après avoir récupéré les infos de l\'établissement', data.value)
 // Tracker le scan après avoir récupéré les infos de l'établissement
 // if (data.value && data.value.establishment && data.value.establishment.id) {
 //   await trackScan({
@@ -32,8 +32,8 @@ console.log('Tracker le scan après avoir récupéré les infos de l\'établisse
 
 // Rediriger vers le menu de l'établissement avec le numéro de table décodé
 if (data.value && data.value.slug) {
-  // const tableParam = data.value.table !== null ? `?table=${data.value.table}` : ''
-  navigateTo(`/menu/${data.value.slug}?table=${tableParam}`)
+  // const tableParam = data.value.table !== null ? `?q=${data.value.table}` : ''
+  navigateTo(`/menu/${data.value.slug}?q=${tableParam}`)
 } else {
   console.error('Données de redirection manquantes:', data.value)
   throw createError({
@@ -47,7 +47,7 @@ if (data.value && data.value.slug) {
   <div class="min-h-screen flex items-center justify-center bg-gray-50">
     <div class="text-center">
       <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-facebook mx-auto mb-4"></div>
-      <p class="text-gray-600">Redirection vers le menu...</p>
+      <!-- <p class="text-gray-600">Redirection vers le menu...</p> -->
     </div>
   </div>
 </template> 

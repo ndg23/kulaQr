@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#FFFBFB] flex items-center justify-center">
+  <div class="min-h-screen bg-white ##bg-[#FFFBFB] flex items-center justify-center">
     <!-- Back Button -->
     <div class="fixed top-0 w-full space-x-2- border-b border-gray-200 z-50 bg-white">
       <div class="flex items-center space-x-2 max-w-5xl mx-auto left-8 flex justify-between items-center">
@@ -18,7 +18,7 @@
     </div>
     <!-- Main Content -->
     <div class="min-h-screen flex items-center justify-center px-6">
-      <div class="w-full max-w-5xl">
+      <div class="w-full max-w-5xl mt-20 pb-12">
         <!-- Logo -->
         <!-- <div class="mb-16 text-center">
           <NuxtLink to="/" class="inline-flex items-center space-x-3">

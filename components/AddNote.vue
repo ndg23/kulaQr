@@ -11,6 +11,7 @@
           placeholder="Instructions spéciales..."
           class="w-full border border-gray-200 rounded-lg p-3 h-24"
           ref="noteInput"
+          maxlength="25"
         ></textarea>
         
         <div class="flex justify-between mt-4">

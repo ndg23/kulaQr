@@ -25,186 +25,120 @@
         </div>
       </div>
   
-      <!-- Users List -->
-      <div class="bg-white rounded-[2rem] border border-gray-100 overflow-hidden">
-        <!-- Header with Search and Add -->
-        <div class="p-6 border-b border-gray-100">
-          <div class="flex items-center justify-between">
-            <div class="relative flex-1 max-w-lg">
-              <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                v-model="filters.search"
-                type="search"
-                placeholder="Rechercher un utilisateur..."
-                class="w-full h-12 pl-12 pr-4 rounded-2xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
-              />
-            </div>
-            <button
-              @click="openUserModal()"
-              class="px-6 py-4 text-base font-semibold border border-gray-300 bg-sky-600 text-white hover:bg-sky-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-all"
-
+      <!-- Users List with DataTable -->
+      <DataTable
+        :items="users"
+        :columns="tableColumns"
+        :loading="loading"
+        :current-page="currentPage"
+        :per-page="perPage"
+        :total-items="filteredUsers.length"
+        :show-pagination="true"
+        :show-add-button="true"
+        add-button-label="Ajouter"
+        :header-buttons="[
+          { label: 'Importer', icon: 'fas fa-upload', variant: 'secondary', action: 'import' },
+          { label: 'Rafraîchir', icon: 'fas fa-sync', variant: 'secondary', action: 'refresh' }
+        ]"
+        empty-title="Aucun utilisateur trouvé"
+        empty-description="Aucun utilisateur ne correspond à vos critères de recherche"
+        empty-icon="fas fa-users"
+        @page-change="currentPage = $event"
+        @update:per-page="perPage = $event"
+        @add="showUserModal = true"
+        @button-click="handleButtonClick"
+      >
+        <!-- User Column with Avatar -->
+        <template #cell-full_name="{ item }">
+          <div class="flex items-center space-x-3 max-w-[250px]">
+            <div 
+              class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0"
+              :class="`bg-${getUserColor(item.id)}-500`"
             >
-              Ajouter un utilisateur
+              {{ getUserInitials(item.full_name) }}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="font-medium text-gray-900 truncate">{{ item.full_name }}</div>
+              <div class="text-sm text-gray-500 truncate">{{ item.email }}</div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Role Column -->
+        <template #cell-role="{ item }">
+          <div class="max-w-[150px]">
+            <span
+              class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+              :class="getRoleBadgeClass(item.role)"
+            >
+              {{ formatRole(item.role) }}
+            </span>
+          </div>
+        </template>
+
+        <!-- Subscription Column -->
+        <template #cell-subscription_tier="{ item }">
+          <div class="max-w-[120px]">
+            <span
+              class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+              :class="getSubscriptionBadgeClass(item.subscription_tier)"
+            >
+              {{ formatSubscriptionTier(item.subscription_tier) }}
+            </span>
+          </div>
+        </template>
+
+        <!-- Status Column -->
+        <template #cell-is_active="{ item }">
+          <div class="max-w-[100px]">
+            <span
+              class="px-3 py-1 rounded-full text-xs font-medium inline-flex items-center whitespace-nowrap"
+              :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+            >
+              <div 
+                class="w-1.5 h-1.5 rounded-full mr-1.5 flex-shrink-0"
+                :class="item.is_active ? 'bg-green-500' : 'bg-red-500'"
+              />
+              {{ item.is_active ? 'Actif' : 'Inactif' }}
+            </span>
+          </div>
+        </template>
+
+        <!-- Actions Column -->
+        <template #cell-actions="{ item }">
+          <div class="flex items-center gap-2 max-w-[200px]">
+            <button
+              @click="editUser(item)"
+              class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title="Modifier"
+            >
+              <Edit class="w-4 h-4" />
+            </button>
+            <button
+              @click="viewUser(item)"
+              class="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+              title="Voir le profil"
+            >
+              <Eye class="w-4 h-4" />
+            </button>
+            <button
+              @click="toggleUserStatus(item)"
+              class="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+              :title="item.is_active ? 'Désactiver' : 'Activer'"
+            >
+              <Ban v-if="item.is_active" class="w-4 h-4" />
+              <CheckCircle v-else class="w-4 h-4" />
+            </button>
+            <button
+              @click="deleteUser(item.id)"
+              class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Supprimer"
+            >
+              <Trash2 class="w-4 h-4" />
             </button>
           </div>
-        </div>
-  
-        <!-- Filters -->
-        <div class="p-4 bg-gray-50 border-b border-gray-100">
-          <div class="flex gap-4">
-            <USelect
-              v-model="filters.role"
-              :options="roleOptions"
-              placeholder="Tous les rôles"
-              class="w-48"
-            />
-            <USelect
-              v-model="filters.subscription_tier"
-              :options="subscriptionOptions"
-              placeholder="Tous les abonnements"
-              class="w-48"
-            />
-          </div>
-        </div>
-  
-        <!-- Table -->
-        <UTable
-          :rows="filteredUsers"
-          :columns="columns"
-          :loading="loading"
-          :empty-state="{ icon: 'i-lucide-users-x', label: 'Aucun utilisateur trouvé' }"
-          hover
-        >
-          <!-- User Column -->
-          <template #user-data="{ row }">
-            <div class="flex items-center space-x-3">
-              <UAvatar
-                :text="getUserInitials(row.full_name)"
-                :color="getUserColor(row.id)"
-                size="sm"
-              />
-              <div>
-                <div class="font-medium text-gray-900">{{ row.full_name }}</div>
-                <div class="text-sm text-gray-500">{{ row.email }}</div>
-              </div>
-            </div>
-          </template>
-  
-          <!-- Role Column -->
-          <template #role-data="{ row }">
-            <UBadge
-              :color="getRoleColor(row.role)"
-              variant="subtle"
-              size="sm"
-            >
-              {{ formatRole(row.role) }}
-            </UBadge>
-          </template>
-  
-          <!-- Subscription Column -->
-          <template #subscription_tier-data="{ row }">
-            <UBadge
-              :color="getSubscriptionColor(row.subscription_tier)"
-              variant="subtle"
-              size="sm"
-            >
-              {{ formatSubscriptionTier(row.subscription_tier) }}
-            </UBadge>
-          </template>
-  
-          <!-- Status Column -->
-          <template #is_active-data="{ row }">
-            <UBadge
-              :color="row.is_active ? 'green' : 'red'"
-              variant="subtle"
-              size="sm"
-            >
-              <div class="flex items-center">
-                <div class="w-1.5 h-1.5 rounded-full mr-1.5"
-                  :class="row.is_active ? 'bg-green-500' : 'bg-red-500'"
-                />
-                {{ row.is_active ? 'Actif' : 'Inactif' }}
-              </div>
-            </UBadge>
-          </template>
-  
-          <!-- Created At Column -->
-          <template #created_at-data="{ row }">
-            <div class="flex flex-col">
-              <span class="text-sm font-medium text-gray-900">
-                {{ formatDate(row.created_at, 'date') }}
-              </span>
-              <!-- <span class="text-xs text-gray-500">
-                {{ formatDate(row.created_at, 'time') }}
-              </span> -->
-            </div>
-          </template>
-  
-          <!-- Last Login Column -->
-          <template #last_login-data="{ row }">
-            <div class="flex flex-col">
-              <span class="text-sm font-medium text-gray-900">
-                {{ formatDate(row.last_login, 'relative') }}
-              </span>
-            </div>
-          </template>
-          
-  
-          <!-- Actions Column -->
-          <template #actions-data="{ row }">
-            <UDropdown
-              :items="[
-                [
-                  {
-                    label: 'Modifier',
-                    icon: 'i-heroicons-pencil-square',
-                    click: () => editUser(row)
-                  },
-                  {
-                    label: 'Voir le profil',
-                    icon: 'i-heroicons-eye',
-                    click: () => viewUser(row)
-                  }
-                ],
-                [
-                  {
-                    label: row.is_active ? 'Désactiver' : 'Activer',
-                    icon: row.is_active ? 'i-heroicons-lock-closed' : 'i-heroicons-lock-open',
-                    click: () => toggleUserStatus(row)
-                  },
-                  {
-                    label: 'Supprimer',
-                    icon: 'i-heroicons-trash',
-                    click: () => deleteUser(row.id),
-                    color: 'red'
-                  }
-                ]
-              ]"
-            >
-              <UButton
-                color="gray"
-                variant="ghost"
-                icon="i-heroicons-ellipsis-horizontal"
-              />
-            </UDropdown>
-          </template>
-        </UTable>
-  
-        <!-- Pagination -->
-        <div class="p-4 border-t border-gray-100">
-          <div class="flex items-center justify-between">
-            <p class="text-sm text-gray-500">
-              Affichage de {{ paginationInfo.showing }} sur {{ paginationInfo.total }} utilisateurs
-            </p>
-            <UPagination
-              v-model="currentPage"
-              :total="filteredUsers.length"
-              :per-page="perPage"
-              size="sm"
-            />
-          </div>
-        </div>
-      </div>
+        </template>
+      </DataTable>
   
       <!-- User Modal -->
       <UserFormModal
@@ -241,7 +175,7 @@ const currentPage = ref(1)
 const perPage = ref(10)
 
 // State
-const users = ref([])
+const users = ref<any[]>([])
 const stats = ref({
   total: 0,
   active: 0,
@@ -309,14 +243,55 @@ const columns = [
     label: 'Créé le',
     sortable: true,
     id: 'created-col',
-    formatter: (date) => new Date(date).toLocaleDateString('fr-FR')
+    type: 'date'
   },
   {
     key: 'last_login',
     label: 'Dernière connexion',
     sortable: true,
     id: 'last-login-col',
-    formatter: (date) => new Date(date).toLocaleDateString('fr-FR')
+    type: 'datetime'
+  },
+  {
+    key: 'actions',
+    label: 'Actions',
+    sortable: false
+  }
+]
+
+// Table columns for DataTable component
+const tableColumns = [
+  {
+    key: 'full_name',
+    label: 'Utilisateur',
+    sortable: true
+  },
+  {
+    key: 'role',
+    label: 'Rôle',
+    sortable: true
+  },
+  {
+    key: 'subscription_tier',
+    label: 'Abonnement',
+    sortable: true
+  },
+  {
+    key: 'is_active',
+    label: 'Statut',
+    sortable: true
+  },
+  {
+    key: 'created_at',
+    label: 'Créé le',
+    sortable: true,
+    type: 'date' as const
+  },
+  {
+    key: 'last_login',
+    label: 'Dernière connexion',
+    sortable: true,
+    type: 'datetime' as const
   },
   {
     key: 'actions',
@@ -407,22 +382,22 @@ const paginationInfo = computed(() => {
 })
 
 // Helper methods
-const getUserInitials = (name) => {
+const getUserInitials = (name: string) => {
   if (!name) return '?'
   return name.split(' ')
-    .map(word => word[0])
+    .map((word: string) => word[0])
     .join('')
     .toUpperCase()
     .substring(0, 2)
 }
 
-const getUserColor = (id) => {
+const getUserColor = (id: string) => {
   const colors = ['blue', 'green', 'red', 'yellow', 'purple', 'pink', 'orange', 'cyan']
   const index = Math.abs(hashString(id.toString()) % colors.length)
   return colors[index]
 }
 
-const hashString = (str) => {
+const hashString = (str: string) => {
   let hash = 0
   for (let i = 0; i < str.length; i++) {
     hash = ((hash << 5) - hash) + str.charCodeAt(i)
@@ -431,7 +406,7 @@ const hashString = (str) => {
   return hash
 }
 
-const getRoleColor = (role) => {
+const getRoleColor = (role: string) => {
   switch (role) {
     case 'admin': return 'purple'
     case 'manager': return 'blue'
@@ -441,8 +416,18 @@ const getRoleColor = (role) => {
   }
 }
 
-const getSubscriptionColor = (tier) => {
-  const colors = {
+const getRoleBadgeClass = (role: string) => {
+  switch (role) {
+    case 'admin': return 'bg-purple-100 text-purple-800'
+    case 'manager': return 'bg-blue-100 text-blue-800'
+    case 'staff': return 'bg-green-100 text-green-800'
+    case 'owner': return 'bg-orange-100 text-orange-800'
+    default: return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getSubscriptionColor = (tier: string) => {
+  const colors: Record<string, string> = {
     'free': 'gray',
     'premium': 'purple',
     'pro': 'blue'
@@ -450,8 +435,17 @@ const getSubscriptionColor = (tier) => {
   return colors[tier] || 'gray'
 }
 
-const formatSubscriptionTier = (tier) => {
-  const formats = {
+const getSubscriptionBadgeClass = (tier: string) => {
+  const classes: Record<string, string> = {
+    'free': 'bg-gray-100 text-gray-800',
+    'premium': 'bg-purple-100 text-purple-800',
+    'pro': 'bg-blue-100 text-blue-800'
+  }
+  return classes[tier] || 'bg-gray-100 text-gray-800'
+}
+
+const formatSubscriptionTier = (tier: string) => {
+  const formats: Record<string, string> = {
     'free': 'Gratuit',
     'premium': 'Premium',
     'pro': 'Pro'
@@ -460,8 +454,8 @@ const formatSubscriptionTier = (tier) => {
 }
 
 // Formatage des rôles
-const formatRole = (role) => {
-  const roles = {
+const formatRole = (role: string) => {
+  const roles: Record<string, string> = {
     'admin': 'Administrateur',
     'manager': 'Gérant',
     'staff': 'Staff',
@@ -471,7 +465,7 @@ const formatRole = (role) => {
 }
 
 // Methods
-const openUserModal = (user = null) => {
+const openUserModal = (user: any = null) => {
   selectedUser.value = user
   showUserModal.value = true
 }
@@ -485,7 +479,7 @@ const handleUserSubmitted = () => {
   loadUsers()
 }
 
-const editUser = (user) => {
+const editUser = (user: any) => {
   selectedUser.value = { ...user }
   Object.assign(userForm, {
     full_name: user.full_name,
@@ -498,12 +492,12 @@ const editUser = (user) => {
   showUserModal.value = true
 }
 
-const viewUser = (user) => {
+const viewUser = (user: any) => {
   // Rediriger vers la page de profil utilisateur
   navigateTo(`/admin/users/${user.id}`)
 }
 
-const toggleUserStatus = async (user) => {
+const toggleUserStatus = async (user: any) => {
   try {
     loading.value = true
     const { error } = await supabase
@@ -523,7 +517,7 @@ const toggleUserStatus = async (user) => {
   }
 }
 
-const deleteUser = async (id) => {
+const deleteUser = async (id: string) => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return
 
   try {
@@ -543,6 +537,22 @@ const deleteUser = async (id) => {
     showToast.error("Une erreur s'est produite lors de la suppression", 'error')
   } finally {
     loading.value = false
+  }
+}
+
+const handleButtonClick = (action: string) => {
+  switch (action) {
+    case 'import':
+      // Handle import action
+      showToast.info('Fonctionnalité d\'importation à venir', 'info')
+      break
+    case 'refresh':
+      // Handle refresh action
+      loadUsers()
+      showToast.success('Liste rafraîchie', 'success')
+      break
+    default:
+      console.log('Unknown action:', action)
   }
 }
 

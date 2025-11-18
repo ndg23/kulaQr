@@ -5,11 +5,7 @@
       title="Commandes"
       subtitle="Gérez vos commandes en temps réel"
       :icon="Receipt"
-      :primary-action="{
-        label: 'Nouvelle commande',
-        icon: Plus,
-        action: openNewOrderModal
-      }"
+      
     />
 
     <main class="max-w-7xl mx-auto px-8 pb-16 mt-2">
@@ -328,6 +324,7 @@ import {
   Printer, User, X, Loader2
 } from 'lucide-vue-next'
 import { useCustomToast } from '~/composables/useToast'
+import { useSound } from '~/composables/useSound'
 import { useSupabaseClient } from '#imports'
 
 // Route and Supabase
@@ -335,6 +332,7 @@ const route = useRoute()
 const supabase = useSupabaseClient()
 const slug = route.params.slug
 const { showToast } = useCustomToast()
+const { playNewOrderSound } = useSound()
 
 // State
 const establishment = ref<any>(null)
@@ -346,7 +344,12 @@ const statusFilter = ref('')
 const staffFilter = ref('')
 const showNewOrderModal = ref(false)
 const creating = ref(false)
-const stats = ref(null)
+const stats = ref<{
+  total_orders: number
+  pending_orders: number
+  processing_orders: number
+  completed_orders: number
+} | null>(null)
 
 // Form data
 const orderForm = ref({
@@ -837,6 +840,8 @@ const setupRealtimeSubscription = () => {
       (payload) => {
         // Handle new or updated orders
         if (payload.eventType === 'INSERT') {
+          // Play sound notification for new orders
+          playNewOrderSound()
           // Add new order to the list
           showToast.success('Nouvelle commande', 'Une nouvelle commande a été reçue')
           loadOrders() // Reload all orders to get the complete data

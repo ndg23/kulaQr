@@ -107,10 +107,11 @@
           <!-- Order Header -->
           <div class="p-6 border-b border-gray-100"
                :class="{
-                 'bg-yellow-50': order.status === 'pending',
-                 'bg-blue-50': order.status === 'confirmed', 
-                 'bg-orange-50': order.status === 'processing',
-                 'bg-green-50': order.status === 'completed'
+                 'bg-yellow-500': order.status === 'pending',
+                 'bg-blue-500': order.status === 'confirmed', 
+                 'bg-orange-500': order.status === 'processing',
+                 'bg-green-500': order.status === 'completed',
+                 'bg-red-500': order.status === 'cancelled'
                }">
             <div class="flex justify-between items-start mb-3">
               <div class="flex items-center gap-3">
@@ -118,8 +119,37 @@
                   {{ order.table_number }}
                 </div>
                 <div>
-                  <div class="text-sm text-gray-500 mb-1">Table {{ order.table_number }}</div>
-                  <div class="text-base font-semibold text-gray-900">#{{ order.orderNumber || order.id.slice(-6) }}</div>
+                  <!-- Table Info Enrichie -->
+                  <div class="mb-3">
+                    <div class="flex items-center gap-2 mb-1">
+                      <MapPin class="w-4 h-4 text-white" />
+                      <h4 class="text-lg font-semibold text-white">
+                        N° {{ order.tables?.table_number || order.table_number || 'N/A' }}
+                      </h4>
+                      <span 
+                        v-if="order.tables?.type === 'VIP'"
+                        class="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-900 rounded-full"
+                      >
+                        VIP
+                      </span>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 text-sm text-white">
+                      <span v-if="order.tables?.section_name" class="inline-flex items-center gap-1">
+                        <Store class="w-3.5 h-3.5" />
+                        {{ order.tables.section_name }}
+                      </span>
+                      <span v-if="order.tables?.floor_level" class="inline-flex items-center gap-1">
+                        <Building class="w-3.5 h-3.5" />
+                        {{ order.tables.floor_level }}
+                      </span>
+                      <span v-if="order.tables?.capacity" class="inline-flex items-center gap-1">
+                        <Users class="w-3.5 h-3.5" />
+                        {{ order.tables.capacity }} pers.
+                      </span>
+                    </div>
+                  </div>
+                
                 </div>
               </div>
               <span class="px-3 py-1 rounded-full text-xs font-medium"
@@ -127,12 +157,13 @@
                      'bg-yellow-100 text-yellow-900': order.status === 'pending',
                      'bg-blue-100 text-blue-900': order.status === 'confirmed',
                      'bg-orange-100 text-orange-900': order.status === 'processing',
-                     'bg-green-100 text-green-900': order.status === 'completed'
+                     'bg-green-100 text-green-900': order.status === 'completed',
+                     'bg-red-100 text-red-900': order.status === 'cancelled'
                    }">
                 {{ translateStatus(order.status) }}
               </span>
             </div>
-            <div class="text-xs text-gray-600">{{ formatRelativeTime(order.created_at) }}</div>
+            <div class="text-sm font-sans text-white">{{ formatRelativeTime(order.created_at) }}</div>
           </div>
           
           <!-- Order Body -->
@@ -144,8 +175,8 @@
                 :key="index"
                 class="flex justify-between text-sm"
               >
-                <span class="text-gray-700">{{ item.quantity }}× {{ item.name }}</span>
-                <span class="font-medium text-gray-900">{{ formatPrice(item.unit_price * item.quantity) }}</span>
+                <div class="text-gray-700 font-mono">{{ item.quantity }}× {{ item.name }} </div>
+                <span class="font-medium text-gray-900 font-mono">{{ formatPrice(item.unit_price * item.quantity) }}</span>
               </div>
               <div v-if="order.items.length > 3" class="text-center text-gray-400 text-xs py-2">
                 +{{ order.items.length - 3 }} article{{ order.items.length - 3 > 1 ? 's' : '' }} supplémentaire{{ order.items.length - 3 > 1 ? 's' : '' }}
@@ -153,6 +184,9 @@
             </div>
             
             <!-- Total -->
+             <div class="my-1 flex ">
+               <span v-if="order.notes" class="text-gray-700 italic text-sm "> <FileText class="w-4 h-4 inline-block mr-1" /> {{ order.notes }}</span>
+             </div>
             <div class="border-t border-gray-200 pt-4 flex justify-between items-center mb-6">
               <span class="text-sm text-gray-500">Total</span>
               <span class="text-2xl font-semibold text-gray-900">{{ formatPrice(order.total_amount) }}</span>
@@ -215,7 +249,12 @@ import {
   ClipboardList, 
   CheckCircle,
   Coffee,
-  X
+  X,
+  MapPin,
+  Store,
+  Building,
+  Users,
+  FileText,
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
@@ -274,17 +313,37 @@ const loadOrders = async () => {
   loadError.value = false
   
   try {
-    if (!establishment.value) {
-      await loadEstablishment()
+    // Pour l'interface staff, récupérer l'établissement depuis la session staff
+    const currentStaff = await getCurrentStaff()
+    if (!currentStaff) {
+      throw new Error('Session du personnel non trouvée')
     }
     
+    // Charger l'établissement directement avec l'ID du staff
     if (!establishment.value) {
-      throw new Error('Aucun établissement trouvé')
+      const { data: establishmentData, error } = await supabase
+        .from('establishments')
+        .select('*')
+        .eq('id', currentStaff.establishment_id)
+        .single()
+      
+      if (error) throw error
+      establishment.value = establishmentData
     }
     
     const { data, error } = await supabase
       .from('orders')
       .select(`
+        *,
+        tables (
+          id,
+          table_number,
+          type,
+          section_name,
+          floor_level,
+          capacity,
+          location_description
+        ),
         id,
         table_number,
         status,
@@ -341,9 +400,24 @@ const loadOrders = async () => {
 
 const loadEstablishment = async () => {
   try {
-    await fetchEstablishmentByUserId()
+    // Pour l'interface staff, utiliser la session PIN au lieu de Supabase Auth
+    const currentStaff = await getCurrentStaff()
+    if (!currentStaff) {
+      throw new Error('Session du personnel non trouvée')
+    }
+    
+    const { data: establishmentData, error } = await supabase
+      .from('establishments')
+      .select('*')
+      .eq('id', currentStaff.establishment_id)
+      .single()
+    
+    if (error) throw error
+    establishment.value = establishmentData
   } catch (error) {
     console.error('Error loading establishment:', error)
+    // Rediriger vers la page de connexion staff si pas de session
+    navigateTo('/auth/pin')
   }
 }
 
@@ -353,25 +427,10 @@ const refreshOrders = async () => {
   isRefreshing.value = false
 }
 
-// Helper function to get current staff info (works for both auth types)
+// Helper function to get current staff info (prioritizes PIN auth for staff interface)
 const getCurrentStaff = async () => {
   try {
-    // First, try to get staff from Supabase Auth (for full accounts)
-    // const { data: { user } } = await supabase.auth.getUser()
-    // if (user) {
-    //   const { data: staffData, error } = await supabase
-    //     .from('staff')
-    //     .select('id, username, role, establishment_id')
-    //     .eq('auth_user_id', user.id)
-    //     .eq('is_active', true)
-    //     .single()
-      
-    //   if (!error && staffData) {
-    //     return staffData
-    //   }
-    // }
-    
-    // If not found or no Supabase auth, try PIN auth from localStorage
+    // For staff interface, prioritize PIN auth from localStorage
     const staffSession = localStorage.getItem('staff_session')
     if (staffSession) {
       const sessionData = JSON.parse(staffSession)
@@ -385,11 +444,16 @@ const getCurrentStaff = async () => {
           .single()
         
         if (!error && staffData) {
+          console.log('✅ Staff session found:', staffData.username)
           return staffData
+        } else {
+          console.warn('⚠️ Staff session invalid, clearing localStorage')
+          localStorage.removeItem('staff_session')
         }
       }
     }
     
+    console.warn('⚠️ No valid staff session found')
     return null
   } catch (error) {
     console.error('Error getting current staff:', error)
@@ -511,7 +575,8 @@ const translateStatus = (status: string) => {
     'pending': 'En attente',
     'confirmed': 'Confirmée',
     'processing': 'En traitement',
-    'completed': 'Terminée'
+    'completed': 'Terminée',
+    'cancelled': 'Annulée'
   }
   
   return translations[status] || 'Inconnu'
@@ -604,6 +669,14 @@ const playNotificationSound = () => {
 }
 // Lifecycle
 onMounted(async () => {
+  // Vérifier d'abord si on a une session staff valide
+  const currentStaff = await getCurrentStaff()
+  if (!currentStaff) {
+    console.warn('Aucune session staff trouvée, redirection vers login')
+    navigateTo('/auth/pin')
+    return
+  }
+  
   await loadEstablishment()
   await loadOrders()
   setupRealtimeConnection()

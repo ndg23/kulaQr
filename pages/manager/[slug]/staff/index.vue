@@ -12,21 +12,20 @@
       }"
     />
 
-    <main class="max-w-7xl mx-auto px-6 py-8">
-
-    <!-- Loading State -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-      <Loader2 class="w-10 h-10 text-kula-500 animate-spin mb-4" />
-      <p class="text-sm text-gray-500">Chargement du personnel...</p>
-    </div>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <!-- Loading State -->
+      <div v-if="loading" class="flex flex-col items-center justify-center py-16">
+        <Loader2 class="w-10 h-10 text-kula-500 animate-spin mb-4" />
+        <p class="text-sm text-gray-500">Chargement du personnel...</p>
+      </div>
 
       <!-- Empty State -->
-      <ManagerModernCard v-else-if="staffMembers.length === 0" class="p-12 text-center">
-        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-          <Users class="w-8 h-8 text-gray-400" />
+      <ManagerModernCard v-else-if="staffMembers.length === 0" class="p-8 sm:p-12 text-center">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+          <Users class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun membre du personnel</h3>
-        <p class="text-gray-500 mb-6 max-w-md mx-auto">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Aucun membre du personnel</h3>
+        <p class="text-sm sm:text-base text-gray-500 mb-6 max-w-md mx-auto">
           Vous n'avez pas encore ajouté de membres à votre équipe. Commencez par ajouter votre premier membre.
         </p>
         <ManagerModernButton
@@ -38,113 +37,171 @@
         </ManagerModernButton>
       </ManagerModernCard>
 
-      <!-- Staff List -->
-      <ManagerModernCard v-else class="overflow-hidden">
+      <!-- Staff List - Desktop Table -->
+      <ManagerModernCard v-else class="hidden lg:block overflow-hidden">
         <template #header>
           <h2 class="text-lg font-semibold text-gray-900">Membres de l'équipe</h2>
         </template>
       
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Membre
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Rôle
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                PIN
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Statut
-              </th>
-              <th scope="col" class="relative px-6 py-3">
-                <span class="sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="member in staffMembers" :key="member.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="h-10 w-10 flex-shrink-0">
-                    <div class="h-10 w-10 rounded-full bg-kula-50 flex items-center justify-center">
-                      <User class="h-5 w-5 text-kula-500" />
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Membre
+                </th>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  PIN
+                </th>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Statut
+                </th>
+                <th scope="col" class="relative px-6 py-3.5">
+                  <span class="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+              <tr v-for="member in staffMembers" :key="member.id" class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-kula-400 to-kula-600 flex items-center justify-center">
+                      <User class="h-5 w-5 text-white" />
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">
+                        {{ member.username }}
+                      </div>
+                      <div class="text-xs text-gray-500">
+                        {{ getRoleName(member.role) }}
+                      </div>
                     </div>
                   </div>
-                  <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900">
-                      {{ member.username }}
-                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-900 font-mono bg-gray-100 px-2.5 py-1 rounded-md">
+                      {{ member.pin || '-' }}
+                    </span>
+                    <button 
+                      v-if="member.pin"
+                      @click="regeneratePin(member)"
+                      class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                      title="Régénérer le PIN"
+                    >
+                      <RefreshCw class="w-4 h-4" />
+                    </button>
+                    <button 
+                      v-else
+                      @click="generatePin(member)"
+                      class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                      title="Générer un PIN"
+                    >
+                      <Key class="w-4 h-4" />
+                    </button>
                   </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-medium rounded-full" 
-                  :class="{
-                    'bg-kula-100 text-kula-800': member.role === 'manager',
-                    'bg-blue-100 text-blue-800': member.role === 'staff',
-                    'bg-green-100 text-green-800': member.role === 'waiter',
-                    'bg-kula-50 text-kula-700': member.role === 'kitchen'
-                  }">
-                  {{ getRoleName(member.role) }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <div class="flex items-center">
-                  <span class="text-sm text-gray-900 font-mono">{{ member.pin || '-' }}</span>
-                  <button 
-                    v-if="member.pin"
-                    @click="regeneratePin(member)"
-                    class="ml-2 text-gray-400 hover:text-gray-700"
-                    title="Régénérer le PIN"
-                  >
-                    <RefreshCw class="w-4 h-4" />
-                  </button>
-                  <button 
-                    v-else
-                    @click="generatePin(member)"
-                    class="ml-2 text-gray-400 hover:text-gray-700"
-                    title="Générer un PIN"
-                  >
-                    <Key class="w-4 h-4" />
-                  </button>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-medium rounded-full" 
-                  :class="{
-                    'bg-green-100 text-green-800': member.is_active,
-                    'bg-red-100 text-red-800': !member.is_active
-                  }">
-                  {{ member.is_active ? 'Actif' : 'Inactif' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex justify-end space-x-2">
-                  <button 
-                    @click="openStaffModal(member)" 
-                    class="text-kula-600 hover:text-kula-900"
-                    title="Modifier"
-                  >
-                    <Edit class="w-4 h-4" />
-                  </button>
-                  <button 
-                    @click="confirmDeleteStaff(member)" 
-                    class="text-red-600 hover:text-red-900"
-                    title="Supprimer"
-                  >
-                    <Trash2 class="w-4 h-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <AppleSwitch 
+                    :model-value="member.is_active"
+                    @update:model-value="toggleStaffStatus(member, $event)"
+                  />
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <div class="flex justify-end gap-1">
+                    <button 
+                      @click="openStaffModal(member)" 
+          class="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-200  transition-all duration-200 hover:scale-10 z-10"
+                      title="Modifier"
+                    >
+                      <Edit class="w-5 h-5 text-gray-400" />
+                    </button>
+                    <button 
+                      @click="confirmDeleteStaff(member)" 
+          class="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-200  transition-all duration-200 hover:scale-10 z-10"
+                      title="Supprimer"
+                    >
+                      <Trash2 class="w-5 h-5 text-gray-400" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </ManagerModernCard>
+
+      <!-- Staff List - Mobile Cards -->
+      <div v-if="!loading && staffMembers.length > 0" class="lg:hidden space-y-3">
+        <div 
+          v-for="member in staffMembers" 
+          :key="member.id"
+          class="bg-white rounded-2xl p-4  border border-gray-100"
+        >
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-kula-400 to-kula-600 flex items-center justify-center">
+                <User class="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 class="text-base font-semibold text-gray-900">{{ member.username }}</h3>
+                <p class="text-xs text-gray-500">{{ getRoleName(member.role) }}</p>
+              </div>
+            </div>
+            <AppleSwitch 
+              :model-value="member.is_active"
+              @update:model-value="toggleStaffStatus(member, $event)"
+              class="scale-90"
+            />
+          </div>
+
+          <!-- PIN Section -->
+          <div class="flex items-center justify-between py-3 px-3 bg-gray-50 rounded-xl mb-3">
+            <div class="flex items-center gap-2">
+              <Key class="w-4 h-4 text-gray-400" />
+              <span class="text-sm text-gray-600">PIN</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-mono font-medium text-gray-900">
+                {{ member.pin || '----' }}
+              </span>
+              <button 
+                v-if="member.pin"
+                @click="regeneratePin(member)"
+                class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                <RefreshCw class="w-3.5 h-3.5" />
+              </button>
+              <button 
+                v-else
+                @click="generatePin(member)"
+                class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                <Plus class="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2">
+            <button 
+              @click="openStaffModal(member)"
+              class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+            >
+              <Edit class="w-4 h-4" />
+              Modifier
+            </button>
+            <button 
+              @click="confirmDeleteStaff(member)"
+              class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+            >
+              <Trash2 class="w-4 h-4" />
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
     </main>
 
     <!-- Staff Modal -->
@@ -159,11 +216,11 @@
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
+          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
+          <div class="flex min-h-full items-center justify-center p-4">
             <TransitionChild
               as="template"
               enter="duration-300 ease-out"
@@ -173,73 +230,52 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900 mb-4">
-                  {{ editingStaff ? 'Modifier un membre' : 'Ajouter un membre' }}
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-3xl bg-white p-6 sm:p-8 shadow-2xl transition-all">
+                <DialogTitle as="h3" class="text-xl font-semibold text-gray-900 mb-6">
+                  {{ isEditing.value ? 'Modifier un membre' : 'Ajouter un membre' }}
                 </DialogTitle>
                 
-                <form @submit.prevent="saveStaff" class="space-y-4">
+                <form @submit.prevent="saveStaff" class="space-y-5">
                   <!-- Username -->
-                  <div>
-                  
-                    <FloatLabelInput
-                      id="username"
-                      v-model="staffForm.username"
-                      type="text"
-                      required
-                      label="Nom d'utilisateur"
-                      placeholder="Ex: Jean D."
-                    />
-                  </div>
-                  
-                  <!-- Role -->
-                  <!-- <div>
-                    
-                    <FloatLabelSelect
-                      id="role"
-                      label="Rôle"
-                      v-model="staffForm.role"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-kula-500 focus:border-kula-500"
-                    >
-                      <option value="manager">Manager</option>
-                      <option value="staff">Personnel</option>
-                      <option value="waiter">Serveur</option>
-                      <option value="kitchen">Cuisine</option>
-                    </FloatLabelSelect>
-                  </div> -->
+                  <FloatLabelInput
+                    id="username"
+                    v-model="staffForm.username"
+                    type="text"
+                    required
+                    label="Nom d'utilisateur"
+                    placeholder="Ex: Jean D."
+                  />
                   
                   <!-- Active Status -->
-                  <div class="flex items-center">
-                    <input
-                      id="is_active"
-                      v-model="staffForm.is_active"
-                      type="checkbox"
-                      class="h-4 w-4 text-kula-500 focus:ring-kula-500 border-gray-300 rounded"
-                    />
-                    <label for="is_active" class="ml-2 block text-sm text-gray-700">
+                  <div class="flex items-center justify-between py-4 px-4 bg-gray-50 rounded-2xl">
+                    <label for="is_active" class="text-sm font-medium text-gray-700">
                       Compte actif
                     </label>
+                    <AppleSwitch
+                      id="is_active"
+                      v-model="staffForm.is_active"
+                    />
                   </div>
                   
                   <!-- Buttons -->
-                  <div class="mt-6 flex justify-end space-x-3">
+                  <div class="flex gap-3 pt-2">
                     <button
                       type="button"
                       @click="closeStaffModal"
-                      class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kula-500"
+                      class="flex-1 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
                     >
                       Annuler
                     </button>
                     <button
                       type="submit"
-                      class="px-4 py-2 text-sm font-medium text-white bg-kula-500 border border-transparent rounded-md hover:bg-kula-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kula-500 relative"
+                      class="flex-1 px-4 py-3 text-sm font-semibold text-white bg-kula-500 hover:bg-kula-600 rounded-xl transition-colors relative disabled:opacity-50"
                       :disabled="formLoading"
                     >
                       <span v-if="formLoading" class="absolute inset-0 flex items-center justify-center">
                         <Loader2 class="w-5 h-5 animate-spin" />
                       </span>
                       <span :class="{ invisible: formLoading }">
-                        {{ editingStaff ? 'Mettre à jour' : 'Ajouter' }}
+                        {{ isEditing.value ? 'Mettre à jour' : 'Ajouter' }}
                       </span>
                     </button>
                   </div>
@@ -254,7 +290,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { 
   TransitionRoot, 
@@ -275,6 +311,7 @@ import {
 } from 'lucide-vue-next'
 import { useCustomToast } from '~/composables/useToast'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
+import AppleSwitch from '~/components/AppleSwitch.vue'
 
 const route = useRoute()
 const { client: supabase } = useSupabaseWrapper()
@@ -287,7 +324,7 @@ const loading = ref(true)
 const showStaffModal = ref(false)
 const editingStaff = ref(null)
 const formLoading = ref(false)
-
+const isEditing = ref(false)
 // Form state
 const staffForm = reactive({
   username: '',
@@ -295,9 +332,11 @@ const staffForm = reactive({
   pin: 1234,
   is_active: true
 })
+
 definePageMeta({
   layout: 'manager'
 })
+
 // Get role name
 const getRoleName = (role: string) => {
   const roles = {
@@ -331,14 +370,42 @@ const loadStaffMembers = async () => {
   }
 }
 
+// Toggle staff status
+const toggleStaffStatus = async (member, newStatus) => {
+  try {
+    const { error } = await supabase
+      .from('staff')
+      .update({ 
+        is_active: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', member.id)
+    
+    if (error) throw error
+    
+    // Update local state
+    const index = staffMembers.value.findIndex(s => s.id === member.id)
+    if (index !== -1) {
+      staffMembers.value[index].is_active = newStatus
+    }
+    
+    showToast.success('Succès', `${member.username} est maintenant ${newStatus ? 'actif' : 'inactif'}`)
+  } catch (error) {
+    console.error('Error toggling staff status:', error)
+    showToast.error('Erreur', 'Impossible de modifier le statut')
+  }
+}
+
 // Open staff modal
 const openStaffModal = (staff = null) => {
   if (staff) {
+    isEditing.value = true
     editingStaff.value = staff
     staffForm.username = staff.username
     staffForm.role = staff.role
     staffForm.is_active = staff.is_active
   } else {
+    isEditing.value = false
     editingStaff.value = null
     staffForm.username = ''
     staffForm.role = 'staff'
@@ -360,7 +427,6 @@ const saveStaff = async () => {
   formLoading.value = true
   
   try {
-    // Update existing staff
     if (editingStaff.value?.id) {
       const { error } = await supabase
         .from('staff')
@@ -373,7 +439,6 @@ const saveStaff = async () => {
       
       if (error) throw error
       
-      // Update local state
       const index = staffMembers.value.findIndex(s => s.id === editingStaff.value.id)
       if (index !== -1) {
         staffMembers.value[index] = {
@@ -385,16 +450,13 @@ const saveStaff = async () => {
       }
       
       showToast.success('Succès', 'Membre mis à jour avec succès')
-    } 
-    // Create new staff
-    else {
-      // Insert directly without PIN
+    } else {
       const { data, error } = await supabase
         .from('staff')
         .insert({
           username: staffForm.username,
           establishment_id: slug,
-          role:"staff",
+          role: "staff",
           pin: staffForm.pin,
           is_active: staffForm.is_active
         })
@@ -403,22 +465,20 @@ const saveStaff = async () => {
       
       if (error) throw error
       
-      // Add to local state
       staffMembers.value.unshift(data)
-      
       showToast.success('Succès', 'Nouveau membre ajouté avec succès')
     }
     
     closeStaffModal()
   } catch (error) {
     console.error('Error saving staff:', error)
-    showToast.error('Erreur', 'Impossible de sauvegarder le membre, veuillez vérifier les champs')
+    showToast.error('Erreur', 'Impossible de sauvegarder le membre')
   } finally {
     formLoading.value = false
   }
 }
 
-// Generate PIN for staff member
+// Generate PIN
 const generatePin = async (staff) => {
   try {
     const { data, error } = await supabase.rpc('create_staff_pin', {
@@ -429,10 +489,7 @@ const generatePin = async (staff) => {
     
     if (error) throw error
     
-    // Update local state
     await loadStaffMembers()
-    
-    // Show PIN to manager
     showToast.success('PIN généré', `PIN: ${data.pin}`)
   } catch (error) {
     console.error('Error generating PIN:', error)
@@ -449,7 +506,6 @@ const regeneratePin = async (staff) => {
     
     if (error) throw error
     
-    // Update local state
     const index = staffMembers.value.findIndex(s => s.id === staff.id)
     if (index !== -1) {
       staffMembers.value[index].pin = data
@@ -462,14 +518,14 @@ const regeneratePin = async (staff) => {
   }
 }
 
-// Confirm delete staff
+// Confirm delete
 const confirmDeleteStaff = (staff) => {
   if (confirm(`Êtes-vous sûr de vouloir supprimer ${staff.username} ?`)) {
     deleteStaff(staff.id)
   }
 }
 
-// Delete staff member
+// Delete staff
 const deleteStaff = async (id) => {
   try {
     const { error } = await supabase
@@ -479,9 +535,7 @@ const deleteStaff = async (id) => {
     
     if (error) throw error
     
-    // Update local state
     staffMembers.value = staffMembers.value.filter((s: any) => s.id !== id)
-    
     showToast.success('Succès', 'Membre supprimé avec succès')
   } catch (error) {
     console.error('Error deleting staff:', error)
@@ -489,15 +543,12 @@ const deleteStaff = async (id) => {
   }
 }
 
-// Load data on mount
 onMounted(() => {
   loadStaffMembers()
 })
 
-// Watch for route changes to reload data
 watch(() => route.path, async (newPath, oldPath) => {
   if (newPath !== oldPath) {
-    console.log('🔄 Route changed, reloading staff data for path:', newPath)
     await loadStaffMembers()
   }
 })
@@ -508,11 +559,7 @@ watch(() => route.path, async (newPath, oldPath) => {
   animation: spin 1s linear infinite;
 }
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
-</style> 
+</style>

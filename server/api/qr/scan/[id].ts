@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   
   const supabase = await serverSupabaseClient(event)
   const query = getQuery(event)
-  const tableParam = query.table as string | undefined
+  const tableParam = query.q as string | undefined
   
   try {
     // Récupérer les informations de l'établissement
@@ -22,9 +22,6 @@ export default defineEventHandler(async (event) => {
       .select('*')
       .eq('id', id)
       .single() 
-    console.log('====================================');
-    console.log(establishmentData);
-    console.log('====================================');
     if (establishmentError || !establishmentData) {
       throw createError({
         statusCode: 404,
@@ -65,9 +62,13 @@ export default defineEventHandler(async (event) => {
     })
     
     if (scanError) {
-      console.error('Erreur enregistrement scan QR:', scanError)
-    }
-    console.log('✅ Scan QR enregistré pour établissement', establishmentData.id, 'table', actualTableNumber)
+ throw createError({
+      statusCode: 500,
+      message: 'Erreur lors du traitement du QR code'
+    })  
+  
+  }
+    // console.log('✅ Scan QR enregistré pour établissement', establishmentData.id, 'table', actualTableNumber)
     // Retourner les informations nécessaires pour la redirection
     return {
       slug: establishmentData.slug,

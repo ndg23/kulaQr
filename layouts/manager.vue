@@ -295,31 +295,31 @@ const navigationItems = computed(() => [
     icon: List
   },
   {
-    name: 'Tables',
+    name: 'QR Codes',
     path: `/manager/${establishment.value?.id}/tables`,
     active: '/tables',
-    icon: Table
-  },
-  {
-    name: 'QR Codes',
-    path: `/manager/${establishment.value?.id}/qr-codes`,
-    active: '/qr-codes',
     icon: QrCode
   },
+  // {
+  //   name: 'QR Codes',
+  //   path: `/manager/${establishment.value?.id}/qr-codes`,
+  //   active: '/qr-codes',
+  //   icon: QrCode
+  // },
   {
     name: 'Commandes',
     path: `/manager/${establishment.value?.id}/orders`,
     active: '/orders',
     icon: Clock
   },
+  // {
+  //   name: 'Support QR',
+  //   path: `/manager/${establishment.value?.id}/qr-support`,
+  //   active: '/qr-support',
+  //   icon: HelpCircle
+  // },
   {
-    name: 'Support QR',
-    path: `/manager/${establishment.value?.id}/qr-support`,
-    active: '/qr-support',
-    icon: HelpCircle
-  },
-  {
-    name: 'Staff',
+    name: 'Personnel',
     path: `/manager/${establishment.value?.id}/staff`,
     active: '/staff',
     icon: Users

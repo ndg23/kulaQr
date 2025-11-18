@@ -25,229 +25,151 @@
       </div>
     </div>
 
-    <!-- Restaurants List -->
-    <div class="bg-white rounded-[2rem] border border-gray-100 overflow-hidden">
-      <!-- Header with Search and Add -->
-      <div class="p-6 border-b border-gray-100">
-        <div class="flex items-center justify-between">
-          <div class="relative flex-1 max-w-lg">
-            <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              v-model="filters.search"
-              type="search"
-              placeholder="Rechercher un etablissement..."
-              class="w-full h-12 pl-12 pr-4 rounded-2xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
+    <!-- Establishments List with DataTable -->
+    <DataTable
+      :items="restaurants"
+      :columns="tableColumns"
+      :loading="loading"
+      :current-page="currentPage"
+      :per-page="perPage"
+      :total-items="filteredRestaurants.length"
+      :show-pagination="true"
+      empty-title="Aucun établissement trouvé"
+      empty-description="Aucun établissement ne correspond à vos critères de recherche"
+      empty-icon="fas fa-store"
+      @page-change="currentPage = $event"
+      @update:per-page="perPage = $event"
+    >
+      <!-- Restaurant Name Column -->
+      <template #cell-name="{ item }">
+        <div class="flex items-center space-x-3 max-w-[250px]">
+          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0">
+            <Store class="w-5 h-5 text-white" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="font-medium text-gray-900 truncate">{{ item.name }}</div>
+            <div class="text-sm text-gray-500 truncate">{{ item.address }}</div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Type Column -->
+      <template #cell-type_name="{ item }">
+        <div class="max-w-[120px]">
+          <span
+            class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+            :class="getTypeBadgeClass(item.type_name)"
+          >
+            {{ formatType(item.type_name) }}
+          </span>
+        </div>
+      </template>
+
+      <!-- Owner Column -->
+      <template #cell-owner_name="{ item }">
+        <div class="flex items-center space-x-2 max-w-[150px]">
+          <div class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <User class="w-3 h-3 text-gray-500" />
+          </div>
+          <span class="text-sm text-gray-700 truncate">{{ item.owner_name }}</span>
+        </div>
+      </template>
+
+      <!-- Subscription Column -->
+      <!-- <template #cell-subscription_type="{ item }">
+        <div class="max-w-[100px]">
+          <span
+            class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+            :class="getSubscriptionBadgeClass(item.subscription_type)"
+          >
+            {{ getSubscriptionLabel(item.subscription_type) }}
+          </span>
+        </div>
+      </template> -->
+
+      <!-- Status Column -->
+      <template #cell-is_active="{ item }">
+        <div class="max-w-[100px]">
+          <span
+            class="px-3 py-1 rounded-full text-xs font-medium inline-flex items-center whitespace-nowrap"
+            :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+          >
+            <div 
+              class="w-1.5 h-1.5 rounded-full mr-1.5 flex-shrink-0"
+              :class="item.is_active ? 'bg-green-500' : 'bg-red-500'"
             />
-          </div>
-          <div class="flex gap-3">
-            <button
-              class="px-6 py-4 text-base font-semibold border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-all"
-              @click="navigateTo('/admin/establishments/manage')"
-            >
-              Gérer un établissement
-            </button>
-            <button
-              class="px-6 py-4 text-base font-semibold border border-gray-300 bg-sky-600 text-white hover:bg-sky-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-all"
-              @click="openRestaurantModal"
-            >
-              Ajouter un etablissement
-            </button>
-          </div>
+            {{ item.is_active ? 'Actif' : 'Inactif' }}
+          </span>
         </div>
-      </div>
+      </template>
 
-      <!-- Filters -->
-      <div class="p-4 bg-gray-50 border-b border-gray-100">
-        <div class="flex gap-4">
-          <USelect
-            v-model="filters.type"
-            :options="typeOptions"
-            placeholder="Tous les types"
-            class="w-48"
-          />
-          <USelect
-            v-model="filters.status"
-            :options="statusOptions"
-            placeholder="Tous les statuts"
-            class="w-48"
-          />
+      <!-- Currency Column -->
+      <template #cell-currency="{ item }">
+        <div class="max-w-[80px]">
+          <span class="text-sm font-medium text-gray-700">{{ item.currency || 'XOF' }}</span>
         </div>
-      </div>
+      </template>
 
-      <!-- Table -->
-      <UTable
-        :rows="filteredRestaurants"
-        :columns="columns"
-        :loading="loading"
-        :empty-state="{ icon: 'i-lucide-utensils', label: 'Aucun restaurant trouvé' }"
-        hover
-      >
-        <!-- Restaurant Column -->
-        <template #name-data="{ row }">
-          <div class="flex items-center space-x-3">
-            <div class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-              <Store class="w-5 h-5 text-gray-500" />
-            </div>
-            <div>
-              <div class="font-medium text-gray-900">{{ row.name }}</div>
-              <div class="text-sm text-gray-500">{{ row.address }}</div>
-            </div>
-          </div>
-        </template>
-
-        <!-- Type Column -->
-        <template #type-data="{ row }">
-          <UBadge
-            :color="getTypeColor(row.type_name)"
-            variant="subtle"
-            size="sm"
-          >
-            {{ formatType(row.type_name) }}
-          </UBadge>
-        </template>
-
-        <!-- Owner Column -->
-        <template #owner-data="{ row }">
-          <div class="flex items-center space-x-2">
-            <div class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
-              <User class="w-3 h-3 text-gray-500" />
-            </div>
-            <span>{{ row.owner_name }}</span>
-          </div>
-        </template>
-
-        <!-- Subscription Column -->
-        <template #subscription_type-data="{ row }">
-          <UBadge
-            :color="getSubscriptionColor(row.subscription_type)"
-            variant="subtle"
-            size="sm"
-          >
-            {{ getSubscriptionLabel(row.subscription_type) }}
-          </UBadge>
-        </template>
-
-        <!-- Status Column -->
-        <template #is_active-data="{ row }">
-          <UBadge
-            :color="row.is_active ? 'green' : 'red'"
-            variant="subtle"
-            size="sm"
-          >
-            <div class="flex items-center">
-              <div class="w-1.5 h-1.5 rounded-full mr-1.5"
-                :class="row.is_active ? 'bg-green-500' : 'bg-red-500'"
-              />
-              {{ row.is_active ? 'Actif' : 'Inactif' }}
-            </div>
-          </UBadge>
-        </template>
-
-        <!-- Created At Column -->
-        <template #created_at-data="{ row }">
-          <div class="flex flex-col">
-            <span class="text-sm font-medium text-gray-900">
-              {{ formatDate(row.created_at, 'date') }}
-            </span>
-            <span class="text-xs text-gray-500">
-              {{ formatDate(row.created_at, 'time') }}
-            </span>
-          </div>
-        </template>
-
-        <!-- Updated At Column -->
-        <template #updated_at-data="{ row }">
-          <div class="flex flex-col">
-            <span class="text-sm font-medium text-gray-900">
-              {{ formatDate(row.updated_at, 'date') }}
-            </span>
-            <span class="text-xs text-gray-500">
-              {{ formatDate(row.updated_at, 'time') }}
-            </span>
-          </div>
-        </template>
-
-        <!-- Currency Column -->
-      
-
-        <!-- Max Categories/Products Column -->
-        <template #max_categories-data="{ row }">
-          <div class="text-center">
-            <span class="text-sm font-medium text-gray-900">{{ row.max_categories }}</span>
-          </div>
-        </template>
-
-        <template #max_products-data="{ row }">
-          <div class="text-center">
-            <span class="text-sm font-medium text-gray-900">{{ row.max_products }}</span>
-          </div>
-        </template>
-
-        <!-- Actions Column -->
-        <template #actions-data="{ row }">
-          <UDropdown
-            :items="[
-              [
-                {
-                  label: 'Gérer',
-                  icon: 'i-heroicons-cog-6-tooth',
-                  click: () => manageEstablishment(row)
-                },
-                {
-                  label: 'Modifier',
-                  icon: 'i-heroicons-pencil-square',
-                  click: () => editRestaurant(row)
-                },
-                {
-                  label: 'Voir le menu',
-                  icon: 'i-heroicons-eye',
-                  click: () => viewRestaurantMenu(row)
-                },
-                {
-                  label: 'QR Codes',
-                  icon: 'i-heroicons-qr-code',
-                  click: () => manageQrCodes(row)
-                }
-              ],
-              [
-                {
-                  label: row.is_active ? 'Désactiver' : 'Activer',
-                  icon: row.is_active ? 'i-heroicons-lock-closed' : 'i-heroicons-lock-open',
-                  click: () => toggleRestaurantStatus(row)
-                },
-                {
-                  label: 'Supprimer',
-                  icon: 'i-heroicons-trash',
-                  click: () => deleteRestaurant(row.id),
-                  color: 'red'
-                }
-              ]
-            ]"
-          >
-            <UButton
-              color="gray"
-              variant="ghost"
-              icon="i-heroicons-ellipsis-horizontal"
-            />
-          </UDropdown>
-        </template>
-      </UTable>
-
-      <!-- Pagination -->
-      <div class="p-4 border-t border-gray-100">
-        <div class="flex items-center justify-between">
-          <p class="text-sm text-gray-500">
-            Affichage de {{ paginationInfo.showing }} sur {{ paginationInfo.total }} restaurants
-          </p>
-          <UPagination
-            v-model="currentPage"
-            :total="filteredRestaurants.length"
-            :per-page="perPage"
-            size="sm"
-          />
+      <!-- Max Categories Column -->
+      <!-- <template #cell-max_categories="{ item }">
+        <div class="text-center max-w-[80px]">
+          <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium whitespace-nowrap">
+            {{ item.max_categories }}
+          </span>
         </div>
-      </div>
-    </div>
+      </template> -->
+
+      <!-- Max Products Column -->
+      <!-- <template #cell-max_products="{ item }">
+        <div class="text-center max-w-[80px]">
+          <span class="px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs font-medium whitespace-nowrap">
+            {{ item.max_products }}
+          </span>
+        </div>
+      </template> -->
+
+      <!-- Actions Column -->
+      <template #cell-actions="{ item }">
+        <div class="flex items-center gap-2 max-w-[200px]">
+          <button
+            @click="manageEstablishment(item)"
+            class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            title="Gérer"
+          >
+            <Shield class="w-4 h-4" />
+          </button>
+          <button
+            @click="editRestaurant(item)"
+            class="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+            title="Modifier"
+          >
+            <Edit class="w-4 h-4" />
+          </button>
+          <button
+            @click="manageQrCodes(item)"
+            class="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+            title="QR Codes"
+          >
+            <UtensilsCrossed class="w-4 h-4" />
+          </button>
+          <button
+            @click="toggleRestaurantStatus(item)"
+            class="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+            :title="item.is_active ? 'Désactiver' : 'Activer'"
+          >
+            <CheckCircle v-if="!item.is_active" class="w-4 h-4" />
+            <X v-else class="w-4 h-4" />
+          </button>
+          <button
+            @click="deleteRestaurant(item.id)"
+            class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title="Supprimer"
+          >
+            <Trash2 class="w-4 h-4" />
+          </button>
+        </div>
+      </template>
+    </DataTable>
 
     <!-- Restaurant Modal -->
     <RestaurantFormModal
@@ -401,13 +323,13 @@ const {client: supabase } = useSupabaseWrapper()
 const {showToast} = useCustomToast()
 
 // State
-const restaurants = ref([])
-const users = ref([])
+const restaurants = ref<any[]>([])
+const users = ref<any[]>([])
 const loading = ref(false)
 const stats = ref({
   total: 0,
   active: 0,
-  subscriptions: {}
+  subscriptions: {} as Record<string, number>
 })
 
 // Pagination
@@ -429,6 +351,67 @@ const selectedRestaurant = ref(null)
 const showQrModal = ref(false)
 const qrCodeUrl = ref('')
 const qrCodeRef = ref(null)
+
+// Table columns for DataTable component
+const tableColumns = [
+  {
+    key: 'name',
+    label: 'Restaurant',
+    sortable: true
+  },
+  {
+    key: 'type_name',
+    label: 'Type',
+    sortable: true
+  },
+  {
+    key: 'owner_name',
+    label: 'Propriétaire',
+    sortable: true
+  },
+  {
+    key: 'subscription_type',
+    label: 'Abonnement',
+    sortable: true
+  },
+  {
+    key: 'is_active',
+    label: 'Statut',
+    sortable: true
+  },
+  {
+    key: 'created_at',
+    label: 'Créé le',
+    sortable: true,
+    type: 'date' as const
+  },
+  {
+    key: 'updated_at',
+    label: 'Mis à jour',
+    sortable: true,
+    type: 'date' as const
+  },
+  {
+    key: 'currency',
+    label: 'Devise',
+    sortable: true
+  },
+  {
+    key: 'max_categories',
+    label: 'Catégories',
+    sortable: true
+  },
+  {
+    key: 'max_products',
+    label: 'Produits',
+    sortable: true
+  },
+  {
+    key: 'actions',
+    label: 'Actions',
+    sortable: false
+  }
+]
 
 // Table columns
 const columns = [
@@ -503,7 +486,7 @@ const columns = [
 ]
 
 // Options for filters
-const typeOptions = ref([])
+const typeOptions = ref<any[]>([])
 const statusOptions = [
   { label: 'Actif', value: 'active' },
   { label: 'Inactif', value: 'inactive' }
@@ -674,8 +657,8 @@ const paginationInfo = computed(() => {
 })
 
 // Helper methods
-const getTypeColor = (type) => {
-  const colors = {
+const getTypeColor = (type: string) => {
+  const colors: Record<string, string> = {
     'restaurant': 'orange',
     'cafe': 'yellow',
     'bar': 'purple',
@@ -685,8 +668,19 @@ const getTypeColor = (type) => {
   return colors[type] || 'gray'
 }
 
-const formatType = (type) => {
-  const formats = {
+const getTypeBadgeClass = (type: string) => {
+  const classes: Record<string, string> = {
+    'restaurant': 'bg-orange-100 text-orange-800',
+    'cafe': 'bg-yellow-100 text-yellow-800',
+    'bar': 'bg-purple-100 text-purple-800',
+    'fast_food': 'bg-red-100 text-red-800',
+    'hotel': 'bg-blue-100 text-blue-800'
+  }
+  return classes[type] || 'bg-gray-100 text-gray-800'
+}
+
+const formatType = (type: string) => {
+  const formats: Record<string, string> = {
     'restaurant': 'Restaurant',
     'cafe': 'Café',
     'bar': 'Bar',
@@ -696,8 +690,8 @@ const formatType = (type) => {
   return formats[type] || type
 }
 
-const getSubscriptionColor = (type) => {
-  const colors = {
+const getSubscriptionColor = (type: string) => {
+  const colors: Record<string, string> = {
     'basic': 'green',
     'premium': 'yellow',
     'pro': 'purple'
@@ -705,8 +699,17 @@ const getSubscriptionColor = (type) => {
   return colors[type] || 'gray'
 }
 
-const getSubscriptionLabel = (type) => {
-  const labels = {
+const getSubscriptionBadgeClass = (type: string) => {
+  const classes: Record<string, string> = {
+    'basic': 'bg-green-100 text-green-800',
+    'premium': 'bg-yellow-100 text-yellow-800',
+    'pro': 'bg-purple-100 text-purple-800'
+  }
+  return classes[type] || 'bg-gray-100 text-gray-800'
+}
+
+const getSubscriptionLabel = (type: string) => {
+  const labels: Record<string, string> = {
     'basic': 'Basic',
     'premium': 'Premium',
     'pro': 'Pro'
@@ -715,12 +718,12 @@ const getSubscriptionLabel = (type) => {
 }
 
 // Methods
-const openRestaurantModal = (restaurant = null) => {
+const openRestaurantModal = (restaurant: any = null) => {
   selectedRestaurant.value = restaurant
   showRestaurantModal.value = true
 }
 
-const editRestaurant = (restaurant) => {
+const editRestaurant = (restaurant: any) => {
   selectedRestaurant.value = { ...restaurant }
   showRestaurantModal.value = true
 }
@@ -734,7 +737,7 @@ const handleRestaurantSubmitted = () => {
   loadRestaurants()
 }
 
-const deleteRestaurant = async (id) => {
+const deleteRestaurant = async (id: string) => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer cet établissement ?')) return
 
   try {
@@ -758,17 +761,17 @@ const deleteRestaurant = async (id) => {
 }
 
 // Méthodes pour les actions du menu déroulant
-const manageEstablishment = (restaurant) => {
+const manageEstablishment = (restaurant: any) => {
   // Rediriger vers la page de gestion de l'établissement
   navigateTo('/admin/establishments/manage')
 }
 
-const viewRestaurantMenu = (restaurant) => {
+const viewRestaurantMenu = (restaurant: any) => {
   // Rediriger vers la page du menu du restaurant
   navigateTo(`/admin/restaurants/${restaurant.id}/menu`)
 }
 
-const manageQrCodes = (restaurant) => {
+const manageQrCodes = (restaurant: any) => {
   selectedRestaurant.value = restaurant
   // Construire l'URL du menu (à adapter selon votre structure)
   qrCodeUrl.value = `${window.location.origin}/menu/${restaurant.slug}`
@@ -781,7 +784,7 @@ const closeQrModal = () => {
 }
 
 // Méthode pour copier l'URL dans le presse-papier
-const copyToClipboard = async (text) => {
+const copyToClipboard = async (text: string) => {
   try {
     await navigator.clipboard.writeText(text)
     showToast.success('URL copiée dans le presse-papier', 'success')
@@ -794,7 +797,7 @@ const copyToClipboard = async (text) => {
 // Méthode pour télécharger le QR code
 const downloadQrCode = async () => {
   try {
-    const qrElement = document.querySelector('.qrcode-vue3')
+    const qrElement = document.querySelector('.qrcode-vue3') as HTMLElement
     if (!qrElement) return
     
     const canvas = await html2canvas(qrElement)
@@ -802,7 +805,7 @@ const downloadQrCode = async () => {
     
     const link = document.createElement('a')
     link.href = dataUrl
-    link.download = `qrcode-${selectedRestaurant.value.slug}.png`
+    link.download = `qrcode-${selectedRestaurant.value?.slug || 'restaurant'}.png`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -817,7 +820,7 @@ const downloadQrCode = async () => {
 // Méthode pour imprimer le QR code
 const printQrCode = async () => {
   try {
-    const qrElement = document.querySelector('.qrcode-vue3')
+    const qrElement = document.querySelector('.qrcode-vue3') as HTMLElement
     if (!qrElement) return
     
     const canvas = await html2canvas(qrElement)
@@ -832,7 +835,7 @@ const printQrCode = async () => {
     printWindow.document.write(`
       <html>
         <head>
-          <title>QR Code - ${selectedRestaurant.value.name}</title>
+          <title>QR Code - ${selectedRestaurant.value?.name || 'Restaurant'}</title>
           <style>
             body {
               display: flex;
@@ -870,7 +873,7 @@ const printQrCode = async () => {
         </head>
         <body onload="window.print(); window.close();">
           <div class="container">
-            <h1>${selectedRestaurant.value.name}</h1>
+            <h1>${selectedRestaurant.value?.name || 'Restaurant'}</h1>
             <p>Scannez ce QR code pour accéder au menu</p>
             <img src="${dataUrl}" alt="QR Code" />
             <div class="url">${qrCodeUrl.value}</div>
@@ -885,7 +888,7 @@ const printQrCode = async () => {
   }
 }
 
-const toggleRestaurantStatus = async (restaurant) => {
+const toggleRestaurantStatus = async (restaurant: any) => {
   try {
     loading.value = true
     const { error } = await supabase
@@ -906,7 +909,7 @@ const toggleRestaurantStatus = async (restaurant) => {
 }
 
 // Fonction de formatage de date
-const formatDate = (dateString, format = 'date') => {
+const formatDate = (dateString: string, format = 'date') => {
   if (!dateString) return '-'
   
   const date = new Date(dateString)
@@ -932,7 +935,7 @@ const formatDate = (dateString, format = 'date') => {
     }).format(date)
   } else if (format === 'relative') {
     const now = new Date()
-    const diffInSeconds = Math.floor((now - date) / 1000)
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
     
     if (diffInSeconds < 60) {
       return 'à l\'instant'

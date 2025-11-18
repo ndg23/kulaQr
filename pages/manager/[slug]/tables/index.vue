@@ -2,65 +2,27 @@
   <div class="p-6 lg:p-8">
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Espaces</h1>
-      <p class="text-lg text-gray-600">Gérez les espaces de votre établissement</p>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Emplacements</h1>
+      <p class="text-lg text-gray-600">Gérez les emplacements de votre établissement</p>
     </div>
 
-    <!-- Stats Cards -->
-    <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Total Espaces</p>
-            <p class="text-2xl font-bold text-gray-900">{{ tables.length }}</p>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
-            <Table class="w-6 h-6 text-blue-500" />
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Espaces VIP</p>
-            <p class="text-2xl font-bold text-purple-600">{{ vipTables }}</p>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center">
-            <Users class="w-6 h-6 text-purple-500" />
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">QR Codes Générés</p>
-            <p class="text-2xl font-bold text-green-600">{{ qrCodesGenerated }}</p>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
-            <QrCode class="w-6 h-6 text-green-500" />
-          </div>
-        </div>
-      </div>
-    </div> -->
-
+   
     <!-- Actions Bar -->
     <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
-      <div class="flex gap-4 items-start sm:items-center justify-between flex-wrap">
+      <div class="flex gap-4 items-start sm:items-center justify-between flex-wrap p-3 md:p-0">
         <div class="flex items-center gap-4">
           <div class="relative">
             <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Rechercher une table..."
+              placeholder="Rechercher un emplacement..."
               class="pl-10 pr-4 py-3 w-full sm:w-80 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
             />
           </div>
         </div>
         
-        <div class="flex gap-3">
+        <div class="flex gap-3 flex-wrap">
           <button
             @click="refreshData"
             :disabled="loading"
@@ -75,7 +37,7 @@
             class="px-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-800 transition-colors flex items-center gap-2"
           >
             <Plus class="w-4 h-4" />
-            Nouveau Lieu
+            Nouvel emplacement
           </button>
         </div>
       </div>
@@ -93,16 +55,16 @@
       <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <Table class="w-12 h-12 text-gray-400" />
       </div>
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun lieu trouvé</h3>
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun emplacement trouvé</h3>
       <p class="text-gray-600 mb-6">
-        {{ searchQuery ? 'Aucun lieu ne correspond à votre recherche' : 'Commencez par créer votre premier lieu' }}
+        {{ searchQuery ? 'Aucun emplacement ne correspond à votre recherche' : 'Commencez par créer votre premier emplacement' }}
       </p>
       <button
         v-if="!searchQuery"
         @click="openTableModal"
         class="px-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-800 transition-colors"
       >
-        Créer un lieu
+        Créer un emplacement  
       </button>
     </div>
 
@@ -114,18 +76,19 @@
       >
         <!-- Table Header -->
         <div class="flex items-center justify-between mb-5 flex-wrap">
-          <div class="flex items-center gap-4 mt-2 lg:mt-0">
+        <div class="flex items-center gap-4 mt-2 lg:mt-0">
           
             <div>
-              <h3 class="text-xl font-bold text-gray-900 mb-1">Numéro {{ table.number }}</h3>
+              <h3 class="text-xl font-bold text-gray-900 mb-1">N° : {{ table.table_number || table.number }}</h3>
               <div class="flex items-center gap-2">
                 <span :class="[
                   table.type === 'VIP' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700',
                   'px-2 py-1 rounded-lg text-xs font-medium'
                 ]">
-                  {{ table.type }}
+                  {{ table.type || 'STANDARD' }}
                 </span>
-                <span class="text-sm text-gray-500">{{ table.zone }}</span>
+                <!-- <span class="text-sm text-gray-500">{{ table.section_name || table.zone }}</span>
+                <span v-if="table.floor_level" class="text-sm text-gray-500">• {{ table.floor_level }}</span> -->
               </div>
             </div>
           </div>
@@ -147,7 +110,13 @@
               />
               <QrCode v-else class="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <p class="text-gray-500 text-sm mb-6 leading-relaxed h-16 overflow-hidden">
-          {{ table.description || 'Aucune description fournie pour cette table.' }}
+          <strong v-if="table.location_description || table.section_name || table.floor_level">📍 Localisation:</strong>
+          <span v-if="table.location_description">{{ table.location_description }}</span>
+          <span v-else-if="table.section_name || table.floor_level">
+            {{ table.section_name || 'Section non spécifiée' }}
+            {{ table.floor_level ? `• ${table.floor_level}` : '' }}
+          </span>
+          <span v-else>{{ table.description || 'Aucune description fournie pour cette table.' }}</span>
         </p>
 
 
@@ -172,7 +141,7 @@
             class="flex-1 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-medium hover:bg-emerald-100 transition-colors border border-emerald-200 flex items-center justify-center gap-1.5"
           >
             <ArrowRight class="w-4 h-4" />
-            Voir le menu
+             Menu
           </button>
           <button
             v-if="table.qr_code_generated"
@@ -198,7 +167,7 @@
       <div class="p-6">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-semibold text-gray-900">
-            {{ editingTable ? 'Modifier la table' : 'Nouvelle table' }}
+            {{ editingTable ? 'Modifier l\'emplacement' : 'Nouvel emplacement' }}
           </h2>
           <button
             @click="closeTableModal"
@@ -213,7 +182,7 @@
             <FloatLabelInput
               id="table-number"
               v-model="tableForm.number"
-              label="Numéro du lieu"
+              label="Numéro de l'emplacement"
               type="number"
               required
               placeholder="Ex: 1, 2, 3..."
@@ -231,24 +200,50 @@
           </div>
 
           <FloatLabelSelect
-            id="table-zone"
-            v-model="tableForm.zone"
-            label="Precisez la zone"
+            id="table-section"
+            v-model="tableForm.section_name"
+            label="Section de l'emplacement"
             required
           >
-            <option value="ETAGE">ETAGE</option>
-            <option value="TERRASSE">TERRASSE</option>
-            <option value="REZ_DE_CHAUSSEE">REZ DE CHAUSSEE</option>
+            <option value="Salle principale">Salle principale</option>
+            <option value="Terrasse">Terrasse</option>
+            <option value="Bar">Bar</option>
+            <option value="Salle privée">Salle privée</option>
+            <option value="Extérieur">Extérieur</option>
+            <option value="Entrée">Entrée</option>
+          </FloatLabelSelect>
+
+          <FloatLabelSelect
+            id="table-floor"
+            v-model="tableForm.floor_level"
+            label="Zone de l'emplacement"
+          >
+            <option value="Rez-de-chaussée">Rez-de-chaussée</option>
+            <option value="1er étage">1er étage</option>
+            <option value="2ème étage">2ème étage</option>
+            <option value="Sous-sol">Sous-sol</option>
           </FloatLabelSelect>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Capacité (places)</label>
+            <input
+              v-model.number="tableForm.capacity"
+              type="number"
+              min="1"
+              max="20"
+              class="w-full px-4 py-3 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
+              placeholder="Ex: 4"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Description de localisation détaillée</label>
             <textarea
-              v-model="tableForm.description"
+              v-model="tableForm.location_description"
               rows="3"
               class="w-full px-4 py-3 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
-              placeholder="Description de la table..."
-            />
+              placeholder="Ex: Près de la fenêtre, à côté du bar, angle nord-est, vue sur jardin..."
+            ></textarea>
           </div>
 
           <div class="flex gap-3 pt-4 d-none-">
@@ -264,7 +259,7 @@
               :disabled="loading"
               class="flex-1 px-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-800 disabled:opacity-50 transition-colors"
             >
-              {{ editingTable ? 'Modifier' : 'Créer' }}
+              {{ editingTable ? 'Modifier' : 'Ajouter' }}
             </button>
           </div>
         </form>
@@ -327,6 +322,8 @@ import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useEstablishment } from '~/composables/useEstablishment'
 import QrCodeCard from '~/components/QrCodeCard.vue'
 import { encodeTableHashids } from '~/utils/secure-encoding'
+import { ta } from 'date-fns/locale'
+// import jsPDF from 'jspdf'
 
 const { showToast } = useCustomToast()
 const { client: supabase } = useSupabaseWrapper()
@@ -348,9 +345,11 @@ const qrCard= ref()
 // Form
 const tableForm = ref({
   number: '',
-  type: 'SIMPLE',
-  zone: 'ETAGE',
-  description: ''
+  type: 'STANDARD',
+  section_name: '',
+  floor_level: '',
+  capacity: null as number | null,
+  location_description: ''
 })
 
 // Computed
@@ -382,7 +381,7 @@ const loadTables = async () => {
       .from('tables')
       .select('*')
       .eq('establishment_id', establishment.value.id)
-      .order('number', { ascending: true })
+      .order('created_at', { ascending: false })
 
     if (error) throw error
     
@@ -396,8 +395,8 @@ const loadTables = async () => {
 }
 
 const viewMenuTable = (table: any) => {
-  navigateTo(`/qr/${establishment.value?.id}?table=${table.number}`)
-  showToast.success('Ouverture', 'Menu ouvert dans un nouvel onglet')
+ return navigateTo(`${table.qr_code_url}`, { external: true })
+  // showToast.success('Ouverture', 'Menu ouvert dans un nouvel onglet')
 }
 
 // Table actions
@@ -405,9 +404,11 @@ const openTableModal = () => {
   editingTable.value = null
   tableForm.value = {
     number: '',
-    type: 'SIMPLE',
-    zone: 'ETAGE',
-    description: ''
+    type: 'STANDARD',
+    section_name: '',
+    floor_level: '',
+    capacity: null,
+    location_description: ''
   }
   showTableModal.value = true
 }
@@ -415,10 +416,12 @@ const openTableModal = () => {
 const editTable = (table: any) => {
   editingTable.value = table
   tableForm.value = {
-    number: table.number,
-    type: table.type || 'SIMPLE',
-    zone: table.zone || 'ETAGE',
-    description: table.description || ''
+    number: table.table_number || table.number || '',
+    type: table.type || 'STANDARD',
+    section_name: table.section_name || table.zone || '',
+    floor_level: table.floor_level || '',
+    capacity: table.capacity || null,
+    location_description: table.location_description || table.description || ''
   }
   showTableModal.value = true
 }
@@ -428,9 +431,11 @@ const closeTableModal = () => {
   editingTable.value = null
   tableForm.value = {
     number: '',
-    type: 'SIMPLE',
-    zone: 'ETAGE',
-    description: ''
+    type: 'STANDARD',
+    section_name: '',
+    floor_level: '',
+    capacity: null,
+    location_description: ''
   }
 }
 
@@ -444,7 +449,7 @@ const generateQrCode = async (table: any) => {
     const encodedTableNumber = encodeTableHashids(table.number, establishment.value.id)
     
     // Générer l'URL du menu pour cette table spécifique avec le numéro encodé
-    const tableMenuUrl = `${window.location.origin}/qr/${establishment.value.id}?table=${encodedTableNumber}`
+    const tableMenuUrl = `${window.location.origin}/qr/${establishment.value.id}?q=${encodedTableNumber}`
     
     // Mettre à jour la table avec l'URL du QR code
     const { error } = await supabase
@@ -481,9 +486,12 @@ const saveTable = async () => {
     
     const tableData = {
       number: parseInt(tableForm.value.number),
+      table_number: parseInt(tableForm.value.number),
       type: tableForm.value.type,
-      zone: tableForm.value.zone,
-      description: tableForm.value.description,
+      section_name: tableForm.value.section_name,
+      floor_level: tableForm.value.floor_level,
+      capacity: tableForm.value.capacity,
+      location_description: tableForm.value.location_description,
       qr_code_url: editingTable.value ? editingTable.value.qr_code_url : null,
       establishment_id: establishment.value.id
     }
@@ -559,166 +567,544 @@ const downloadQrCodes = (table: any) => {
   showToast.success('Ouverture', 'QR code ouvert dans un nouvel onglet')
 }
 
+// const downloadQrCode = async (table: any) => {
+//   try {
+//     if (!qrCodeCardRef.value?.qrCodeImage) {
+//       showToast.error('Erreur', 'QR code non généré')
+//       return
+//     }
+    
+//     // Créer un canvas temporaire pour composer l'image complète
+//     const tempCanvas = document.createElement('canvas')
+//     const ctx = tempCanvas.getContext('2d')
+    
+//     // Obtenir les dimensions de la carte QR
+//     const qrCardElement = qrCard.value
+//     const width = qrCardElement.offsetWidth
+//     const height = qrCardElement.offsetHeight
+    
+//     // Configurer la taille du canvas (avec une résolution x2 pour meilleure qualité)
+//     tempCanvas.width = width * 2
+//     tempCanvas.height = height * 2
+//     ctx.scale(2, 2) // Augmenter la résolution
+    
+//     // Remplir le fond
+//     ctx.fillStyle = '#FFFFFF'
+//     ctx.fillRect(0, 0, width, height)
+    
+//     // Créer une image à partir du QR code
+//     const qrImage = new Image()
+    
+//     // Attendre que l'image QR soit chargée avant de continuer
+//     await new Promise((resolve, reject) => {
+//       qrImage.onload = resolve
+//       qrImage.onerror = reject
+//       qrImage.src = qrCodeCardRef.value.qrCodeImage      
+//     })
+    
+//     // Recréer la structure de la carte QR avec les textes et l'image QR
+    
+//     // 1. Dessiner l'arrière-plan et la bordure du conteneur
+//     ctx.fillStyle = '#FFFFFF'
+//     ctx.fillRect(0, 0, width, height)
+    
+//     // 2. Dessiner les éléments d'en-tête (nom du restaurant + "Menu")
+//     ctx.font = '600 28px system-ui, -apple-system, sans-serif'
+//     ctx.fillStyle = '#1d1d1f'
+//     ctx.textAlign = 'center'
+//     ctx.fillText(establishment.value?.name || '--', width/2, 60)
+    
+//     ctx.font = '600 15px system-ui, -apple-system, sans-serif'
+//     ctx.fillStyle = '#86868b'
+
+//     ctx.fillText(`N° ${table.number}`, width/2, 80)
+
+//     // 3. Dessiner le conteneur du QR code (bordure orange)
+//     const qrContainerWidth = 300
+//     const qrContainerHeight = 300
+//     const qrContainerX = (width - qrContainerWidth) / 2
+//     const qrContainerY = 100
+    
+//     // Bordure orange
+//     // ctx.strokeStyle = '#ff6b35'
+//     // ctx.lineWidth = 2
+//     // ctx.beginPath()
+//     // ctx.roundRect(qrContainerX, qrContainerY, qrContainerWidth, qrContainerHeight, 24)
+//     // ctx.stroke()
+    
+//     // 4. Dessiner l'image QR à l'intérieur du conteneur
+//     const qrSize = 280
+//     const qrX = (width - qrSize) / 2
+//     const qrY = qrContainerY + (qrContainerHeight - qrSize) / 2
+//     ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
+    
+//     // 5. Dessiner les textes en dessous du QR code
+//     ctx.font = '500 22px system-ui, -apple-system, sans-serif'
+//     ctx.fillStyle = '#f91919'
+//     ctx.fillText('Scannez pour commander', width/2, qrContainerY + qrContainerHeight + 40)
+    
+//     ctx.font = '400 14px system-ui, -apple-system, sans-serif'
+//     ctx.fillStyle = '#000000'
+//     ctx.fillText('Pointez votre caméra vers le QR code', width/2, qrContainerY + qrContainerHeight + 70)
+    
+//     // 6. Dessiner les features (Rapide, Sans contact)
+//     // Indicateurs ✓
+//     const featureY = qrContainerY + qrContainerHeight + 80
+    
+//     // Premier indicateur
+//     // ctx.beginPath()
+//     // ctx.arc(width/2 - 50, featureY, 10, 0, Math.PI * 2)
+//     // ctx.fillStyle = '#ff6b35'
+//     // ctx.fill()
+    
+//     // ctx.fillStyle = '#FFFFFF'
+//     // ctx.font = '600 10px system-ui, -apple-system, sans-serif'
+//     // ctx.fillText('✓', width/2 - 50, featureY + 4)
+    
+//     // ctx.fillStyle = '#86868b'
+//     // ctx.font = '400 13px system-ui, -apple-system, sans-serif'
+//     // ctx.fillText('Rapide', width/2 - 20, featureY + 4)
+    
+//     // // Deuxième indicateur
+//     // ctx.beginPath()
+//     // ctx.arc(width/2 + 40, featureY, 10, 0, Math.PI * 2)
+//     // ctx.fillStyle = '#ff6b35'
+//     // ctx.fill()
+    
+//     // ctx.fillStyle = '#FFFFFF'
+//     // ctx.font = '600 10px system-ui, -apple-system, sans-serif'
+//     // ctx.fillText('✓', width/2 + 40, featureY + 4)
+    
+//     // ctx.fillStyle = '#86868b'
+//     // ctx.font = '400 13px system-ui, -apple-system, sans-serif'
+//     // ctx.fillText('Sans contact', width/2 + 90, featureY + 4)
+    
+//     // 7. Dessiner la ligne de séparation (divider)
+//     const dividerY = featureY + 40
+//     const gradient = ctx.createLinearGradient(0, dividerY, width, dividerY)
+//     gradient.addColorStop(0, 'rgba(255,255,255,0)')
+//     gradient.addColorStop(0.5, '#d2d2d7')
+//     gradient.addColorStop(1, 'rgba(255,255,255,0)')
+    
+//     ctx.strokeStyle = gradient
+//     ctx.lineWidth = 1
+//     ctx.beginPath()
+//     ctx.moveTo(width * 0.1, dividerY)
+//     ctx.lineTo(width * 0.9, dividerY)
+//     ctx.stroke()
+    
+//     // 8. Dessiner le footer
+//     const footerY = dividerY + 40
+    
+//     // Point orange
+//     ctx.beginPath()
+//     ctx.arc(width/2 - 40, footerY, 3, 0, Math.PI * 2)
+//     ctx.fillStyle = '#ff6b35'
+//     ctx.fill()
+    
+//     // Texte "Par Kula Qr"
+//     ctx.fillStyle = '#f91919'
+//     ctx.font = '400 13px system-ui, -apple-system, sans-serif'
+//     ctx.fillText('Par Kula Qr', width/2 + 10, footerY + 4)
+    
+//     // Télécharger l'image générée
+//     const dataURL = tempCanvas.toDataURL('image/png')
+//     const link = document.createElement('a')
+//     link.download = `qr-code-${table.number}-de-${establishment.value?.name || ''}-${new Date().toISOString().split('T')[0]}.png`
+//     link.href = dataURL
+//     document.body.appendChild(link)
+//     link.click()
+//     document.body.removeChild(link)
+    
+//     showToast.success('Téléchargé', 'Carte QR téléchargée avec succès')
+    
+//   } catch (error) {
+//     console.error('Erreur de téléchargement:', error)
+//     // Fallback au téléchargement direct du QR code
+//     // downloadQrCodeFallback()
+//   }
+// }
+// const downloadQrCode = async (table: any) => {
+//   try {
+//     if (!qrCodeCardRef.value?.qrCodeImage) {
+//       showToast.error('Erreur', 'QR code non généré')
+//       return
+//     }
+    
+//     // Créer un canvas temporaire pour composer l'image complète
+//     const tempCanvas = document.createElement('canvas')
+//     const ctx = tempCanvas.getContext('2d')
+    
+//     // DIMENSIONS OPTIMISÉES POUR L'IMPRESSION
+//     // Format 10x15cm à 300 DPI (standard Mobile Money)
+//     const DPI = 300
+//     const CM_TO_INCH = 0.393701
+    
+//     // Format portrait 10x15cm
+//     const widthCm = 10
+//     const heightCm = 15
+    
+//     const width = Math.round(widthCm * CM_TO_INCH * DPI)  // 1181 pixels
+//     const height = Math.round(heightCm * CM_TO_INCH * DPI) // 1772 pixels
+    
+//     // Configurer la taille du canvas
+//     tempCanvas.width = width
+//     tempCanvas.height = height
+    
+//     // Remplir le fond blanc
+//     ctx.fillStyle = '#FFFFFF'
+//     ctx.fillRect(0, 0, width, height)
+    
+//     // Créer une image à partir du QR code
+//     const qrImage = new Image()
+    
+//     // Attendre que l'image QR soit chargée
+//     await new Promise((resolve, reject) => {
+//       qrImage.onload = resolve
+//       qrImage.onerror = reject
+//       qrImage.src = qrCodeCardRef.value.qrCodeImage      
+//     })
+    
+//     // PROPORTIONS ADAPTÉES POUR 10x15cm
+    
+//     // 1. En-tête - Nom du restaurant
+//     ctx.font = `600 ${Math.round(DPI * 0.25)}px system-ui, -apple-system, sans-serif` // ~75px
+//     ctx.fillStyle = '#1d1d1f'
+//     ctx.textAlign = 'center'
+//     ctx.fillText(establishment.value?.name || '--', width/2, DPI * 0.6) // ~180px du haut
+    
+//     // Numéro de table
+//     ctx.font = `600 ${Math.round(DPI * 0.15)}px system-ui, -apple-system, sans-serif` // ~45px
+//     ctx.fillStyle = '#86868b'
+//     ctx.fillText(`N° ${table.number}`, width/2, DPI * 0.85)
+    
+//     // 2. QR Code - Taille optimale 5cm (facile à scanner)
+//     const qrSize = Math.round(5 * CM_TO_INCH * DPI) // ~590px (5cm)
+//     const qrX = (width - qrSize) / 2
+//     const qrY = DPI * 1.2 // ~360px du haut
+    
+//     ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
+    
+//     // 3. Texte principal sous le QR
+//     ctx.font = `600 ${Math.round(DPI * 0.2)}px system-ui, -apple-system, sans-serif` // ~60px
+//     ctx.fillStyle = '#f91919'
+//     ctx.fillText('Scannez pour commander', width/2, qrY + qrSize + DPI * 0.35)
+    
+//     // 4. Texte secondaire
+//     ctx.font = `400 ${Math.round(DPI * 0.13)}px system-ui, -apple-system, sans-serif` // ~40px
+//     ctx.fillStyle = '#000000'
+//     ctx.fillText('Pointez votre caméra vers le QR code', width/2, qrY + qrSize + DPI * 0.65)
+    
+//     // 5. Ligne de séparation
+//     const dividerY = qrY + qrSize + DPI * 0.9
+//     const gradient = ctx.createLinearGradient(0, dividerY, width, dividerY)
+//     gradient.addColorStop(0, 'rgba(255,255,255,0)')
+//     gradient.addColorStop(0.5, '#d2d2d7')
+//     gradient.addColorStop(1, 'rgba(255,255,255,0)')
+    
+//     ctx.strokeStyle = gradient
+//     ctx.lineWidth = 2
+//     ctx.beginPath()
+//     ctx.moveTo(width * 0.1, dividerY)
+//     ctx.lineTo(width * 0.9, dividerY)
+//     ctx.stroke()
+    
+//     // 6. Footer - "Par Kula Qr"
+//     const footerY = dividerY + DPI * 0.4
+    
+//     // Point orange
+//     ctx.beginPath()
+//     ctx.arc(width/2 - DPI * 0.3, footerY, 8, 0, Math.PI * 2)
+//     ctx.fillStyle = '#ff6b35'
+//     ctx.fill()
+    
+//     // Texte
+//     ctx.fillStyle = '#f91919'
+//     ctx.font = `400 ${Math.round(DPI * 0.12)}px system-ui, -apple-system, sans-serif`
+//     ctx.fillText('Par Kula Qr', width/2 + DPI * 0.15, footerY + 8)
+    
+//     // Télécharger l'image en haute résolution
+//     const dataURL = tempCanvas.toDataURL('image/png', 1.0) // Qualité maximale
+//     const link = document.createElement('a')
+//     link.download = `qr-code-table-${table.number}-${establishment.value?.name || 'restaurant'}-${new Date().toISOString().split('T')[0]}.png`
+//     link.href = dataURL
+//     document.body.appendChild(link)
+//     link.click()
+//     document.body.removeChild(link)
+    
+//     showToast.success('Téléchargé', `Carte QR (${widthCm}×${heightCm}cm, 300 DPI) prête pour impression`)
+    
+//   } catch (error) {
+//     console.error('Erreur de téléchargement:', error)
+//     showToast.error('Erreur', 'Impossible de générer le QR code')
+//   }
+// }
+
+// VARIANTE : Format paysage 15x10cm (si préféré)
+// Remplacer les lignes 15-16 par :
+// const widthCm = 15
+// const heightCm = 10
+const refreshData = () => {
+  loadTables()
+}
+// const downloadQrCode = async (table: any) => {
+//   try {
+//     if (!qrCodeCardRef.value?.qrCodeImage) {
+//       showToast.error('Erreur', 'QR code non généré')
+//       return
+//     }
+    
+//     // Créer un canvas temporaire pour composer l'image complète
+//     const tempCanvas = document.createElement('canvas')
+//     const ctx = tempCanvas.getContext('2d')
+    
+//     // DIMENSIONS OPTIMISÉES POUR L'IMPRESSION
+//     // Format 10x15cm à 300 DPI (standard Mobile Money)
+//     const DPI = 300
+//     const CM_TO_INCH = 0.393701
+    
+//     // Format portrait 10x12cm
+//     const widthCm = 10
+//     const heightCm = 12
+    
+//     const width = Math.round(widthCm * CM_TO_INCH * DPI)  // 1181 pixels
+//     const height = Math.round(heightCm * CM_TO_INCH * DPI) // 1417 pixels
+
+//     // Configurer la taille du canvas
+//     tempCanvas.width = width
+//     tempCanvas.height = height
+    
+//     // Remplir le fond blanc
+//     ctx.fillStyle = '#FFFFFF'
+//     ctx.fillRect(0, 0, width, height)
+    
+//     // Créer une image à partir du QR code
+//     const qrImage = new Image()
+    
+//     // Attendre que l'image QR soit chargée
+//     await new Promise((resolve, reject) => {
+//       qrImage.onload = resolve
+//       qrImage.onerror = reject
+//       qrImage.src = qrCodeCardRef.value.qrCodeImage      
+//     })
+    
+//     // PROPORTIONS ADAPTÉES POUR 10x15cm
+    
+//     // 1. NUMÉRO DE TABLE/CHAMBRE - TRÈS VISIBLE EN HAUT
+    
+//     ctx.font = `800 ${Math.round(DPI * 0.5)}px monospace` // ~150px - TRÈS GROS
+//     ctx.fillStyle = '#f91919' // Rouge vif pour attirer l'œil
+//     ctx.textAlign = 'center'
+//     ctx.fillText(`${table.number}`, width/2, DPI * 0.55) // ~165px du haut
+    
+//     // Label "Table" ou "Chambre" en petit au-dessus
+//     // ctx.font = `600 ${Math.round(DPI * 0.13)}px system-ui, -apple-system, sans-serif` // ~40px
+//     // ctx.fillStyle = '#86868b'
+//     // ctx.fillText(table.type || 'Table', width/2, DPI * 0.35)
+    
+//     // 2. Nom du restaurant en plus discret
+//     ctx.font = `600 ${Math.round(DPI * 0.18)}px system-ui, -apple-system, sans-serif` // ~55px
+//     ctx.fillStyle = '#1d1d1f'
+//     ctx.fillText(establishment.value?.name || '--', width/2, DPI * 0.85)
+    
+//     // 3. QR Code - Taille optimale 5cm (facile à scanner)
+//     const qrSize = Math.round(5 * CM_TO_INCH * DPI) // ~590px (5cm)
+//     const qrX = (width - qrSize) / 2
+//     const qrY = DPI * 1.1 // ~330px du haut
+    
+//     ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
+    
+//     // 4. Texte principal sous le QR
+//     ctx.font = `600 ${Math.round(DPI * 0.2)}px system-ui, -apple-system, sans-serif` // ~60px
+//     ctx.fillStyle = '#f91919'
+//     ctx.fillText('Scannez pour commander', width/2, qrY + qrSize + DPI * 0.35)
+    
+//     // 5. Texte secondaire
+//     ctx.font = `400 ${Math.round(DPI * 0.13)}px system-ui, -apple-system, sans-serif` // ~40px
+//     ctx.fillStyle = '#000000'
+//     ctx.fillText('Pointez votre caméra vers le QR code', width/2, qrY + qrSize + DPI * 0.65)
+    
+//     // 6. Ligne de séparation
+//     const dividerY = qrY + qrSize + DPI * 0.9
+//     const gradient = ctx.createLinearGradient(0, dividerY, width, dividerY)
+//     gradient.addColorStop(0, 'rgba(255,255,255,0)')
+//     gradient.addColorStop(0.5, '#d2d2d7')
+//     gradient.addColorStop(1, 'rgba(255,255,255,0)')
+    
+//     ctx.strokeStyle = gradient
+//     ctx.lineWidth = 2
+//     ctx.beginPath()
+//     ctx.moveTo(width * 0.1, dividerY)
+//     ctx.lineTo(width * 0.9, dividerY)
+//     ctx.stroke()
+    
+//     // 7. Footer - "Par Kula Qr"
+//     const footerY = dividerY + DPI * 0.4
+    
+//     // Point orange
+//     ctx.beginPath()
+//     ctx.arc(width/2 - DPI * 0.3, footerY, 8, 0, Math.PI * 2)
+//     ctx.fillStyle = '#ff6b35'
+//     ctx.fill()
+    
+//     // Texte
+//     ctx.fillStyle = '#f91919'
+//     ctx.font = `400 ${Math.round(DPI * 0.12)}px system-ui, -apple-system, sans-serif`
+//     ctx.fillText('Merci', width/2 + DPI * 0.15, footerY + 8)
+    
+//     // Télécharger l'image en haute résolution
+//     const dataURL = tempCanvas.toDataURL('image/png', 1.0) // Qualité maximale
+//     const link = document.createElement('a')
+//     link.download = `qr-code-${table.number}-${establishment.value?.name || 'restaurant'}-${new Date().toISOString().split('T')[0]}.png`
+//     link.href = dataURL
+//     document.body.appendChild(link)
+//     link.click()
+//     document.body.removeChild(link)
+    
+//     showToast.success('Téléchargé', `Carte QR (${widthCm}×${heightCm}cm, 300 DPI) prête pour impression`)
+    
+//   } catch (error) {
+//     console.error('Erreur de téléchargement:', error)
+//     showToast.error('Erreur', 'Impossible de générer le QR code')
+//   }
+// }
+
 const downloadQrCode = async (table: any) => {
   try {
     if (!qrCodeCardRef.value?.qrCodeImage) {
       showToast.error('Erreur', 'QR code non généré')
       return
     }
-    
-    // Créer un canvas temporaire pour composer l'image complète
+
+    // ===============================
+    // PARAMÈTRES IMPRESSION
+    // ===============================
+    const DPI = 300
+    const CM_TO_INCH = 0.393701
+
+    const widthCm = 10
+    const heightCm = 12
+
+    const width = Math.round(widthCm * CM_TO_INCH * DPI)   // ≈ 1181 px
+    const height = Math.round(heightCm * CM_TO_INCH * DPI) // ≈ 1417 px
+
+    const marginCm = 0.5 // marge blanche de 0.5 cm
+    const margin = Math.round(marginCm * CM_TO_INCH * DPI)
+
+    const printableWidth = width - margin * 2
+    const printableHeight = height - margin * 2
+
+    // ===============================
+    // CANVAS HAUTE RÉSOLUTION
+    // ===============================
     const tempCanvas = document.createElement('canvas')
     const ctx = tempCanvas.getContext('2d')
-    
-    // Obtenir les dimensions de la carte QR
-    const qrCardElement = qrCard.value
-    const width = qrCardElement.offsetWidth
-    const height = qrCardElement.offsetHeight
-    
-    // Configurer la taille du canvas (avec une résolution x2 pour meilleure qualité)
-    tempCanvas.width = width * 2
-    tempCanvas.height = height * 2
-    ctx.scale(2, 2) // Augmenter la résolution
-    
-    // Remplir le fond
+    if (!ctx) {
+      throw new Error('Impossible de créer le contexte canvas')
+    }
+    tempCanvas.width = width
+    tempCanvas.height = height
+
+    // Fond blanc
     ctx.fillStyle = '#FFFFFF'
     ctx.fillRect(0, 0, width, height)
-    
-    // Créer une image à partir du QR code
+
+    // Décalage pour la marge
+    ctx.save()
+    ctx.translate(margin, margin)
+
+    // ===============================
+    // CHARGEMENT DU QR CODE
+    // ===============================
     const qrImage = new Image()
-    
-    // Attendre que l'image QR soit chargée avant de continuer
     await new Promise((resolve, reject) => {
       qrImage.onload = resolve
       qrImage.onerror = reject
-      qrImage.src = qrCodeCardRef.value.qrCodeImage      
+      qrImage.src = qrCodeCardRef.value.qrCodeImage
     })
-    
-    // Recréer la structure de la carte QR avec les textes et l'image QR
-    
-    // 1. Dessiner l'arrière-plan et la bordure du conteneur
-    ctx.fillStyle = '#FFFFFF'
-    ctx.fillRect(0, 0, width, height)
-    
-    // 2. Dessiner les éléments d'en-tête (nom du restaurant + "Menu")
-    ctx.font = '600 28px system-ui, -apple-system, sans-serif'
-    ctx.fillStyle = '#1d1d1f'
-    ctx.textAlign = 'center'
-    ctx.fillText(establishment.value?.name || '--', width/2, 60)
-    
-    ctx.font = '600 15px system-ui, -apple-system, sans-serif'
-    ctx.fillStyle = '#86868b'
 
-    ctx.fillText(`N° ${table.number}`, width/2, 80)
+    // ===============================
+    // COMPOSITION GRAPHIQUE
+    // ===============================
 
-    // 3. Dessiner le conteneur du QR code (bordure orange)
-    const qrContainerWidth = 300
-    const qrContainerHeight = 300
-    const qrContainerX = (width - qrContainerWidth) / 2
-    const qrContainerY = 100
-    
-    // Bordure orange
-    // ctx.strokeStyle = '#ff6b35'
-    // ctx.lineWidth = 2
-    // ctx.beginPath()
-    // ctx.roundRect(qrContainerX, qrContainerY, qrContainerWidth, qrContainerHeight, 24)
-    // ctx.stroke()
-    
-    // 4. Dessiner l'image QR à l'intérieur du conteneur
-    const qrSize = 280
-    const qrX = (width - qrSize) / 2
-    const qrY = qrContainerY + (qrContainerHeight - qrSize) / 2
-    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
-    
-    // 5. Dessiner les textes en dessous du QR code
-    ctx.font = '500 22px system-ui, -apple-system, sans-serif'
+    // 1️⃣ Numéro de table
+    ctx.font = `800 ${Math.round(DPI * 0.5)}px monospace` // ~150px
     ctx.fillStyle = '#f91919'
-    ctx.fillText('Scannez pour commander', width/2, qrContainerY + qrContainerHeight + 40)
-    
-    ctx.font = '400 14px system-ui, -apple-system, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top'
+    ctx.fillText(`${table.number}`, printableWidth / 2, DPI * 0.2)
+
+    // 2️⃣ Nom du restaurant
+    ctx.font = `600 ${Math.round(DPI * 0.18)}px "Helvetica Neue", Arial, sans-serif`
+    ctx.fillStyle = '#1d1d1f'
+    ctx.fillText(establishment.value?.name || '--', printableWidth / 2, DPI * 0.7)
+
+    // 3️⃣ QR code centré
+    const qrSize = Math.round(5 * CM_TO_INCH * DPI) // ~590 px
+    const qrX = (printableWidth - qrSize) / 2
+    const qrY = DPI * 0.95
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
+
+    // 4️⃣ Texte principal
+    ctx.font = `600 ${Math.round(DPI * 0.2)}px "Helvetica Neue", Arial, sans-serif`
+    ctx.fillStyle = '#f91919'
+    ctx.fillText('Scannez pour commander', printableWidth / 2, qrY + qrSize + DPI * 0.35)
+
+    // 5️⃣ Sous-texte
+    ctx.font = `400 ${Math.round(DPI * 0.13)}px "Helvetica Neue", Arial, sans-serif`
     ctx.fillStyle = '#000000'
-    ctx.fillText('Pointez votre caméra vers le QR code', width/2, qrContainerY + qrContainerHeight + 70)
-    
-    // 6. Dessiner les features (Rapide, Sans contact)
-    // Indicateurs ✓
-    const featureY = qrContainerY + qrContainerHeight + 80
-    
-    // Premier indicateur
-    // ctx.beginPath()
-    // ctx.arc(width/2 - 50, featureY, 10, 0, Math.PI * 2)
-    // ctx.fillStyle = '#ff6b35'
-    // ctx.fill()
-    
-    // ctx.fillStyle = '#FFFFFF'
-    // ctx.font = '600 10px system-ui, -apple-system, sans-serif'
-    // ctx.fillText('✓', width/2 - 50, featureY + 4)
-    
-    // ctx.fillStyle = '#86868b'
-    // ctx.font = '400 13px system-ui, -apple-system, sans-serif'
-    // ctx.fillText('Rapide', width/2 - 20, featureY + 4)
-    
-    // // Deuxième indicateur
-    // ctx.beginPath()
-    // ctx.arc(width/2 + 40, featureY, 10, 0, Math.PI * 2)
-    // ctx.fillStyle = '#ff6b35'
-    // ctx.fill()
-    
-    // ctx.fillStyle = '#FFFFFF'
-    // ctx.font = '600 10px system-ui, -apple-system, sans-serif'
-    // ctx.fillText('✓', width/2 + 40, featureY + 4)
-    
-    // ctx.fillStyle = '#86868b'
-    // ctx.font = '400 13px system-ui, -apple-system, sans-serif'
-    // ctx.fillText('Sans contact', width/2 + 90, featureY + 4)
-    
-    // 7. Dessiner la ligne de séparation (divider)
-    const dividerY = featureY + 40
-    const gradient = ctx.createLinearGradient(0, dividerY, width, dividerY)
+    ctx.fillText('Pointez votre caméra vers le QR code', printableWidth / 2, qrY + qrSize + DPI * 0.65)
+
+    // 6️⃣ Ligne décorative
+    const dividerY = qrY + qrSize + DPI * 0.9
+    const gradient = ctx.createLinearGradient(0, dividerY, printableWidth, dividerY)
     gradient.addColorStop(0, 'rgba(255,255,255,0)')
     gradient.addColorStop(0.5, '#d2d2d7')
     gradient.addColorStop(1, 'rgba(255,255,255,0)')
-    
     ctx.strokeStyle = gradient
-    ctx.lineWidth = 1
+    ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.moveTo(width * 0.1, dividerY)
-    ctx.lineTo(width * 0.9, dividerY)
+    ctx.moveTo(printableWidth * 0.1, dividerY)
+    ctx.lineTo(printableWidth * 0.9, dividerY)
     ctx.stroke()
-    
-    // 8. Dessiner le footer
-    const footerY = dividerY + 40
-    
-    // Point orange
+
+    // 7️⃣ Footer
+    const footerY = dividerY + DPI * 0.4
     ctx.beginPath()
-    ctx.arc(width/2 - 40, footerY, 3, 0, Math.PI * 2)
+    ctx.arc(printableWidth / 2 - DPI * 0.3, footerY, 8, 0, Math.PI * 2)
     ctx.fillStyle = '#ff6b35'
     ctx.fill()
-    
-    // Texte "Par Kula Qr"
     ctx.fillStyle = '#f91919'
-    ctx.font = '400 13px system-ui, -apple-system, sans-serif'
-    ctx.fillText('Par Kula Qr', width/2 + 10, footerY + 4)
-    
-    // Télécharger l'image générée
-    const dataURL = tempCanvas.toDataURL('image/png')
+    ctx.font = `400 ${Math.round(DPI * 0.12)}px "Helvetica Neue", Arial, sans-serif`
+    ctx.fillText('Merci', printableWidth / 2 + DPI * 0.15, footerY + 8)
+
+    ctx.restore()
+
+    // ===============================
+    // EXPORTS PNG + PDF
+    // ===============================
+    const dataURL = tempCanvas.toDataURL('image/png', 1.0)
+
+    // --- Téléchargement PNG ---
     const link = document.createElement('a')
-    link.download = `qr-code-${table.number}-de-${establishment.value?.name || ''}-${new Date().toISOString().split('T')[0]}.png`
+    link.download = `qr-${table.number}-${establishment.value?.name || 'restaurant'}.png`
     link.href = dataURL
-    document.body.appendChild(link)
     link.click()
-    document.body.removeChild(link)
-    
-    showToast.success('Téléchargé', 'Carte QR téléchargée avec succès')
-    
+
+    // --- Téléchargement PDF ---
+    // const pdf = new jsPDF({
+    //   orientation: 'portrait',
+    //   unit: 'px',
+    //   format: [width, height]
+    // })
+    // pdf.addImage(dataURL, 'PNG', 0, 0, width, height)
+    // pdf.save(`qr-${table.number}-${establishment.value?.name || 'restaurant'}.pdf`)
+
+    showToast.success('Téléchargé', `Carte QR (${widthCm}×${heightCm} cm, 300 DPI) prête pour impression`)
   } catch (error) {
     console.error('Erreur de téléchargement:', error)
-    // Fallback au téléchargement direct du QR code
-    // downloadQrCodeFallback()
+    showToast.error('Erreur', 'Impossible de générer le QR code')
   }
-}
-
-const refreshData = () => {
-  loadTables()
 }
 
 const showQrCodeCard = (table: any) => {

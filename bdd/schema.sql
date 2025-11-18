@@ -107,6 +107,8 @@ CREATE TABLE establishments (
     description TEXT,
     image_url TEXT,
     address TEXT,
+    longitude TEXT,
+    latitude TEXT,
     phone TEXT,
     opening_hours TEXT,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -178,6 +180,8 @@ CREATE TABLE products (
 --     status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'occupied', 'reserved', 'maintenance')),
 --     qr_code_id UUID,
 --     location_description TEXT,
+--     section_name TEXT, -- Zone du restaurant (terrasse, salle principale, bar, etc.)
+--     floor_level TEXT, -- Étage (rez-de-chaussée, étage, sous-sol)
 --     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 --     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 --     created_by UUID REFERENCES auth.users(id),
@@ -189,8 +193,8 @@ CREATE TABLE products (
 CREATE TABLE orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     establishment_id UUID REFERENCES establishments(id) ON DELETE CASCADE,
-    table_id UUID REFERENCES tables(id),
-    table_number INTEGER,
+    table_id UUID REFERENCES restaurant_tables(id), -- Référence à la table physique
+    table_number INTEGER, -- Gardé pour compatibilité
     staff_id UUID REFERENCES staff(id) ON DELETE SET NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'ready', 'completed', 'cancelled')),
     total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,

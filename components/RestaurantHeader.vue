@@ -16,17 +16,19 @@
     <div class="absolute bottom-0 left-0 right-0 px-5 pb-6">
       <!-- Welcome Label -->
       <div class="inline-block mb-2">
-        <span class="text-white/70 text-sm font-medium tracking-wide">Vous êtes chez</span>
+        <span class="text-white text-sm font-mono tracking-wide">Bienvenue chez</span>
       </div>
       
       <!-- Restaurant Name -->
       <h1 class="text-white text-4xl font-bold tracking-tight leading-tight mb-3">
-        {{ data.name || 'Restaurant' }}
+        {{ data.name || 'Etablissement' }}
       </h1>
 
       <!-- Description -->
       <p class="text-white/90 text-base leading-relaxed mb-4 max-w-md">
-        {{ data.description || 'Bienvenue' }}
+        {{ data.description }}
+
+        
       </p>
       
       <!-- Info Pills -->
@@ -41,7 +43,8 @@
         
         <div 
           v-if="data.address" 
-          class="flex items-center bg-white/15 backdrop-blur-md rounded-full px-3 py-2"
+          class="flex underline items-center bg-white/15 backdrop-blur-md rounded-full px-3 py-2 cursor-pointer hover:bg-white/25 transition-all duration-200 active:scale-95"
+          @click="openGoogleMaps"
         >
           <MapPin class="w-4 h-4 mr-2 text-white" :stroke-width="2.5" />
           <span class="text-white text-sm font-medium">{{ data.address }}</span>
@@ -49,12 +52,20 @@
       </div>
     </div>
 
-    <!-- Optional: Status Indicator -->
+    <!-- Logo in top right -->
     <div class="absolute top-4 right-4">
-      <div class="bg-white/20 backdrop-blur-xl rounded-full px-4 py-2 border border-white/30">
-        <div class="flex items-center">
-          <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-          <span class="text-white text-xs font-semibold">Ouvert</span>
+      <div class="bg-white backdrop-blur-xl rounded-xl p-1 border border-white">
+        <img
+          v-if="data.image_url"
+          :src="data.image_url"
+          alt="Restaurant logo"
+          class="w-10 h-10 rounded-xl object-cover"
+          @error="handleLogoError"
+        />
+        <div v-else class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center fallback-icon">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
         </div>
       </div>
     </div>
@@ -79,6 +90,32 @@ const handleImageError = (e: Event) => {
   const target = e.target as HTMLImageElement
   target.src = props.defaultImage
 }
+
+const handleLogoError = (e: Event) => {
+  const target = e.target as HTMLImageElement
+  target.style.display = 'none'
+  // Show fallback icon
+  const fallbackIcon = target.parentElement?.querySelector('.fallback-icon') as HTMLElement
+  if (fallbackIcon) {
+    fallbackIcon.style.display = 'flex'
+  }
+}
+
+// Open Google Maps with coordinates
+const openGoogleMaps = () => {
+  const { latitude, longitude, address } = props.data
+  
+  // If we have coordinates, use them for precise location
+  if (latitude && longitude) {
+    // Google Maps URL with coordinates
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
+    window.open(mapsUrl, '_blank')
+  } else if (address) {
+    // Fallback to address search if no coordinates
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+    window.open(mapsUrl, '_blank')
+  }
+}
 </script>
 
 <style scoped>
@@ -96,5 +133,10 @@ const handleImageError = (e: Event) => {
 
 .absolute.bottom-0 {
   animation: fadeInUp 0.6s ease-out;
+}
+
+/* Hide fallback icon by default */
+.fallback-icon {
+  display: none;
 }
 </style>

@@ -61,7 +61,7 @@
 import type { OrderData } from '~/types'
 
 defineProps<{
-  order: OrderData
+  order: any
 }>()
 
 defineEmits<{

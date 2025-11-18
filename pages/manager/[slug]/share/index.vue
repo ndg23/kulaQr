@@ -218,7 +218,7 @@ const menuLink = computed(() => {
 
 // Methods
 const getTableLink = (table: number) => {
-  return `${menuLink.value}?table=${table}`
+  return `${menuLink.value}?q=${table}`
 }
 
 const copyLink = async () => {

@@ -113,7 +113,7 @@ export const useSeo = () => {
     const description = meta.description || 'Transformez votre activité commerciale avec des menus digitaux QR code. Solution moderne, sans contact et écologique.'
     
     // Image
-    const image = meta.image || `${baseUrl}/og-image.jpg`
+    const image = meta.image || `${baseUrl}/images/logo.png`
     
     // URL
     const url = meta.url ? `${baseUrl}${meta.url}` : baseUrl

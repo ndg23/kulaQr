@@ -54,7 +54,7 @@ if (decodedWrong === null) {
 const testEstablishmentId = '550e8400-e29b-41d4-a716-446655440000' // UUID de test
 const testTableNumber = 3
 const encodedTable = encodeTableHashids(testTableNumber, testEstablishmentId)
-const qrUrl = `http://localhost:3000/qr/${testEstablishmentId}?table=${encodedTable}`
+const qrUrl = `http://localhost:3000/qr/${testEstablishmentId}?q=${encodedTable}`
 
 console.log('\n🔗 Test QR URL:')
 console.log(qrUrl)

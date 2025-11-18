@@ -100,7 +100,29 @@
         </div>
       </div>
 
-   
+      <!-- Notifications Settings Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100">
+          <h2 class="text-lg font-semibold text-gray-900">Notifications</h2>
+        </div>
+        <div class="p-6 space-y-6">
+          <!-- Sound Notifications -->
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Notifications sonores</h3>
+              <p class="text-sm text-gray-500">Jouer un son lors de nouvelles commandes</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                v-model="form.sound_notifications_enabled"
+                type="checkbox"
+                class="sr-only peer"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
 
       <!-- Submit Button -->
       <div class="flex justify-end">
@@ -125,6 +147,7 @@ import { ref, reactive } from 'vue'
 import { ImageIcon, Upload, Loader2 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
+import { useSound } from '~/composables/useSound'
 import FloatLabelInput from '~/components/FloatLabelInput.vue'
 definePageMeta({
   layout: 'manager'
@@ -134,6 +157,7 @@ const route = useRoute()
 const slug = route.params.slug as string
 const { client: supabase, withLoading } = useSupabaseWrapper()
 const {showToast} = useCustomToast()
+const { setEnabled: setSoundEnabled } = useSound()
 
 const fileInput = ref<HTMLInputElement>()
 const imagePreview = ref<string>()
@@ -145,6 +169,7 @@ const form = reactive({
   image_url: '',
   phone: '',
   address: '',
+  sound_notifications_enabled: true
 })
 
 // Load establishment data
@@ -162,13 +187,59 @@ const loadEstablishment = async () => {
 
   // Update form with establishment data
   Object.assign(form, data)
+  
+  // Load sound preference from localStorage
+  const soundEnabled = localStorage.getItem('sound-notifications-enabled')
+  form.sound_notifications_enabled = soundEnabled !== null ? JSON.parse(soundEnabled) : true
 }
 
-const handleImageChange = (event: Event) => {
+const handleImageChange = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
-  if (file) {
-    imagePreview.value = URL.createObjectURL(file)
-    // TODO: Upload image to storage
+  if (!file) return
+
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    showToast.error('Erreur', 'Veuillez sélectionner un fichier image valide')
+    return
+  }
+
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showToast.error('Erreur', 'L\'image ne doit pas dépasser 5MB')
+    return
+  }
+
+  // Show preview immediately
+  imagePreview.value = URL.createObjectURL(file)
+
+  try {
+    // Upload to Supabase Storage
+    const fileExt = file.name.split('.').pop()
+    const fileName = `establishment-logos/${slug}_${Date.now()}.${fileExt}`
+
+    const { data, error } = await supabase.storage
+      .from('images')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (error) throw error
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('images')
+      .getPublicUrl(fileName)
+
+    // Update form with new image URL
+    form.image_url = publicUrl
+
+    showToast.success('Logo uploadé', 'Le logo a été mis à jour avec succès')
+  } catch (error: any) {
+    console.error('Error uploading image:', error)
+    showToast.error('Erreur', 'Impossible d\'uploader l\'image')
+    // Reset preview on error
+    imagePreview.value = ''
   }
 }
 
@@ -177,10 +248,23 @@ const saveSettings = async () => {
     loading.value = true
     const { error } = await supabase
       .from('establishments')
-      .update(form)
+      .update({
+        name: form.name,
+        description: form.description,
+        image_url: form.image_url,
+        phone: form.phone,
+        address: form.address
+      })
       .eq('id', slug)
 
     if (error) throw error
+
+    // Save sound preference to localStorage
+    localStorage.setItem('sound-notifications-enabled', JSON.stringify(form.sound_notifications_enabled))
+    
+    // Update sound composable
+    const { setEnabled } = useSound()
+    setEnabled(form.sound_notifications_enabled)
 
     showToast.success('Succès', 'Les modifications ont été enregistrées')
   } catch (error) {

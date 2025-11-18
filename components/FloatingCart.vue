@@ -92,9 +92,9 @@
             <!-- Bouton supprimer -->
             <button 
               @click="$emit('remove-item', item.id)"
-              class="absolute top-3 right-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+              class="absolute top-3 right-0 w-10 h-10  border border-gray-300 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
             >
-              <Trash2 class="w-4 h-4" />
+              <X class="w-8 h-8" />
             </button>
 
             <div class="flex flex-col pr-8">
@@ -114,7 +114,9 @@
                   <span class="mx-3 font-medium w-5 text-center">{{ item.quantity }}</span>
                   <button
                     @click="$emit('increment', item.id)"
+                    v-if="item.quantity<5"
                     class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center"
+                    :disabled="item.quantity>=5"
                   >
                     <Plus class="w-5 h-5" />
                   </button>
@@ -140,22 +142,23 @@
         
         <button
           @click="handleOrder"
-          class="w-full py-3 bg-black hover:bg-gray-800 text-white font-medium rounded-xl transition-all transform active:scale-95 flex items-center justify-center"
+          class="w-full py-3 bg-red-500 rounded-full hover:bg-red-800 text-white font-medium rounded-full transition-all transform active:scale-95 flex items-center justify-center"
           :disabled="cart.length === 0"
           :class="{ 'opacity-50 cursor-not-allowed': cart.length === 0 }"
         >
-          <span class="relative">
+          <span class="relative text-white text-lg font-medium  ">
             Commander maintenant
           </span>
-          <ArrowRight class="ml-2 w-5 h-5" />
+          <ArrowRight class="ml-2 w-5 h-5 " />
         </button>
 
         <button 
           @click="$emit('toggle')"
-          class="w-full py-3 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+          class="w-full py-3 border border-gray-200 text-gray-600 font-medium rounded-full hover:bg-gray-50 transition-colors"
         >
-          Fermer
-        </button>
+<span class="text-red-500">          Fermer
+</span>
+      </button>
       </div>
     </div>
   </div>
@@ -170,7 +173,7 @@ import {
   Minus, 
   SquarePen,
   ArrowRight,
-  Trash2 
+  Trash2 ,X
 } from 'lucide-vue-next'
 import type { CartItem } from '~/types'
 

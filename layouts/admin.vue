@@ -49,7 +49,7 @@
         <div class="p-4 border-b">
           <NuxtLink to="/admin" class="flex items-center gap-3" @click="showMobileMenu = false">
             <div class="w-8 h-8 rounded-full bg-black flex items-center justify-center">
-              <span class="text-white text-xs font-bold">Y</span>
+              <span class="text-white text-xs font-bold">K</span>
             </div>
             <span class="text-lg font-bold">Admin</span>
           </NuxtLink>
@@ -122,9 +122,9 @@
           </NuxtLink>
 
           <!-- Post Button Style (Optional) -->
-          <button class="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full transition-colors">
+          <!-- <button class="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full transition-colors">
             Nouveau
-          </button>
+          </button> -->
         </nav>
 
         <!-- User Section -->
@@ -138,8 +138,8 @@
                 <User class="w-5 h-5 text-gray-600" />
               </div>
               <div class="flex-1 min-w-0 text-left">
-                <p class="text-sm font-bold text-gray-900 truncate">Administrateur</p>
-                <p class="text-sm text-gray-500 truncate">@admin</p>
+                <p class="text-sm font-bold text-gray-900 truncate">{{ userName }}</p>
+                <p class="text-sm text-gray-500 truncate">{{ userEmail }}</p>
               </div>
               <svg class="w-4 h-4 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 13.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0-5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 10a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
@@ -164,7 +164,7 @@
                   class="flex w-full items-center gap-3 px-4 py-3 text-sm font-bold hover:bg-gray-50 transition-colors"
                 >
                   <LogOut class="w-4 h-4" />
-                  <span>Déconnexion @admin</span>
+                  <span>Déconnexion {{ userEmail }}</span>
                 </button>
               </div>
             </Transition>
@@ -200,13 +200,18 @@ import {
   BarChart3,
   Headphones
 } from 'lucide-vue-next'
+import { useSupabaseWrapper } from '~/composables/useSupabase'
 
 const route = useRoute()
 const router = useRouter()
+const { client: supabase } = useSupabaseWrapper()
 
 // State
 const showMobileMenu = ref(false)
 const showUserMenu = ref(false)
+const currentUser = ref<any>(null)
+const userName = ref('Administrateur')
+const userEmail = ref('@admin')
 
 // Navigation items
 const navigationItems = [
@@ -234,18 +239,18 @@ const navigationItems = [
     active: 'qr-codes',
     icon: QrCode
   },
-  {
-    name: 'Support QR',
-    path: '/admin/qr-support-requests',
-    active: 'qr-support-requests',
-    icon: Headphones
-  },
-  {
-    name: 'Stats',
-    path: '/admin/stats',
-    active: 'stats',
-    icon: BarChart3
-  },
+  // {
+  //   name: 'Support QR',
+  //   path: '/admin/qr-support-requests',
+  //   active: 'qr-support-requests',
+  //   icon: Headphones
+  // },
+  // {
+  //   name: 'Stats',
+  //   path: '/admin/stats',
+  //   active: 'stats',
+  //   icon: BarChart3
+  // },
   {
     name: 'Paramètres',
     path: '/admin/settings',
@@ -262,10 +267,29 @@ const toggleUserMenu = () => {
 // Handle logout
 const handleLogout = async () => {
   try {
-    // Add your logout logic here
+    await supabase.auth.signOut()
     await router.push('/auth/login')
   } catch (error) {
     console.error('Logout error:', error)
+  }
+}
+
+// Fetch current user session
+const fetchUserSession = async () => {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    
+    if (error) throw error
+    
+    if (user) {
+      currentUser.value = user
+      userName.value = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Administrateur'
+      userEmail.value = `@${user.email?.split('@')[0] || 'admin'}`
+    }
+  } catch (error) {
+    console.error('Error fetching user session:', error)
+    // Redirect to login if session is invalid
+    await router.push('/auth/login')
   }
 }
 
@@ -283,8 +307,9 @@ watch(() => route.path, () => {
 })
 
 // Setup event listeners
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
+  await fetchUserSession()
 })
 
 onUnmounted(() => {

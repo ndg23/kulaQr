@@ -30,8 +30,7 @@ export const decodeTableHashids = (
     
     if (decoded.length === 0) {
       // Fallback: nombre direct
-      const direct = parseInt(encoded)
-      return !isNaN(direct) ? direct : null
+  return null
     }
     
     return decoded[0] as number

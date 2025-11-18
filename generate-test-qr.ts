@@ -6,7 +6,7 @@ const tableNumber = 5
 
 
 const encoded = encodeTableHashids(tableNumber, establishmentId)
-const qrUrl = `http://localhost:3005/qr/${establishmentId}?table=${encoded}`
+const qrUrl = `http://localhost:3005/qr/${establishmentId}?q=${encoded}`
 
 console.log('Test QR URL generated:')
 console.log('Establishment ID:', establishmentId)

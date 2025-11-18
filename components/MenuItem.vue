@@ -34,9 +34,15 @@
     
     <button
       @click="$emit('add', item)"
-      class="ml-4 bg-gray-100 text-gray-800 rounded-full w-8 h-8 flex items-center justify-center focus:outline-none hover:bg-gray-200"
+      :disabled="disabled"
+      :class="[
+        'ml-4 rounded-full w-10 h-10 flex items-center justify-center focus:outline-none transition-colors',
+        disabled 
+          ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+      ]"
     >
-      <Plus class="w-4 h-4" />
+      <Plus class="w-6 h-6" />
     </button>
   </div>
 </template>
@@ -49,6 +55,10 @@ const props = defineProps({
   item: {
     type: Object,
     required: true
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   },
   defaultImage: {
     type: String,

@@ -3,7 +3,6 @@ Allow: /
 Disallow: /admin/
 Disallow: /manager/
 Disallow: /staff/
-Disallow: /auth/
 Disallow: /api/
 
 # Sitemap

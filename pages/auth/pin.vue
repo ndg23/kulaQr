@@ -17,7 +17,7 @@
           {{ error }}
         </div>
 
-        <form @submit.prevent="login" class="space-y-6">
+        <form @submit.prevent="login" class="space-y-6" autocomplete="off">
           <!-- Username Input -->
           <div>
             <FloatLabelInput
@@ -33,6 +33,8 @@
 
           <!-- PIN Input -->
           <div>
+                          <label for="pin" class=" my-2 text-md text-gray-500 block">Entrez votre code</label>
+
             <div class="flex justify-between space-x-2">
               <input
                 v-for="(digit, index) in pinDigits"
@@ -42,13 +44,13 @@
                 type="password"
                 inputmode="numeric"
                 maxlength="1"
-                class="block w-1/4 h-12 text-center text-xl font-medium border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                class="block w-1/4 h-12 text-center text-xl font-medium border border-gray-300 rounded-md focus:outline-none focus:ring-0 focus:ring-- focus:border-red-500"
                 @input="onPinDigitInput(index)"
                 @keydown="onPinDigitKeydown($event, index)"
                 @focus="$event.target.select()"
               />
             </div>
-            <p class="mt-2 text-xs text-gray-500 text-center">Entrez votre code PIN à 4 chiffres</p>
+            <!-- <p class="mt-2 text-xs text-gray-500 text-center">Entrez votre code PIN à 4 chiffres</p> -->
           </div>
 
           <div>
@@ -62,9 +64,10 @@
             </button>
           </div>
           
-          <div class="text-center mt-4">
+          <div class="text-center mt-4 border p-3 rounded-md bg-gray-50 flex items-center justify-center">
+<ArrowLeft class="w-4 h-4 inline-block mr-2" />
             <NuxtLink to="/auth/login" class="text-sm text-blue-500 hover:text-blue-900">
-              Retour à la connexion classique
+              Retourner à la connexion standard
             </NuxtLink>
           </div>
         </form>
@@ -79,6 +82,7 @@ import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
 import { useRouter } from 'vue-router'
 import FormInput from '~/components/ui/FormInput.vue'
+import { Eye, EyeOff, Loader2, CheckCircle, ArrowLeft } from 'lucide-vue-next'
 const { client: supabase } = useSupabaseWrapper()
 const { showToast } = useCustomToast()
 const router = useRouter()

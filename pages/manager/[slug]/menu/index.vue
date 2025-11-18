@@ -120,18 +120,27 @@
             <img
               :src="product.image_url || '/images/product-empty.png'"
               :alt="product.name"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             />
-            <!-- Availability Toggle -->
-            <div class="absolute top-3 right-3">
-              <button
-                @click="toggleAvailability(product)"
-                class="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-200 hover:shadow-md transition-all duration-200"
-                :class="product.is_available ? 'text-green-600' : 'text-gray-400'"
-              >
-                <Store class="w-5 h-5" />
-              </button>
-            </div>
+  <!-- Availability Toggle -->
+  <div class="absolute top-3 right-3">
+    <button
+      :class="[
+        'relative inline-flex h-[31px] w-[51px] items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
+        product.is_available ? 'bg-green-500' : 'bg-gray-300'
+      ]"
+      role="switch"
+      :aria-checked="product.is_available"
+      @click="updateAvailability(product, !product.is_available)"
+    >
+      <span
+        :class="[
+          'inline-block h-[27px] w-[27px] transform rounded-full bg-white shadow-lg transition-transform duration-200 ease-in-out',
+          product.is_available ? 'translate-x-[22px]' : 'translate-x-[2px]'
+        ]"
+      />
+    </button>
+  </div>
             <!-- Status Badge -->
             <div class="absolute top-3 left-3">
               <span
@@ -242,6 +251,7 @@ import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
 import { useEstablishment } from '~/composables/useEstablishment'
 import ProductModal from '~/components/modals/ProductModal.vue'
+import Switch from '~/components/ui/Switch.vue'
 
 const route = useRoute()
 const slug = route.params.slug
@@ -357,20 +367,27 @@ const loadData = async () => {
   }
 }
 
-const toggleAvailability = async (product: any) => {
+const updateAvailability = async (product: any, isAvailable: boolean) => {
   try {
     const { error } = await supabase
       .from('products')
-      .update({ is_available: !product.is_available })
+      .update({ is_available: isAvailable })
       .eq('id', product.id)
 
     if (error) throw error
-    showToast.success('Disponibilité mise à jour', 'Le statut du produit a été modifié')
+    
+    // Update local state
+    product.is_available = isAvailable
+    
+    showToast.success(
+      'Disponibilité mise à jour', 
+      `Le produit "${product.name}" est maintenant ${isAvailable ? 'disponible' : 'indisponible'}`
+    )
   } catch (err) {
     console.error('Erreur mise à jour:', err)
     showToast.error('Erreur', 'Impossible de mettre à jour la disponibilité')
-    // Revenir à l'état précédent
-    product.is_available = !product.is_available
+    // Revert the change
+    product.is_available = !isAvailable
   }
 }
 
@@ -453,7 +470,7 @@ const saveProduct = async (productData: any) => {
     await loadData()
     closeModal()
     showToast.success(
-      'Produit sauvegardé',
+      'Sauvegarde réussie',
       editingProduct.value?.id ? 'Modifications enregistrées' : 'Nouveau produit ajouté'
     )
   } catch (err) {

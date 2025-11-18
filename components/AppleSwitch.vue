@@ -1,13 +1,12 @@
 <template>
   <button
-    type="button"
     :class="[
       'relative inline-flex h-[31px] w-[51px] items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
       modelValue ? 'bg-green-500' : 'bg-gray-300'
     ]"
     role="switch"
     :aria-checked="modelValue"
-    @click="$emit('update:modelValue', !modelValue)"
+    @click="toggle"
   >
     <span
       :class="[
@@ -18,12 +17,23 @@
   </button>
 </template>
 
-<script setup lang="ts">
-defineProps<{
-  modelValue: boolean
-}>()
+<script setup>
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    required: true
+  }
+})
 
-defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-}>()
-</script> 
+const emit = defineEmits(['update:modelValue'])
+
+const toggle = () => {
+  emit('update:modelValue', !props.modelValue)
+}
+</script>
+
+<style scoped>
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+</style>

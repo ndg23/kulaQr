@@ -91,10 +91,10 @@
   <div
     v-for="category in filteredCategories"
     :key="category.id"
-    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
+    class="bg-white rounded-2xl shadow-sm- border border-gray-100 overflow-hidden hover:shadow-xs transition-all duration-300 group relative"
   >
     <!-- Category Image -->
-    <div class="relative aspect-[4/3] overflow-hidden bg-gray-50">
+    <div class="relative aspect-[4/3] overflow-hidden bg-white">
       <!-- Image principale -->
       <img
         v-if="category.image_url && !category.imageError"
@@ -130,7 +130,7 @@
       <div class="absolute top-3 right-3">
         <button
           @click="editCategory(category)"
-          class="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 z-10"
+          class="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-200 hover:shadow-xl transition-all duration-200 hover:scale-105 z-10"
         >
           <Edit2 class="w-5 h-5 text-gray-700" />
         </button>
@@ -163,7 +163,7 @@
 
       <!-- Creation Date -->
       <div class="flex items-center justify-end">
-        <span class="text-xs text-gray-400">
+        <span class="text-xs text-gray-600">
           Ajouté le {{ formatDate(category.created_at) }}
         </span>
       </div>
@@ -289,6 +289,8 @@ const getCategoryIcon = (category: Category) => {
   if (name.includes('glace') || name.includes('dessert')) return IceCream
   if (name.includes('café') || name.includes('thé')) return Coffee
   if (name.includes('bière') || name.includes('alcool')) return Beer
+  if (name.includes('image') || name.includes('photo')) return ImageIcon
+  if (name.includes('autre')) return UtensilsCrossed
   
   return category.icon || UtensilsCrossed
 }
@@ -407,7 +409,7 @@ const deleteCategory = async (id: string) => {
     // Also remove products from this category from local state
     products.value = products.value.filter(p => p.category_id !== id)
     
-    showToast.success('Catégorie supprimée', 'La catégorie a été supprimée')
+    showToast.success('Catégorie supprimée', 'La catégorie a été supprimé avec succès')
   } catch (error) {
     console.error('Error deleting category:', error)
     showToast.error('Erreur', "Une erreur s'est produite lors de la suppression")
@@ -461,7 +463,7 @@ onMounted(async () => {
 // Remplacez le watcher par :
 watch(() => route.params.slug, async (newSlug, oldSlug) => {
   if (newSlug && newSlug !== oldSlug) {
-    console.log('🔄 Restaurant categories:', newSlug)
+    // console.log('🔄 Restaurant categories:', newSlug)
     await loadData()
   }
 }, { immediate: true }) // immediate: true remplace onMounted
@@ -489,7 +491,7 @@ const quickStats = computed(() => {
 
   return [
     {
-      name: 'Catégories',
+      name: 'Nombre de Catégories',
       value: categories.value.length,
       icon: List
     },

@@ -128,8 +128,8 @@
               class="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-900 transition-all"
             >
               <div class="flex items-start justify-between mb-6">
-                <div>
-                  <div class="flex items-center gap-3 mb-2">
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-3">
                     <span class="text-sm font-mono font-medium text-gray-500">#{{ order.id.slice(-4) }}</span>
                     <span
                       :class="[
@@ -143,9 +143,44 @@
                       {{ getStatusText(order.status) }}
                     </span>
                   </div>
-                  <h4 class="text-lg font-semibold text-gray-900">Table {{ order.table_number || 'N/A' }}</h4>
-                  <p class="text-sm text-gray-500 mt-1">{{ order.items_count || 0 }} articles · {{ formatTime(order.created_at) }}</p>
+                  
+                  <!-- Table Info Enrichie -->
+                  <div class="mb-3">
+                    <div class="flex items-center gap-2 mb-1">
+                      <MapPin class="w-4 h-4 text-gray-400" />
+                      <h4 class="text-lg font-semibold text-gray-900">
+                        Table {{ order.tables?.table_number || order.table_number || 'N/A' }}
+                      </h4>
+                      <span 
+                        v-if="order.tables?.type === 'VIP'"
+                        class="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-900 rounded-full"
+                      >
+                        VIP
+                      </span>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 text-sm text-gray-500">
+                      <span v-if="order.tables?.section_name" class="inline-flex items-center gap-1">
+                        <Store class="w-3.5 h-3.5" />
+                        {{ order.tables.section_name }}
+                      </span>
+                      <span v-if="order.tables?.floor_level" class="inline-flex items-center gap-1">
+                        <Building class="w-3.5 h-3.5" />
+                        {{ order.tables.floor_level }}
+                      </span>
+                      <span v-if="order.tables?.capacity" class="inline-flex items-center gap-1">
+                        <Users class="w-3.5 h-3.5" />
+                        {{ order.tables.capacity }} pers.
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <p class="text-sm text-gray-500">
+                    {{ order.items_count || 0 }} article{{ order.items_count > 1 ? 's' : '' }} · 
+                    {{ formatTime(order.created_at) }}
+                  </p>
                 </div>
+                
                 <p class="text-2xl font-semibold text-gray-900">{{ formatPrice(order.total_amount || 0) }}</p>
               </div>
 
@@ -200,7 +235,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { 
   ShoppingCart, 
   DollarSign,
@@ -211,19 +246,24 @@ import {
   RefreshCw,
   ArrowRight,
   QrCode,
-  Target,
   Eye,
-  DollarSignIcon
+  DollarSignIcon,
+  MapPin,
+  Store,
+  Building,
+  Users
 } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
 import { useSupabaseClient } from '#imports'
 import { useCustomToast } from '~/composables/useToast'
+import { useSound } from '~/composables/useSound'
 
 const { establishment } = useEstablishment()
 const { user } = useAuth()
 const supabase = useSupabaseClient()
 const { showToast } = useCustomToast()
+const { playNewOrderSound } = useSound()
 
 const isLoading = ref(true)
 const isRefreshing = ref(false)
@@ -232,10 +272,13 @@ const updatingOrderId = ref<string | null>(null)
 const recentOrders = ref<any[]>([])
 const popularProducts = ref<any[]>([])
 
+// Real-time subscription
+let subscription: any = null
+
 const currentOrders = computed(() => {
   return recentOrders.value
     .filter(order => ['pending', 'confirmed', 'processing'].includes(order.status))
-    .slice(0, 10)
+    .slice(0, 1000)
 })
 
 const currentOrdersStats = computed(() => {
@@ -256,6 +299,7 @@ const loadData = async () => {
     
     if (!establishment.value?.id) return
     
+    // Load KPIs
     const { data: kpiData, error: kpiError } = await (supabase as any)
       .rpc('get_restaurant_kpis', { establishment_uuid: establishment.value.id })
     
@@ -270,7 +314,7 @@ const loadData = async () => {
         icon: QrCode
       },
       {
-name: 'Commandes aujourd\'hui',
+        name: 'Commandes aujourd\'hui',
         value: kpis.orders_count_today?.toString() || '0',
         icon: ShoppingCart
       },
@@ -286,15 +330,28 @@ name: 'Commandes aujourd\'hui',
       }
     ]
     
+    // Load orders WITH table info (foreign key join)
     const { data: ordersData, error: ordersError } = await supabase
       .from('orders')
-      .select('*')
+      .select(`
+        *,
+        tables (
+          id,
+          table_number,
+          type,
+          section_name,
+          floor_level,
+          capacity,
+          location_description
+        )
+      `)
       .eq('establishment_id', establishment.value.id)
       .order('created_at', { ascending: false })
-      .limit(10) as { data: any[], error: any }
+      .limit(50) as { data: any[], error: any }
     
     if (ordersError) throw ordersError
     
+    // Add items count for each order
     const ordersWithItemsCount = await Promise.all(
       (ordersData || []).map(async (order) => {
         const { count } = await supabase
@@ -311,6 +368,7 @@ name: 'Commandes aujourd\'hui',
     
     recentOrders.value = ordersWithItemsCount
     
+    // Load products
     const { data: productsData, error: productsError } = await supabase
       .from('products')
       .select('*')
@@ -319,6 +377,9 @@ name: 'Commandes aujourd\'hui',
     
     if (productsError) throw productsError
     popularProducts.value = productsData || []
+    
+    // Set up real-time subscription after loading data
+    setupRealtimeSubscription()
     
   } catch (error: any) {
     console.error('Error loading dashboard data:', error)
@@ -329,9 +390,59 @@ name: 'Commandes aujourd\'hui',
   }
 }
 
+const setupRealtimeSubscription = () => {
+  if (!establishment.value?.id) return
+
+  // Cancel any existing subscription
+  if (subscription) {
+    subscription.unsubscribe()
+  }
+
+  // Create new subscription for order updates
+  subscription = supabase
+    .channel(`dashboard-orders-${establishment.value.id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'orders',
+        filter: `establishment_id=eq.${establishment.value.id}`
+      },
+      async (payload) => {
+        if (payload.eventType === 'INSERT') {
+          // Play sound notification for new orders
+          playNewOrderSound()
+          // Show toast notification with table info
+          const tableInfo = payload.new.table_number ? `Table ${payload.new.table_number}` : 'Nouvelle commande'
+          showToast.success('Nouvelle commande', tableInfo)
+          scrollToDown()
+          // Refresh dashboard data to get table info
+          await loadData()
+        } else if (payload.eventType === 'UPDATE') {
+          // Update existing order in the list
+          const index = recentOrders.value.findIndex(order => order.id === payload.new.id)
+          if (index !== -1) {
+            recentOrders.value[index] = { ...recentOrders.value[index], ...payload.new }
+          }
+        }
+      }
+    )
+    .subscribe()
+}
+
 const refreshData = async () => {
   isRefreshing.value = true
   await loadData()
+}
+
+const scrollToDown = () => {
+  setTimeout(() => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    })
+  }, 100)
 }
 
 const updateOrderStatus = async (orderId: string, newStatus: string) => {
@@ -387,6 +498,13 @@ const getStatusText = (status: string) => {
 
 onMounted(() => {
   loadData()
+})
+
+// Clean up real-time subscription
+onUnmounted(() => {
+  if (subscription) {
+    subscription.unsubscribe()
+  }
 })
 
 definePageMeta({
