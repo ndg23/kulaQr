@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 lg:p-8">
+  <div class="p-6 lg:p-8 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-12">
       <h1 class="text-4xl font-bold text-gray-900 mb-2">Etablissements</h1>
@@ -26,31 +26,39 @@
     </div>
 
     <!-- Establishments List with DataTable -->
-    <DataTable
-      :items="restaurants"
-      :columns="tableColumns"
-      :loading="loading"
-      :current-page="currentPage"
-      :per-page="perPage"
-      :total-items="filteredRestaurants.length"
-      :show-pagination="true"
-      empty-title="Aucun établissement trouvé"
-      empty-description="Aucun établissement ne correspond à vos critères de recherche"
-      empty-icon="fas fa-store"
-      @page-change="currentPage = $event"
-      @update:per-page="perPage = $event"
-    >
+    <div class="bg-white">
+      <DataTable
+        :items="restaurants"
+        :columns="tableColumns"
+        :loading="loading"
+        :current-page="currentPage"
+        :per-page="perPage"
+        :total-items="filteredRestaurants.length"
+        :show-pagination="true"
+        :header-buttons="[
+          { label: 'Ajouter', icon: 'Plus', variant: 'primary', action: 'add' }
+        ]"
+        empty-title="Aucun établissement trouvé"
+        empty-description="Commencez par créer votre premier établissement"
+        empty-icon="fas fa-store"
+        @page-change="currentPage = $event"
+        @update:per-page="perPage = $event"
+        @button-click="handleAction"
+      >
       <!-- Restaurant Name Column -->
       <template #cell-name="{ item }">
-        <div class="flex items-center space-x-3 max-w-[250px]">
-          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0">
+        <NuxtLink 
+          :to="`/admin/establishments/${item.id}`"
+          class="flex items-center gap-3 max-w-[280px] group"
+        >
+          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
             <Store class="w-5 h-5 text-white" />
           </div>
           <div class="min-w-0 flex-1">
-            <div class="font-medium text-gray-900 truncate">{{ item.name }}</div>
-            <div class="text-sm text-gray-500 truncate">{{ item.address }}</div>
+            <div class="font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">{{ item.name }}</div>
+            <div class="text-sm text-gray-500 truncate">{{ item.address || 'Adresse non définie' }}</div>
           </div>
-        </div>
+        </NuxtLink>
       </template>
 
       <!-- Type Column -->
@@ -67,11 +75,11 @@
 
       <!-- Owner Column -->
       <template #cell-owner_name="{ item }">
-        <div class="flex items-center space-x-2 max-w-[150px]">
-          <div class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-            <User class="w-3 h-3 text-gray-500" />
+        <div class="flex items-center gap-2 max-w-[180px]">
+          <div class="h-8 w-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0">
+            <span class="text-xs font-semibold text-gray-700">{{ getInitials(item.owner_name) }}</span>
           </div>
-          <span class="text-sm text-gray-700 truncate">{{ item.owner_name }}</span>
+          <span class="text-sm font-medium text-gray-700 truncate">{{ item.owner_name }}</span>
         </div>
       </template>
 
@@ -130,31 +138,31 @@
 
       <!-- Actions Column -->
       <template #cell-actions="{ item }">
-        <div class="flex items-center gap-2 max-w-[200px]">
-          <button
-            @click="manageEstablishment(item)"
-            class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            title="Gérer"
+        <div class="flex items-center gap-1.5">
+          <NuxtLink
+            :to="`/admin/establishments/${item.id}`"
+            class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+            title="Voir détails"
           >
             <Shield class="w-4 h-4" />
-          </button>
+          </NuxtLink>
           <button
             @click="editRestaurant(item)"
-            class="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+            class="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all"
             title="Modifier"
           >
             <Edit class="w-4 h-4" />
           </button>
           <button
             @click="manageQrCodes(item)"
-            class="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-            title="QR Codes"
+            class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
+            title="QR Code"
           >
             <UtensilsCrossed class="w-4 h-4" />
           </button>
           <button
             @click="toggleRestaurantStatus(item)"
-            class="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+            class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-all"
             :title="item.is_active ? 'Désactiver' : 'Activer'"
           >
             <CheckCircle v-if="!item.is_active" class="w-4 h-4" />
@@ -162,7 +170,7 @@
           </button>
           <button
             @click="deleteRestaurant(item.id)"
-            class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
             title="Supprimer"
           >
             <Trash2 class="w-4 h-4" />
@@ -170,6 +178,7 @@
         </div>
       </template>
     </DataTable>
+    </div>
 
     <!-- Restaurant Modal -->
     <RestaurantFormModal
@@ -309,7 +318,8 @@ import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { 
   Store, User, Users, Search, Plus, Edit, Trash2, 
   RefreshCw, X, CheckCircle, AlertTriangle, Loader2, 
-  UtensilsCrossed, Coffee, Pizza, Utensils, Building, Shield, ClipboardCopy, Download, Printer
+  UtensilsCrossed, Coffee, Pizza, Utensils, Building, Shield, ClipboardCopy, Download, Printer,
+  Hotel, Wine, CakeSlice
 } from 'lucide-vue-next'
 import { 
   TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle, Switch 
@@ -390,11 +400,6 @@ const tableColumns = [
     label: 'Mis à jour',
     sortable: true,
     type: 'date' as const
-  },
-  {
-    key: 'currency',
-    label: 'Devise',
-    sortable: true
   },
   {
     key: 'max_categories',
@@ -670,13 +675,33 @@ const getTypeColor = (type: string) => {
 
 const getTypeBadgeClass = (type: string) => {
   const classes: Record<string, string> = {
-    'restaurant': 'bg-orange-100 text-orange-800',
-    'cafe': 'bg-yellow-100 text-yellow-800',
-    'bar': 'bg-purple-100 text-purple-800',
-    'fast_food': 'bg-red-100 text-red-800',
-    'hotel': 'bg-blue-100 text-blue-800'
+    'restaurant': 'bg-orange-50 text-orange-700 border border-orange-200',
+    'cafe': 'bg-amber-50 text-amber-700 border border-amber-200',
+    'bar': 'bg-purple-50 text-purple-700 border border-purple-200',
+    'fast_food': 'bg-red-50 text-red-700 border border-red-200',
+    'hotel': 'bg-blue-50 text-blue-700 border border-blue-200'
   }
-  return classes[type] || 'bg-gray-100 text-gray-800'
+  return classes[type] || 'bg-gray-50 text-gray-700 border border-gray-200'
+}
+
+const getTypeIcon = (type: string) => {
+  const icons: Record<string, any> = {
+    'restaurant': Utensils,
+    'cafe': Coffee,
+    'bar': Wine,
+    'fast_food': Pizza,
+    'hotel': Hotel
+  }
+  return icons[type] || Store
+}
+
+const getInitials = (name: string) => {
+  if (!name) return '?'
+  const parts = name.trim().split(' ')
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+  }
+  return name.substring(0, 2).toUpperCase()
 }
 
 const formatType = (type: string) => {
@@ -718,6 +743,12 @@ const getSubscriptionLabel = (type: string) => {
 }
 
 // Methods
+const handleAction = (action: string) => {
+  if (action === 'add') {
+    openRestaurantModal()
+  }
+}
+
 const openRestaurantModal = (restaurant: any = null) => {
   selectedRestaurant.value = restaurant
   showRestaurantModal.value = true

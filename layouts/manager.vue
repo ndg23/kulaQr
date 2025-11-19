@@ -1,238 +1,176 @@
 <template>
   <div class="min-h-screen bg-white">
     <!-- Mobile Header -->
-    <header class="md:hidden bg-white border-b border-gray-100 sticky top-0 z-40">
-      <div class="px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center">
-            <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
-          </div>
-          <h1 class="text-xl font-semibold text-orange-500 truncate">
-            {{ establishment?.name || 'Dashboard' }}
-          </h1>
+    <header class="md:hidden bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div class="px-4 py-3">
+        <div class="flex items-center justify-between">
+          <NuxtLink :to="`/manager/${establishment?.id}`" class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center">
+              <span class="text-white text-sm font-bold">{{ getEstablishmentInitials() }}</span>
+            </div>
+          </NuxtLink>
+          
+          <button
+            @click="showMobileMenu = !showMobileMenu"
+            class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <Menu v-if="!showMobileMenu" class="w-5 h-5" />
+            <X v-else class="w-5 h-5" />
+          </button>
         </div>
-        <button 
-          @click="toggleMobileMenu"
-          class="p-2 rounded-full hover:bg-gray-100 transition-colors"
-        >
-          <Menu class="w-5 h-5 text-gray-600" />
-        </button>
       </div>
     </header>
 
     <!-- Mobile Menu Overlay -->
     <Transition
-      enter-active-class="transition duration-300 ease-out"
+      enter-active-class="transition-opacity duration-200"
       enter-from-class="opacity-0"
       enter-to-class="opacity-100"
-      leave-active-class="transition duration-200 ease-in"
+      leave-active-class="transition-opacity duration-200"
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div 
+      <div
         v-if="showMobileMenu"
-        class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-50"
+        class="md:hidden fixed inset-0 bg-black/20 z-40"
         @click="showMobileMenu = false"
-      ></div>
+      />
     </Transition>
 
     <!-- Mobile Menu -->
     <Transition
-      enter-active-class="transition duration-300 ease-out"
-      enter-from-class="transform -translate-x-full"
-      enter-to-class="transform translate-x-0"
-      leave-active-class="transition duration-200 ease-in"
-      leave-from-class="transform translate-x-0"
-      leave-to-class="transform -translate-x-full"
+      enter-active-class="transition-transform duration-200"
+      enter-from-class="-translate-x-full"
+      enter-to-class="translate-x-0"
+      leave-active-class="transition-transform duration-200"
+      leave-from-class="translate-x-0"
+      leave-to-class="-translate-x-full"
     >
-      <div 
-        v-if="showMobileMenu"
-        class="md:hidden fixed left-0 top-0 h-full w-80 bg-white shadow-2xl z-50"
-      >
-        <div class="p-6 border-b border-gray-100">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-lg flex items-center justify-center">
-              <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
+      <div v-if="showMobileMenu" class="md:hidden fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-50">
+        <div class="p-4 border-b">
+          <NuxtLink :to="`/manager/${establishment?.id}`" class="flex items-center gap-3" @click="showMobileMenu = false">
+            <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
+              <span class="text-white text-xs font-bold">{{ getEstablishmentInitials() }}</span>
             </div>
-            <div>
-              <h1 class="text-xl font-bold text-orange-500">
-                {{ establishment?.name || 'Dashboard' }}
-              </h1>
-              <p class="text-sm text-gray-500">Gestion</p>
-            </div>
-          </div>
+            <span class="text-lg font-bold">{{ establishment?.name || 'Manager' }}</span>
+          </NuxtLink>
         </div>
 
-        <nav class="flex-1 p-4">
-          <div class="space-y-1">
-            <NuxtLink 
-              v-for="item in navigationItems" 
-              :key="item.path"
-              :to="item.path"
-              @click="showMobileMenu = false"
-              class="flex items-center gap-4 p-3 rounded-full text-base transition-all"
-              :class="[
-                route.path.includes(item.active)
-                  ? 'bg-gray-100 text-gray-900 font-semibold' 
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-              ]"
-            >
-              <component :is="item.icon" class="w-6 h-6" />
-              <span>{{ item.name }}</span>
-            </NuxtLink>
-          </div>
+        <nav class="p-2">
+          <NuxtLink
+            v-for="item in navigationItems"
+            :key="item.path"
+            :to="item.path"
+            class="flex items-center gap-4 px-4 py-3 rounded-full transition-colors"
+            :class="[
+              route.path === item.path || route.path.includes(item.active)
+                ? 'font-bold'
+                : 'hover:bg-gray-100'
+            ]"
+            @click="showMobileMenu = false"
+          >
+            <component :is="item.icon" class="w-6 h-6" :stroke-width="route.path.includes(item.active) ? 2.5 : 2" />
+            <span class="text-lg">{{ item.name }}</span>
+          </NuxtLink>
         </nav>
 
-        <div class="p-4 border-t border-gray-100">
-          <div class="relative">
-            <div class="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 cursor-pointer user-menu" @click="toggleUserMenu">
-              <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <span class="text-gray-600 text-sm font-medium">
-                  {{ getUserInitials() }}
-                </span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 truncate">
-                  {{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}
-                </p>
-                <p class="text-xs text-gray-500 truncate">
-                  @{{ (user as any)?.email?.split('@')[0] }}
-                </p>
-              </div>
-              <ChevronDown class="w-4 h-4 text-gray-400" />
-            </div>
-            
-            <!-- Mobile User Menu Dropdown -->
-            <Transition
-              enter-active-class="transition duration-200 ease-out"
-              enter-from-class="transform scale-95 opacity-0"
-              enter-to-class="transform scale-100 opacity-100"
-              leave-active-class="transition duration-150 ease-in"
-              leave-from-class="transform scale-100 opacity-100"
-              leave-to-class="transform scale-95 opacity-0"
-            >
-              <div 
-                v-if="showUserMenu"
-                class="absolute bottom-full left-0 mb-2 w-full bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden z-10"
-              >
-                <div class="p-3 border-b border-gray-100">
-                  <p class="text-sm font-semibold text-gray-900">{{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}</p>
-                  <p class="text-xs text-gray-500">@{{ (user as any)?.email?.split('@')[0] }}</p>
-                </div>
-                <div class="p-1">
-                  <button
-                    @click="handleLogout"
-                    class="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                  >
-                    <LogOut class="w-4 h-4" />
-                    <span>Se déconnecter</span>
-                  </button>
-                </div>
-              </div>
-            </Transition>
-          </div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
+          <button
+            @click="handleLogout"
+            class="flex w-full items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <LogOut class="w-5 h-5" />
+            <span>Déconnexion</span>
+          </button>
         </div>
       </div>
     </Transition>
 
     <div class="hidden md:flex">
-      <!-- Desktop Sidebar - Style Twitter 2024 -->
-      <aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen fixed left-0 top-0">
-        <!-- Logo Section -->
-        <div class="p-6">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center">
-              <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
+      <!-- Desktop Sidebar - Twitter Style -->
+      <aside class="w-72 border-r border-gray-200 flex flex-col h-screen fixed left-0 top-0">
+        <!-- Logo -->
+        <div class="px-4 pt-2">
+          <NuxtLink 
+            :to="`/manager/${establishment?.id}`"
+            class="w-12 h-12 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+          >
+            <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
+              <span class="text-white text-sm font-bold">{{ getEstablishmentInitials() }}</span>
             </div>
-            <div>
-            <h1 class="text-xl font-bold text-orange-500">
-              {{ establishment?.name || 'Dashboard' }}
-            </h1>
-              <p class="text-sm text-gray-500">Gestion</p>
-            </div>
-          </div>
+          </NuxtLink>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-3">
-          <div class="space-y-1">
-            <NuxtLink 
-              v-for="item in navigationItems" 
-              :key="item.path"
-              :to="item.path"
-              class="flex items-center gap-4 p-3 rounded-full text-lg transition-all group"
-              :class="[
-                route.path.includes(item.active)
-                  ? 'bg-gray-100 text-gray-900 font-semibold' 
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-              ]"
-            >
-              <component :is="item.icon" class="w-6 h-6" />
-              <span>{{ item.name }}</span>
-            </NuxtLink>
-          </div>
+        <nav class="flex-1 px-2 pt-2 space-y-1">
+          <NuxtLink
+            v-for="item in navigationItems"
+            :key="item.path"
+            :to="item.path"
+            class="flex items-center gap-5 px-4 py-3 rounded-full transition-colors group"
+            :class="[
+              route.path === item.path || route.path.includes(item.active)
+                ? 'font-bold'
+                : 'hover:bg-gray-100'
+            ]"
+          >
+            <component 
+              :is="item.icon" 
+              class="w-7 h-7" 
+              :stroke-width="route.path.includes(item.active) ? 2.5 : 2" 
+            />
+            <span class="text-xl">{{ item.name }}</span>
+          </NuxtLink>
         </nav>
 
         <!-- User Section -->
-        <div class="p-3">
+        <div class="p-3 mb-4">
           <div class="relative">
-            <div class="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 cursor-pointer transition-colors user-menu" @click="toggleUserMenu">
-              <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <span class="text-gray-600 text-sm font-medium">
-                  {{ getUserInitials() }}
-                </span>
+            <button
+              @click="toggleUserMenu"
+              class="flex w-full items-center gap-3 px-3 py-3 rounded-full hover:bg-gray-100 transition-colors group"
+            >
+              <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <span class="text-gray-600 text-sm font-medium">{{ getUserInitials() }}</span>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 truncate">
-                  {{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}
-                </p>
-                <p class="text-xs text-gray-500 truncate">
-                  @{{ (user as any)?.email?.split('@')[0] }}
-                </p>
+              <div class="flex-1 min-w-0 text-left">
+                <p class="text-sm font-bold text-gray-900 truncate">{{ userName }}</p>
+                <p class="text-sm text-gray-500 truncate">{{ userEmail }}</p>
               </div>
-              <ChevronDown 
-                class="w-4 h-4 text-gray-400 transition-transform duration-200"
-                :class="{ 'rotate-180': showUserMenu }"
-              />
-            </div>
-            
-            <!-- Desktop User Menu Dropdown -->
+              <svg class="w-4 h-4 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 13.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0-5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 10a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
+              </svg>
+            </button>
+
+            <!-- Dropdown Menu -->
             <Transition
-              enter-active-class="transition duration-200 ease-out"
+              enter-active-class="transition duration-100 ease-out"
               enter-from-class="transform scale-95 opacity-0"
               enter-to-class="transform scale-100 opacity-100"
-              leave-active-class="transition duration-150 ease-in"
+              leave-active-class="transition duration-75 ease-in"
               leave-from-class="transform scale-100 opacity-100"
               leave-to-class="transform scale-95 opacity-0"
             >
-              <div 
+              <div
                 v-if="showUserMenu"
-                class="absolute bottom-full left-0 mb-2 w-full bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden z-10"
+                class="absolute bottom-full left-0 mb-2 w-full bg-white shadow-xl rounded-2xl border border-gray-200 overflow-hidden"
               >
-                <div class="p-3 border-b border-gray-100">
-                  <p class="text-sm font-semibold text-gray-900">{{ (user as any)?.user_metadata?.full_name || (user as any)?.email }}</p>
-                  <p class="text-xs text-gray-500">@{{ (user as any)?.email?.split('@')[0] }}</p>
-                </div>
-                <div class="p-1">
-                  <button
-                    @click="handleLogout"
-                    class="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                  >
-                    <LogOut class="w-4 h-4" />
-                    <span>Se déconnecter</span>
-                  </button>
-                </div>
+                <button
+                  @click="handleLogout"
+                  class="flex w-full items-center gap-3 px-4 py-3 text-sm font-bold hover:bg-gray-50 transition-colors"
+                >
+                  <LogOut class="w-4 h-4" />
+                  <span>Déconnexion {{ userEmail }}</span>
+                </button>
               </div>
             </Transition>
           </div>
         </div>
       </aside>
 
-      <!-- Desktop Main Content -->
-      <main class="ml-64 flex-1 min-h-screen bg-gray-50">
-        <div class="max-w-7xl mx-auto">
+      <!-- Main Content -->
+      <main class="ml-72 flex-1 min-h-screen">
         <slot />
-        </div>
       </main>
     </div>
 
@@ -338,6 +276,14 @@ const getUserInitials = () => {
     return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
   }
   return 'U'
+}
+
+const getEstablishmentInitials = () => {
+  const name = establishment.value?.name || establishment.value?.id
+  if (name) {
+    return name.toString().split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+  }
+  return 'E'
 }
 
 const handleLogout = async () => {

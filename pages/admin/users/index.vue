@@ -37,6 +37,7 @@
         :show-add-button="true"
         add-button-label="Ajouter"
         :header-buttons="[
+          { label: 'Manager + Établissement', icon: 'fas fa-store', variant: 'success', action: 'add-manager-establishment' },
           { label: 'Importer', icon: 'fas fa-upload', variant: 'secondary', action: 'import' },
           { label: 'Rafraîchir', icon: 'fas fa-sync', variant: 'secondary', action: 'refresh' }
         ]"
@@ -140,17 +141,24 @@
         </template>
       </DataTable>
   
-      <!-- User Modal -->
-      <UserFormModal
-        v-if="showUserModal"
-        :open="showUserModal"
-        :user="selectedUser"
-        @close="closeUserModal"
-        @submit="handleUserSubmitted"
-      />
-    </div>
-  </template>
-  
+    <!-- User Modal -->
+    <UserFormModal
+      v-if="showUserModal"
+      :open="showUserModal"
+      :user="selectedUser"
+      @close="closeUserModal"
+      @submit="handleUserSubmitted"
+    />
+
+    <!-- Manager with Establishment Modal -->
+    <ManagerWithEstablishmentModal
+      :open="showManagerEstablishmentModal"
+      @close="showManagerEstablishmentModal = false"
+      @submit="handleManagerEstablishmentSubmitted"
+    />
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue'
 // import { Users, UserPlus, UserCheck, Shield, Search, Edit, Trash2, RefreshCw, X, CheckCircle, AlertTriangle, Info, Users, ChevronLeft, ChevronRight, Eye, EyeOff, User, Download, UserPlus, UserCheck, UserX, Shield, Mail, Ban, Loader2 } from 'lucide-vue-next'
@@ -164,12 +172,14 @@ import {
 } from 'lucide-vue-next';
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild, Switch } from '@headlessui/vue'
 import UserFormModal from '~/components/admin/UserFormModal.vue'
+import ManagerWithEstablishmentModal from '~/components/admin/ManagerWithEstablishmentModal.vue'
 // import { UDropdown } from '@/components/ui/dropdown'
 
 const {showToast} = useCustomToast()
 const { client: supabase } = useSupabaseWrapper()
 const loading = ref(false)
 const showUserModal = ref(false)
+const showManagerEstablishmentModal = ref(false)
 const selectedUser = ref(null)
 const currentPage = ref(1)
 const perPage = ref(10)
@@ -392,7 +402,7 @@ const getUserInitials = (name: string) => {
 }
 
 const getUserColor = (id: string) => {
-  const colors = ['blue', 'green', 'red', 'yellow', 'purple', 'pink', 'orange', 'cyan']
+  const colors = ['blue', 'green', 'red', 'yellow', 'purple', 'pink', 'orange', 'cyan', 'teal', 'indigo', 'lime', 'emerald', 'fuchsia', 'rose', 'amber', 'violet', 'sky','gray', 'slate', 'stone', 'neutral', 'zinc', 'burgundy', 'navy', 'olive', 'maroon', 'turquoise', 'magenta']
   const index = Math.abs(hashString(id.toString()) % colors.length)
   return colors[index]
 }
@@ -541,19 +551,30 @@ const deleteUser = async (id: string) => {
 }
 
 const handleButtonClick = (action: string) => {
+  console.log('Button clicked with action:', action)
+  
   switch (action) {
+    case 'add-manager-establishment':
+      console.log('Opening Manager + Establishment modal')
+      showManagerEstablishmentModal.value = true
+      break
     case 'import':
-      // Handle import action
-      showToast.info('Fonctionnalité d\'importation à venir', 'info')
+      showToast.info('Fonctionnalité d\'importation à venir')
       break
     case 'refresh':
-      // Handle refresh action
       loadUsers()
-      showToast.success('Liste rafraîchie', 'success')
+      showToast.success('Liste rafraîchie')
       break
     default:
-      console.log('Unknown action:', action)
+      console.warn('Unknown action:', action)
+      showToast.error(`Action inconnue: ${action}`)
   }
+}
+
+// Handle manager with establishment submitted
+const handleManagerEstablishmentSubmitted = async () => {
+  showManagerEstablishmentModal.value = false
+  await loadUsers()
 }
 
 // Load initial data

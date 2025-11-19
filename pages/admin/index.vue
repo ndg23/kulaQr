@@ -1,5 +1,5 @@
 <template>
-    <div class="p-6 lg:p-8">
+    <div class="p-6 lg:p-8 ">
       <!-- Header -->
       <div class="mb-12">
         <h1 class="text-4xl font-bold text-gray-900 mb-2">Tableau de bord</h1>
@@ -7,9 +7,14 @@
       </div>
   
       <!-- Stats Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8 mb-12">
-        <div v-for="stat in statsDisplay" :key="stat.name" 
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <component
+          :is="stat.link ? 'NuxtLink' : 'div'"
+          v-for="stat in statsDisplay"
+          :key="stat.name"
+          :to="stat.link"
           class="bg-white p-8 rounded-[2rem] border border-gray-100 transition-all -hover:scale-[1.02] -hover:shadow-lg"
+          :class="{ 'cursor-pointer': stat.link }"
         >
           <div class="flex items-center space-x-6">
             <div class="w-16 h-16 rounded-2xl flex items-center justify-center"
@@ -22,7 +27,7 @@
               <h3 class="text-3xl font-bold text-gray-900">{{ stat.value }}</h3>
             </div>
           </div>
-        </div>
+        </component>
       </div>
   
       <!-- Recent Activity -->
@@ -241,7 +246,8 @@
       value: adminStats.value.total_orders.toString(),
       icon: ShoppingBag,
       iconBg: 'bg-amber-50',
-      iconColor: 'text-amber-500'
+      iconColor: 'text-amber-500',
+      link: '/admin/orders'
     },
     { 
       name: 'Produits', 

@@ -5,20 +5,24 @@
       title="Commandes"
       subtitle="Gérez vos commandes en temps réel"
       :icon="Receipt"
-      
+      :primary-action="{
+        label: 'Nouvelle commande',
+        icon: Plus,
+        action: openNewOrderModal
+      }"
     />
 
-    <main class="max-w-7xl mx-auto px-8 pb-16 mt-2">
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <!-- Stats Cards - Responsive Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-              <Receipt class="w-6 h-6 text-blue-600" />
+            <div class="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center">
+              <Receipt class="w-6 h-6 text-white" />
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900">{{ stats?.total_orders || 0 }}</p>
-              <p class="text-sm text-gray-500">Total commandes</p>
+              <p class="text-sm text-gray-500">Total</p>
             </div>
           </div>
         </div>
@@ -30,7 +34,7 @@
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900">{{ stats?.pending_orders || 0 }}</p>
-              <p class="text-sm text-gray-500">En attente</p>
+              <p class="text-sm text-gray-500">Attente</p>
             </div>
           </div>
         </div>
@@ -42,7 +46,7 @@
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900">{{ stats?.processing_orders || 0 }}</p>
-              <p class="text-sm text-gray-500">En préparation</p>
+              <p class="text-sm text-gray-500">Préparation</p>
             </div>
           </div>
         </div>
@@ -60,138 +64,156 @@
         </div>
       </div>
 
-      <!-- Filters -->
-      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-        <div class="flex flex-wrap gap-4 items-center">
-          <div class="flex items-center gap-2">
-            <Filter class="w-5 h-5 text-gray-400" />
-            <span class="text-sm font-medium text-gray-700">Filtrer par:</span>
+      <!-- Filtres - Mobile Friendly -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div class="space-y-4">
+          <!-- Header de filtres -->
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+              <Filter class="w-4 h-4 text-gray-600" />
+            </div>
+            <h2 class="text-lg font-semibold text-gray-900">Filtres</h2>
           </div>
 
-          <select
-            v-model="statusFilter"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Tous les statuts</option>
-            <option value="pending">En attente</option>
-            <option value="confirmed">Confirmée</option>
-            <option value="processing">En traitement</option>
-            <option value="completed">Terminée</option>
-          </select>
+          <!-- Filtres en colonne sur mobile -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <select
+              v-model="statusFilter"
+              class="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all bg-white hover:border-gray-300 cursor-pointer"
+            >
+              <option value="">Tous les statuts</option>
+              <option value="pending">En attente</option>
+              <option value="confirmed">Confirmée</option>
+              <option value="processing">En traitement</option>
+              <option value="completed">Terminée</option>
+            </select>
 
-          <select
-            v-model="staffFilter"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Tout le staff</option>
-            <option v-for="member in staff" :key="member.id" :value="member.id">
-              {{ member.username }}
-            </option>
-          </select>
+            <select
+              v-model="staffFilter"
+              class="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all bg-white hover:border-gray-300 cursor-pointer"
+            >
+              <option value="">Tout le staff</option>
+              <option v-for="member in staff" :key="member.id" :value="member.id">
+                {{ member.username }}
+              </option>
+            </select>
 
-          <div class="relative flex-1 max-w-sm">
-            <Search class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              v-model="searchQuery"
-              @input="applyFilters"
-              type="text"
-              placeholder="Rechercher par numéro de commande..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <div class="relative">
+              <Search class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Rechercher..."
+                class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all hover:border-gray-300"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Orders List -->
+      <!-- Liste des commandes - Design épuré et responsive -->
       <div class="space-y-4">
         <div
           v-for="order in filteredOrders"
           :key="order.id"
-          class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+          class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
         >
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
-                <h3 class="text-lg font-semibold text-gray-900">#{{ order.orderNumber }}</h3>
-                <span
-                  :class="getStatusBadgeClass(order.status)"
-                  class="px-2 py-1 text-xs font-medium rounded-full"
-                >
+          <!-- Mobile: Layout vertical -->
+          <div class="space-y-4 sm:space-y-0 sm:flex sm:items-start sm:justify-between">
+            <div class="flex-1 space-y-4 sm:space-y-6">
+              <!-- En-tête -->
+              <div class="flex flex-wrap items-center gap-2 sm:gap-4">
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900">#{{ order.orderNumber }}</h3>
+                <div class="hidden sm:block h-6 w-px bg-gray-200" />
+                <span class="px-2.5 sm:px-3 py-1 bg-gray-100 text-gray-900 text-xs font-medium rounded-lg uppercase tracking-wider">
                   {{ getStatusText(order.status) }}
                 </span>
                 <span class="text-sm text-gray-500">Table {{ order.table_number || 'N/A' }}</span>
               </div>
 
-              <!-- Staff Assignment -->
-              <div class="flex items-center gap-2 mb-3">
-                <User class="w-4 h-4 text-gray-400" />
-                <span class="text-sm text-gray-600">Staff:</span>
-                <select
-                  v-model="order.staff_id"
-                  @change="assignOrderToStaff(order.id, $event.target.value)"
-                  class="text-sm border border-gray-200 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Non assigné</option>
-                  <option v-for="member in staff" :key="member.id" :value="member.id">
-                    {{ member.username }}
-                  </option>
-                </select>
+              <!-- Staff Assignment - Disabled -->
+              <div class="flex items-center gap-3 sm:gap-4 opacity-50 cursor-not-allowed" title="Assignation désactivée">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gray-300 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <User class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
+                </div>
+                <div class="flex-1 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg sm:rounded-xl text-sm bg-gray-50 text-gray-500">
+                  {{ order.staff?.username || 'Non assigné' }}
+                </div>
               </div>
 
-              <!-- Order Items -->
-              <div class="space-y-2 mb-3">
+              <!-- Articles -->
+              <div class="space-y-3 sm:space-y-4">
                 <div
                   v-for="item in (order.items || []).slice(0, 3)"
                   :key="item.id"
-                  class="flex items-center justify-between text-sm"
+                  class="flex items-center justify-between py-2 sm:py-3 border-b border-gray-100 last:border-0"
                 >
-                  <span class="text-gray-600">
-                    {{ item.quantity || 0 }}x {{ item.name || 'Produit inconnu' }}
+                  <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                    <span class="text-sm font-medium text-gray-400 w-6 sm:w-8 flex-shrink-0">{{ item.quantity || 0 }}×</span>
+                    <span class="text-sm sm:text-base text-gray-900 truncate">{{ item.name || 'Produit inconnu' }}</span>
+                  </div>
+                  <span class="font-medium text-gray-900 text-sm sm:text-base ml-2 flex-shrink-0">
+                    {{ formatPrice((item.unit_price || 0) * (item.quantity || 0)) }}
                   </span>
-                  <span class="font-medium">{{ formatPrice((item.unit_price || 0) * (item.quantity || 0)) }}</span>
                 </div>
-                <div v-if="(order.items || []).length > 3" class="text-xs text-gray-400">
+                <div v-if="(order.items || []).length > 3" 
+                     class="text-xs font-semibold uppercase tracking-wider pt-2 px-3 flex items-center gap-2"
+                     :class="getMoreItemsClass()">
+                  <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
                   +{{ (order.items || []).length - 3 }} autres articles
                 </div>
               </div>
 
-              <div class="flex items-center gap-4 text-sm text-gray-500">
-                <span>Total: <strong class="text-gray-900">{{ formatPrice(order.total_amount) }}</strong></span>
-                <span>{{ formatDate(order.created_at) }}</span>
+              <!-- Footer info -->
+              <div class="flex flex-wrap items-center gap-4 sm:gap-8 pt-4 sm:pt-6 border-t border-gray-100">
+                <div>
+                  <span class="text-xs text-gray-500 uppercase tracking-wider block mb-1">Total</span>
+                  <span class="text-xl sm:text-2xl font-bold text-gray-900">{{ formatPrice(order.total_amount) }}</span>
+                </div>
+                <div class="hidden sm:block h-8 w-px bg-gray-200" />
+                <div>
+                  <span class="text-xs text-gray-500 uppercase tracking-wider block mb-1">Créée le</span>
+                  <span class="text-sm text-gray-900">{{ formatDate(order.created_at) }}</span>
+                </div>
               </div>
             </div>
 
-            <div class="flex items-center gap-2 ml-4">
+            <!-- Actions - Twitter 2024 Style -->
+            <div class="flex sm:flex-col items-center gap-2 sm:gap-3 sm:ml-8 justify-end sm:justify-start">
               <button
                 v-if="canAcceptOrder(order.status)"
                 @click="updateOrderStatus(order.id, 'confirmed')"
-                class="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                class="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-green-50 active:scale-95"
                 title="Accepter"
               >
-                <CheckCircle class="w-5 h-5" />
+                <div class="absolute inset-0 rounded-full bg-green-500/10 scale-0 group-hover:scale-100 transition-transform duration-200"></div>
+                <CheckCircle class="w-5 h-5 sm:w-5.5 sm:h-5.5 text-gray-600 group-hover:text-green-600 transition-colors relative z-10" />
               </button>
               <button
                 v-if="canPrepareOrder(order.status)"
                 @click="updateOrderStatus(order.id, 'processing')"
-                class="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                class="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-orange-50 active:scale-95"
                 title="Préparer"
               >
-                <Coffee class="w-5 h-5" />
+                <div class="absolute inset-0 rounded-full bg-orange-500/10 scale-0 group-hover:scale-100 transition-transform duration-200"></div>
+                <Coffee class="w-5 h-5 sm:w-5.5 sm:h-5.5 text-gray-600 group-hover:text-orange-600 transition-colors relative z-10" />
               </button>
               <button
                 v-if="canCompleteOrder(order.status)"
                 @click="updateOrderStatus(order.id, 'completed')"
-                class="p-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                class="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-blue-50 active:scale-95"
                 title="Terminer"
               >
-                <CheckCircle class="w-5 h-5" />
+                <div class="absolute inset-0 rounded-full bg-blue-500/10 scale-0 group-hover:scale-100 transition-transform duration-200"></div>
+                <CheckCircle class="w-5 h-5 sm:w-5.5 sm:h-5.5 text-gray-600 group-hover:text-blue-600 transition-colors relative z-10" />
               </button>
               <button
                 @click="printOrder(order)"
-                class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                class="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-gray-100 active:scale-95"
                 title="Imprimer"
               >
-                <Printer class="w-5 h-5" />
+                <div class="absolute inset-0 rounded-full bg-gray-500/10 scale-0 group-hover:scale-100 transition-transform duration-200"></div>
+                <Printer class="w-5 h-5 sm:w-5.5 sm:h-5.5 text-gray-600 group-hover:text-gray-900 transition-colors relative z-10" />
               </button>
             </div>
           </div>
@@ -199,30 +221,30 @@
       </div>
 
       <!-- Empty State -->
-      <div v-if="filteredOrders.length === 0 && !loading" class="text-center py-16">
-        <div class="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
-          <Receipt class="w-8 h-8 text-gray-400" />
+      <div v-if="filteredOrders.length === 0 && !loading" class="text-center py-12 sm:py-16">
+        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gray-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4">
+          <Receipt class="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
         </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucune commande</h3>
-        <p class="text-gray-500 mb-6">
+        <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Aucune commande</h3>
+        <p class="text-sm sm:text-base text-gray-500 mb-6 px-4">
           {{ orders.length === 0 ? 'Aucune commande n\'a encore été passée.' : 'Aucune commande ne correspond à vos critères.' }}
         </p>
         <button
           @click="openNewOrderModal"
-          class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+          class="bg-black hover:bg-gray-800 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium transition-colors"
         >
           Créer une commande
         </button>
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="flex items-center justify-center py-16">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span class="ml-3 text-gray-600">Chargement des commandes...</span>
+      <div v-if="loading" class="flex items-center justify-center py-12 sm:py-16">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+        <span class="ml-3 text-sm sm:text-base text-gray-600">Chargement...</span>
       </div>
     </main>
 
-    <!-- New Order Modal -->
+    <!-- Modal - Mobile Optimized -->
     <TransitionRoot appear :show="showNewOrderModal" as="template">
       <Dialog as="div" class="relative z-50" @close="closeModal">
         <TransitionChild
@@ -234,7 +256,7 @@
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
+          <div class="fixed inset-0 bg-black/20 backdrop-blur-sm" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
@@ -248,59 +270,57 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
-                <div class="p-6">
-                  <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                      Nouvelle commande
-                    </h3>
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl sm:rounded-3xl bg-white border border-gray-200 shadow-2xl transition-all">
+                <div class="p-6 sm:p-10">
+                  <div class="flex items-center justify-between mb-6 sm:mb-8">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Nouvelle commande</h3>
                     <button
                       @click="closeModal"
-                      class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                      class="w-9 h-9 sm:w-10 sm:h-10 border border-gray-200 rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
                     >
-                      <X class="w-5 h-5" />
+                      <X class="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </div>
 
-                  <form @submit.prevent="createNewOrder" class="space-y-4">
+                  <form @submit.prevent="createNewOrder" class="space-y-5 sm:space-y-6">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Numéro de table *
+                      <label class="block text-sm font-medium text-gray-900 mb-2 sm:mb-3 uppercase tracking-wider">
+                        Numéro de table
                       </label>
                       <input
                         v-model.number="orderForm.table_number"
                         type="number"
                         required
                         min="1"
-                        placeholder="Ex: 5"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="5"
+                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base focus:outline-none focus:border-black transition-colors"
                       />
                     </div>
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Notes (optionnel)
+                      <label class="block text-sm font-medium text-gray-900 mb-2 sm:mb-3 uppercase tracking-wider">
+                        Notes
                       </label>
                       <textarea
                         v-model="orderForm.notes"
-                        rows="3"
-                        placeholder="Notes spéciales pour la commande..."
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      ></textarea>
+                        rows="4"
+                        placeholder="Notes spéciales..."
+                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base focus:outline-none focus:border-black transition-colors resize-none"
+                      />
                     </div>
 
-                    <div class="flex gap-3 pt-4">
+                    <div class="flex gap-3 sm:gap-4 pt-2 sm:pt-4">
                       <button
                         type="button"
                         @click="closeModal"
-                        class="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+                        class="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium hover:bg-gray-50 transition-colors"
                       >
                         Annuler
                       </button>
                       <button
                         type="submit"
                         :disabled="creating"
-                        class="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-black text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {{ creating ? 'Création...' : 'Créer' }}
                       </button>
@@ -321,8 +341,9 @@ import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue'
 import {
   Receipt, Plus, Clock, Coffee, CheckCircle, Filter, Search,
-  Printer, User, X, Loader2
+  Printer, User, X
 } from 'lucide-vue-next'
+import ManagerModernHeader from '~/components/manager/ModernHeader.vue'
 import { useCustomToast } from '~/composables/useToast'
 import { useSound } from '~/composables/useSound'
 import { useSupabaseClient } from '#imports'
@@ -357,11 +378,48 @@ const orderForm = ref({
   notes: ''
 })
 
+// Item color functions - alternating colors for visual distinction
+const getItemColorClass = (index: number) => {
+  const colors = [
+    'bg-blue-50 border border-blue-100',
+    'bg-green-50 border border-green-100', 
+    'bg-purple-50 border border-purple-100',
+    'bg-orange-50 border border-orange-100',
+    'bg-pink-50 border border-pink-100'
+  ]
+  return colors[index % colors.length]
+}
+
+const getItemBadgeClass = (index: number) => {
+  const colors = [
+    'bg-blue-500 text-white',
+    'bg-green-500 text-white',
+    'bg-purple-500 text-white',
+    'bg-orange-500 text-white',
+    'bg-pink-500 text-white'
+  ]
+  return colors[index % colors.length]
+}
+
+const getItemTextClass = (index: number) => {
+  const colors = [
+    'text-blue-900',
+    'text-green-900',
+    'text-purple-900',
+    'text-orange-900',
+    'text-pink-900'
+  ]
+  return colors[index % colors.length]
+}
+
+const getMoreItemsClass = () => {
+  return 'text-gray-500'
+}
+
 // Computed
 const filteredOrders = computed(() => {
   let filtered = orders.value
 
-  // Search filter
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(order =>
@@ -370,12 +428,10 @@ const filteredOrders = computed(() => {
     )
   }
 
-  // Status filter
   if (statusFilter.value) {
     filtered = filtered.filter(order => order.status === statusFilter.value)
   }
 
-  // Staff filter
   if (staffFilter.value) {
     filtered = filtered.filter(order => order.staff_id === staffFilter.value)
   }
@@ -386,15 +442,11 @@ const filteredOrders = computed(() => {
 // Load establishment data
 const loadEstablishment = async () => {
   try {
-    // Vérifier si le slug est valide
     if (!slug) {
       showToast.error('Erreur', 'URL invalide')
       return
     }
     
-    console.log('🏢 Loading establishment with slug:', slug)
-    
-    // Récupérer l'établissement sans utiliser .single() initialement
     const { data, error } = await supabase
       .from('establishments')
       .select('*')
@@ -402,21 +454,16 @@ const loadEstablishment = async () => {
     
     if (error) throw error
     
-    // Vérifier si des données ont été trouvées
     if (!data || data.length === 0) {
       showToast.error('Erreur', 'Établissement introuvable')
       return
     }
     
-    // Assigner le premier résultat
     establishment.value = data[0]
-    console.log('✅ Establishment loaded:', establishment.value)
-    
-    // Une fois l'établissement chargé, configurer la subscription
     setupRealtimeSubscription()
   } catch (err) {
     console.error('Error loading establishment:', err)
-    showToast.error('Erreur', 'Impossible de charger les données de l\'établissement')
+    showToast.error('Erreur', 'Impossible de charger les données')
   }
 }
 
@@ -434,12 +481,10 @@ const loadStaff = async () => {
       .order('username')
     
     if (error) throw error
-    
-    console.log('👥 Staff members loaded:', data)
     staff.value = data || []
   } catch (err) {
     console.error('Error loading staff:', err)
-    showToast.error('Erreur', 'Impossible de charger les membres du staff')
+    showToast.error('Erreur', 'Impossible de charger le staff')
   }
 }
 
@@ -450,7 +495,6 @@ const loadOrders = async () => {
   loading.value = true
 
   try {
-    // Get all orders for this establishment
     const { data: ordersData, error: ordersError } = await supabase
       .from('orders')
       .select('*')
@@ -459,12 +503,8 @@ const loadOrders = async () => {
 
     if (ordersError) throw ordersError
 
-    console.log('📦 Orders data received:', ordersData)
-
-    // Process orders with their items and staff info
     const processedOrders = await Promise.all(ordersData.map(async (order: any, index: number) => {
       try {
-        // Get items for this order
         const { data: itemsData, error: itemsError } = await supabase
           .from('order_items')
           .select('*')
@@ -472,9 +512,7 @@ const loadOrders = async () => {
 
         if (itemsError) throw itemsError
 
-        // Format each item with product details
         const items = await Promise.all(itemsData.map(async (item: any) => {
-          // Get product details
           const { data: product } = await supabase
             .from('products')
             .select('name, description')
@@ -488,7 +526,6 @@ const loadOrders = async () => {
           }
         }))
 
-        // Get staff info if assigned
         let staffInfo = null
         if (order.staff_id) {
           try {
@@ -500,22 +537,17 @@ const loadOrders = async () => {
 
             staffInfo = staffData && (staffData as any).username ? staffData : null
           } catch (err) {
-            console.warn(`Could not load staff info for order ${order.id}:`, err)
             staffInfo = null
           }
         }
 
-        const processedOrder = {
+        return {
           ...order,
           items,
           staff: staffInfo,
           orderNumber: 1000 + index
         }
-
-        console.log('🔄 Processed order:', processedOrder)
-        return processedOrder
       } catch (err) {
-        console.error(`Error loading items for order ${order.id}:`, err)
         return {
           ...order,
           items: [],
@@ -525,9 +557,8 @@ const loadOrders = async () => {
       }
     }))
 
-    console.log('✅ Final processed orders:', processedOrders)
     orders.value = processedOrders
-    loadStats() // Calculate stats after loading orders
+    loadStats()
   } catch (err) {
     console.error('Error loading orders:', err)
     showToast.error('Erreur', 'Impossible de charger les commandes')
@@ -536,12 +567,8 @@ const loadOrders = async () => {
   }
 }
 
-// Methods
 const openNewOrderModal = () => {
-  orderForm.value = {
-    table_number: null,
-    notes: ''
-  }
+  orderForm.value = { table_number: null, notes: '' }
   showNewOrderModal.value = true
 }
 
@@ -551,12 +578,9 @@ const closeModal = () => {
 
 const createNewOrder = async () => {
   if (!establishment.value?.id) return
-
   creating.value = true
   try {
-    // This would typically create a new order, but for now we'll just show a message
-    // In a real implementation, you'd have a proper order creation flow
-    showToast.info('Fonction à implémenter', 'La création de commande manuelle sera bientôt disponible')
+    showToast.info('Fonction à implémenter', 'La création manuelle sera bientôt disponible')
     closeModal()
   } catch (error) {
     console.error('Error creating order:', error)
@@ -564,10 +588,6 @@ const createNewOrder = async () => {
   } finally {
     creating.value = false
   }
-}
-
-const applyFilters = () => {
-  // Filters are applied reactively through computed property
 }
 
 const loadStats = () => {
@@ -584,20 +604,15 @@ const loadStats = () => {
   }
 }
 
-// Update order status
 const updateOrderStatus = async (orderId: string, newStatus: string) => {
   try {
     const { error } = await (supabase as any)
       .from('orders')
-      .update({
-        status: newStatus,
-        updated_at: new Date().toISOString()
-      })
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
       .eq('id', orderId)
 
     if (error) throw error
 
-    // Update local state
     const index = orders.value.findIndex((o: any) => o.id === orderId)
     if (index !== -1) {
       orders.value[index].status = newStatus
@@ -605,32 +620,33 @@ const updateOrderStatus = async (orderId: string, newStatus: string) => {
 
     const order = orders.value.find((o: any) => o.id === orderId)
     showToast.success('Statut mis à jour', `Commande #${order?.orderNumber || orderId.slice(-6)} ${getStatusMessage(newStatus)}`)
-    loadStats() // Refresh stats
+    loadStats()
   } catch (err) {
     console.error('Error updating order status:', err)
     showToast.error('Erreur', 'Impossible de mettre à jour le statut')
   }
 }
 
-// Assign order to staff member
 const assignOrderToStaff = async (orderId: string, staffId: string) => {
-  console.log('👤 Assigning order', orderId, 'to staff', staffId)
-
   try {
     const { error } = await (supabase as any)
       .from('orders')
-      .update({
-        staff_id: staffId || null,
-        updated_at: new Date().toISOString()
-      })
+      .update({ staff_id: staffId || null, updated_at: new Date().toISOString() })
       .eq('id', orderId)
 
     if (error) throw error
 
-    // Update local state
     const index = orders.value.findIndex((o: any) => o.id === orderId)
     if (index !== -1) {
       orders.value[index].staff_id = staffId || null
+      if (staffId) {
+        const staffMember = staff.value.find((s: any) => s.id === staffId)
+        orders.value[index].staff = staffMember
+      } else {
+        orders.value[index].staff = null
+      }
+    
+
 
       // Update staff object
       if (staffId) {
@@ -794,6 +810,7 @@ const getStatusText = (status: string) => {
 
 const getStatusMessage = (status: string) => {
   const messages: Record<string, string> = {
+    'pending': 'est en attente',
     'confirmed': 'a été confirmée',
     'processing': 'est en traitement',
     'completed': 'est terminée'

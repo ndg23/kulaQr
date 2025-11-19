@@ -89,14 +89,13 @@
       <!-- Desktop Sidebar - Twitter Style -->
       <aside class="w-72 border-r border-gray-200 flex flex-col h-screen fixed left-0 top-0">
         <!-- Logo -->
-        <div class="px-4 pt-2">
+        <div class="px-4 pt-2 pb-1">
           <NuxtLink 
             to="/admin" 
-            class="w-12 h-12 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+            class="inline-flex items-center gap-1 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"
           >
-            <div class="w-8 h-8 rounded-full bg-black flex items-center justify-center">
-              <span class="text-white text-sm font-bold">Y</span>
-            </div>
+            <span class="text-orange-500 text-base font-black">KulaQr</span>
+            <span class="text-gray-600 text-sm font-medium">Admin</span>
           </NuxtLink>
         </div>
 
@@ -173,10 +172,11 @@
       </aside>
 
       <!-- Main Content -->
-      <main class="ml-72 flex-1 min-h-screen">
+      <main class="ml-72  min-h-screen max-w-7xl mx-auto">
         <slot />
       </main>
     </div>
+        <!-- <div class="p-4 md:p-8 max-w-7xl mx-auto"> -->
 
     <!-- Mobile Main Content -->
     <main class="md:hidden">
@@ -198,7 +198,8 @@ import {
   X,
   QrCode,
   BarChart3,
-  Headphones
+  Headphones,
+  ShoppingBag
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 
@@ -232,6 +233,12 @@ const navigationItems = [
     path: '/admin/users',
     active: 'users',
     icon: Users
+  },
+  {
+    name: 'Commandes',
+    path: '/admin/orders',
+    active: 'orders',
+    icon: ShoppingBag
   },
   {
     name: 'QR Codes',
