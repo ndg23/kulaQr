@@ -25,16 +25,16 @@
             <p class="text-sm text-gray-500">Année de création</p>
           </div>
           <div class="text-center">
-            <div class="text-5xl md:text-6xl font-semibold text-gray-900 mb-3">15+</div>
+            <div class="text-5xl md:text-6xl font-semibold text-gray-900 mb-3">5+</div>
             <p class="text-sm text-gray-500">Pays desservis</p>
           </div>
           <div class="text-center">
-            <div class="text-5xl md:text-6xl font-semibold text-gray-900 mb-3">50+</div>
+            <div class="text-5xl md:text-6xl font-semibold text-gray-900 mb-3">10+</div>
             <p class="text-sm text-gray-500">Employés passionnés</p>
           </div>
           <div class="text-center">
             <div class="text-5xl md:text-6xl font-semibold text-gray-900 mb-3">2K+</div>
-            <p class="text-sm text-gray-500">Restaurants satisfaits</p>
+            <p class="text-sm text-gray-500">Etablissements satisfaits</p>
           </div>
         </div>
       </div>
@@ -82,37 +82,7 @@
       </div>
     </section>
 
-    <!-- Team Section -->
-    <section class="w-full py-24 bg-gray-50">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="text-center mb-16">
-          <span class="text-sm font-semibold tracking-widest text-gray-500 uppercase">Notre équipe</span>
-          <h2 class="mt-4 text-4xl font-semibold text-gray-900">Des experts passionnés</h2>
-        </div>
-        
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-          <div v-for="member in team" :key="member.name" class="text-center">
-            <div class="relative w-48 h-48 mx-auto mb-6">
-              <img 
-                :src="member.image" 
-                :alt="member.name"
-                class="w-full h-full object-cover rounded-full"
-              />
-            </div>
-            <h3 class="text-xl font-medium text-gray-900 mb-1">{{ member.name }}</h3>
-            <p class="text-gray-500 mb-4">{{ member.role }}</p>
-            <div class="flex justify-center space-x-4">
-              <a :href="member.linkedin" class="text-gray-400 hover:text-gray-600">
-                <Linkedin class="w-5 h-5" />
-              </a>
-              <a :href="member.twitter" class="text-gray-400 hover:text-gray-600">
-                <Twitter class="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+   
 
     <!-- Values Section -->
     <section class="w-full py-24 md:py-32 bg-white">

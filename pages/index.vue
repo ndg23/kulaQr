@@ -5,25 +5,24 @@
       <Navbar />
 
       <!-- Hero Section - Ultra minimal -->
-      <section class="w-full min-h-[90vh] relative flex items-center justify-center pt-20 pb-32">
+      <section class="w-full min-h-[90vh] relative flex items-center justify-center pt-20 pb-32 bg-kula-50">
         <div class="relative w-full max-w-6xl mx-auto px-6 md:px-8 text-center">
           <!-- Main headline -->
-          <h1 class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight text-gray-900 leading-[1.05] mb-10">
-            Menu digital.<br />
+          <h1 class="text-5xl sm:text-7xl md:text-8xl lg:text-9xl- font-bold tracking-tight text-gray-900 leading-[1.05] mb-10">
+            Menu digital<br />
             <span class="text-orange-500">Simple.</span>
           </h1>
           
           <!-- Subheadline -->
-          <p class="text-2xl sm:text-3xl md:text-4xl text-gray-500 font-light max-w-4xl mx-auto mb-16 leading-relaxed">
-            QR code. Scan. Commande.<br class="hidden sm:block" />
-            C'est tout.
+          <p class="text-2xl sm:text-3xl md:text-4xl text-gray-900 font- max-w-7xl mx-auto mb-16 leading-relaxed">
+             Scan et Commande
           </p>
           
           <!-- CTA Button -->
           <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
             <NuxtLink 
               to="/auth/register"
-              class="group px-12 py-6 bg-gray-900 text-white rounded-full text-xl font-semibold transition-all duration-200 hover:bg-gray-800 flex items-center justify-center"
+              class="group px-12 py-4 md:py-4 bg-gray-900 text-white rounded-full text-xl font-semibold transition-all duration-200 hover:bg-gray-800 flex items-center justify-center"
             >
               <span>Démarrer gratuitement</span>
               <ArrowRight class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
@@ -31,17 +30,17 @@
           </div>
           
           <!-- Social proof - minimalist -->
-          <div class="flex items-center justify-center gap-16 text-gray-400 text-sm">
+          <div class="flex items-center justify-center gap-6 md:gap-16 text-gray-400 text-sm">
             <div class="text-center">
-              <div class="text-4xl font-bold text-gray-900 mb-1">50+</div>
-              <div>Restaurants</div>
+              <div class="text-2xl  md:text-4xl font-bold text-gray-900 mb-1">50+</div>
+              <div>Etablissements</div>
             </div>
             <div class="text-center">
-              <div class="text-4xl font-bold text-gray-900 mb-1">1K+</div>
+              <div class="text-2xl  md:text-4xl font-bold text-gray-900 mb-1">1K+</div>
               <div>Scans/mois</div>
             </div>
             <div class="text-center">
-              <div class="text-4xl font-bold text-gray-900 mb-1">15%</div>
+              <div class="text-2xl  md:text-4xl font-bold text-gray-900 mb-1">50%</div>
               <div>+ Efficacité</div>
             </div>
           </div>
@@ -49,7 +48,7 @@
       </section>
 
       <!-- Features Section - Clean cards -->
-      <section id="features" class="w-full py-32 md:py-40 bg-gray-50-">
+      <section id="features" class="w-full py-3 2 md:py-40- bg-gray-50-">
         <div class="max-w-7xl mx-auto px-6 md:px-8">
           <!-- Section header -->
           <div class="text-center mb-32">
@@ -315,7 +314,7 @@
                 <ul class="space-y-2.5 text-sm">
                   <!-- <li><a href="/legal/mentions-legales" class="text-gray-600 hover:text-gray-900 hover:underline decoration-red-500 transition-colors">Mentions légales</a></li> -->
                   <li><a href="/legal/privacy" class="text-gray-600 hover:text-gray-900 hover:underline decoration-red-500 transition-colors">Confidentialité</a></li>
-                  <li><a href="/legal/terms" class="text-gray-600 hover:text-gray-900 hover:underline decoration-red-500 transition-colors">CGU</a></li>
+                  <li><a href="/legal/cgu" class="text-gray-600 hover:text-gray-900 hover:underline decoration-red-500 transition-colors">CGU</a></li>
                 </ul>
               </div>
             </div>
@@ -323,12 +322,13 @@
 
           <!-- Footer bottom -->
           <div class="pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-sm text-gray-500">© 2025 KulaQr — Dakar, Sénégal</p>
+            <p class="text-sm text-gray-500">© 2025 Kula Qr — Dakar, Sénégal</p>
             <div class="flex items-center gap-6">
-              <a href="#" class="text-sm text-gray-500 hover:text-gray-900 hover:underline decoration-red-500 transition-colors">Twitter</a>
+              <!-- <a href="#" class="text-sm text-gray-500 hover:text-gray-900 hover:underline decoration-red-500 transition-colors">Twitter</a>
               <a href="#" class="text-sm text-gray-500 hover:text-gray-900 hover:underline decoration-red-500 transition-colors">LinkedIn</a>
               <a href="#" class="text-sm text-gray-500 hover:text-gray-900 hover:underline decoration-red-500 transition-colors">Instagram</a>
-            </div>
+           -->
+                </div>
           </div>
         </div>
       </footer>

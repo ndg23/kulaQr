@@ -40,7 +40,7 @@ INSERT INTO establishments (
   gen_random_uuid(),
   'Restaurant Admin',
   'admin@kulqr.com',
-  '+221 77 749 39 10',
+  '+221 78 383 55 97',
   'Dakar, Sénégal',
   'ee8e7274-4176-4a5e-82c9-7316f395d171', -- Même ID que ci-dessus
   true,

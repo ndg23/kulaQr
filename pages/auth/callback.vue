@@ -83,9 +83,9 @@ onMounted(async () => {
           id: user.id,
           full_name: fullName,
           role: 'owner',
-          subscription_tier: 'free',
-          is_active: true,
-          subscription_ends_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+          subscription_tier: 'demo', // CORRIGÉ : demo au lieu de free
+          is_active: false, // CORRIGÉ : inactif par défaut comme pour l'inscription normale
+          subscription_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // CORRIGÉ : 7 jours pour demo
         })
 
       if (createUserError) {

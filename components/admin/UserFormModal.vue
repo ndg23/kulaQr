@@ -42,7 +42,7 @@
                       />
                     </div>
                     
-                    <div v-if="!isEdit">
+                    <div>
                       <FloatLabelSelect
                         id="role"
                         v-model="form.role"
@@ -51,8 +51,9 @@
                         required
                       >
                         <option value="admin">Administrateur</option>
+                        <option value="owner">Propriétaire</option>
                         <option value="manager">Manager</option>
-                        <option value="user">Utilisateur</option>
+                        <option value="staff">Staff</option>
                       </FloatLabelSelect>
                     </div>
                     
@@ -280,7 +281,7 @@ const validateForm = () => {
     isValid = false;
   }
 
-  if (!isEdit.value && !form.value.role) {
+  if (!form.value.role) {
     errors.value.role = 'Le rôle est requis';
     isValid = false;
   }
@@ -300,6 +301,7 @@ const handleSubmit = async () => {
     const userData = isEdit.value ? {
       // Édition : seulement les champs modifiables
       full_name: form.value.full_name,
+      role: form.value.role,
       is_active: form.value.status === 'active',
       subscription_tier: form.value.subscription_tier,
       subscription_ends_at: form.value.subscription_ends_at ? new Date(form.value.subscription_ends_at).toISOString() : null

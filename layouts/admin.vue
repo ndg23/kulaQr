@@ -199,7 +199,8 @@ import {
   QrCode,
   BarChart3,
   Headphones,
-  ShoppingBag
+  ShoppingBag,
+  CreditCard
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 
@@ -233,6 +234,12 @@ const navigationItems = [
     path: '/admin/users',
     active: 'users',
     icon: Users
+  },
+  {
+    name: 'Abonnements',
+    path: '/admin/subscriptions',
+    active: 'subscriptions',
+    icon: CreditCard
   },
   {
     name: 'Commandes',

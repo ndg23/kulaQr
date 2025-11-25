@@ -35,7 +35,7 @@
             </p>
             <ul class="list-disc pl-6 text-gray-600 space-y-2">
               <li>Email : contact@kulaqr.com</li>
-              <li>Téléphone : +221 XX XXX XX XX</li>
+              <li>Téléphone : +221 78 383 55 97 | +221 78 373 90 55</li>
               <li>NINEA : [Numéro NINEA]</li>
             </ul>
           </div>

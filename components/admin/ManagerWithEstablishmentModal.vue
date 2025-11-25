@@ -160,21 +160,21 @@
                     :error="errors.address"
                   />
                   
-                  <FloatLabelInput
+                  <!-- <FloatLabelInput
                     id="establishment-phone"
                     v-model="establishmentForm.phone"
                     label="Téléphone de l'établissement"
                     type="tel"
                     :error="errors.establishment_phone"
-                  />
+                  /> -->
 
-                  <FloatLabelInput
+                  <!-- <FloatLabelInput
                     id="establishment-email"
                     v-model="establishmentForm.email"
                     label="Email de l'établissement"
                     type="email"
                     :error="errors.establishment_email"
-                  />
+                  /> -->
 
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Type d'établissement</label>
@@ -188,7 +188,7 @@
                       </option>
                     </select>
                   </div>
-
+<!-- 
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Devise</label>
                     <select 
@@ -211,7 +211,7 @@
                       <option value="premium">Premium</option>
                       <option value="pro">Pro</option>
                     </select>
-                  </div>
+                  </div> -->
                 </div>
 
                 <!-- Error Message -->
@@ -453,10 +453,10 @@ const handleSubmit = async () => {
       .insert({
         name: establishmentForm.value.name,
         address: establishmentForm.value.address,
-        phone: establishmentForm.value.phone,
-        email: establishmentForm.value.email,
+        // phone: establishmentForm.value.phone,
+        // email: establishmentForm.value.email,
         type_id: establishmentForm.value.type_id || null,
-        currency: establishmentForm.value.currency,
+        // currency: establishmentForm.value.currency,
         subscription_type: establishmentForm.value.subscription_type,
         user_id: authData.user.id,
         is_active: true

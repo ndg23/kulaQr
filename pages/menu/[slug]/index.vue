@@ -789,6 +789,12 @@ const placeOrder = async () => {
 const cancelOrder = async () => {
   if (!currentOrderId.value) return
   
+  // Vérifier que la commande est bien en attente
+  if (orderStatus.value !== 'pending') {
+    showToast('⚠️ Cette commande ne peut plus être annulée')
+    return
+  }
+  
   if (!confirm('Voulez-vous vraiment annuler cette commande ?')) return
   
   try {

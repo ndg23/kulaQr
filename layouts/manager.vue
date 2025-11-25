@@ -127,6 +127,7 @@
         <div class="p-3 mb-4">
           <div class="relative">
             <button
+              data-user-menu-button
               @click="toggleUserMenu"
               class="flex w-full items-center gap-3 px-3 py-3 rounded-full hover:bg-gray-100 transition-colors group"
             >
@@ -153,6 +154,7 @@
             >
               <div
                 v-if="showUserMenu"
+                data-user-menu-dropdown
                 class="absolute bottom-full left-0 mb-2 w-full bg-white shadow-xl rounded-2xl border border-gray-200 overflow-hidden"
               >
                 <button
@@ -209,10 +211,20 @@ const { establishment, fetchEstablishmentByUserId } = useEstablishment()
 const { user, logout, isLoading } = useAuth()
 const showUserMenu = ref(false)
 const showMobileMenu = ref(false)
-definePageMeta({
 
-middleware: 'auth'
+// Computed properties for user data
+const userName = computed(() => {
+  return (user.value as any)?.user_metadata?.full_name || 'Utilisateur'
 })
+
+const userEmail = computed(() => {
+  return (user.value as any)?.email || ''
+})
+
+definePageMeta({
+  middleware: 'auth'
+})
+
 const navigationItems = computed(() => [
   {
     name: 'Accueil',
@@ -287,6 +299,7 @@ const getEstablishmentInitials = () => {
 }
 
 const handleLogout = async () => {
+  showUserMenu.value = false // Fermer le menu avant de déconnecter
   await logout()
   navigateTo('/auth/login')
 }
@@ -299,11 +312,19 @@ const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
 }
 
-// Gestionnaire de clic en dehors du menu
+// Gestionnaire de clic en dehors du menu - Fixed
 const handleClickOutside = (event: MouseEvent) => {
+  if (!showUserMenu.value) return
+  
   const target = event.target as HTMLElement
-  if (showUserMenu.value && !target.closest('.user-menu')) {
-    showUserMenu.value = false
+  const userMenuButton = document.querySelector('[data-user-menu-button]')
+  const userMenuDropdown = document.querySelector('[data-user-menu-dropdown]')
+  
+  // Si le clic n'est ni sur le bouton ni sur le dropdown, fermer
+  if (userMenuButton && userMenuDropdown) {
+    if (!userMenuButton.contains(target) && !userMenuDropdown.contains(target)) {
+      showUserMenu.value = false
+    }
   }
 }
 

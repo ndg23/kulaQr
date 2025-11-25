@@ -124,7 +124,7 @@
             </p>
             <ul class="text-gray-600 mb-8 space-y-2">
               <li>Email : privacy@kulaqr.com</li>
-              <li>Téléphone : +221 XX XXX XX XX</li>
+              <li>Téléphone : +221 78 383 55 97 | +221 78 373 90 55</li>
               <li>Adresse : Point E, Rue de Saint-Louis, Dakar, Sénégal</li>
             </ul>
             <NuxtLink 

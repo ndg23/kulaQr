@@ -39,8 +39,12 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-4">Téléphone</h3>
             <p class="text-gray-500 mb-4">Du lundi au vendredi, 9h-18h</p>
-            <a href="tel:+221777493910" class="text-black hover:text-gray-600 font-medium">
-              +221 77 749 39 10
+            <a href="tel:+221783835597" class="text-black hover:text-gray-600 font-medium">
+              +221 78 383 55 97
+            </a>
+            <span class="text-gray-400 mx-2">|</span>
+            <a href="tel:+221783739055" class="text-black hover:text-gray-600 font-medium">
+              +221 78 373 90 55
             </a>
           </div>
 
@@ -96,7 +100,7 @@
                   v-model="form.phone"
                   type="tel"
                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent transition-shadow"
-                  placeholder="+221 77 XXX XX XX"
+                  placeholder="+221 78 383 55 97"
                 />
               </div>
 

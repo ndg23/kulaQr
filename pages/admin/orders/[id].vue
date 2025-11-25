@@ -298,7 +298,7 @@
             </button>
             
             <button 
-              v-if="order.status !== 'cancelled'"
+              v-if="order.status === 'pending'"
               @click="cancelOrder"
               :disabled="updating"
               class="w-full px-4 py-3 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
@@ -503,8 +503,14 @@ const updatePaymentStatus = async () => {
   }
 }
 
-// Cancel order
+// Cancel order (uniquement si en attente, pas après confirmation)
 const cancelOrder = async () => {
+  // Vérifier que la commande est en attente
+  if (order.value.status !== 'pending') {
+    showToast.error('Impossible d\'annuler', 'Seules les commandes en attente peuvent être annulées')
+    return
+  }
+  
   if (!confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) return
   
   try {

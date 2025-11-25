@@ -8,8 +8,8 @@
             <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
               <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
             </div>
-            <span class="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
-              Kula <span class="text-kula-500 fontex-bold font-black">Qr</span>
+            <span class="text-xl font-bold  group-hover:text-gray-700 transition-colors">
+              Kula <span class="text-kula-500  font-black">QR</span>
             </span>
           </NuxtLink>
         </div>

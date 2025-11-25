@@ -90,13 +90,16 @@ colorMode: {
     key: process.env.SUPABASE_KEY,
     redirect: false,
     cookieOptions: {
-      secure: false,
-      sameSite: 'lax'
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 // 7 jours
     },
     clientOptions: {
       auth: {
-        detectSessionInUrl: false,
-        persistSession: false
+        detectSessionInUrl: true,
+        persistSession: true,
+        autoRefreshToken: true,
+        flowType: 'pkce'
       }
     }
   },
@@ -124,10 +127,17 @@ colorMode: {
   },
   // Configuration runtime
   runtimeConfig: {
+    // Variables serveur privées
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    cronSecret: process.env.CRON_SECRET,
+    
+    // Variables publiques
     public: {
       qrSecretKey: process.env.QR_SECRET_KEY,
       baseURL: process.env.BASE_URL,
-      siteUrl: process.env.SITE_URL || 'https://kulaqr.vercel.app'
+      siteUrl: process.env.SITE_URL || 'https://kulaqr.vercel.app',
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseKey: process.env.SUPABASE_KEY
     }
   }
 })

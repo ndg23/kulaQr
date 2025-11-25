@@ -535,8 +535,9 @@ const cancelOrder = async (orderId: string) => {
   }
 }
 
+// Une commande ne peut être annulée que si elle est en attente (pas encore acceptée)
 const canCancelOrder = (status: string) => {
-  return status === 'pending' || status === 'confirmed'
+  return status === 'pending'
 }
 
 const canManageOrder = (order: any) => {

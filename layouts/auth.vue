@@ -18,7 +18,7 @@
     </div>
     <!-- Main Content -->
     <div class="min-h-screen flex items-center justify-center px-6">
-      <div class="w-full max-w-5xl mt-20 pb-12">
+      <div class="w-full mt-10 pb-12">
         <!-- Logo -->
         <!-- <div class="mb-16 text-center">
           <NuxtLink to="/" class="inline-flex items-center space-x-3">

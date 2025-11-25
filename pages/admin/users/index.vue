@@ -109,6 +109,13 @@
         <template #cell-actions="{ item }">
           <div class="flex items-center gap-2 max-w-[200px]">
             <button
+              @click="changeUserRole(item)"
+              class="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+              title="Changer le rôle"
+            >
+              <Shield class="w-4 h-4" />
+            </button>
+            <button
               @click="editUser(item)"
               class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
               title="Modifier"
@@ -150,6 +157,14 @@
       @submit="handleUserSubmitted"
     />
 
+    <!-- Role Change Modal -->
+    <RoleChangeModal
+      :open="showRoleChangeModal"
+      :user="selectedUser"
+      @close="showRoleChangeModal = false"
+      @submit="handleRoleChanged"
+    />
+
     <!-- Manager with Establishment Modal -->
     <ManagerWithEstablishmentModal
       :open="showManagerEstablishmentModal"
@@ -172,6 +187,7 @@ import {
 } from 'lucide-vue-next';
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild, Switch } from '@headlessui/vue'
 import UserFormModal from '~/components/admin/UserFormModal.vue'
+import RoleChangeModal from '~/components/admin/RoleChangeModal.vue'
 import ManagerWithEstablishmentModal from '~/components/admin/ManagerWithEstablishmentModal.vue'
 // import { UDropdown } from '@/components/ui/dropdown'
 
@@ -179,6 +195,7 @@ const {showToast} = useCustomToast()
 const { client: supabase } = useSupabaseWrapper()
 const loading = ref(false)
 const showUserModal = ref(false)
+const showRoleChangeModal = ref(false)
 const showManagerEstablishmentModal = ref(false)
 const selectedUser = ref(null)
 const currentPage = ref(1)
@@ -500,6 +517,17 @@ const editUser = (user: any) => {
     subscription_ends_at: user.subscription_ends_at
   })
   showUserModal.value = true
+}
+
+const changeUserRole = (user: any) => {
+  // Ouvrir le modal dédié au changement de rôle
+  selectedUser.value = { ...user }
+  showRoleChangeModal.value = true
+}
+
+const handleRoleChanged = async () => {
+  showRoleChangeModal.value = false
+  await loadUsers()
 }
 
 const viewUser = (user: any) => {

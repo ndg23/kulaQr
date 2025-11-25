@@ -14,8 +14,8 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <!-- Stats Cards - Responsive Grid -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div class="bg-white rounded-xl p-6  border border-gray-100">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center">
               <Receipt class="w-6 h-6 text-white" />
@@ -27,7 +27,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="bg-white rounded-xl p-6  border border-gray-100">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center">
               <Clock class="w-6 h-6 text-yellow-600" />
@@ -39,7 +39,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="bg-white rounded-xl p-6  border border-gray-100">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
               <Coffee class="w-6 h-6 text-orange-600" />
@@ -51,7 +51,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="bg-white rounded-xl p-6  border border-gray-100">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
               <CheckCircle class="w-6 h-6 text-green-600" />
@@ -65,7 +65,7 @@
       </div>
 
       <!-- Filtres - Mobile Friendly -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <div class="bg-white rounded-xl  border border-gray-100 p-6 mb-6">
         <div class="space-y-4">
           <!-- Header de filtres -->
           <div class="flex items-center gap-3 mb-4">
@@ -113,113 +113,129 @@
 
       <!-- Liste des commandes - Design épuré et responsive -->
       <div class="space-y-4">
+        <!-- Order Card -->
         <div
           v-for="order in filteredOrders"
           :key="order.id"
-          class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
+          class="bg-white border border-gray-200 rounded-3xl p-5 hover:border-blue-300 transition-all cursor-pointer active:scale-[0.98]"
         >
-          <!-- Mobile: Layout vertical -->
-          <div class="space-y-4 sm:space-y-0 sm:flex sm:items-start sm:justify-between">
-            <div class="flex-1 space-y-4 sm:space-y-6">
-              <!-- En-tête -->
-              <div class="flex flex-wrap items-center gap-2 sm:gap-4">
-                <h3 class="text-xl sm:text-2xl font-bold text-gray-900">#{{ order.orderNumber }}</h3>
-                <div class="hidden sm:block h-6 w-px bg-gray-200" />
-                <span class="px-2.5 sm:px-3 py-1 bg-gray-100 text-gray-900 text-xs font-medium rounded-lg uppercase tracking-wider">
+          <div class="flex items-start gap-4">
+            <!-- Order Avatar/Number -->
+            <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
+              {{ order.table_number }}
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <!-- Header -->
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-bold text-gray-900">
+                  Commande #{{ order.orderNumber }}
+                </h3>
+                <span
+                  :class="[
+                    'px-3 py-1 rounded-full text-xs font-semibold',
+                    getStatusClass(order.status)
+                  ]"
+                >
                   {{ getStatusText(order.status) }}
                 </span>
-                <span class="text-sm text-gray-500">Table {{ order.table_number || 'N/A' }}</span>
+              </div>
+              
+              <!-- Meta Info -->
+              <div class="flex items-center gap-2 flex-wrap mb-3 text-xs text-gray-500">
+                <span>📍 Table {{ order.table_number }}</span>
+                <span>•</span>
+                <span>🕐 {{ formatTime(order.created_at) }}</span>
+                <span v-if="order.staff" class="flex items-center gap-1 text-blue-600 font-semibold">
+                  <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                  </svg>
+                  {{ order.staff.username }}
+                </span>
               </div>
 
-              <!-- Staff Assignment - Disabled -->
-              <div class="flex items-center gap-3 sm:gap-4 opacity-50 cursor-not-allowed" title="Assignation désactivée">
-                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gray-300 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <User class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
-                </div>
-                <div class="flex-1 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg sm:rounded-xl text-sm bg-gray-50 text-gray-500">
-                  {{ order.staff?.username || 'Non assigné' }}
-                </div>
-              </div>
-
-              <!-- Articles -->
-              <div class="space-y-3 sm:space-y-4">
+              <!-- Items Preview -->
+              <div class="space-y-2 mb-3">
                 <div
-                  v-for="item in (order.items || []).slice(0, 3)"
+                  v-for="item in order.items.slice(0, 2)"
                   :key="item.id"
-                  class="flex items-center justify-between py-2 sm:py-3 border-b border-gray-100 last:border-0"
+                  class="flex items-center justify-between text-sm"
                 >
-                  <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                    <span class="text-sm font-medium text-gray-400 w-6 sm:w-8 flex-shrink-0">{{ item.quantity || 0 }}×</span>
-                    <span class="text-sm sm:text-base text-gray-900 truncate">{{ item.name || 'Produit inconnu' }}</span>
+                  <div class="flex items-center gap-2 flex-1 min-w-0">
+                    <span class="font-medium text-gray-400 w-6">{{ item.quantity }}×</span>
+                    <span class="text-gray-900 truncate">{{ item.name }}</span>
                   </div>
-                  <span class="font-medium text-gray-900 text-sm sm:text-base ml-2 flex-shrink-0">
-                    {{ formatPrice((item.unit_price || 0) * (item.quantity || 0)) }}
+                  <span class="font-medium text-gray-900 ml-2">
+                    {{ formatPrice(item.unit_price * item.quantity) }}
                   </span>
                 </div>
-                <div v-if="(order.items || []).length > 3" 
-                     class="text-xs font-semibold uppercase tracking-wider pt-2 px-3 flex items-center gap-2"
-                     :class="getMoreItemsClass()">
-                  <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
-                  +{{ (order.items || []).length - 3 }} autres articles
+                <div
+                  v-if="order.items.length > 2"
+                  class="text-xs text-gray-500 font-medium pl-8"
+                >
+                  +{{ order.items.length - 2 }} autres articles
                 </div>
               </div>
 
-              <!-- Footer info -->
-              <div class="flex flex-wrap items-center gap-4 sm:gap-8 pt-4 sm:pt-6 border-t border-gray-100">
-                <div>
-                  <span class="text-xs text-gray-500 uppercase tracking-wider block mb-1">Total</span>
-                  <span class="text-xl sm:text-2xl font-bold text-gray-900">{{ formatPrice(order.total_amount) }}</span>
-                </div>
-                <div class="hidden sm:block h-8 w-px bg-gray-200" />
-                <div>
-                  <span class="text-xs text-gray-500 uppercase tracking-wider block mb-1">Créée le</span>
-                  <span class="text-sm text-gray-900">{{ formatDate(order.created_at) }}</span>
+              <!-- Footer -->
+              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <span class="text-lg font-bold text-gray-900">
+                  {{ formatPrice(order.total_amount) }}
+                </span>
+                
+                <!-- Actions -->
+                <div class="flex items-center gap-2">
+                  <button
+                    v-if="canAcceptOrder(order.status)"
+                    @click.stop="updateOrderStatus(order.id, 'confirmed')"
+                    class="w-9 h-9 rounded-full hover:bg-green-50 flex items-center justify-center transition-colors group"
+                    title="Accepter"
+                  >
+                    <svg class="w-5 h-5 text-gray-600 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
+                  
+                  <button
+                    v-if="canPrepareOrder(order.status)"
+                    @click.stop="updateOrderStatus(order.id, 'processing')"
+                    class="w-9 h-9 rounded-full hover:bg-orange-50 flex items-center justify-center transition-colors group"
+                    title="Préparer"
+                  >
+                    <svg class="w-5 h-5 text-gray-600 group-hover:text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </button>
+                  
+                  <button
+                    v-if="canCompleteOrder(order.status)"
+                    @click.stop="updateOrderStatus(order.id, 'completed')"
+                    class="w-9 h-9 rounded-full hover:bg-blue-50 flex items-center justify-center transition-colors group"
+                    title="Terminer"
+                  >
+                    <svg class="w-5 h-5 text-gray-600 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
+                  
+                  <button
+                    @click.stop="printOrder(order)"
+                    class="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors group"
+                    title="Imprimer"
+                  >
+                    <svg class="w-5 h-5 text-gray-600 group-hover:text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                  </button>
                 </div>
               </div>
-            </div>
-
-            <!-- Actions - Twitter 2024 Style -->
-            <div class="flex sm:flex-col items-center gap-2 sm:gap-3 sm:ml-8 justify-end sm:justify-start">
-              <button
-                v-if="canAcceptOrder(order.status)"
-                @click="updateOrderStatus(order.id, 'confirmed')"
-                class="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-green-50 active:scale-95"
-                title="Accepter"
-              >
-                <div class="absolute inset-0 rounded-full bg-green-500/10 scale-0 group-hover:scale-100 transition-transform duration-200"></div>
-                <CheckCircle class="w-5 h-5 sm:w-5.5 sm:h-5.5 text-gray-600 group-hover:text-green-600 transition-colors relative z-10" />
-              </button>
-              <button
-                v-if="canPrepareOrder(order.status)"
-                @click="updateOrderStatus(order.id, 'processing')"
-                class="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-orange-50 active:scale-95"
-                title="Préparer"
-              >
-                <div class="absolute inset-0 rounded-full bg-orange-500/10 scale-0 group-hover:scale-100 transition-transform duration-200"></div>
-                <Coffee class="w-5 h-5 sm:w-5.5 sm:h-5.5 text-gray-600 group-hover:text-orange-600 transition-colors relative z-10" />
-              </button>
-              <button
-                v-if="canCompleteOrder(order.status)"
-                @click="updateOrderStatus(order.id, 'completed')"
-                class="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-blue-50 active:scale-95"
-                title="Terminer"
-              >
-                <div class="absolute inset-0 rounded-full bg-blue-500/10 scale-0 group-hover:scale-100 transition-transform duration-200"></div>
-                <CheckCircle class="w-5 h-5 sm:w-5.5 sm:h-5.5 text-gray-600 group-hover:text-blue-600 transition-colors relative z-10" />
-              </button>
-              <button
-                @click="printOrder(order)"
-                class="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-gray-100 active:scale-95"
-                title="Imprimer"
-              >
-                <div class="absolute inset-0 rounded-full bg-gray-500/10 scale-0 group-hover:scale-100 transition-transform duration-200"></div>
-                <Printer class="w-5 h-5 sm:w-5.5 sm:h-5.5 text-gray-600 group-hover:text-gray-900 transition-colors relative z-10" />
-              </button>
             </div>
           </div>
+          
         </div>
-      </div>
 
+        </div>
       <!-- Empty State -->
       <div v-if="filteredOrders.length === 0 && !loading" class="text-center py-12 sm:py-16">
         <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gray-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4">
@@ -415,7 +431,20 @@ const getItemTextClass = (index: number) => {
 const getMoreItemsClass = () => {
   return 'text-gray-500'
 }
-
+const getStatusClass = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800'
+    case 'confirmed':
+      return 'bg-blue-100 text-blue-800'
+    case 'processing':
+      return 'bg-orange-100 text-orange-800'
+    case 'completed':
+      return 'bg-green-100 text-green-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
 // Computed
 const filteredOrders = computed(() => {
   let filtered = orders.value

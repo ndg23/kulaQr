@@ -349,9 +349,9 @@ const cancelOrder = async () => {
   }
 }
 
-// Vérifier si la commande peut être annulée
+// Vérifier si la commande peut être annulée (seulement si en attente, pas après confirmation)
 const canCancelOrder = (status: string) => {
-  return status === 'pending' || status === 'processing'
+  return status === 'pending'
 }
 
 // Formater la date et l'heure
