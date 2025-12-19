@@ -40,7 +40,7 @@
         <!-- Title & Description -->
         <div class="space-y-2">
           <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
-            Restaurant introuvable
+            Établissement introuvable
           </h1>
           <p class="text-base text-gray-600 leading-relaxed">
             Cet établissement n'existe pas ou a été désactivé.
@@ -81,7 +81,7 @@
               </svg>
             </div>
             <div>
-              <p class="text-lg font-bold text-gray-900 tabular-nums">Table {{ tableNumber }}</p>
+              <p class="text-lg font-bold text-gray-900 tabular-nums">N° {{ tableNumber }}</p>
             </div>
           </div>
 

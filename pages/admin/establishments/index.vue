@@ -1,71 +1,85 @@
 <template>
-  <div class="p-6 lg:p-8 max-w-7xl mx-auto">
+  <div class="py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="mb-12">
-      <h1 class="text-4xl font-bold text-gray-900 mb-2">Etablissements</h1>
-      <p class="text-lg text-gray-600">Gérez les établissements</p>
+    <div class="mb-6 sm:mb-8">
+      <h1 class="text-2xl sm:text-3xl font-semibold text-gray-900 mb-2">Établissements</h1>
+      <p class="text-sm sm:text-base text-gray-600">Gérez les établissements et leurs propriétaires</p>
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
       <div v-for="stat in statsDisplay" :key="stat.name" 
-        class="bg-white p-8 rounded-[2rem] border border-gray-100 transition-all -hover:scale-[1.02] -hover:shadow-lg"
+        class="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors"
       >
-        <div class="flex items-center space-x-6">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center"
-            :class="stat.iconBg"
-          >
-            <component :is="stat.icon" class="w-8 h-8" :class="stat.iconColor" />
-          </div>
+        <div class="flex items-center justify-between">
           <div>
-            <p class="text-base text-gray-500 mb-1">{{ stat.name }}</p>
-            <h3 class="text-3xl font-bold text-gray-900">{{ stat.value }}</h3>
+            <p class="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">{{ stat.name }}</p>
+            <h3 class="text-3xl sm:text-4xl font-black text-gray-900">{{ stat.value }}</h3>
+          </div>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gray-50 flex items-center justify-center">
+            <component :is="stat.icon" class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
           </div>
         </div>
       </div>
     </div>
 
     <!-- Establishments List with DataTable -->
-    <div class="bg-white">
-      <DataTable
-        :items="restaurants"
-        :columns="tableColumns"
-        :loading="loading"
-        :current-page="currentPage"
-        :per-page="perPage"
-        :total-items="filteredRestaurants.length"
-        :show-pagination="true"
-        :header-buttons="[
-          { label: 'Ajouter', icon: 'Plus', variant: 'primary', action: 'add' }
-        ]"
-        empty-title="Aucun établissement trouvé"
-        empty-description="Commencez par créer votre premier établissement"
-        empty-icon="fas fa-store"
-        @page-change="currentPage = $event"
-        @update:per-page="perPage = $event"
-        @button-click="handleAction"
-      >
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <!-- Mobile Header - visible seulement sur mobile -->
+      <div class="md:hidden px-4 py-3 bg-gray-50 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold text-gray-900">Établissements</h3>
+          <button
+            @click="handleAction('add')"
+            class="px-3 py-1.5 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Ajouter
+          </button>
+        </div>
+      </div>
+      
+      <!-- Responsive table wrapper -->
+      <div class="overflow-x-auto">
+        <DataTable
+          :items="restaurants"
+          :columns="tableColumns"
+          :loading="loading"
+          :current-page="currentPage"
+          :per-page="perPage"
+          :total-items="filteredRestaurants.length"
+          :show-pagination="true"
+          :header-buttons="[
+            { label: 'Ajouter', icon: 'Plus', variant: 'primary', action: 'add' }
+          ]"
+          empty-title="Aucun établissement trouvé"
+          empty-description="Commencez par créer votre premier établissement"
+          empty-icon="fas fa-store"
+          @page-change="currentPage = $event"
+          @update:per-page="perPage = $event"
+          @button-click="handleAction"
+          class="min-w-[800px]"
+        >
       <!-- Restaurant Name Column -->
       <template #cell-name="{ item }">
         <NuxtLink 
           :to="`/admin/establishments/${item.id}`"
-          class="flex items-center gap-3 max-w-[280px] group"
+          class="flex items-center gap-2 sm:gap-3 max-w-[240px] sm:max-w-[280px] group"
         >
-          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-            <Store class="w-5 h-5 text-white" />
+          <div class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+            <Store class="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
           <div class="min-w-0 flex-1">
-            <div class="font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">{{ item.name }}</div>
-            <div class="text-sm text-gray-500 truncate">{{ item.address || 'Adresse non définie' }}</div>
+            <div class="font-semibold text-gray-900 text-sm sm:text-base truncate group-hover:text-orange-600 transition-colors">{{ item.name }}</div>
+            <div class="text-xs sm:text-sm text-gray-500 truncate hidden sm:block">{{ item.address || 'Adresse non définie' }}</div>
           </div>
         </NuxtLink>
       </template>
 
       <!-- Type Column -->
       <template #cell-type_name="{ item }">
-        <div class="max-w-[120px]">
+        <div class="max-w-[100px] sm:max-w-[120px]">
           <span
-            class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+            class="px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
             :class="getTypeBadgeClass(item.type_name)"
           >
             {{ formatType(item.type_name) }}
@@ -75,11 +89,11 @@
 
       <!-- Owner Column -->
       <template #cell-owner_name="{ item }">
-        <div class="flex items-center gap-2 max-w-[180px]">
-          <div class="h-8 w-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0">
+        <div class="flex items-center gap-2 max-w-[150px] sm:max-w-[180px]">
+          <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0">
             <span class="text-xs font-semibold text-gray-700">{{ getInitials(item.owner_name) }}</span>
           </div>
-          <span class="text-sm font-medium text-gray-700 truncate">{{ item.owner_name }}</span>
+          <span class="text-xs sm:text-sm font-medium text-gray-700 truncate">{{ item.owner_name }}</span>
         </div>
       </template>
 
@@ -97,16 +111,17 @@
 
       <!-- Status Column -->
       <template #cell-is_active="{ item }">
-        <div class="max-w-[100px]">
+        <div class="max-w-[80px] sm:max-w-[100px]">
           <span
-            class="px-3 py-1 rounded-full text-xs font-medium inline-flex items-center whitespace-nowrap"
+            class="px-2 sm:px-3 py-1 rounded-full text-xs font-medium inline-flex items-center whitespace-nowrap"
             :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
           >
             <div 
-              class="w-1.5 h-1.5 rounded-full mr-1.5 flex-shrink-0"
+              class="w-1.5 h-1.5 rounded-full mr-1 sm:mr-1.5 flex-shrink-0"
               :class="item.is_active ? 'bg-green-500' : 'bg-red-500'"
             />
-            {{ item.is_active ? 'Actif' : 'Inactif' }}
+            <span class="hidden sm:inline">{{ item.is_active ? 'Actif' : 'Inactif' }}</span>
+            <span class="sm:hidden">{{ item.is_active ? 'ON' : 'OFF' }}</span>
           </span>
         </div>
       </template>
@@ -138,48 +153,19 @@
 
       <!-- Actions Column -->
       <template #cell-actions="{ item }">
-        <div class="flex items-center gap-1.5">
-          <NuxtLink
-            :to="`/admin/establishments/${item.id}`"
-            class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-            title="Voir détails"
-          >
-            <Shield class="w-4 h-4" />
-          </NuxtLink>
-          <button
-            @click="editRestaurant(item)"
-            class="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all"
-            title="Modifier"
-          >
-            <Edit class="w-4 h-4" />
-          </button>
-          <button
-            @click="manageQrCodes(item)"
-            class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
-            title="QR Code"
-          >
-            <UtensilsCrossed class="w-4 h-4" />
-          </button>
-          <button
-            @click="toggleRestaurantStatus(item)"
-            class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-all"
-            :title="item.is_active ? 'Désactiver' : 'Activer'"
-          >
-            <CheckCircle v-if="!item.is_active" class="w-4 h-4" />
-            <X v-else class="w-4 h-4" />
-          </button>
-          <button
-            @click="deleteRestaurant(item.id)"
-            class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-            title="Supprimer"
-          >
-            <Trash2 class="w-4 h-4" />
-          </button>
+        <div class="max-w-[100px] sm:max-w-[120px]">
+          <ActionDropdown
+            :actions="getEstablishmentActions(item)"
+            @action="handleEstablishmentAction"
+            trigger-text="Actions"
+            class="text-sm"
+          />
         </div>
       </template>
-    </DataTable>
+        </DataTable>
+      </div>
     </div>
-
+  </div>
     <!-- Restaurant Modal -->
     <RestaurantFormModal
       v-if="showRestaurantModal"
@@ -187,6 +173,23 @@
       :restaurant="selectedRestaurant"
       @close="closeRestaurantModal"
       @submit="handleRestaurantSubmitted"
+    />
+
+    <!-- Staff Management Modal -->
+    <StaffManagementModal
+      :open="showStaffModal"
+      :establishment="selectedRestaurant"
+      @close="showStaffModal = false"
+      @success="handleModalSuccess"
+    />
+
+    <!-- Establishment Assignment Modal -->
+    <EstablishmentAssignmentModal
+      :open="assignmentModal.modalOpen.value"
+      :mode="assignmentModal.modalOptions.value.mode"
+      :establishment="assignmentModal.modalOptions.value.establishment"
+      @close="assignmentModal.closeModal"
+      @success="handleEstablishmentAssignmentSuccess"
     />
 
     <!-- QR Code Modal -->
@@ -308,7 +311,7 @@
         </div>
       </Dialog>
     </TransitionRoot>
-  </div>
+
 </template>
 
 <script setup lang="ts">
@@ -319,7 +322,7 @@ import {
   Store, User, Users, Search, Plus, Edit, Trash2, 
   RefreshCw, X, CheckCircle, AlertTriangle, Loader2, 
   UtensilsCrossed, Coffee, Pizza, Utensils, Building, Shield, ClipboardCopy, Download, Printer,
-  Hotel, Wine, CakeSlice
+  Hotel, Wine, CakeSlice, ArrowRightLeft, QrCode, Ban
 } from 'lucide-vue-next'
 import { 
   TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle, Switch 
@@ -327,6 +330,10 @@ import {
 import QRCodeVue3 from 'qrcode-vue3'
 import html2canvas from 'html2canvas'
 import RestaurantFormModal from '~/components/admin/RestaurantFormModal.vue'
+import ActionDropdown from '~/components/admin/ActionDropdown.vue'
+import StaffManagementModal from '~/components/admin/StaffManagementModal.vue'
+import EstablishmentAssignmentModal from '~/components/admin/EstablishmentAssignmentModal.vue'
+import { useEstablishmentAssignment } from '~/composables/useEstablishmentAssignment'
 
 // Supabase client
 const {client: supabase } = useSupabaseWrapper()
@@ -355,6 +362,8 @@ const filters = ref({
 
 // Modal
 const showRestaurantModal = ref(false)
+const showStaffModal = ref(false)
+const assignmentModal = useEstablishmentAssignment()
 const selectedRestaurant = ref(null)
 
 // État pour le modal QR code
@@ -367,54 +376,56 @@ const tableColumns = [
   {
     key: 'name',
     label: 'Restaurant',
-    sortable: true
+    sortable: true,
+    width: '300px',
+    minWidth: '280px',
+    priority: 1 // Toujours visible
   },
   {
     key: 'type_name',
     label: 'Type',
-    sortable: true
+    sortable: true,
+    width: '120px',
+    minWidth: '110px',
+    priority: 2, // Visible à partir de SM
+    responsive: 'sm'
   },
   {
     key: 'owner_name',
     label: 'Propriétaire',
-    sortable: true
-  },
-  {
-    key: 'subscription_type',
-    label: 'Abonnement',
-    sortable: true
+    sortable: true,
+    width: '180px',
+    minWidth: '160px',
+    priority: 3, // Visible à partir de MD
+    responsive: 'md'
   },
   {
     key: 'is_active',
     label: 'Statut',
-    sortable: true
+    sortable: true,
+    width: '100px',
+    minWidth: '90px',
+    priority: 2, // Visible à partir de SM
+    responsive: 'sm'
   },
   {
     key: 'created_at',
     label: 'Créé le',
     sortable: true,
-    type: 'date' as const
-  },
-  {
-    key: 'updated_at',
-    label: 'Mis à jour',
-    sortable: true,
-    type: 'date' as const
-  },
-  {
-    key: 'max_categories',
-    label: 'Catégories',
-    sortable: true
-  },
-  {
-    key: 'max_products',
-    label: 'Produits',
-    sortable: true
+    type: 'date' as const,
+    width: '120px',
+    minWidth: '110px',
+    priority: 4, // Visible à partir de LG
+    responsive: 'lg'
   },
   {
     key: 'actions',
     label: 'Actions',
-    sortable: false
+    sortable: false,
+    width: '120px',
+    minWidth: '110px',
+    priority: 1, // Toujours visible
+    align: 'center'
   }
 ]
 
@@ -765,6 +776,101 @@ const closeRestaurantModal = () => {
 }
 
 const handleRestaurantSubmitted = () => {
+  loadRestaurants()
+}
+
+// Get establishment actions for dropdown
+const getEstablishmentActions = (establishment: any) => {
+  const actions = [
+    {
+      id: 'view',
+      label: 'Voir Détails',
+      icon: Shield,
+      variant: 'primary' as const,
+      callback: () => navigateTo(`/admin/establishments/${establishment.id}`)
+    },
+    {
+      id: 'edit',
+      label: 'Modifier',
+      icon: Edit,
+      variant: 'primary' as const,
+      callback: () => editRestaurant(establishment)
+    },
+    {
+      id: 'staff',
+      label: 'Gérer Personnel',
+      icon: Users,
+      variant: 'primary' as const,
+      callback: () => manageStaff(establishment)
+    },
+    {
+      id: 'qr',
+      label: 'QR Code',
+      icon: QrCode,
+      variant: 'secondary' as const,
+      callback: () => manageQrCodes(establishment)
+    },
+    {
+      id: 'transfer',
+      label: 'Transférer Propriété',
+      icon: ArrowRightLeft,
+      variant: 'secondary' as const,
+      callback: () => transferEstablishment(establishment)
+    }
+  ]
+
+  // Add status-specific actions
+  if (establishment.is_active) {
+    actions.push({
+      id: 'deactivate',
+      label: 'Désactiver',
+      icon: Ban,
+      variant: 'danger' as const,
+      callback: () => toggleRestaurantStatus(establishment)
+    })
+  } else {
+    actions.push({
+      id: 'activate',
+      label: 'Activer',
+      icon: CheckCircle,
+      variant: 'primary' as const,
+      callback: () => toggleRestaurantStatus(establishment)
+    })
+  }
+
+  actions.push({
+    id: 'delete',
+    label: 'Supprimer',
+    icon: Trash2,
+    variant: 'danger' as const,
+    callback: () => deleteRestaurant(establishment.id)
+  })
+
+  return actions
+}
+
+// Action handlers
+const manageStaff = (establishment: any) => {
+  selectedRestaurant.value = establishment
+  showStaffModal.value = true
+}
+
+const transferEstablishment = (establishment: any) => {
+  assignmentModal.transferEstablishment(establishment)
+}
+
+// Handle action from dropdown
+const handleEstablishmentAction = (action: any) => {
+  // Actions are handled by their callbacks
+}
+
+// Handle modal success
+const handleModalSuccess = () => {
+  loadRestaurants()
+}
+
+const handleEstablishmentAssignmentSuccess = () => {
+  assignmentModal.onSuccess()
   loadRestaurants()
 }
 

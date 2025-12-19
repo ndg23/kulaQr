@@ -1,31 +1,25 @@
 <template>
-    <div class="p-6 lg:p-8">
-      <!-- Header -->
-      <div class="mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">Utilisateurs</h1>
-        <p class="text-lg text-gray-600">Gérez vos utilisateurs</p>
-      </div>
-  
-      <!-- Stats Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-        <div v-for="stat in statsDisplay" :key="stat.name" 
-          class="bg-white p-8 rounded-[2rem] border border-gray-100 transition-all -hover:scale-[1.02] -hover:shadow-lg"
-        >
-          <div class="flex items-center space-x-6">
-            <div class="w-16 h-16 rounded-2xl flex items-center justify-center"
-              :class="stat.iconBg"
-            >
-              <component :is="stat.icon" class="w-8 h-8" :class="stat.iconColor" />
-            </div>
-            <div>
-              <p class="text-base text-gray-500 mb-1">{{ stat.name }}</p>
-              <h3 class="text-3xl font-bold text-gray-900">{{ stat.value }}</h3>
-            </div>
+  <div class="py-6">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-semibold text-gray-900 mb-2">Utilisateurs</h1>
+      <p class="text-gray-600">Gérez vos utilisateurs et leurs permissions</p>
+    </div>    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div v-for="stat in statsDisplay" :key="stat.name" 
+        class="bg-white p-6 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-500 mb-2">{{ stat.name }}</p>
+            <h3 class="text-4xl font-black text-gray-900">{{ stat.value }}</h3>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
+            <component :is="stat.icon" class="w-6 h-6 text-gray-700" />
           </div>
         </div>
       </div>
-  
-      <!-- Users List with DataTable -->
+    </div>      <!-- Users List with DataTable -->
       <DataTable
         :items="users"
         :columns="tableColumns"
@@ -51,100 +45,61 @@
       >
         <!-- User Column with Avatar -->
         <template #cell-full_name="{ item }">
-          <div class="flex items-center space-x-3 max-w-[250px]">
+          <div class="flex items-center space-x-3 min-w-[200px]">
             <div 
-              class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0"
+              class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0"
               :class="`bg-${getUserColor(item.id)}-500`"
             >
               {{ getUserInitials(item.full_name) }}
             </div>
             <div class="min-w-0 flex-1">
               <div class="font-medium text-gray-900 truncate">{{ item.full_name }}</div>
-              <div class="text-sm text-gray-500 truncate">{{ item.email }}</div>
+              <div class="text-xs text-gray-500 truncate">{{ item.email }}</div>
             </div>
           </div>
         </template>
 
         <!-- Role Column -->
         <template #cell-role="{ item }">
-          <div class="max-w-[150px]">
-            <span
-              class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
-              :class="getRoleBadgeClass(item.role)"
-            >
-              {{ formatRole(item.role) }}
-            </span>
-          </div>
+          <span
+            class="px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap"
+            :class="getRoleBadgeClass(item.role)"
+          >
+            {{ formatRole(item.role) }}
+          </span>
         </template>
 
         <!-- Subscription Column -->
         <template #cell-subscription_tier="{ item }">
-          <div class="max-w-[120px]">
-            <span
-              class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
-              :class="getSubscriptionBadgeClass(item.subscription_tier)"
-            >
-              {{ formatSubscriptionTier(item.subscription_tier) }}
-            </span>
-          </div>
+          <span
+            class="px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap"
+            :class="getSubscriptionBadgeClass(item.subscription_tier)"
+          >
+            {{ formatSubscriptionTier(item.subscription_tier) }}
+          </span>
         </template>
 
         <!-- Status Column -->
         <template #cell-is_active="{ item }">
-          <div class="max-w-[100px]">
-            <span
-              class="px-3 py-1 rounded-full text-xs font-medium inline-flex items-center whitespace-nowrap"
-              :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-            >
-              <div 
-                class="w-1.5 h-1.5 rounded-full mr-1.5 flex-shrink-0"
-                :class="item.is_active ? 'bg-green-500' : 'bg-red-500'"
-              />
-              {{ item.is_active ? 'Actif' : 'Inactif' }}
-            </span>
-          </div>
+          <span
+            class="px-2 py-1 rounded-md text-xs font-medium inline-flex items-center whitespace-nowrap"
+            :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+          >
+            <div 
+              class="w-1.5 h-1.5 rounded-full mr-1.5 flex-shrink-0"
+              :class="item.is_active ? 'bg-green-500' : 'bg-red-500'"
+            />
+            {{ item.is_active ? 'Actif' : 'Inactif' }}
+          </span>
         </template>
 
         <!-- Actions Column -->
         <template #cell-actions="{ item }">
-          <div class="flex items-center gap-2 max-w-[200px]">
-            <button
-              @click="changeUserRole(item)"
-              class="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-              title="Changer le rôle"
-            >
-              <Shield class="w-4 h-4" />
-            </button>
-            <button
-              @click="editUser(item)"
-              class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-              title="Modifier"
-            >
-              <Edit class="w-4 h-4" />
-            </button>
-            <button
-              @click="viewUser(item)"
-              class="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-              title="Voir le profil"
-            >
-              <Eye class="w-4 h-4" />
-            </button>
-            <button
-              @click="toggleUserStatus(item)"
-              class="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-              :title="item.is_active ? 'Désactiver' : 'Activer'"
-            >
-              <Ban v-if="item.is_active" class="w-4 h-4" />
-              <CheckCircle v-else class="w-4 h-4" />
-            </button>
-            <button
-              @click="deleteUser(item.id)"
-              class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              title="Supprimer"
-            >
-              <Trash2 class="w-4 h-4" />
-            </button>
-          </div>
+          <ActionDropdown
+            :actions="getUserActions(item)"
+            @action="handleUserAction"
+            trigger-text="Actions"
+          />
         </template>
       </DataTable>
   
@@ -165,11 +120,21 @@
       @submit="handleRoleChanged"
     />
 
-    <!-- Manager with Establishment Modal -->
-    <ManagerWithEstablishmentModal
-      :open="showManagerEstablishmentModal"
-      @close="showManagerEstablishmentModal = false"
-      @submit="handleManagerEstablishmentSubmitted"
+    <!-- Establishment Assignment Modal -->
+    <EstablishmentAssignmentModal
+      :open="assignmentModal.modalOpen.value"
+      :mode="assignmentModal.modalOptions.value.mode"
+      :establishment="assignmentModal.modalOptions.value.establishment"
+      @close="assignmentModal.closeModal"
+      @success="handleEstablishmentAssignmentSuccess"
+    />
+
+    <!-- Subscription Management Modal -->
+    <SubscriptionManagementModal
+      :open="showSubscriptionModal"
+      :user="selectedUser"
+      @close="showSubscriptionModal = false"
+      @success="handleModalSuccess"
     />
   </div>
 </template>
@@ -183,12 +148,15 @@ import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { 
   Plus, Edit, Trash2, RefreshCw, X, CheckCircle, AlertTriangle, 
   Info, Users, ChevronLeft, ChevronRight, Eye, EyeOff, User, Download,
-  UserPlus, UserCheck, UserX, Shield, Mail, Ban, Loader2, Search
+  UserPlus, UserCheck, UserX, Shield, Mail, Ban, Loader2, Search, 
+  CreditCard, UserCog
 } from 'lucide-vue-next';
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild, Switch } from '@headlessui/vue'
 import UserFormModal from '~/components/admin/UserFormModal.vue'
 import RoleChangeModal from '~/components/admin/RoleChangeModal.vue'
-import ManagerWithEstablishmentModal from '~/components/admin/ManagerWithEstablishmentModal.vue'
+import EstablishmentAssignmentModal from '~/components/admin/EstablishmentAssignmentModal.vue'
+import ActionDropdown from '~/components/admin/ActionDropdown.vue'
+import SubscriptionManagementModal from '~/components/admin/SubscriptionManagementModal.vue'
 // import { UDropdown } from '@/components/ui/dropdown'
 
 const {showToast} = useCustomToast()
@@ -196,7 +164,10 @@ const { client: supabase } = useSupabaseWrapper()
 const loading = ref(false)
 const showUserModal = ref(false)
 const showRoleChangeModal = ref(false)
-const showManagerEstablishmentModal = ref(false)
+// Import establishment assignment composable
+import { useEstablishmentAssignment } from '~/composables/useEstablishmentAssignment'
+const assignmentModal = useEstablishmentAssignment()
+const showSubscriptionModal = ref(false)
 const selectedUser = ref(null)
 const currentPage = ref(1)
 const perPage = ref(10)
@@ -291,39 +262,46 @@ const tableColumns = [
   {
     key: 'full_name',
     label: 'Utilisateur',
-    sortable: true
+    sortable: true,
+    width: '25%'
   },
   {
     key: 'role',
     label: 'Rôle',
-    sortable: true
+    sortable: true,
+    width: '12%'
   },
   {
     key: 'subscription_tier',
     label: 'Abonnement',
-    sortable: true
+    sortable: true,
+    width: '12%'
   },
   {
     key: 'is_active',
     label: 'Statut',
-    sortable: true
+    sortable: true,
+    width: '10%'
   },
   {
     key: 'created_at',
     label: 'Créé le',
     sortable: true,
-    type: 'date' as const
+    type: 'date' as const,
+    width: '12%'
   },
   {
     key: 'last_login',
     label: 'Dernière connexion',
     sortable: true,
-    type: 'datetime' as const
+    type: 'datetime' as const,
+    width: '17%'
   },
   {
     key: 'actions',
     label: 'Actions',
-    sortable: false
+    sortable: false,
+    width: '12%'
   }
 ]
 
@@ -361,26 +339,17 @@ const statsDisplay = computed(() => [
   { 
     name: 'Total utilisateurs', 
     value: stats.value.total.toString(),
-    icon: Users,
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-500',
-    borderColor: 'border-blue-500'
+    icon: Users
   },
   { 
     name: 'Utilisateurs actifs', 
     value: stats.value.active.toString(),
-    icon: UserCheck,
-    iconBg: 'bg-green-50',
-    iconColor: 'text-green-500',
-    borderColor: 'border-green-500'
+    icon: UserCheck
   },
   { 
     name: 'Administrateurs', 
     value: stats.value.admin.toString(),
-    icon: Shield,
-    iconBg: 'bg-purple-50',
-    iconColor: 'text-purple-500',
-    borderColor: 'border-purple-500'
+    icon: Shield
   }
 ])
 
@@ -584,7 +553,7 @@ const handleButtonClick = (action: string) => {
   switch (action) {
     case 'add-manager-establishment':
       console.log('Opening Manager + Establishment modal')
-      showManagerEstablishmentModal.value = true
+      assignmentModal.createOwnerWithEstablishment()
       break
     case 'import':
       showToast.info('Fonctionnalité d\'importation à venir')
@@ -599,9 +568,91 @@ const handleButtonClick = (action: string) => {
   }
 }
 
-// Handle manager with establishment submitted
-const handleManagerEstablishmentSubmitted = async () => {
-  showManagerEstablishmentModal.value = false
+// Get user actions for dropdown
+const getUserActions = (user: any) => {
+  const actions = [
+    {
+      id: 'edit',
+      label: 'Modifier',
+      icon: Edit,
+      variant: 'primary' as const,
+      callback: () => editUser(user)
+    },
+    {
+      id: 'subscription',
+      label: 'Gérer Abonnement',
+      icon: CreditCard,
+      variant: 'primary' as const,
+      callback: () => manageSubscription(user)
+    },
+    {
+      id: 'role',
+      label: 'Changer Rôle',
+      icon: UserCog,
+      variant: 'secondary' as const,
+      callback: () => changeUserRole(user)
+    },
+    {
+      id: 'view',
+      label: 'Voir Profil',
+      icon: Eye,
+      variant: 'secondary' as const,
+      callback: () => viewUser(user)
+    }
+  ]
+
+  // Add status-specific actions
+  if (user.is_active) {
+    actions.push({
+      id: 'suspend',
+      label: 'Suspendre',
+      icon: Ban,
+      variant: 'danger' as const,
+      callback: () => toggleUserStatus(user)
+    })
+  } else {
+    actions.push({
+      id: 'activate',
+      label: 'Activer',
+      icon: CheckCircle,
+      variant: 'primary' as const,
+      callback: () => toggleUserStatus(user)
+    })
+  }
+
+  // Add delete for non-admin users
+  if (user.role !== 'admin') {
+    actions.push({
+      id: 'delete',
+      label: 'Supprimer',
+      icon: Trash2,
+      variant: 'danger' as const,
+      callback: () => deleteUser(user.id)
+    })
+  }
+
+  return actions
+}
+
+// Handle action from dropdown
+const handleUserAction = (action: any) => {
+  // Actions are handled by their callbacks
+}
+
+// Manage subscription
+const manageSubscription = (user: any) => {
+  selectedUser.value = user
+  showSubscriptionModal.value = true
+}
+
+// Handle modal success
+const handleModalSuccess = () => {
+  loadUsers()
+}
+
+// Handle establishment assignment success
+const handleEstablishmentAssignmentSuccess = async () => {
+  assignmentModal.onSuccess()
   await loadUsers()
 }
 

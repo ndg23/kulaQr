@@ -143,7 +143,7 @@ onMounted(async () => {
     
     // Petit délai pour que l'utilisateur voie le message
     await new Promise(resolve => setTimeout(resolve, 900))
-    if (establishments) {
+    if (userData.role === 'owner') {
       await router.push(`/manager/${establishments.id}`)
     } else {
       await router.push('/admin')

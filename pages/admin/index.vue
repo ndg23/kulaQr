@@ -1,30 +1,28 @@
 <template>
-    <div class="p-6 lg:p-8 ">
+    <div class="py-6">
       <!-- Header -->
-      <div class="mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">Tableau de bord</h1>
-        <p class="text-lg text-gray-600">Bienvenue sur votre espace d'administration</p>
+      <div class="mb-8">
+        <h1 class="text-3xl font-semibold text-gray-900 mb-2">Tableau de bord</h1>
+        <p class="text-gray-600">Bienvenue sur votre espace d'administration</p>
       </div>
   
       <!-- Stats Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         <component
           :is="stat.link ? 'NuxtLink' : 'div'"
           v-for="stat in statsDisplay"
           :key="stat.name"
           :to="stat.link"
-          class="bg-white p-8 rounded-[2rem] border border-gray-100 transition-all -hover:scale-[1.02] -hover:shadow-lg"
+          class="bg-white p-6 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors"
           :class="{ 'cursor-pointer': stat.link }"
         >
-          <div class="flex items-center space-x-6">
-            <div class="w-16 h-16 rounded-2xl flex items-center justify-center"
-              :class="stat.iconBg"
-            >
-              <component :is="stat.icon" class="w-8 h-8" :class="stat.iconColor" />
-            </div>
+          <div class="flex items-center justify-between">
             <div>
-              <p class="text-base text-gray-500 mb-1">{{ stat.name }}</p>
-              <h3 class="text-3xl font-bold text-gray-900">{{ stat.value }}</h3>
+              <p class="text-sm font-medium text-gray-500 mb-2">{{ stat.name }}</p>
+              <h3 class="text-4xl font-black text-gray-900">{{ stat.value }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
+              <component :is="stat.icon" class="w-6 h-6 text-gray-700" />
             </div>
           </div>
         </component>

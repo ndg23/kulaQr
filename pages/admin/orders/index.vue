@@ -1,10 +1,10 @@
 <template>
-  <div class="p-6 lg:p-8 max-w-7xl mx-auto">
+  <div class="py-6">
     <!-- Header -->
     <div class="mb-8">
       <div class="flex items-center justify-between mb-2">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Gestion des commandes</h1>
+          <h1 class="text-3xl font-semibold text-gray-900">Commandes</h1>
           <p class="text-gray-600 mt-1">Gérer et suivre toutes les commandes de la plateforme</p>
         </div>
         <button
@@ -18,23 +18,29 @@
     </div>
 
     <!-- Filters and Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
       <button
         v-for="status in orderStatuses"
         :key="status.value"
         @click="activeStatus = status.value"
-        class="p-4 rounded-xl border-2 transition-all"
+        class="p-6 rounded-2xl border transition-colors"
         :class="[
           activeStatus === status.value
-            ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-200 hover:border-gray-300 bg-white'
+            ? 'border-black bg-black text-white'
+            : 'border-gray-100 bg-white hover:border-gray-200'
         ]"
       >
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-gray-600">{{ status.label }}</span>
-          <component :is="status.icon" class="w-5 h-5" :class="status.color" />
+        <div class="flex items-center justify-between mb-3">
+          <component :is="status.icon" class="w-6 h-6" :class="activeStatus === status.value ? 'text-white' : 'text-gray-700'" />
         </div>
-        <p class="text-2xl font-bold text-gray-900">{{ getStatusCount(status.value) }}</p>
+        <div>
+          <p class="text-sm font-medium mb-1" :class="activeStatus === status.value ? 'text-white/80' : 'text-gray-500'">
+            {{ status.label }}
+          </p>
+          <p class="text-3xl font-black" :class="activeStatus === status.value ? 'text-white' : 'text-gray-900'">
+            {{ getStatusCount(status.value) }}
+          </p>
+        </div>
       </button>
     </div>
 

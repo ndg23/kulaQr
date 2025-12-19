@@ -19,7 +19,7 @@
           <!-- Sélection par page -->
           <select
             v-model="localPerPage"
-            class="border border-gray-300 dark:border-gray-700 rounded-full px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-inter text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+            class="border border-gray-200 rounded-xl px-4 py-2 bg-white text-gray-700 font-inter text-sm hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400 transition-all cursor-pointer shadow-sm"
           >
             <option v-for="n in [10, 25, 50, 100]" :key="n" :value="n">
               {{ n }} par page
@@ -216,17 +216,17 @@
     <!-- Pagination -->
     <div
       v-if="showPagination && totalPages > 0"
-      class="flex items-center justify-between px-6 py-3 border-t border-gray-200 dark:border-gray-800"
+      class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-900/50"
     >
-      <div class="flex items-center text-sm text-gray-700 dark:text-gray-300">
-        Affichage de {{ paginationInfo.from }}-{{ paginationInfo.to }} sur {{ totalItems }} éléments
+      <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 font-medium">
+        Affichage de <span class="font-black text-gray-900 dark:text-white mx-1">{{ paginationInfo.from }}-{{ paginationInfo.to }}</span> sur <span class="font-black text-gray-900 dark:text-white mx-1">{{ totalItems }}</span> éléments
       </div>
       
       <div class="flex items-center space-x-2">
         <button
-          @click="changePage(currentPage - 1)"
-          :disabled="currentPage === 1"
-          class="px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-50"
+          @click="changePage(props.currentPage - 1)"
+          :disabled="props.currentPage === 1"
+          class="px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         >
           <i class="fas fa-chevron-left"></i>
         </button>
@@ -237,10 +237,10 @@
             :key="page"
             @click="changePage(page)"
             :class="[
-              'px-3 py-1 rounded-lg',
-              currentPage === page
-                ? 'bg-primary-500 text-white'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+              'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
+              props.currentPage === page
+                ? 'bg-black text-white font-black'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
             ]"
           >
             {{ page }}
@@ -248,9 +248,9 @@
         </div>
         
         <button
-          @click="changePage(currentPage + 1)"
-          :disabled="currentPage === totalPages"
-          class="px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-50"
+          @click="changePage(props.currentPage + 1)"
+          :disabled="props.currentPage === totalPages"
+          class="px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         >
           <i class="fas fa-chevron-right"></i>
         </button>

@@ -87,7 +87,7 @@
 
     <div class="hidden md:flex">
       <!-- Desktop Sidebar - Twitter Style -->
-      <aside class="w-72 border-r border-gray-200 flex flex-col h-screen fixed left-0 top-0">
+      <aside class="w-64 xl:w-72 border-r border-gray-200 flex flex-col h-screen fixed left-0 top-0">
         <!-- Logo -->
         <div class="px-4 pt-2 pb-1">
           <NuxtLink 
@@ -172,14 +172,17 @@
       </aside>
 
       <!-- Main Content -->
-      <main class="ml-72  min-h-screen max-w-7xl mx-auto">
-        <slot />
+      <main class="ml-64 xl:ml-72 min-h-screen w-full">
+        <div class="max-w-7Transfert d'Établissement
+
+xl mx-auto px-4 lg:px-6 xl:px-8">
+          <slot />
+        </div>
       </main>
     </div>
-        <!-- <div class="p-4 md:p-8 max-w-7xl mx-auto"> -->
 
     <!-- Mobile Main Content -->
-    <main class="md:hidden">
+    <main class="md:hidden ">
       <slot />
     </main>
   </div>
