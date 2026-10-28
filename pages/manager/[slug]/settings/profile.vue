@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-6 border-b border-gray-100">
-        <h1 class="text-xl font-semibold text-gray-900">Profil utilisateur</h1>
+    <div class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden">
+      <div class="px-6 py-5 border-b border-gray-100">
+        <h1 class="text-xl font-extrabold text-gray-900">Profil utilisateur</h1>
         <p class="mt-1 text-sm text-gray-500">
           Gérez vos informations personnelles et vos préférences
         </p>
@@ -24,7 +24,7 @@
             <button
               type="button"
               @click="triggerFileInput"
-              class="absolute bottom-0 right-0 bg-blue-500 text-white p-1.5 rounded-full shadow-sm hover:bg-blue-600 transition-colors"
+              class="absolute bottom-0 right-0 bg-gray-900 text-white p-2 rounded-full hover:bg-gray-800 transition-colors"
             >
               <Camera class="h-4 w-4" />
             </button>
@@ -93,14 +93,14 @@
         <div class="flex justify-end space-x-3 pt-6">
           <button
             type="button"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            class="h-12 px-6 bg-gray-100 rounded-full font-bold text-gray-900 hover:bg-gray-200 transition-colors"
             @click="resetForm"
           >
             Annuler
           </button>
           <button
             type="submit"
-            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+            class="h-12 px-6 bg-gray-900 text-white rounded-full font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
             :disabled="loading"
           >
             <span v-if="loading" class="flex items-center">

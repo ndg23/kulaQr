@@ -1,27 +1,20 @@
 <template>
     <div>
-      <!-- Header -->
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">Journaux d'activité</h1>
-          <p class="mt-1 text-sm text-gray-500">Suivez les activités de votre personnel</p>
-        </div>
-        
-        <!-- Filtres -->
-        <div class="flex space-x-4">
-          <select 
-            v-model="filters.staffId" 
-            class="rounded-md border-gray-300 shadow-sm focus:border-kula-500 focus:ring-kula-500"
+      <PageHeader title="Journaux d'activité" description="Suivez les activités de votre personnel">
+        <template #actions>
+          <select
+            v-model="filters.staffId"
+            class="h-12 px-5 rounded-full bg-gray-100 border-0 font-bold text-gray-900 focus:ring-2 focus:ring-gray-900"
           >
             <option value="">Tous les membres</option>
             <option v-for="member in staffMembers" :key="member.id" :value="member.id">
               {{ member.username }}
             </option>
           </select>
-          
-          <select 
-            v-model="filters.action" 
-            class="rounded-md border-gray-300 shadow-sm focus:border-kula-500 focus:ring-kula-500"
+
+          <select
+            v-model="filters.action"
+            class="h-12 px-5 rounded-full bg-gray-100 border-0 font-bold text-gray-900 focus:ring-2 focus:ring-gray-900"
           >
             <option value="">Toutes les actions</option>
             <option value="login">Connexion</option>
@@ -30,27 +23,27 @@
             <option value="order_updated">Commande mise à jour</option>
             <option value="order_completed">Commande terminée</option>
           </select>
-          
-          <button 
-            @click="loadLogs" 
-            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kula-500"
+
+          <button
+            class="inline-flex items-center gap-2 h-12 px-5 rounded-full bg-gray-900 text-white font-bold hover:bg-gray-800 transition-colors"
+            @click="loadLogs"
           >
-            <RefreshCw class="h-4 w-4 mr-1.5" :class="{ 'animate-spin': loading }" />
+            <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
             Actualiser
           </button>
-        </div>
-      </div>
-  
+        </template>
+      </PageHeader>
+
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-        <Loader2 class="w-10 h-10 text-kula-500 animate-spin mb-4" />
+        <Loader2 class="w-10 h-10 text-gray-900 animate-spin mb-4" />
         <p class="text-sm text-gray-500">Chargement des journaux d'activité...</p>
       </div>
   
       <!-- Empty State -->
-      <div v-else-if="logs.length === 0" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-kula-50 flex items-center justify-center">
-          <ClipboardList class="w-8 h-8 text-kula-500" />
+      <div v-else-if="logs.length === 0" class="bg-white rounded-[2rem] border border-gray-200 p-12 text-center">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+          <ClipboardList class="w-8 h-8 text-gray-900" />
         </div>
         <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune activité enregistrée</h3>
         <p class="text-gray-500 mb-6 max-w-md mx-auto">
@@ -59,9 +52,9 @@
       </div>
   
       <!-- Logs Table -->
-      <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">Journaux d'activité</h2>
+      <div v-else class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="text-lg font-extrabold text-gray-900">Journaux d'activité</h2>
         </div>
         
         <div class="overflow-x-auto">
@@ -93,8 +86,8 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="h-8 w-8 flex-shrink-0">
-                      <div class="h-8 w-8 rounded-full bg-kula-50 flex items-center justify-center">
-                        <User class="h-4 w-4 text-kula-500" />
+                      <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                        <User class="h-4 w-4 text-gray-900" />
                       </div>
                     </div>
                     <div class="ml-3">
@@ -126,14 +119,14 @@
             <button
               @click="page > 1 ? page-- : null"
               :disabled="page <= 1"
-              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="relative inline-flex items-center h-10 px-5 text-sm font-bold rounded-full text-gray-900 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Précédent
             </button>
             <button
               @click="page < totalPages ? page++ : null"
               :disabled="page >= totalPages"
-              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="ml-3 relative inline-flex items-center h-10 px-5 text-sm font-bold rounded-full text-gray-900 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Suivant
             </button>
@@ -145,11 +138,11 @@
               </p>
             </div>
             <div>
-              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <nav class="relative z-0 inline-flex rounded-full gap-1" aria-label="Pagination">
                 <button
                   @click="page > 1 ? page-- : null"
                   :disabled="page <= 1"
-                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span class="sr-only">Précédent</span>
                   <ChevronLeft class="h-5 w-5" />
@@ -157,7 +150,7 @@
                 <button
                   @click="page < totalPages ? page++ : null"
                   :disabled="page >= totalPages"
-                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span class="sr-only">Suivant</span>
                   <ChevronRight class="h-5 w-5" />

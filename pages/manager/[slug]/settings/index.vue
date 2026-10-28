@@ -1,16 +1,12 @@
 <template>
     <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-900">Paramètres</h1>
-      <p class="mt-1 text-sm text-gray-500">Gérez les informations de votre établissement</p>
-    </div>
+    <PageHeader title="Paramètres" description="Gérez les informations de votre établissement" />
 
     <form @submit.prevent="saveSettings" class="space-y-6">
       <!-- Basic Info Card -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">Informations générales</h2>
+      <div class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="text-lg font-extrabold text-gray-900">Informations générales</h2>
         </div>
         <div class="p-6 space-y-6">
           <!-- Restaurant Name -->
@@ -29,10 +25,10 @@
             <textarea
               v-model="form.description"
               rows="3"
-              class="peer w-full px-5 pt-6 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-blue-500 focus:ring-0 transition-colors"
+              class="peer w-full px-5 pt-6 rounded-3xl bg-gray-50 border-2 border-gray-100 focus:border-gray-900 focus:ring-0 transition-colors"
               placeholder=" "
             />
-            <label class="absolute left-5 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-blue-500">
+            <label class="absolute left-5 top-4 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:text-sm peer-focus:top-2 peer-focus:text-gray-900">
               Description
             </label>
           </div>
@@ -41,7 +37,7 @@
           <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">Logo</label>
             <div class="flex items-center space-x-4">
-              <div class="relative h-24 w-24 rounded-xl bg-gray-50 border-2 border-gray-100 overflow-hidden">
+              <div class="relative h-24 w-24 rounded-3xl bg-gray-50 border-2 border-gray-100 overflow-hidden">
                 <img
                   v-if="imagePreview || form.image_url"
                   :src="imagePreview || form.image_url"
@@ -62,7 +58,7 @@
                 <button
                   type="button"
                   @click="fileInput?.click()"
-                  class="inline-flex items-center rounded-full border-2 border-gray-100 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                  class="inline-flex items-center h-12 rounded-full bg-gray-100 px-5 font-bold text-gray-700 hover:bg-gray-100 transition-colors"
                 >
                   <Upload class="h-4 w-4 mr-2" />
                   Choisir une image
@@ -74,9 +70,9 @@
       </div>
 
       <!-- Contact Info Card -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">Contact de l'établissement</h2>
+      <div class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="text-lg font-extrabold text-gray-900">Contact de l'établissement</h2>
         </div>
         <div class="p-6 space-y-6">
           <!-- Phone -->
@@ -101,9 +97,9 @@
       </div>
 
       <!-- Notifications Settings Card -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">Notifications</h2>
+      <div class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="text-lg font-extrabold text-gray-900">Notifications</h2>
         </div>
         <div class="p-6 space-y-6">
           <!-- Sound Notifications -->
@@ -118,7 +114,7 @@
                 type="checkbox"
                 class="sr-only peer"
               />
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
             </label>
           </div>
         </div>
@@ -128,7 +124,7 @@
       <div class="flex justify-end">
         <button
           type="submit"
-          class="inline-flex items-center px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="inline-flex items-center h-12 px-8 rounded-full bg-gray-900 text-white font-bold hover:bg-gray-800 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           :disabled="loading"
         >
           <span v-if="loading" class="flex items-center">

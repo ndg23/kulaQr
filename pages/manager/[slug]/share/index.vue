@@ -1,28 +1,12 @@
 <template>
-  <div class="min-h-screen bg-[#F5F5F7]">
-    <!-- En-tête -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50">
-      <div class="max-w-[1600px] mx-auto px-6 py-5">
-        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div class="max-w-2xl">
-            <div class="flex items-center gap-3 mb-2">
-              <h1 class="text-3xl font-semibold text-gray-900">Partage</h1>
-              <div class="flex items-center gap-2 px-3 py-1 bg-gray-900/5 rounded-full">
-                <Share2 class="w-4 h-4 text-gray-600" />
-                <span class="text-sm font-medium text-gray-600">Liens & QR Codes</span>
-              </div>
-            </div>
-            <p class="text-base text-gray-500">Partagez votre menu digital avec vos clients via des liens ou QR codes personnalisés.</p>
-          </div>
-        </div>
-      </div>
-    </header>
+  <div>
+    <PageHeader title="Partage" description="Partagez votre menu digital avec vos clients via des liens ou QR codes personnalisés." />
 
-    <main class="max-w-[1600px] mx-auto px-6 py-8">
+    <main>
       <!-- Lien principal -->
-      <div class="bg-white rounded-xl border border-gray-200/50 overflow-hidden mb-8">
+      <div class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden mb-8">
         <div class="p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Lien principal</h2>
+          <h2 class="text-xl font-extrabold text-gray-900 mb-1">Lien principal</h2>
           <p class="text-gray-500 mb-6">Le lien direct vers votre menu digital</p>
           
           <div class="flex items-center gap-4">
@@ -32,7 +16,7 @@
                 type="text"
                 :value="menuLink"
                 readonly
-                class="w-full h-11 pl-10 pr-24 rounded-xl bg-gray-50 border border-gray-200/50 text-gray-900"
+                class="w-full h-12 pl-10 pr-24 rounded-full bg-gray-50 border border-gray-200 text-gray-900"
               />
               <Link class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -46,7 +30,7 @@
             </div>
             <button
               @click="shareLink"
-              class="h-11 px-6 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 active:scale-95 transition-all flex items-center gap-2"
+              class="h-12 px-6 bg-gray-900 text-white rounded-full font-bold hover:bg-gray-800 active:scale-95 transition-all flex items-center gap-2"
             >
               <Share2 class="w-4 h-4" />
               Partager
@@ -58,12 +42,12 @@
       <!-- QR Codes -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- QR Code Principal -->
-        <div class="bg-white rounded-xl border border-gray-200/50 overflow-hidden">
+        <div class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden">
           <div class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">QR Code Principal</h3>
+            <h3 class="text-lg font-extrabold text-gray-900 mb-1">QR Code Principal</h3>
             <p class="text-gray-500 mb-6">Code QR vers votre menu complet</p>
             
-            <div class="bg-white rounded-xl border border-gray-200/50 p-6 mb-6">
+            <div class="bg-white rounded-3xl border border-gray-200 p-6 mb-6">
               <QRCodeVue3
                 :value="menuLink"
                 :size="200"
@@ -78,21 +62,21 @@
             <div class="flex items-center gap-2">
               <button
                 @click="downloadQR('main')"
-                class="flex-1 h-10 bg-gray-900/5 hover:bg-gray-900/10 text-gray-700 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+                class="flex-1 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-full font-bold transition-all flex items-center justify-center gap-2"
               >
                 <Download class="w-4 h-4" />
                 PNG
               </button>
               <button
                 @click="downloadQR('main', 'svg')"
-                class="flex-1 h-10 bg-gray-900/5 hover:bg-gray-900/10 text-gray-700 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+                class="flex-1 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-full font-bold transition-all flex items-center justify-center gap-2"
               >
                 <Download class="w-4 h-4" />
                 SVG
               </button>
               <button
                 @click="printQR('main')"
-                class="flex-1 h-10 bg-gray-900/5 hover:bg-gray-900/10 text-gray-700 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+                class="flex-1 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-full font-bold transition-all flex items-center justify-center gap-2"
               >
                 <Printer class="w-4 h-4" />
                 Imprimer
@@ -102,9 +86,9 @@
         </div>
 
         <!-- QR Code par Table -->
-        <div class="bg-white rounded-xl border border-gray-200/50 overflow-hidden">
+        <div class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden">
           <div class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">QR Code par Table</h3>
+            <h3 class="text-lg font-extrabold text-gray-900 mb-1">QR Code par Table</h3>
             <p class="text-gray-500 mb-4">Générez des QR codes uniques pour chaque table</p>
             
             <div class="mb-4">
@@ -113,12 +97,12 @@
                 v-model="tableNumber"
                 type="number"
                 min="1"
-                class="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200/50 text-gray-900"
+                class="w-full h-12 px-5 rounded-full bg-gray-50 border border-gray-200 text-gray-900"
                 placeholder="Ex: 1"
               />
             </div>
 
-            <div v-if="tableNumber" class="bg-white rounded-xl border border-gray-200/50 p-6 mb-6">
+            <div v-if="tableNumber" class="bg-white rounded-3xl border border-gray-200 p-6 mb-6">
               <QRCodeVue3
                 :value="getTableLink(tableNumber)"
                 :size="200"
@@ -133,21 +117,21 @@
             <div v-if="tableNumber" class="flex items-center gap-2">
               <button
                 @click="downloadQR('table')"
-                class="flex-1 h-10 bg-gray-900/5 hover:bg-gray-900/10 text-gray-700 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+                class="flex-1 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-full font-bold transition-all flex items-center justify-center gap-2"
               >
                 <Download class="w-4 h-4" />
                 PNG
               </button>
               <button
                 @click="downloadQR('table', 'svg')"
-                class="flex-1 h-10 bg-gray-900/5 hover:bg-gray-900/10 text-gray-700 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+                class="flex-1 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-full font-bold transition-all flex items-center justify-center gap-2"
               >
                 <Download class="w-4 h-4" />
                 SVG
               </button>
               <button
                 @click="printQR('table')"
-                class="flex-1 h-10 bg-gray-900/5 hover:bg-gray-900/10 text-gray-700 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+                class="flex-1 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-full font-bold transition-all flex items-center justify-center gap-2"
               >
                 <Printer class="w-4 h-4" />
                 Imprimer
@@ -157,15 +141,15 @@
         </div>
 
         <!-- Personnalisation -->
-        <div class="bg-white rounded-xl border border-gray-200/50 overflow-hidden">
+        <div class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden">
           <div class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Personnalisation</h3>
+            <h3 class="text-lg font-extrabold text-gray-900 mb-1">Personnalisation</h3>
             <p class="text-gray-500 mb-6">Personnalisez l'apparence de vos QR codes</p>
 
             <div class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Style des points</label>
-                <select v-model="qrStyle" class="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200/50">
+                <select v-model="qrStyle" class="w-full h-12 px-5 rounded-full bg-gray-50 border border-gray-200">
                   <option value="dots">Points</option>
                   <option value="squares">Carrés</option>
                   <option value="rounded">Arrondis</option>
@@ -177,13 +161,13 @@
                 <input
                   v-model="qrColor"
                   type="color"
-                  class="w-full h-11 px-4 rounded-xl bg-gray-50 border border-gray-200/50"
+                  class="w-full h-12 px-5 rounded-full bg-gray-50 border border-gray-200"
                 />
               </div>
 
               <button
                 @click="applyStyle"
-                class="w-full h-10 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 active:scale-95 transition-all flex items-center justify-center gap-2"
+                class="w-full h-12 bg-gray-900 text-white rounded-full font-bold hover:bg-gray-800 active:scale-95 transition-all flex items-center justify-center gap-2"
               >
                 <Check class="w-4 h-4" />
                 Appliquer

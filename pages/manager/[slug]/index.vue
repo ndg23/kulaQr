@@ -1,235 +1,156 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <!-- Minimal Header -->
-    <div class="border-b border-gray-100">
-      <div class="max-w-7xl mx-auto px-6 sm:px-8 py-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl font-semibold text-gray-900 tracking-tight">Dashboard</h1>
-            <p class="text-sm text-gray-500 mt-1">Vue d'ensemble de votre établissement</p>
-          </div>
-          <button
-            @click="refreshData"
-            :disabled="isRefreshing"
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-          >
-            <RefreshCw :class="['w-4 h-4', isRefreshing && 'animate-spin']" />
-            Actualiser
-          </button>
-        </div>
-      </div>
+  <div>
+    <PageHeader
+      :title="`Bonjour, ${user?.user_metadata?.full_name?.split(' ')[0] || 'Manager'}`"
+      description="Vue d'ensemble de votre établissement"
+    >
+      <template #actions>
+        <button
+          class="inline-flex items-center gap-2 h-12 px-5 rounded-full bg-gray-100 hover:bg-gray-200 font-bold text-gray-900 transition-colors disabled:opacity-50"
+          :disabled="isRefreshing"
+          @click="refreshData"
+        >
+          <RefreshCw :class="['w-4 h-4', isRefreshing && 'animate-spin']" />
+          Actualiser
+        </button>
+      </template>
+    </PageHeader>
+
+    <div v-if="isLoading" class="flex justify-center items-center py-32">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-gray-900"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-6 sm:px-8 py-12">
-      <!-- Welcome Section -->
-      <div class="mb-16">
-        <h2 class="text-5xl font-semibold text-gray-900 tracking-tight mb-3">
-          Bonjour, {{ user?.user_metadata?.full_name?.split(' ')[0] || 'Manager' }}
-        </h2>
-        <p class="text-xl text-gray-500">Résumé de votre activité</p>
+    <div v-else class="space-y-6 sm:space-y-8">
+      <!-- Indicateurs du jour -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <PageStatCard
+          v-for="(stat, i) in mainMetrics"
+          :key="stat.name"
+          :name="stat.name"
+          :value="stat.value"
+          :icon="stat.icon"
+          :tone="cycleTone(i)"
+        />
       </div>
 
-      <!-- Loading State -->
-      <div v-if="isLoading" class="flex justify-center items-center py-32">
-        <div class="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-gray-900"></div>
-      </div>
-
-      <div v-else class="space-y-16">
-        <!-- Main Metrics - Large & Impactful -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div 
-            v-for="stat in mainMetrics" 
-            :key="stat.name"
-            class="bg-gray-50 rounded-3xl p-10 hover:bg-gray-100 transition-colors cursor-pointer"
-          >
-            <component :is="stat.icon" class="w-10 h-10 text-gray-900 mb-6" />
-            <p class="text-5xl font-semibold text-gray-900 mb-3 tracking-tight">{{ stat.value }}</p>
-            <span class="text-base text-gray-500">{{ stat.name }}</span>
+      <!-- Accès rapides -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <NuxtLink
+          v-for="link in quickLinks"
+          :key="link.to"
+          :to="`/manager/${establishment?.id}${link.to}`"
+          class="flex items-center gap-4 rounded-[2rem] bg-gray-50 hover:bg-gray-100 p-4 sm:p-5 transition-colors"
+        >
+          <IconBadge :icon="link.icon" :tone="link.tone" size="lg" />
+          <div class="min-w-0">
+            <h3 class="font-extrabold text-gray-900">{{ link.name }}</h3>
+            <p class="text-sm text-gray-500">{{ link.hint }}</p>
           </div>
-        </div>
+          <ArrowRight class="w-5 h-5 text-gray-400 ml-auto flex-shrink-0" />
+        </NuxtLink>
+      </div>
 
-        <!-- Quick Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <NuxtLink 
+      <!-- Commandes en cours -->
+      <section>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">Commandes actuelles</h2>
+          <NuxtLink
             :to="`/manager/${establishment?.id}/orders`"
-            class="group bg-white border border-gray-200 rounded-3xl p-10 hover:border-gray-900 transition-all"
+            class="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-gray-100 hover:bg-gray-200 text-sm font-bold text-gray-900 transition-colors"
           >
-            <ShoppingCart class="w-8 h-8 text-gray-900 mb-6" />
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Commandes</h3>
-            <p class="text-sm text-gray-500">{{ recentOrders.length }} commandes récentes</p>
-          </NuxtLink>
-            
-          <NuxtLink 
-            :to="`/manager/${establishment?.id}/menu`"
-            class="group bg-white border border-gray-200 rounded-3xl p-10 hover:border-gray-900 transition-all"
-          >
-            <ChefHat class="w-8 h-8 text-gray-900 mb-6" />
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Menu</h3>
-            <p class="text-sm text-gray-500">{{ popularProducts.length }} produits</p>
-          </NuxtLink>
-
-          <NuxtLink 
-            :to="`/manager/${establishment?.id}/qr-codes`"
-            class="group bg-white border border-gray-200 rounded-3xl p-10 hover:border-gray-900 transition-all"
-          >
-            <QrCode class="w-8 h-8 text-gray-900 mb-6" />
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">QR Code</h3>
-            <p class="text-sm text-gray-500">Menu digital</p>
+            Voir tout
+            <ArrowRight class="w-4 h-4" />
           </NuxtLink>
         </div>
 
-        <!-- Current Orders Section -->
-        <div>
-          <div class="flex items-center justify-between mb-8">
-            <h2 class="text-3xl font-semibold text-gray-900 tracking-tight">Commandes actuelles</h2>
-            <NuxtLink
-              :to="`/manager/${establishment?.id}/orders`"
-              class="text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors inline-flex items-center gap-2"
-            >
-              Voir tout
-              <ArrowRight class="w-4 h-4" />
-            </NuxtLink>
-          </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4">
+          <PageStatCard name="Total" :value="currentOrdersStats.total" :icon="ShoppingCart" tone="black" />
+          <PageStatCard name="En attente" :value="currentOrdersStats.pending" :icon="Clock" tone="yellow" />
+          <PageStatCard name="En préparation" :value="currentOrdersStats.processing" :icon="Coffee" tone="orange" />
+          <PageStatCard name="Prêtes" :value="currentOrdersStats.ready" :icon="CheckCircle" tone="green" />
+        </div>
 
-          <!-- Order Stats -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-gray-50 rounded-2xl p-6">
-              <p class="text-3xl font-semibold text-gray-900 mb-1">{{ currentOrdersStats.total }}</p>
-              <p class="text-sm text-gray-500">Total</p>
-            </div>
+        <div v-if="currentOrders.length === 0" class="text-center py-20 bg-gray-50 rounded-[2rem]">
+          <IconBadge :icon="ShoppingCart" tone="black" size="lg" class="mx-auto mb-4" />
+          <h4 class="text-lg font-extrabold text-gray-900 mb-1">Aucune commande en cours</h4>
+          <p class="text-gray-500">Les nouvelles commandes apparaîtront ici</p>
+        </div>
 
-            <div class="bg-yellow-50 rounded-2xl p-6">
-              <p class="text-3xl font-semibold text-gray-900 mb-1">{{ currentOrdersStats.pending }}</p>
-              <p class="text-sm text-gray-500">En attente</p>
-            </div>
-
-            <div class="bg-orange-50 rounded-2xl p-6">
-              <p class="text-3xl font-semibold text-gray-900 mb-1">{{ currentOrdersStats.processing }}</p>
-              <p class="text-sm text-gray-500">En préparation</p>
-            </div>
-
-            <div class="bg-green-50 rounded-2xl p-6">
-              <p class="text-3xl font-semibold text-gray-900 mb-1">{{ currentOrdersStats.ready }}</p>
-              <p class="text-sm text-gray-500">Prêtes</p>
-            </div>
-          </div>
-
-          <!-- Orders List -->
-          <div v-if="currentOrders.length === 0" class="text-center py-24 bg-gray-50 rounded-3xl">
-            <ShoppingCart class="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h4 class="text-lg font-semibold text-gray-900 mb-2">Aucune commande en cours</h4>
-            <p class="text-gray-500">Les nouvelles commandes apparaîtront ici</p>
-          </div>
-
-          <div v-else class="space-y-4">
-            <div
-              v-for="order in currentOrders.slice(0, 6)"
-              :key="order.id"
-              class="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-900 transition-all"
-            >
-              <div class="flex items-start justify-between mb-6">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-3">
-                    <span class="text-sm font-mono font-medium text-gray-500">#{{ order.id.slice(-4) }}</span>
-                    <span
-                      :class="[
-                        'px-3 py-1 text-xs font-medium rounded-full',
-                        order.status === 'pending' && 'bg-yellow-100 text-yellow-900',
-                        order.status === 'confirmed' && 'bg-blue-100 text-blue-900',
-                        order.status === 'processing' && 'bg-orange-100 text-orange-900',
-                        order.status === 'completed' && 'bg-green-100 text-green-900'
-                      ]"
-                    >
-                      {{ getStatusText(order.status) }}
-                    </span>
-                  </div>
-                  
-                  <!-- Table Info Enrichie -->
-                  <div class="mb-3">
-                    <div class="flex items-center gap-2 mb-1">
-                      <MapPin class="w-4 h-4 text-gray-400" />
-                      <h4 class="text-lg font-semibold text-gray-900">
-                        Table {{ order.tables?.table_number || order.table_number || 'N/A' }}
-                      </h4>
-                      <span 
-                        v-if="order.tables?.type === 'VIP'"
-                        class="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-900 rounded-full"
-                      >
-                        VIP
-                      </span>
-                    </div>
-                    
-                    <div class="flex items-center gap-4 text-sm text-gray-500">
-                      <span v-if="order.tables?.section_name" class="inline-flex items-center gap-1">
-                        <Store class="w-3.5 h-3.5" />
-                        {{ order.tables.section_name }}
-                      </span>
-                      <span v-if="order.tables?.floor_level" class="inline-flex items-center gap-1">
-                        <Building class="w-3.5 h-3.5" />
-                        {{ order.tables.floor_level }}
-                      </span>
-                      <span v-if="order.tables?.capacity" class="inline-flex items-center gap-1">
-                        <Users class="w-3.5 h-3.5" />
-                        {{ order.tables.capacity }} pers.
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <p class="text-sm text-gray-500">
-                    {{ order.items_count || 0 }} article{{ order.items_count > 1 ? 's' : '' }} · 
-                    {{ formatTime(order.created_at) }}
-                  </p>
+        <div v-else class="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4">
+          <article
+            v-for="order in currentOrders.slice(0, 6)"
+            :key="order.id"
+            class="bg-white border border-gray-200 rounded-[2rem] p-5 sm:p-6"
+          >
+            <div class="flex items-start justify-between gap-4 mb-5">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2 mb-3">
+                  <span class="text-sm font-mono font-bold text-gray-500">#{{ order.id.slice(-4) }}</span>
+                  <span
+                    :class="[
+                      'inline-flex items-center h-7 px-3 text-xs font-bold rounded-full',
+                      order.status === 'pending' && 'bg-yellow-100 text-yellow-900',
+                      order.status === 'confirmed' && 'bg-blue-100 text-blue-900',
+                      order.status === 'processing' && 'bg-orange-100 text-orange-900',
+                      order.status === 'completed' && 'bg-green-100 text-green-900'
+                    ]"
+                  >{{ getStatusText(order.status) }}</span>
+                  <span
+                    v-if="order.tables?.type === 'VIP'"
+                    class="inline-flex items-center h-7 px-3 text-xs font-bold bg-purple-100 text-purple-900 rounded-full"
+                  >VIP</span>
                 </div>
-                
-                <p class="text-2xl font-semibold text-gray-900">{{ formatPrice(order.total_amount || 0) }}</p>
+
+                <div class="flex items-center gap-2 mb-1">
+                  <MapPin class="w-4 h-4 text-gray-400" />
+                  <h4 class="text-lg font-extrabold text-gray-900">
+                    Table {{ order.tables?.table_number || order.table_number || 'N/A' }}
+                  </h4>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+                  <span v-if="order.tables?.section_name" class="inline-flex items-center gap-1">
+                    <Store class="w-3.5 h-3.5" />{{ order.tables.section_name }}
+                  </span>
+                  <span v-if="order.tables?.floor_level" class="inline-flex items-center gap-1">
+                    <Building class="w-3.5 h-3.5" />{{ order.tables.floor_level }}
+                  </span>
+                  <span v-if="order.tables?.capacity" class="inline-flex items-center gap-1">
+                    <Users class="w-3.5 h-3.5" />{{ order.tables.capacity }} pers.
+                  </span>
+                </div>
+
+                <p class="text-sm text-gray-500 mt-2">
+                  {{ order.items_count || 0 }} article{{ order.items_count > 1 ? 's' : '' }} · {{ formatTime(order.created_at) }}
+                </p>
               </div>
 
-              <div class="flex gap-3">
-                <NuxtLink
-                  :to="`/staff/order-detail/${order?.id}`"
-                  class="flex-1 inline-flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-900 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors"
-                >
-                  <Eye class="w-4 h-4 mr-2" />
-                  Détails
-                </NuxtLink>
-
-                <button
-                  v-if="order.status === 'pending'"
-                  @click="updateOrderStatus(order.id, 'confirmed')"
-                  :disabled="updatingOrderId === order.id"
-                  class="flex-1 inline-flex items-center justify-center px-4 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                  <div v-if="updatingOrderId === order.id" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  <Check v-else class="w-4 h-4 mr-2" />
-                  Confirmer
-                </button>
-
-                <button
-                  v-else-if="order.status === 'confirmed'"
-                  @click="updateOrderStatus(order.id, 'processing')"
-                  :disabled="updatingOrderId === order.id"
-                  class="flex-1 inline-flex items-center justify-center px-4 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                  <div v-if="updatingOrderId === order.id" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  <Coffee v-else class="w-4 h-4 mr-2" />
-                  Préparer
-                </button>
-
-                <button
-                  v-else-if="order.status === 'processing'"
-                  @click="updateOrderStatus(order.id, 'completed')"
-                  :disabled="updatingOrderId === order.id"
-                  class="flex-1 inline-flex items-center justify-center px-4 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                  <div v-if="updatingOrderId === order.id" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  <CheckCircle v-else class="w-4 h-4 mr-2" />
-                  Terminer
-                </button>
-              </div>
+              <p class="text-xl sm:text-2xl font-black text-gray-900 whitespace-nowrap">{{ formatPrice(order.total_amount || 0) }}</p>
             </div>
-          </div>
+
+            <div class="flex gap-2">
+              <NuxtLink
+                :to="`/staff/order-detail/${order?.id}`"
+                class="flex-1 inline-flex items-center justify-center h-12 px-4 bg-gray-100 text-gray-900 rounded-full font-bold hover:bg-gray-200 transition-colors"
+              >
+                <Eye class="w-4 h-4 mr-2" />
+                Détails
+              </NuxtLink>
+
+              <button
+                v-if="nextAction(order.status)"
+                :disabled="updatingOrderId === order.id"
+                class="flex-1 inline-flex items-center justify-center h-12 px-4 bg-gray-900 text-white rounded-full font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                @click="updateOrderStatus(order.id, nextAction(order.status)!.status)"
+              >
+                <div v-if="updatingOrderId === order.id" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                <component :is="nextAction(order.status)!.icon" v-else class="w-4 h-4 mr-2" />
+                {{ nextAction(order.status)!.label }}
+              </button>
+            </div>
+          </article>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </template>
@@ -251,13 +172,16 @@ import {
   MapPin,
   Store,
   Building,
-  Users
+  Users,
+  Clock
 } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
 import { useSupabaseClient } from '#imports'
 import { useCustomToast } from '~/composables/useToast'
 import { useSound } from '~/composables/useSound'
+import { cycleTone } from '~/utils/palette'
+import IconBadge from '~/components/ui/IconBadge.vue'
 
 const { establishment } = useEstablishment()
 const { user } = useAuth()
@@ -292,6 +216,19 @@ const currentOrdersStats = computed(() => {
 })
 
 const mainMetrics = ref<any[]>([])
+
+const quickLinks = [
+  { name: 'Commandes', hint: 'Suivre et gérer', to: '/orders', icon: ShoppingCart, tone: 'orange' as const },
+  { name: 'Menu', hint: 'Produits et prix', to: '/menu', icon: ChefHat, tone: 'blue' as const },
+  { name: 'QR Codes', hint: 'Tables et menu digital', to: '/tables', icon: QrCode, tone: 'pink' as const }
+]
+
+// Prochaine étape d'une commande
+const nextAction = (status: string) => ({
+  pending: { status: 'confirmed', label: 'Confirmer', icon: Check },
+  confirmed: { status: 'processing', label: 'Préparer', icon: Coffee },
+  processing: { status: 'completed', label: 'Terminer', icon: CheckCircle }
+} as Record<string, { status: string; label: string; icon: any }>)[status]
 
 const loadData = async () => {
   try {

@@ -1,30 +1,24 @@
 <template>
   <div>
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Gestion des permissions</h1>
-        <p class="mt-1 text-sm text-gray-500">Définissez les permissions pour chaque membre du personnel</p>
-      </div>
-    </div>
+    <PageHeader title="Gestion des permissions" description="Définissez les permissions pour chaque membre du personnel" />
 
     <!-- Loading State -->
     <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-      <Loader2 class="w-10 h-10 text-kula-500 animate-spin mb-4" />
+      <Loader2 class="w-10 h-10 text-gray-900 animate-spin mb-4" />
       <p class="text-sm text-gray-500">Chargement des permissions...</p>
     </div>
 
     <!-- Staff Permissions -->
-    <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-6 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">Permissions par rôle</h2>
+    <div v-else class="bg-white rounded-[2rem] border border-gray-200 overflow-hidden">
+      <div class="px-6 py-5 border-b border-gray-100">
+        <h2 class="text-lg font-extrabold text-gray-900">Permissions par rôle</h2>
       </div>
       
       <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Manager Permissions -->
-          <div class="border border-gray-200 rounded-xl p-4">
-            <h3 class="text-md font-medium text-gray-900 mb-4">Manager</h3>
+          <div class="border border-gray-200 rounded-3xl p-5">
+            <h3 class="font-extrabold text-gray-900 mb-4">Manager</h3>
             <ul class="space-y-2">
               <li v-for="perm in allPermissions" :key="perm.id" class="flex items-center">
                 <CheckCircle class="w-5 h-5 text-green-500 mr-2" />
@@ -34,8 +28,8 @@
           </div>
           
           <!-- Staff Permissions -->
-          <div class="border border-gray-200 rounded-xl p-4">
-            <h3 class="text-md font-medium text-gray-900 mb-4">Staff</h3>
+          <div class="border border-gray-200 rounded-3xl p-5">
+            <h3 class="font-extrabold text-gray-900 mb-4">Staff</h3>
             <ul class="space-y-2">
               <li v-for="perm in staffPermissions" :key="perm.id" class="flex items-center">
                 <CheckCircle class="w-5 h-5 text-green-500 mr-2" />
@@ -45,8 +39,8 @@
           </div>
           
           <!-- Kitchen Permissions -->
-          <div class="border border-gray-200 rounded-xl p-4">
-            <h3 class="text-md font-medium text-gray-900 mb-4">Cuisine</h3>
+          <div class="border border-gray-200 rounded-3xl p-5">
+            <h3 class="font-extrabold text-gray-900 mb-4">Cuisine</h3>
             <ul class="space-y-2">
               <li v-for="perm in kitchenPermissions" :key="perm.id" class="flex items-center">
                 <CheckCircle class="w-5 h-5 text-green-500 mr-2" />
@@ -67,7 +61,7 @@
           
           <select
             v-model="selectedStaffId"
-            class="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-kula-500 focus:border-kula-500"
+            class="w-full md:w-1/2 h-12 px-5 border border-gray-200 rounded-full focus:outline-none focus:border-gray-900"
           >
             <option value="">Sélectionnez un membre du personnel</option>
             <option v-for="staff in staffMembers" :key="staff.id" :value="staff.id">
@@ -76,7 +70,7 @@
           </select>
           
           <div v-if="selectedStaffId" class="mt-6">
-            <h3 class="text-md font-medium text-gray-900 mb-4">Permissions pour {{ getSelectedStaffName() }}</h3>
+            <h3 class="font-extrabold text-gray-900 mb-4">Permissions pour {{ getSelectedStaffName() }}</h3>
             
             <div class="space-y-4">
               <div v-for="perm in allPermissions" :key="perm.id" class="flex items-center">
@@ -85,7 +79,7 @@
                   type="checkbox"
                   :checked="hasPermission(perm.id)"
                   @change="togglePermission(perm.id)"
-                  class="h-4 w-4 text-kula-600 focus:ring-kula-500 border-gray-300 rounded"
+                  class="h-5 w-5 text-gray-900 focus:ring-gray-900 border-gray-300 rounded-md"
                 />
                 <label :for="`perm-${perm.id}`" class="ml-3 text-sm text-gray-700">
                   {{ perm.label }}
@@ -97,7 +91,7 @@
               <button
                 @click="savePermissions"
                 :disabled="savingPermissions"
-                class="inline-flex items-center px-4 py-2 bg-kula-500 text-white rounded-full text-sm font-medium hover:bg-kula-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="inline-flex items-center h-12 px-6 bg-gray-900 text-white rounded-full font-bold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Loader2 v-if="savingPermissions" class="w-4 h-4 mr-1.5 animate-spin" />
                 <Save v-else class="w-4 h-4 mr-1.5" />

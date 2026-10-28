@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div>
     <!-- Modern Header -->
     <div class="no-print">
       <ManagerModernHeader
@@ -38,7 +38,7 @@
       />
             </div>
 
-    <main class="max-w-4xl mx-auto px-6 py-8">
+    <main class="max-w-4xl mx-auto">
       <!-- Utilisation du composant QrCodeCard -->
       <div ref="qrCard">
         <QrCodeCard 

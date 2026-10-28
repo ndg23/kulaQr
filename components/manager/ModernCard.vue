@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+  <div class="bg-white rounded-[2rem] border border-gray-200">
     <!-- Card Header -->
     <div v-if="title || $slots.header" class="p-6 border-b border-gray-100">
       <slot name="header">
@@ -9,7 +9,7 @@
               <component :is="icon" class="w-4 h-4 text-gray-600" />
             </div>
             <div>
-              <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
+              <h3 class="text-lg font-extrabold text-gray-900">{{ title }}</h3>
               <p v-if="subtitle" class="text-sm text-gray-500">{{ subtitle }}</p>
             </div>
           </div>
