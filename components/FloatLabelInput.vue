@@ -13,7 +13,7 @@
           error ? 'border-red-500 focus:ring-none focus:ring-none-400' : 
                  (isFocused ? 'border-gray-900 dark:border-white' : ''),
           disabled ? 'bg-gray-50 dark:bg-gray-900 opacity-60 cursor-not-allowed' : '',
-          pill ? '!rounded-full !pl-7 !pr-7' : '',
+          pill ? ('!rounded-full !pl-7 ' + ($slots.trailing ? '!pr-16' : '!pr-7')) : '',
           iconLeft ? 'pl-12' : '',
           iconRight ? 'pr-12' : ''
         ]"
@@ -48,6 +48,11 @@
         <span v-if="required" class="text-red-500 ml-0.5">*</span>
       </label>
       
+      <!-- Contenu à droite du champ (ex. afficher / masquer le mot de passe) -->
+      <div v-if="$slots.trailing" class="absolute right-3 top-8 -translate-y-1/2 flex items-center">
+        <slot name="trailing" />
+      </div>
+
       <!-- Icône à gauche -->
       <div 
         v-if="iconLeft" 
@@ -283,6 +288,14 @@
   
   
   
+  /* Valeur remplie par le navigateur : le label monte même si le modèle est encore vide */
+  input:-webkit-autofill ~ label {
+    top: 0.625rem !important;
+    --tw-translate-y: 0px !important;
+    --tw-scale-x: 0.72 !important;
+    --tw-scale-y: 0.72 !important;
+  }
+
   /* Transition douce pour les changements d'état */
   label, input, .absolute {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

@@ -4,14 +4,14 @@
       <!-- Progress Indicator - Enhanced -->
       <div class="mb-8 sm:mb-10">
         <div class="flex items-center gap-2">
-          <div v-for="i in 3" :key="i" class="relative h-1 flex-1 rounded-full bg-gray-200 overflow-hidden">
+          <div v-for="i in 3" :key="i" class="relative h-1.5 flex-1 rounded-full bg-gray-200 overflow-hidden">
             <div
-              class="absolute inset-0 bg-black origin-left transition-transform duration-500 ease-out"
+              class="absolute inset-0 bg-gray-900 origin-left transition-transform duration-500 ease-out"
               :class="step >= i ? 'scale-x-100' : 'scale-x-0'"></div>
           </div>
         </div>
         <div class="mt-3 text-center">
-          <p class="text-xs sm:text-sm font-medium text-gray-500">Étape {{ step }} sur 3</p>
+          <p class="text-xs sm:text-sm font-bold text-gray-500">Étape {{ step }} sur 3</p>
         </div>
       </div>
 
@@ -22,53 +22,35 @@
         <div v-if="step === 1" class="space-y-6 sm:space-y-8 animate-fade-in">
           <!-- Header -->
           <div class="space-y-1 sm:space-y-2">
-            <h1 class="text-[27px] sm:text-[31px] font-bold text-gray-900 leading-tight">
+            <h1 class="text-[27px] sm:text-[31px] font-black tracking-tight text-gray-900 leading-tight">
               Créer votre compte
             </h1>
           </div>
 
           <!-- Form -->
           <form @submit.prevent="nextStep" class="space-y-4 sm:space-y-5">
-            <!-- Full Name -->
-            <div>
-              <input v-model="form.fullName" type="text" id="fullName" required placeholder="Nom complet"
-                @focus="scrollToInput"
-                class="w-full h-[52px] sm:h-[56px] px-4 bg-white border border-gray-300 rounded text-[15px] sm:text-[17px] placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.fullName }" />
-              <transition enter-active-class="transition-all duration-200" enter-from-class="opacity-0 -translate-y-1"
-                enter-to-class="opacity-100 translate-y-0">
-                <p v-if="errors.fullName" class="text-xs sm:text-sm text-red-600 mt-2">{{ errors.fullName }}</p>
-              </transition>
-            </div>
+            <FloatLabelInput id="fullName" v-model="form.fullName" label="Nom complet" autocomplete="name"
+              :error="errors.fullName" :show-char-count="false" pill required />
 
             <!-- Phone Number -->
-            <div>
-              <div class="flex gap-2">
-                <!-- Country Code Select -->
-                <select v-model="form.countryCode"
-                  class="w-20 sm:w-24 h-[52px] sm:h-[56px] px-2 sm:px-3 bg-white border border-gray-300 rounded text-[15px] sm:text-[17px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200">
-                  <option value="+221">🇸🇳 +221</option>
-                  <option value="+242">🇨🇬 +242</option>
-                  <option value="+241">🇬🇦 +241</option>
-                  <option value="+243">🇨🇩 +243</option>
-                  <option value="+225">🇨🇮 +225</option>
-                  <option value="+229">🇧🇯 +229</option>
-                </select>
-
-                <!-- Phone Number Input -->
-                <input v-model="form.phone" type="tel" id="phone" required placeholder="77 123 45 67"
-                  @focus="scrollToInput"
-                  class="flex-1 h-[52px] sm:h-[56px] px-3 sm:px-4 bg-white border border-gray-300 rounded text-[15px] sm:text-[17px] placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                  :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.phone }" />
+            <div class="flex gap-2">
+              <select v-model="form.countryCode" aria-label="Indicatif"
+                class="w-28 h-16 px-4 bg-white border border-gray-200 rounded-full text-base focus:outline-none focus:border-gray-900 focus:ring-0 transition-colors">
+                <option value="+221">🇸🇳 +221</option>
+                <option value="+242">🇨🇬 +242</option>
+                <option value="+241">🇬🇦 +241</option>
+                <option value="+243">🇨🇩 +243</option>
+                <option value="+225">🇨🇮 +225</option>
+                <option value="+229">🇧🇯 +229</option>
+              </select>
+              <div class="flex-1 min-w-0">
+                <FloatLabelInput id="phone" v-model="form.phone" type="tel" label="Téléphone" autocomplete="tel-national"
+                  :error="errors.phone" :show-char-count="false" pill required />
               </div>
-              <transition enter-active-class="transition-all duration-200" enter-from-class="opacity-0 -translate-y-1"
-                enter-to-class="opacity-100 translate-y-0">
-                <p v-if="errors.phone" class="text-xs sm:text-sm text-red-600 mt-2">{{ errors.phone }}</p>
-              </transition>
             </div>
 
             <button type="submit"
-              class="w-full h-[48px] sm:h-[52px] bg-black text-white rounded-full text-[15px] sm:text-[17px] font-bold hover:bg-gray-800 active:scale-[0.97] transition-all duration-200 flex items-center justify-center"
+              class="w-full h-14 bg-gray-900 text-white rounded-full text-[17px] font-bold hover:bg-gray-800 active:scale-[0.97] transition-all duration-200 flex items-center justify-center disabled:opacity-50"
               :disabled="loading">
               <span v-if="!loading">Suivant</span>
               <Loader2 v-else class="w-5 h-5 animate-spin" />
@@ -76,10 +58,10 @@
           </form>
 
           <!-- Sign In Link -->
-          <div class="pt-4 sm:pt-5 border-t border-gray-300">
+          <div class="pt-4 sm:pt-5 border-t border-gray-200">
             <p class="text-[14px] sm:text-[15px] text-gray-600">
               Vous avez déjà un compte ?
-              <NuxtLink to="/auth/login" class="text-blue-500 hover:underline ml-1">
+              <NuxtLink to="/auth/login" class="text-gray-900 underline font-bold ml-1">
                 Se connecter
               </NuxtLink>
             </p>
@@ -90,52 +72,36 @@
         <div v-else-if="step === 2" class="space-y-6 sm:space-y-8 animate-fade-in">
           <!-- Header -->
           <div class="space-y-1 sm:space-y-2">
-            <h1 class="text-[27px] sm:text-[31px] font-bold text-gray-900 leading-tight">
+            <h1 class="text-[27px] sm:text-[31px] font-black tracking-tight text-gray-900 leading-tight">
               Sécurisez votre compte
             </h1>
           </div>
 
           <!-- Form -->
           <form @submit.prevent="nextStep" class="space-y-4 sm:space-y-5">
-            <!-- Email -->
-            <div>
-              <input v-model="form.email" type="email" id="email" required placeholder="Email"
-                @focus="scrollToInput"
-                class="w-full h-[52px] sm:h-[56px] px-4 bg-white border border-gray-300 rounded text-[15px] sm:text-[17px] placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.email }" />
-              <transition enter-active-class="transition-all duration-200" enter-from-class="opacity-0 -translate-y-1"
-                enter-to-class="opacity-100 translate-y-0">
-                <p v-if="errors.email" class="text-xs sm:text-sm text-red-600 mt-2">{{ errors.email }}</p>
-              </transition>
-            </div>
+            <FloatLabelInput id="email" v-model="form.email" type="email" label="Email" autocomplete="email"
+              :error="errors.email" :show-char-count="false" pill required />
 
-            <!-- Password -->
-            <div>
-              <div class="relative">
-                <input v-model="form.password" :type="showPassword ? 'text' : 'password'" id="password" minlength="6"
-                  required placeholder="Mot de passe"
-                  @focus="scrollToInput"
-                  class="w-full h-[52px] sm:h-[56px] px-4 pr-12 bg-white border border-gray-300 rounded text-[15px] sm:text-[17px] placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                  :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.password }" />
-                <button type="button" @click="showPassword = !showPassword"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-gray-900 transition-colors">
-                  <Eye v-if="showPassword" class="w-4 h-4 sm:w-5 sm:h-5" />
-                  <EyeOff v-else class="w-4 h-4 sm:w-5 sm:h-5" />
+            <FloatLabelInput id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'"
+              label="Mot de passe" autocomplete="new-password" minlength="6" :error="errors.password"
+              :show-char-count="false" pill required>
+              <template #trailing>
+                <button type="button" :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                  class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                  @click="showPassword = !showPassword">
+                  <Eye v-if="showPassword" class="w-5 h-5" />
+                  <EyeOff v-else class="w-5 h-5" />
                 </button>
-              </div>
-              <transition enter-active-class="transition-all duration-200" enter-from-class="opacity-0 -translate-y-1"
-                enter-to-class="opacity-100 translate-y-0">
-                <p v-if="errors.password" class="text-xs sm:text-sm text-red-600 mt-2">{{ errors.password }}</p>
-              </transition>
-            </div>
+              </template>
+            </FloatLabelInput>
 
             <div class="flex gap-2 sm:gap-3">
               <button type="button" @click="step = 1"
-                class="h-[48px] sm:h-[52px] px-5 sm:px-6 bg-white border border-gray-300 rounded-full text-[15px] sm:text-[17px] font-bold text-gray-900 hover:bg-gray-50 transition-colors duration-200">
+                class="h-14 px-6 bg-gray-100 rounded-full text-[17px] font-bold text-gray-900 hover:bg-gray-200 active:scale-[0.97] transition-all duration-200">
                 Retour
               </button>
               <button type="submit"
-                class="flex-1 h-[48px] sm:h-[52px] bg-black text-white rounded-full text-[15px] sm:text-[17px] font-bold hover:bg-gray-800 active:scale-[0.97] transition-all duration-200 flex items-center justify-center"
+                class="flex-1 h-14 bg-gray-900 text-white rounded-full text-[17px] font-bold hover:bg-gray-800 active:scale-[0.97] transition-all duration-200 flex items-center justify-center disabled:opacity-50"
                 :disabled="loading">
                 <span v-if="!loading">Suivant</span>
                 <Loader2 v-else class="w-5 h-5 animate-spin" />
@@ -146,7 +112,7 @@
           <!-- Divider -->
           <div class="relative my-1">
             <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300"></div>
+              <div class="w-full border-t border-gray-200"></div>
             </div>
             <div class="relative flex justify-center">
               <span class="px-2 bg-white text-[14px] sm:text-[15px] text-gray-500">ou</span>
@@ -155,8 +121,8 @@
 
           <!-- Google Sign Up -->
           <button @click="signInWithGoogle" type="button"
-            class="w-full h-[48px] sm:h-[52px] bg-white border border-gray-300 rounded-full text-[14px] sm:text-[15px] font-bold flex items-center justify-center hover:bg-gray-50 transition-colors duration-200">
-            <svg class="w-4 h-4 sm:w-[18px] sm:h-[18px] mr-2" viewBox="0 0 24 24">
+            class="w-full h-14 bg-white border border-gray-200 rounded-full text-[15px] font-bold flex items-center justify-center hover:bg-gray-50 active:scale-[0.97] transition-all duration-200">
+            <svg class="w-[18px] h-[18px] mr-2" viewBox="0 0 24 24">
               <path fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
               <path fill="#34A853"
@@ -176,69 +142,42 @@
         <div v-else class="space-y-6 sm:space-y-8 animate-fade-in">
           <!-- Header -->
           <div class="space-y-1 sm:space-y-2">
-            <h1 class="text-[27px] sm:text-[31px] font-bold text-gray-900 leading-tight">
+            <h1 class="text-[27px] sm:text-[31px] font-black tracking-tight text-gray-900 leading-tight">
               Votre établissement
             </h1>
           </div>
 
           <!-- Form -->
           <form @submit.prevent="handleRegister" class="space-y-4 sm:space-y-5">
-            <!-- Restaurant Name -->
-            <div>
-              <input v-model="form.restaurantName" type="text" id="restaurantName" required
-                placeholder="Nom de l'établissement"
-                @focus="scrollToInput"
-                class="w-full h-[52px] sm:h-[56px] px-4 bg-white border border-gray-300 rounded text-[15px] sm:text-[17px] placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.restaurantName }" />
-              <transition enter-active-class="transition-all duration-200" enter-from-class="opacity-0 -translate-y-1"
-                enter-to-class="opacity-100 translate-y-0">
-                <p v-if="errors.restaurantName" class="text-xs sm:text-sm text-red-600 mt-2">{{ errors.restaurantName
-                  }}</p>
-              </transition>
-            </div>
+            <FloatLabelInput id="restaurantName" v-model="form.restaurantName" label="Nom de l'établissement"
+              :error="errors.restaurantName" :show-char-count="false" pill required />
 
-            <!-- Type Select -->
-            <div>
-              <select v-model="form.type" id="type" required
-                @focus="scrollToInput"
-                class="w-full h-[52px] sm:h-[56px] px-4 bg-white border border-gray-300 rounded text-[15px] sm:text-[17px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                :class="{
-                  'border-red-500 focus:border-red-500 focus:ring-red-500': errors.type,
-                  'text-gray-900': form.type,
-                  'text-gray-500': !form.type
-                }">
-                <option value="" disabled selected>Type d'établissement</option>
-                <option v-for="type in establishmentTypes" :key="type.id" :value="type.id">
-                  {{ type.name }}
-                </option>
-              </select>
-              <transition enter-active-class="transition-all duration-200" enter-from-class="opacity-0 -translate-y-1"
-                enter-to-class="opacity-100 translate-y-0">
-                <p v-if="errors.type" class="text-xs sm:text-sm text-red-600 mt-2">{{ errors.type }}</p>
-              </transition>
-            </div>
+            <FloatLabelSelect id="type" v-model="form.type" label="Type d'établissement" :error="errors.type" pill
+              required>
+              <option value="" disabled>Sélectionnez un type</option>
+              <option v-for="type in establishmentTypes" :key="type.id" :value="type.id">
+                {{ type.name }}
+              </option>
+            </FloatLabelSelect>
 
-            <!-- Address with Location -->
-            <div>
-              <div class="relative">
-                <input v-model="form.address" type="text" id="address" placeholder="Adresse (optionnel)"
-                  @focus="scrollToInput"
-                  class="w-full h-[52px] sm:h-[56px] px-4 pr-11 sm:pr-12 bg-white border border-gray-300 rounded text-[15px] sm:text-[17px] placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200" />
-                <button type="button" @click="showLocationSheet = true"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-gray-900 transition-colors"
-                  title="Localiser sur la carte">
-                  <MapPin class="w-4 h-4 sm:w-5 sm:h-5" />
+            <FloatLabelInput id="address" v-model="form.address" label="Adresse (optionnel)" autocomplete="street-address"
+              :show-char-count="false" pill>
+              <template #trailing>
+                <button type="button" @click="showLocationSheet = true" title="Localiser sur la carte"
+                  aria-label="Localiser sur la carte"
+                  class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors">
+                  <MapPin class="w-5 h-5" />
                 </button>
-              </div>
-            </div>
+              </template>
+            </FloatLabelInput>
 
             <div class="flex gap-2 sm:gap-3">
               <button type="button" @click="step = 2"
-                class="h-[48px] sm:h-[52px] px-5 sm:px-6 bg-white border border-gray-300 rounded-full text-[15px] sm:text-[17px] font-bold text-gray-900 hover:bg-gray-50 transition-colors duration-200">
+                class="h-14 px-6 bg-gray-100 rounded-full text-[17px] font-bold text-gray-900 hover:bg-gray-200 active:scale-[0.97] transition-all duration-200">
                 Retour
               </button>
               <button type="submit"
-                class="flex-1 h-[48px] sm:h-[52px] bg-black text-white rounded-full text-[15px] sm:text-[17px] font-bold hover:bg-gray-800 active:scale-[0.97] transition-all duration-200 flex items-center justify-center"
+                class="flex-1 h-14 bg-gray-900 text-white rounded-full text-[17px] font-bold hover:bg-gray-800 active:scale-[0.97] transition-all duration-200 flex items-center justify-center disabled:opacity-50"
                 :disabled="loading">
                 <span v-if="!loading">Créer mon compte</span>
                 <span v-else class="flex items-center gap-2">
@@ -275,7 +214,7 @@
           leave-active-class="transition-all duration-200 ease-in" leave-from-class="translate-y-0 sm:scale-100"
           leave-to-class="translate-y-full sm:translate-y-0 sm:scale-95">
           <div v-if="showLocationSheet"
-            class="w-full sm:w-[90%] sm:max-w-2xl bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden">
+            class="w-full sm:w-[90%] sm:max-w-2xl bg-white rounded-t-3xl sm:rounded-[2rem] shadow-2xl max-h-[85vh] flex flex-col overflow-hidden">
             <!-- Header -->
             <div class="flex items-center justify-between p-6 border-b border-gray-100">
               <div>
@@ -311,7 +250,7 @@
             <!-- Address Display & Actions -->
             <div class="p-6 space-y-4 bg-white">
               <!-- Selected Address -->
-              <div v-if="selectedAddress" class="p-4 bg-gray-50 rounded-xl">
+              <div v-if="selectedAddress" class="p-4 bg-gray-50 rounded-3xl">
                 <p class="text-xs text-gray-500 mb-1">Adresse sélectionnée</p>
                 <p class="text-gray-900 font-medium">{{ selectedAddress }}</p>
               </div>

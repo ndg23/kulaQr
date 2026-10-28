@@ -12,7 +12,7 @@
       >
         <div 
           v-if="route.query.registered"
-          class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200"
+          class="mb-6 p-4 rounded-3xl bg-green-50 border border-green-200"
         >
           <div class="flex items-start gap-3">
             <CheckCircle class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
@@ -49,7 +49,7 @@
         <button 
           type="button"
           @click="signInWithGoogle"
-          class="w-full h-[52px] bg-white border border-gray-300 rounded-xl font-bold text-[15px] flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
+          class="w-full h-14 bg-white border border-gray-200 rounded-full font-bold text-[15px] flex items-center justify-center hover:bg-gray-50 active:scale-[0.97] transition-all duration-200"
         >
           <svg class="w-[18px] h-[18px] mr-2" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -65,7 +65,7 @@
         <!-- Divider -->
         <div class="relative my-4">
           <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-gray-300"></div>
+            <div class="w-full border-t border-gray-200"></div>
           </div>
           <div class="relative flex justify-center">
             <span class="px-2 bg-white text-[15px] text-gray-500">ou</span>
@@ -85,51 +85,55 @@
           >
             <div 
               v-if="error"
-              class="p-4 rounded-xl bg-red-50 border border-red-200"
+              class="px-5 py-4 rounded-3xl bg-red-50 border border-red-200"
             >
               <p class="text-sm text-red-900 font-medium">{{ error }}</p>
             </div>
           </transition>
 
           <!-- Email Input -->
-          <div>
-            <input
-              v-model="email"
-              type="email"
-              id="email"
-              required
-              :disabled="loading"
-              placeholder="Adresse e-mail"
-              class="w-full h-[56px] px-4 bg-white border border-gray-300 rounded-xl text-[17px] placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-red-500 transition-all duration-200 disabled:opacity-50 disabled:bg-gray-50"
-            />
-          </div>
+          <FloatLabelInput
+            id="email"
+            v-model="email"
+            type="email"
+            label="Adresse e-mail"
+            autocomplete="email"
+            :disabled="loading"
+            :show-char-count="false"
+            pill
+            required
+          />
 
           <!-- Password Input -->
-          <div class="relative">
-            <input
-              v-model="password"
-              :type="showPassword ? 'text' : 'password'"
-              id="password"
-              required
-              :disabled="loading"
-              placeholder="Mot de passe"
-              class="w-full h-[56px] px-4 pr-12 bg-white border border-gray-300 rounded-xl text-[17px] placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-red-500 transition-all duration-200 disabled:opacity-50 disabled:bg-gray-50"
-            />
-            <button 
-              type="button"
-              @click="showPassword = !showPassword"
-              :disabled="loading"
-              class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-50"
-            >
-              <Eye v-if="showPassword" class="w-5 h-5" />
-              <EyeOff v-else class="w-5 h-5" />
-            </button>
-          </div>
+          <FloatLabelInput
+            id="password"
+            v-model="password"
+            :type="showPassword ? 'text' : 'password'"
+            label="Mot de passe"
+            autocomplete="current-password"
+            :disabled="loading"
+            :show-char-count="false"
+            pill
+            required
+          >
+            <template #trailing>
+              <button
+                type="button"
+                :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                :disabled="loading"
+                class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                @click="showPassword = !showPassword"
+              >
+                <Eye v-if="showPassword" class="w-5 h-5" />
+                <EyeOff v-else class="w-5 h-5" />
+              </button>
+            </template>
+          </FloatLabelInput>
 
           <!-- Submit Button -->
           <button
             type="submit"
-            class="w-full h-[52px] bg-black text-white rounded-xl text-[17px] font-bold hover:bg-gray-800 active:scale-[0.97] transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black disabled:active:scale-100"
+            class="w-full h-14 bg-gray-900 text-white rounded-full text-[17px] font-bold hover:bg-gray-800 active:scale-[0.97] transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-900 disabled:active:scale-100"
             :disabled="loading"
           >
             <span v-if="!loading">Suivant</span>
@@ -140,19 +144,19 @@
           <button
             type="button"
             @click="navigateTo('/auth/forgot-password')"
-            class="w-full h-[52px] bg-white border border-gray-300 rounded-xl text-[17px] font-bold text-gray-900 hover:bg-gray-50 transition-colors duration-200"
+            class="w-full h-14 bg-gray-100 rounded-full text-[17px] font-bold text-gray-900 hover:bg-gray-200 active:scale-[0.97] transition-all duration-200"
           >
             Mot de passe oublié ?
           </button>
         </form>
 
         <!-- Sign Up Section -->
-        <div class="mt-10 pt-5 border-t border-gray-300">
+        <div class="mt-10 pt-5 border-t border-gray-200">
           <p class="text-[17px] text-gray-600">
             Vous n'avez pas de compte ?
             <NuxtLink 
               to="/auth/register" 
-              class="text-blue-500 hover:underline font-normal ml-1"
+              class="text-gray-900 underline font-bold ml-1"
             >
               S'inscrire
             </NuxtLink>
@@ -164,12 +168,12 @@
       <div class="mt-8 pt-6 border-t border-gray-200">
         <NuxtLink 
           to="/auth/pin"
-          class="flex items-center justify-center gap-2 text-[15px] text-gray-600 hover:text-gray-900 transition-colors"
+          class="flex items-center justify-center gap-2 h-12 rounded-full bg-gray-100 text-[15px] text-gray-900 hover:bg-gray-200 transition-colors"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
           </svg>
-          <span class="font-medium">Connexion personnel (PIN)</span>
+          <span class="font-bold">Connexion personnel (PIN)</span>
         </NuxtLink>
       </div>
     </div>
