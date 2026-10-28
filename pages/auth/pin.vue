@@ -143,10 +143,10 @@ const login = async () => {
   
   try {
     // Vérification côté base (bdd/staff_pin_access.sql) ; sans cette fonction, ancien accès direct à la table staff
-    let staffRow: any = null
-    let token: string | null = null
+    let staffRow = null
+    let token = null
 
-    const { data: rpcData, error: rpcErr } = await (supabase as any).rpc('staff_pin_login', {
+    const { data: rpcData, error: rpcErr } = await supabase.rpc('staff_pin_login', {
       p_username: username.value,
       p_pin: pin.value
     })
