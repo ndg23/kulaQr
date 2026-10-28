@@ -142,64 +142,57 @@ const login = async () => {
   error.value = ''
   
   try {
-    // Check if username and PIN are valid
-    const { data, error: err } = await supabase
-      .from('staff')
-      .select('*')
-      .eq('pin', pin.value)
-      .eq('username', username.value)
-      .eq('is_active', true)
-      .single()
-    
-    if (err) {
-      if (err.code === 'PGRST116') {
-        error.value = 'Identifiant ou code PIN incorrect'
-      } else {
-        throw err
+    // Vérification côté base (bdd/staff_pin_access.sql) ; sans cette fonction, ancien accès direct à la table staff
+    let staffRow: any = null
+    let token: string | null = null
+
+    const { data: rpcData, error: rpcErr } = await (supabase as any).rpc('staff_pin_login', {
+      p_username: username.value,
+      p_pin: pin.value
+    })
+
+    if (rpcErr && (rpcErr.code === 'PGRST202' || rpcErr.code === '42883' || /Could not find the function/i.test(rpcErr.message || ''))) {
+      const { data: legacy, error: legacyErr } = await supabase
+        .from('staff')
+        .select('*')
+        .eq('pin', pin.value)
+        .eq('username', username.value)
+        .eq('is_active', true)
+        .maybeSingle()
+      if (legacyErr) throw legacyErr
+      staffRow = legacy
+        ? { staff_id: legacy.id, username: legacy.username, role: legacy.role, establishment_id: legacy.establishment_id }
+        : null
+      if (staffRow) {
+        await supabase.from('staff').update({ last_login: new Date().toISOString() }).eq('id', legacy.id)
       }
-      return
+    } else if (rpcErr) {
+      throw rpcErr
+    } else if (rpcData) {
+      staffRow = rpcData
+      token = rpcData.token
     }
-    
-    if (!data) {
+
+    if (!staffRow) {
       error.value = 'Identifiant ou code PIN incorrect'
       return
     }
-    
-    // Create a session for the staff member
-    const sessionData = {
-      staff_id: data.id,
-      username: data.username,
-      role: data.role,
-      establishment_id: data.establishment_id,
+
+    localStorage.setItem('staff_session', JSON.stringify({
+      token,
+      staff_id: staffRow.staff_id,
+      username: staffRow.username,
+      role: staffRow.role,
+      establishment_id: staffRow.establishment_id,
       auth_type: 'pin'
-    }
-    
-    // Store session in localStorage
-    localStorage.setItem('staff_session', JSON.stringify(sessionData))
-    
-    // Log activity
-    // await supabase.from('staff_activity_logs').insert({
-    //   staff_id: data.id,
-    //   action: 'login',
-    //   details: { method: 'pin' }
-    // }).catch(e => console.error('Error logging activity:', e))
-    
-    // Update last login
-    await supabase
-      .from('staff')
-      .update({ last_login: new Date().toISOString() })
-      .eq('id', data.id)
-    
-    // Redirect based on role
-    let redirectPath = '/staff'
-    if (data.role === 'waiter') {
-      redirectPath = '/staff/orders'
-    } else if (data.role === 'kitchen') {
-      redirectPath = '/staff/kitchen'
-    } else if (data.role === 'manager') {
-      redirectPath = `/manager/${data.establishment_id}/dashboard`
-    }
-    
+    }))
+
+    const data = { username: staffRow.username }
+
+    // Tout le personnel arrive sur la page où l'on prend et suit les commandes
+    // (les pages /staff/kitchen et /manager/:id/dashboard n'existent pas ; le back-office manager exige un compte)
+    const redirectPath = '/staff'
+
     showToast.success('Connexion réussie', `Bienvenue, ${data.username}`)
     router.push(redirectPath)
     

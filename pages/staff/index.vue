@@ -430,30 +430,31 @@ const refreshOrders = async () => {
 // Helper function to get current staff info (prioritizes PIN auth for staff interface)
 const getCurrentStaff = async () => {
   try {
-    // For staff interface, prioritize PIN auth from localStorage
     const staffSession = localStorage.getItem('staff_session')
     if (staffSession) {
       const sessionData = JSON.parse(staffSession)
-      if (sessionData.staff_id && sessionData.auth_type === 'pin') {
-        // Verify the staff still exists and is active
-        const { data: staffData, error } = await supabase
-          .from('staff')
-          .select('id, username, role, establishment_id')
-          .eq('id', sessionData.staff_id)
-          .eq('is_active', true)
-          .single()
-        
-        if (!error && staffData) {
-          console.log('✅ Staff session found:', staffData.username)
-          return staffData
-        } else {
-          console.warn('⚠️ Staff session invalid, clearing localStorage')
-          localStorage.removeItem('staff_session')
+      if (sessionData.auth_type === 'pin') {
+        if (sessionData.token) {
+          // Le jeton est vérifié côté base : session valide, non expirée, compte toujours actif
+          const { data: staffData, error } = await (supabase as any).rpc('staff_session_info', {
+            p_token: sessionData.token
+          })
+          if (!error && staffData) return staffData
+        } else if (sessionData.staff_id) {
+          // Session sans jeton (fonctions SQL non installées) : ancienne vérification directe
+          const { data: staffData, error } = await supabase
+            .from('staff')
+            .select('id, username, role, establishment_id')
+            .eq('id', sessionData.staff_id)
+            .eq('is_active', true)
+            .maybeSingle()
+          if (!error && staffData) return staffData
         }
+        console.warn('⚠️ Session du personnel expirée ou invalide')
+        localStorage.removeItem('staff_session')
       }
     }
-    
-    console.warn('⚠️ No valid staff session found')
+
     return null
   } catch (error) {
     console.error('Error getting current staff:', error)
@@ -470,39 +471,49 @@ const updateOrderStatus = async (orderId: string, newStatus: string) => {
       return
     }
 
-    const updateData: any = { 
-      status: newStatus,
-      updated_at: new Date().toISOString()
-    }
+    const token = JSON.parse(localStorage.getItem('staff_session') || '{}').token
 
-    // Si on passe en confirmed ou processing, assigner le staff
-    if (newStatus === 'confirmed' || newStatus === 'processing') {
-      updateData.staff_id = currentStaff.id
-    }
+    if (token) {
+      // La base vérifie la session, l'établissement et la transition de statut
+      const { data: updated, error } = await (supabase as any).rpc('staff_set_order_status', {
+        p_token: token,
+        p_order_id: orderId,
+        p_status: newStatus
+      })
 
-    // Condition pour éviter les race conditions selon le statut actuel attendu
-    let currentStatusCondition = 'pending'
-    if (newStatus === 'processing') {
-      currentStatusCondition = 'confirmed'
-    } else if (newStatus === 'completed') {
-      currentStatusCondition = 'processing'
-    }
+      if (error) throw error
 
-    const { error } = await supabase
-      .from('orders')
-      .update(updateData)
-      .eq('id', orderId)
-      .eq('status', currentStatusCondition)
-    
-    if (error) {
-      if (error.code === 'PGRST116') { // No rows updated (status changed)
+      if (!updated) {
         showToast.error('Commande déjà mise à jour', 'Le statut de cette commande a changé')
         await loadOrders() // Recharger pour voir l'état actuel
         return
       }
-      throw error
+    } else {
+      // Session sans jeton : ancienne mise à jour directe
+      const updateData: any = { status: newStatus, updated_at: new Date().toISOString() }
+      if (newStatus === 'confirmed' || newStatus === 'processing') {
+        updateData.staff_id = currentStaff.id
+      }
+      let expected = 'pending'
+      if (newStatus === 'processing') expected = 'confirmed'
+      else if (newStatus === 'completed') expected = 'processing'
+
+      const { data: rows, error } = await (supabase as any)
+        .from('orders')
+        .update(updateData)
+        .eq('id', orderId)
+        .eq('status', expected)
+        .select('id')
+
+      if (error) throw error
+
+      if (!rows || rows.length === 0) {
+        showToast.error('Commande déjà mise à jour', 'Le statut de cette commande a changé')
+        await loadOrders()
+        return
+      }
     }
-    
+
     // Update local state
     const orderIndex = orders.value.findIndex(order => order.id === orderId)
     if (orderIndex !== -1) {

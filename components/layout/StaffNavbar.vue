@@ -276,6 +276,15 @@ const getRoleBadgeClass = (role) => {
 // Déconnexion
 const logout = async () => {
   try {
+    // Invalider le jeton côté base
+    if (staffSession.value?.token) {
+      try {
+        await supabase.rpc('staff_logout', { p_token: staffSession.value.token })
+      } catch (e) {
+        console.error('Erreur lors de la fermeture de la session:', e)
+      }
+    }
+
     // Enregistrer l'activité de déconnexion si la fonction existe
     if (staffSession.value && staffSession.value.staff_id) {
       try {
