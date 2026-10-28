@@ -1,25 +1,12 @@
 <template>
-  <div class="py-6">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-semibold text-gray-900 mb-2">Utilisateurs</h1>
-      <p class="text-gray-600">Gérez vos utilisateurs et leurs permissions</p>
-    </div>    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-      <div v-for="stat in statsDisplay" :key="stat.name" 
-        class="bg-white p-6 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500 mb-2">{{ stat.name }}</p>
-            <h3 class="text-4xl font-black text-gray-900">{{ stat.value }}</h3>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
-            <component :is="stat.icon" class="w-6 h-6 text-gray-700" />
-          </div>
-        </div>
-      </div>
-    </div>      <!-- Users List with DataTable -->
+  <div>
+    <PageHeader title="Utilisateurs" description="Gérez vos utilisateurs et leurs permissions" />
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-10">
+      <PageStatCard v-for="(stat, i) in statsDisplay" :key="stat.name" :tone="cycleTone(i)" :name="stat.name" :value="stat.value" :icon="stat.icon" />
+    </div>
+
+      <!-- Users List with DataTable -->
       <DataTable
         :items="users"
         :columns="tableColumns"
@@ -40,7 +27,7 @@
         empty-icon="fas fa-users"
         @page-change="currentPage = $event"
         @update:per-page="perPage = $event"
-        @add="showUserModal = true"
+        @add="navigateTo('/admin/users/new')"
         @button-click="handleButtonClick"
       >
         <!-- User Column with Avatar -->
@@ -103,43 +90,11 @@
         </template>
       </DataTable>
   
-    <!-- User Modal -->
-    <UserFormModal
-      v-if="showUserModal"
-      :open="showUserModal"
-      :user="selectedUser"
-      @close="closeUserModal"
-      @submit="handleUserSubmitted"
-    />
-
-    <!-- Role Change Modal -->
-    <RoleChangeModal
-      :open="showRoleChangeModal"
-      :user="selectedUser"
-      @close="showRoleChangeModal = false"
-      @submit="handleRoleChanged"
-    />
-
-    <!-- Establishment Assignment Modal -->
-    <EstablishmentAssignmentModal
-      :open="assignmentModal.modalOpen.value"
-      :mode="assignmentModal.modalOptions.value.mode"
-      :establishment="assignmentModal.modalOptions.value.establishment"
-      @close="assignmentModal.closeModal"
-      @success="handleEstablishmentAssignmentSuccess"
-    />
-
-    <!-- Subscription Management Modal -->
-    <SubscriptionManagementModal
-      :open="showSubscriptionModal"
-      :user="selectedUser"
-      @close="showSubscriptionModal = false"
-      @success="handleModalSuccess"
-    />
-  </div>
+      </div>
 </template>
 
 <script setup lang="ts">
+import { cycleTone } from '~/utils/palette'
 import { ref, computed, reactive, onMounted } from 'vue'
 // import { Users, UserPlus, UserCheck, Shield, Search, Edit, Trash2, RefreshCw, X, CheckCircle, AlertTriangle, Info, Users, ChevronLeft, ChevronRight, Eye, EyeOff, User, Download, UserPlus, UserCheck, UserX, Shield, Mail, Ban, Loader2 } from 'lucide-vue-next'
 import { useCustomToast } from '~/composables/useToast'
@@ -149,26 +104,15 @@ import {
   Plus, Edit, Trash2, RefreshCw, X, CheckCircle, AlertTriangle, 
   Info, Users, ChevronLeft, ChevronRight, Eye, EyeOff, User, Download,
   UserPlus, UserCheck, UserX, Shield, Mail, Ban, Loader2, Search, 
-  CreditCard, UserCog
+  CreditCard, UserCog, Store
 } from 'lucide-vue-next';
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild, Switch } from '@headlessui/vue'
-import UserFormModal from '~/components/admin/UserFormModal.vue'
-import RoleChangeModal from '~/components/admin/RoleChangeModal.vue'
-import EstablishmentAssignmentModal from '~/components/admin/EstablishmentAssignmentModal.vue'
 import ActionDropdown from '~/components/admin/ActionDropdown.vue'
-import SubscriptionManagementModal from '~/components/admin/SubscriptionManagementModal.vue'
 // import { UDropdown } from '@/components/ui/dropdown'
 
 const {showToast} = useCustomToast()
 const { client: supabase } = useSupabaseWrapper()
 const loading = ref(false)
-const showUserModal = ref(false)
-const showRoleChangeModal = ref(false)
-// Import establishment assignment composable
-import { useEstablishmentAssignment } from '~/composables/useEstablishmentAssignment'
-const assignmentModal = useEstablishmentAssignment()
-const showSubscriptionModal = ref(false)
-const selectedUser = ref(null)
 const currentPage = ref(1)
 const perPage = ref(10)
 
@@ -460,44 +404,10 @@ const formatRole = (role: string) => {
   return roles[role] || role
 }
 
-// Methods
-const openUserModal = (user: any = null) => {
-  selectedUser.value = user
-  showUserModal.value = true
-}
-
-const closeUserModal = () => {
-  showUserModal.value = false
-  selectedUser.value = null
-}
-
-const handleUserSubmitted = () => {
-  loadUsers()
-}
-
-const editUser = (user: any) => {
-  selectedUser.value = { ...user }
-  Object.assign(userForm, {
-    full_name: user.full_name,
-    email: user.email,
-    role: user.role,
-    is_active: user.is_active,
-    subscription_tier: user.subscription_tier,
-    subscription_ends_at: user.subscription_ends_at
-  })
-  showUserModal.value = true
-}
-
-const changeUserRole = (user: any) => {
-  // Ouvrir le modal dédié au changement de rôle
-  selectedUser.value = { ...user }
-  showRoleChangeModal.value = true
-}
-
-const handleRoleChanged = async () => {
-  showRoleChangeModal.value = false
-  await loadUsers()
-}
+// Navigation : chaque action a sa page
+const editUser = (user: any) => navigateTo(`/admin/users/${user.id}/edit`)
+const changeUserRole = (user: any) => navigateTo(`/admin/users/${user.id}/role`)
+const manageSubscription = (user: any) => navigateTo(`/admin/users/${user.id}/subscription`)
 
 const viewUser = (user: any) => {
   // Rediriger vers la page de profil utilisateur
@@ -552,8 +462,7 @@ const handleButtonClick = (action: string) => {
   
   switch (action) {
     case 'add-manager-establishment':
-      console.log('Opening Manager + Establishment modal')
-      assignmentModal.createOwnerWithEstablishment()
+      navigateTo('/admin/establishments/new')
       break
     case 'import':
       showToast.info('Fonctionnalité d\'importation à venir')
@@ -585,6 +494,13 @@ const getUserActions = (user: any) => {
       variant: 'primary' as const,
       callback: () => manageSubscription(user)
     },
+    ...(user.role === 'owner' || user.role === 'manager' ? [{
+      id: 'assign',
+      label: 'Assigner un établissement',
+      icon: Store,
+      variant: 'primary' as const,
+      callback: () => navigateTo(`/admin/users/${user.id}/assign`)
+    }] : []),
     {
       id: 'role',
       label: 'Changer Rôle',
@@ -637,23 +553,6 @@ const getUserActions = (user: any) => {
 // Handle action from dropdown
 const handleUserAction = (action: any) => {
   // Actions are handled by their callbacks
-}
-
-// Manage subscription
-const manageSubscription = (user: any) => {
-  selectedUser.value = user
-  showSubscriptionModal.value = true
-}
-
-// Handle modal success
-const handleModalSuccess = () => {
-  loadUsers()
-}
-
-// Handle establishment assignment success
-const handleEstablishmentAssignmentSuccess = async () => {
-  assignmentModal.onSuccess()
-  await loadUsers()
 }
 
 // Load initial data

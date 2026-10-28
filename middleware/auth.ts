@@ -14,7 +14,7 @@ export default defineNuxtRouteMiddleware((to) => {
     supabase.from('establishments')
       .select('id')
       .eq('user_id', user.value.id)
-      .single()
+      .maybeSingle()
       .then(({ data: establishment }) => {
         if (establishment?.id) {
           navigateTo(`/manager/${establishment.id}`)

@@ -1,29 +1,20 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Modern Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-6">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Gestion des demandes QR</h1>
-            <p class="text-sm text-gray-500 mt-1">Gérez les demandes de support pour les codes QR</p>
-          </div>
-          <div class="flex items-center space-x-3">
-            <button
-              @click="refreshData"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-            >
-              <RefreshCw class="w-4 h-4 mr-2" />
-              Actualiser
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div>
+    <PageHeader title="Demandes QR" description="Gérez les demandes de support pour les codes QR">
+      <template #actions>
+        <button
+          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          @click="refreshData"
+        >
+          <RefreshCw class="w-4 h-4 mr-2" />
+          Actualiser
+        </button>
+      </template>
+    </PageHeader>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main>
       <!-- Stats Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <div
           v-for="stat in stats"
           :key="stat.name"

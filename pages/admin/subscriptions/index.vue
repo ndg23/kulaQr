@@ -1,21 +1,17 @@
 <template>
-    <div class="p-6 lg:p-8 w-full max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">Gestion des Abonnements</h1>
-            <p class="text-lg text-gray-600">Surveillez et gérez les abonnements des utilisateurs</p>
-        </div>
+    <div class="w-full">
+        <PageHeader title="Abonnements" description="Surveillez et gérez les abonnements des utilisateurs" />
 
         <!-- Actions rapides -->
-        <div class="mb-8 flex gap-4">
+        <div class="mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button @click="manualCheck" :disabled="checking"
-                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                class="px-5 py-2.5 justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                 <RefreshCw :class="{ 'animate-spin': checking }" class="w-5 h-5" />
                 {{ checking ? 'Vérification en cours...' : 'Vérifier maintenant' }}
             </button>
 
             <button @click="loadStats"
-                class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2">
+                class="px-5 py-2.5 justify-center bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors flex items-center gap-2">
                 <BarChart3 class="w-5 h-5" />
                 Actualiser les stats
             </button>

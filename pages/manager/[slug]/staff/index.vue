@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div>
     <!-- Modern Header -->
     <ManagerModernHeader
       title="Gestion du personnel"
@@ -12,7 +12,7 @@
       }"
     />
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <main>
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-16">
         <Loader2 class="w-10 h-10 text-kula-500 animate-spin mb-4" />
@@ -204,101 +204,12 @@
       </div>
     </main>
 
-    <!-- Staff Modal -->
-    <TransitionRoot appear :show="showStaffModal" as="template">
-      <Dialog as="div" @close="closeStaffModal" class="relative z-50">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-3xl bg-white p-6 sm:p-8 shadow-2xl transition-all">
-                <DialogTitle as="h3" class="text-xl font-semibold text-gray-900 mb-6">
-                  {{ isEditing.value ? 'Modifier un membre' : 'Ajouter un membre' }}
-                </DialogTitle>
-                
-                <form @submit.prevent="saveStaff" class="space-y-5">
-                  <!-- Username -->
-                  <FloatLabelInput
-                    id="username"
-                    v-model="staffForm.username"
-                    type="text"
-                    required
-                    label="Nom d'utilisateur"
-                    placeholder="Ex: Jean D."
-                  />
-                  
-                  <!-- Active Status -->
-                  <div class="flex items-center justify-between py-4 px-4 bg-gray-50 rounded-2xl">
-                    <label for="is_active" class="text-sm font-medium text-gray-700">
-                      Compte actif
-                    </label>
-                    <AppleSwitch
-                      id="is_active"
-                      v-model="staffForm.is_active"
-                    />
-                  </div>
-                  
-                  <!-- Buttons -->
-                  <div class="flex gap-3 pt-2">
-                    <button
-                      type="button"
-                      @click="closeStaffModal"
-                      class="flex-1 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      type="submit"
-                      class="flex-1 px-4 py-3 text-sm font-semibold text-white bg-kula-500 hover:bg-kula-600 rounded-xl transition-colors relative disabled:opacity-50"
-                      :disabled="formLoading"
-                    >
-                      <span v-if="formLoading" class="absolute inset-0 flex items-center justify-center">
-                        <Loader2 class="w-5 h-5 animate-spin" />
-                      </span>
-                      <span :class="{ invisible: formLoading }">
-                        {{ isEditing.value ? 'Mettre à jour' : 'Ajouter' }}
-                      </span>
-                    </button>
-                  </div>
-                </form>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { 
-  TransitionRoot, 
-  TransitionChild, 
-  Dialog, 
-  DialogPanel, 
-  DialogTitle 
-} from '@headlessui/vue'
 import { 
   User, 
   Users, 
@@ -321,17 +232,6 @@ const { slug } = route.params
 // State
 const staffMembers = ref([] as any[])
 const loading = ref(true)
-const showStaffModal = ref(false)
-const editingStaff = ref(null)
-const formLoading = ref(false)
-const isEditing = ref(false)
-// Form state
-const staffForm = reactive({
-  username: '',
-  role: 'staff',
-  pin: 1234,
-  is_active: true
-})
 
 definePageMeta({
   layout: 'manager'
@@ -396,87 +296,9 @@ const toggleStaffStatus = async (member, newStatus) => {
   }
 }
 
-// Open staff modal
-const openStaffModal = (staff = null) => {
-  if (staff) {
-    isEditing.value = true
-    editingStaff.value = staff
-    staffForm.username = staff.username
-    staffForm.role = staff.role
-    staffForm.is_active = staff.is_active
-  } else {
-    isEditing.value = false
-    editingStaff.value = null
-    staffForm.username = ''
-    staffForm.role = 'staff'
-    staffForm.is_active = true
-  }
-  showStaffModal.value = true
-}
-
-// Close staff modal
-const closeStaffModal = () => {
-  showStaffModal.value = false
-  setTimeout(() => {
-    editingStaff.value = null
-  }, 300)
-}
-
-// Save staff
-const saveStaff = async () => {
-  formLoading.value = true
-  
-  try {
-    if (editingStaff.value?.id) {
-      const { error } = await supabase
-        .from('staff')
-        .update({
-          username: staffForm.username,
-          is_active: staffForm.is_active,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingStaff.value.id)
-      
-      if (error) throw error
-      
-      const index = staffMembers.value.findIndex(s => s.id === editingStaff.value.id)
-      if (index !== -1) {
-        staffMembers.value[index] = {
-          ...staffMembers.value[index],
-          username: staffForm.username,
-          is_active: staffForm.is_active,
-          updated_at: new Date().toISOString()
-        }
-      }
-      
-      showToast.success('Succès', 'Membre mis à jour avec succès')
-    } else {
-      const { data, error } = await supabase
-        .from('staff')
-        .insert({
-          username: staffForm.username,
-          establishment_id: slug,
-          role: "staff",
-          pin: staffForm.pin,
-          is_active: staffForm.is_active
-        })
-        .select()
-        .single()
-      
-      if (error) throw error
-      
-      staffMembers.value.unshift(data)
-      showToast.success('Succès', 'Nouveau membre ajouté avec succès')
-    }
-    
-    closeStaffModal()
-  } catch (error) {
-    console.error('Error saving staff:', error)
-    showToast.error('Erreur', 'Impossible de sauvegarder le membre')
-  } finally {
-    formLoading.value = false
-  }
-}
+// Chaque action a sa page
+const openStaffModal = (staff: any = null) =>
+  navigateTo(staff?.id ? `/manager/${slug}/staff/${staff.id}/edit` : `/manager/${slug}/staff/new`)
 
 // Generate PIN
 const generatePin = async (staff) => {

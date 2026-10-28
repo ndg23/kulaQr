@@ -68,17 +68,15 @@ export const useEstablishment = () => {
         .from('establishments')
         .select('*')
         .eq('user_id', user.value.id)
-        .single()
-      
-      if (err) {
-        if (err.code === 'PGRST116') {
-          // No establishment found for this user
-          console.warn('No establishment found for user:', user.value.id)
-          return null
-        }
-        throw err
+        .maybeSingle()
+
+      if (err) throw err
+
+      if (!data) {
+        // No establishment found for this user (ex. admin)
+        return null
       }
-      
+
       establishment.value = data
       
       // Update localStorage

@@ -1,34 +1,20 @@
 <template>
-    <div class="py-6">
-      <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-semibold text-gray-900 mb-2">Tableau de bord</h1>
-        <p class="text-gray-600">Bienvenue sur votre espace d'administration</p>
-      </div>
-  
-      <!-- Stats Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        <component
-          :is="stat.link ? 'NuxtLink' : 'div'"
-          v-for="stat in statsDisplay"
-          :key="stat.name"
-          :to="stat.link"
-          class="bg-white p-6 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors"
-          :class="{ 'cursor-pointer': stat.link }"
-        >
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-500 mb-2">{{ stat.name }}</p>
-              <h3 class="text-4xl font-black text-gray-900">{{ stat.value }}</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
-              <component :is="stat.icon" class="w-6 h-6 text-gray-700" />
-            </div>
-          </div>
-        </component>
-      </div>
-  
-      <!-- Recent Activity -->
+  <div>
+    <PageHeader title="Tableau de bord" description="Bienvenue sur votre espace d'administration" />
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-10">
+      <PageStatCard
+        v-for="(stat, i) in statsDisplay"
+        :key="stat.name"
+        :tone="cycleTone(i)"
+        :name="stat.name"
+        :value="stat.value"
+        :icon="stat.icon"
+        :to="stat.link"
+      />
+    </div>
+
+    <!-- Recent Activity -->
       <div class="bg-white rounded-[2rem] border border-gray-100 overflow-hidden mb-12">
         <div class="p-6 border-b border-gray-100">
           <div class="flex items-center justify-between">
@@ -170,6 +156,7 @@
   </template>
   
   <script setup lang="ts">
+import { cycleTone } from '~/utils/palette'
   import { ref, computed, onMounted } from 'vue'
   import { 
     Users, UserCheck, Shield, Activity, Utensils, ShoppingBag, 

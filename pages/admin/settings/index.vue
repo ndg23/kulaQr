@@ -1,10 +1,6 @@
 <template>
-  <div class="p-6 lg:p-8">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-4xl font-bold text-gray-900 mb-2">Paramètres</h1>
-      <p class="text-lg text-gray-600">Configuration de la plateforme</p>
-    </div>
+  <div>
+    <PageHeader title="Paramètres" description="Configuration de la plateforme" />
 
     <!-- Settings Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl">

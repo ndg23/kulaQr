@@ -1,10 +1,6 @@
 <template>
-  <div class="p-6 lg:p-8">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">QR Codes</h1>
-      <p class="text-lg text-gray-600">Aperçu des QR codes de vos établissements</p>
-    </div>
+  <div>
+    <PageHeader title="QR Codes" description="Aperçu des QR codes de vos établissements" />
 
     <!-- Establishment Selector -->
     <div class="mb-8">

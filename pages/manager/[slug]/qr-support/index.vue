@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div>
     <!-- Modern Header -->
     <ManagerModernHeader
       title="Support QR"
@@ -12,7 +12,7 @@
       }"
     />
 
-    <main class="max-w-7xl mx-auto px-8 pb-16 mt-2">
+    <main>
       <!-- Stats Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -192,151 +192,11 @@
       </div>
     </main>
 
-    <!-- New Request Modal -->
-    <TransitionRoot appear :show="showNewRequestModal" as="template">
-      <Dialog as="div" class="relative z-50" @close="closeModal">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
-                <div class="p-6">
-                  <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                      {{ editingRequest ? 'Modifier la demande' : 'Nouvelle demande de support' }}
-                    </h3>
-                    <button
-                      @click="closeModal"
-                      class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
-                    >
-                      <X class="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <form @submit.prevent="submitRequest" class="space-y-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Type de demande *
-                      </label>
-                      <select
-                        v-model="requestForm.request_type"
-                        required
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="">Sélectionnez un type</option>
-                        <option value="new_qr">Nouveau QR code</option>
-                        <option value="qr_replacement">Remplacement de QR code</option>
-                        <option value="qr_update">Mise à jour de QR code</option>
-                        <option value="qr_deactivation">Désactivation de QR code</option>
-                        <option value="bulk_qr_generation">Génération de QR codes en masse</option>
-                        <option value="qr_customization">Personnalisation de QR code</option>
-                        <option value="technical_issue">Problème technique</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Titre *
-                      </label>
-                      <input
-                        v-model="requestForm.title"
-                        type="text"
-                        required
-                        placeholder="Titre de votre demande"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Numéro de table (optionnel)
-                      </label>
-                      <input
-                        v-model.number="requestForm.table_number"
-                        type="number"
-                        min="1"
-                        placeholder="Ex: 5"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Priorité
-                      </label>
-                      <select
-                        v-model="requestForm.priority"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="low">Faible</option>
-                        <option value="medium">Moyen</option>
-                        <option value="high">Élevé</option>
-                        <option value="urgent">Urgent</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Description *
-                      </label>
-                      <textarea
-                        v-model="requestForm.description"
-                        required
-                        rows="4"
-                        placeholder="Décrivez votre demande en détail..."
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      ></textarea>
-                    </div>
-
-                    <div class="flex gap-3 pt-4">
-                      <button
-                        type="button"
-                        @click="closeModal"
-                        class="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
-                      >
-                        Annuler
-                      </button>
-                      <button
-                        type="submit"
-                        :disabled="submitting"
-                        class="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {{ submitting ? 'Envoi...' : (editingRequest ? 'Modifier' : 'Envoyer') }}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue'
 import {
   HelpCircle,
   Plus,
@@ -363,16 +223,11 @@ const {
   loading,
   requests,
   fetchRequests,
-  createRequest,
-  updateRequest,
   cancelRequest,
   getStats
 } = useQrSupport()
 
 // Local state
-const showNewRequestModal = ref(false)
-const editingRequest = ref(null)
-const submitting = ref(false)
 const stats = ref(null)
 
 // Filters
@@ -380,14 +235,6 @@ const statusFilter = ref('')
 const priorityFilter = ref('')
 const typeFilter = ref('')
 
-// Form data
-const requestForm = ref({
-  request_type: '',
-  title: '',
-  table_number: null as number | null,
-  priority: 'medium',
-  description: ''
-})
 
 // Computed
 const filteredRequests = computed(() => {
@@ -409,63 +256,10 @@ const filteredRequests = computed(() => {
 })
 
 // Methods
-const openNewRequestModal = () => {
-  editingRequest.value = null
-  requestForm.value = {
-    request_type: '',
-    title: '',
-    table_number: null,
-    priority: 'medium',
-    description: ''
-  }
-  showNewRequestModal.value = true
-}
+// Chaque action a sa page
+const openNewRequestModal = () => navigateTo(`/manager/${slug}/qr-support/new`)
 
-const editRequest = (request: any) => {
-  editingRequest.value = request
-  requestForm.value = {
-    request_type: request.request_type,
-    title: request.title,
-    table_number: request.table_number,
-    priority: request.priority,
-    description: request.description || ''
-  }
-  showNewRequestModal.value = true
-}
-
-const closeModal = () => {
-  showNewRequestModal.value = false
-  editingRequest.value = null
-}
-
-const submitRequest = async () => {
-  if (!establishment.value?.id) return
-
-  submitting.value = true
-  try {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
-
-    const requestData = {
-      establishment_id: establishment.value.id,
-      requested_by: user.id,
-      ...requestForm.value
-    }
-
-    if (editingRequest.value) {
-      await updateRequest(editingRequest.value.id, requestForm.value)
-    } else {
-      await createRequest(requestData)
-    }
-
-    closeModal()
-    await loadData()
-  } catch (error) {
-    console.error('Error submitting request:', error)
-  } finally {
-    submitting.value = false
-  }
-}
+const editRequest = (request: any) => navigateTo(`/manager/${slug}/qr-support/${request.id}/edit`)
 
 const confirmCancelRequest = (request: any) => {
   if (confirm('Êtes-vous sûr de vouloir annuler cette demande ?')) {

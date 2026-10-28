@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div>
     <!-- Modern Header -->
     <ManagerModernHeader
       title="Catégories"
@@ -12,7 +12,7 @@
       }"
     />
 
-    <main class="max-w-7xl mx-auto px-8 pb-16 mt-2">
+    <main>
       <!-- Stats Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         <div
@@ -173,44 +173,6 @@
       </div>
     </main>
 
-    <!-- Modal -->
-    <TransitionRoot appear :show="showCategoryModal" as="template">
-      <Dialog as="div" class="relative z-50" @close="closeCategoryModal">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-            <DialogPanel class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
-              <CategoryModal
-                :category="editingCategory"
-                @close="closeCategoryModal"
-                @submit="saveCategory"
-              />
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
   </div>
 </template>
 
@@ -223,18 +185,10 @@ import {
   ImageIcon, Search, ArrowUpDown, Upload, Download,
   ArrowRight, List, TrendingUp
 } from 'lucide-vue-next'
-import CategoryModal from '~/components/modals/CategoryModal.vue'
-import {
-  TransitionRoot,
-  TransitionChild,
-  Dialog,
-  DialogPanel
-} from '@headlessui/vue'
 // import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useEstablishment } from '~/composables/useEstablishment'
 import type { Category, Product } from '~/types'
 import { useCustomToast } from '~/composables/useToast'
-import ImageUploader from '~/components/ui/ImageUploader.vue'
 // import { useSupabaseClient } from '@supabase/supabase-js'
 const {showToast} = useCustomToast()
 const route = useRoute()
@@ -243,8 +197,6 @@ const supabase = useSupabaseClient()
 const { establishment } = useEstablishment()
 
 // State
-const showCategoryModal = ref(false)
-const editingCategory = ref<Category | null>(null as any)
 const categories = ref<Category[]>([])
 const products = ref<Product[]>([])
 const loading = ref(true)
@@ -295,93 +247,9 @@ const getCategoryIcon = (category: Category) => {
   return category.icon || UtensilsCrossed
 }
 
-const openCategoryModal = () => {
-  editingCategory.value = null
-  showCategoryModal.value = true
-}
+const openCategoryModal = () => navigateTo(`/manager/${slug}/categories/new`)
 
-const closeCategoryModal = () => {
-  showCategoryModal.value = false
-  editingCategory.value = null
-}
-
-const editCategory = (category: Category) => {
-  editingCategory.value = { ...category }
-  showCategoryModal.value = true
-}
-
-interface CategoryData {
-  name: string
-  order_number: number
-  image_url?: string
-  establishment_id?: string
-}
-
-const saveCategory = async (categoryData: CategoryData) => {
-  try {
-    if (editingCategory.value?.id) {
-      const { data, error } = await supabase
-        .from('categories')
-        .update({
-          name: categoryData.name,
-          order_number: categoryData.order_number,
-          image_url: categoryData.image_url,
-          establishment_id: establishment.value?.id as string
-        })
-        .eq('id', editingCategory.value.id)
-        .select()
-        .single()
-
-      if (error) throw error
-      
-      const updatedCategory = data as Category
-      
-      // Mise à jour locale
-      const index = categories.value.findIndex((c: Category) => c.id === editingCategory.value?.id)
-      if (index !== -1) {
-        categories.value[index] = {
-          ...categories.value[index],
-          ...updatedCategory,
-          imageError: false,
-          imageLoaded: false,
-          iconBg: 'bg-blue-50',
-          iconColor: 'text-blue-500'
-        }
-      }
-    } else {
-      const { data, error } = await supabase
-        .from('categories')
-        .insert({
-          establishment_id: establishment.value?.id,
-          name: categoryData.name,
-          order_number: categories.value.length + 1,
-          image_url: categoryData.image_url
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // Ajout local
-      categories.value.push({
-        ...data,
-        imageError: false,
-        imageLoaded: false,
-        iconBg: 'bg-blue-50',
-        iconColor: 'text-blue-500'
-      })
-    }
-    
-    closeCategoryModal()
-    showToast.success(
-      'Catégorie sauvegardée',
-      editingCategory.value?.id ? 'Modifications enregistrées' : 'Nouvelle catégorie ajoutée'
-    )
-  } catch (error) {
-    console.error('Error saving category:', error)
-    showToast.error('Erreur', "Une erreur s'est produite lors de la sauvegarde")
-  }
-}
+const editCategory = (category: Category) => navigateTo(`/manager/${slug}/categories/${category.id}/edit`)
 
 const deleteCategory = async (id: string) => {
   // Check if category has products

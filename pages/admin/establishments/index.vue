@@ -1,45 +1,11 @@
 <template>
-  <div class="py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <div class="mb-6 sm:mb-8">
-      <h1 class="text-2xl sm:text-3xl font-semibold text-gray-900 mb-2">Établissements</h1>
-      <p class="text-sm sm:text-base text-gray-600">Gérez les établissements et leurs propriétaires</p>
+  <div>
+    <PageHeader title="Établissements" description="Gérez les établissements et leurs propriétaires" />
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-10">
+      <PageStatCard v-for="(stat, i) in statsDisplay" :key="stat.name" :tone="cycleTone(i)" :name="stat.name" :value="stat.value" :icon="stat.icon" />
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
-      <div v-for="stat in statsDisplay" :key="stat.name" 
-        class="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">{{ stat.name }}</p>
-            <h3 class="text-3xl sm:text-4xl font-black text-gray-900">{{ stat.value }}</h3>
-          </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gray-50 flex items-center justify-center">
-            <component :is="stat.icon" class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Establishments List with DataTable -->
-    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-      <!-- Mobile Header - visible seulement sur mobile -->
-      <div class="md:hidden px-4 py-3 bg-gray-50 border-b border-gray-100">
-        <div class="flex items-center justify-between">
-          <h3 class="font-semibold text-gray-900">Établissements</h3>
-          <button
-            @click="handleAction('add')"
-            class="px-3 py-1.5 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Ajouter
-          </button>
-        </div>
-      </div>
-      
-      <!-- Responsive table wrapper -->
-      <div class="overflow-x-auto">
         <DataTable
           :items="restaurants"
           :columns="tableColumns"
@@ -57,7 +23,6 @@
           @page-change="currentPage = $event"
           @update:per-page="perPage = $event"
           @button-click="handleAction"
-          class="min-w-[800px]"
         >
       <!-- Restaurant Name Column -->
       <template #cell-name="{ item }">
@@ -89,12 +54,23 @@
 
       <!-- Owner Column -->
       <template #cell-owner_name="{ item }">
-        <div class="flex items-center gap-2 max-w-[150px] sm:max-w-[180px]">
-          <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0">
-            <span class="text-xs font-semibold text-gray-700">{{ getInitials(item.owner_name) }}</span>
-          </div>
-          <span class="text-xs sm:text-sm font-medium text-gray-700 truncate">{{ item.owner_name }}</span>
-        </div>
+        <NuxtLink
+          v-if="!item.user_id"
+          :to="`/admin/establishments/${item.id}/owner`"
+          class="inline-flex items-center gap-1.5 h-8 px-4 rounded-full bg-[#FFE0F0] text-[#A10054] text-xs font-bold hover:opacity-80 transition-opacity whitespace-nowrap"
+        >
+          <UserPlus class="w-3.5 h-3.5" />
+          Assigner un marchand
+        </NuxtLink>
+        <NuxtLink
+          v-else
+          :to="`/admin/establishments/${item.id}/owner`"
+          class="flex items-center gap-2 max-w-[180px] group"
+          title="Changer de marchand"
+        >
+          <span class="h-8 w-8 rounded-full bg-[#7050FF] text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">{{ getInitials(item.owner_name) }}</span>
+          <span class="text-sm font-medium text-gray-700 truncate group-hover:underline">{{ item.owner_name }}</span>
+        </NuxtLink>
       </template>
 
       <!-- Subscription Column -->
@@ -163,158 +139,12 @@
         </div>
       </template>
         </DataTable>
+
       </div>
-    </div>
-  </div>
-    <!-- Restaurant Modal -->
-    <RestaurantFormModal
-      v-if="showRestaurantModal"
-      :open="showRestaurantModal"
-      :restaurant="selectedRestaurant"
-      @close="closeRestaurantModal"
-      @submit="handleRestaurantSubmitted"
-    />
-
-    <!-- Staff Management Modal -->
-    <StaffManagementModal
-      :open="showStaffModal"
-      :establishment="selectedRestaurant"
-      @close="showStaffModal = false"
-      @success="handleModalSuccess"
-    />
-
-    <!-- Establishment Assignment Modal -->
-    <EstablishmentAssignmentModal
-      :open="assignmentModal.modalOpen.value"
-      :mode="assignmentModal.modalOptions.value.mode"
-      :establishment="assignmentModal.modalOptions.value.establishment"
-      @close="assignmentModal.closeModal"
-      @success="handleEstablishmentAssignmentSuccess"
-    />
-
-    <!-- QR Code Modal -->
-    <TransitionRoot appear :show="showQrModal" as="template">
-      <Dialog as="div" @close="closeQrModal" class="relative z-50">
-        <!-- Overlay -->
-        <TransitionChild
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
-        </TransitionChild>
-
-        <!-- Modal -->
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
-                <div class="relative">
-                  <!-- Header avec le nom du restaurant -->
-                  <div class="bg-gray-50 px-6 py-4 text-center">
-                    <DialogTitle as="h3" class="text-xl font-semibold text-gray-900">
-                      {{ selectedRestaurant?.name }}
-                    </DialogTitle>
-                    <p class="mt-1 text-sm text-gray-500">
-                      Scanner ce QR code pour accéder au menu
-                    </p>
-                  </div>
-                  
-                  <!-- QR Code -->
-                  <div class="flex justify-center p-8 bg-white">
-                    <div class="p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
-                      <QRCodeVue3
-                        v-if="qrCodeUrl"
-                        :value="qrCodeUrl"
-                        :size="240"
-                        level="H"
-                        :margin="2"
-                        class="rounded-xl overflow-hidden"
-                        :dotsOptions="{ 
-                          type: 'square',
-                          color: '#000000' 
-                        }"
-                        :cornersSquareOptions="{ 
-                          type: 'square',
-                          color: '#000000' 
-                        }"
-                        :cornersDotOptions="{ 
-                          type: 'square',
-                          color: '#000000' 
-                        }"
-                        :backgroundOptions="{ 
-                          color: '#FFFFFF' 
-                        }"
-                      />
-                    </div>
-                  </div>
-                  
-                  <!-- URL -->
-                  <div class="px-6 pb-4 text-center">
-                    <p class="text-sm font-medium text-gray-700 mb-2">URL du menu</p>
-                    <div class="flex items-center justify-center space-x-2">
-                      <input
-                        type="text"
-                        readonly
-                        :value="qrCodeUrl"
-                        class="flex-1 px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg"
-                      />
-                      <button
-                        @click="copyToClipboard(qrCodeUrl)"
-                        class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
-                        title="Copier l'URL"
-                      >
-                        <ClipboardCopy class="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <!-- Actions -->
-                  <div class="border-t border-gray-100 px-6 py-4 bg-gray-50 flex justify-between">
-                    <button
-                      @click="downloadQrCode"
-                      class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      <Download class="w-4 h-4 mr-2" />
-                      Télécharger
-                    </button>
-                    <button
-                      @click="printQrCode"
-                      class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800"
-                    >
-                      <Printer class="w-4 h-4 mr-2" />
-                      Imprimer
-                    </button>
-                  </div>
-                  
-                  <!-- Bouton de fermeture -->
-                  <button
-                    @click="closeQrModal"
-                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-500"
-                  >
-                    <X class="w-5 h-5" />
-                  </button>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-
 </template>
 
 <script setup lang="ts">
+import { cycleTone } from '~/utils/palette'
 import { ref, computed, onMounted } from 'vue'
 import { useCustomToast } from '~/composables/useToast'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
@@ -322,18 +152,9 @@ import {
   Store, User, Users, Search, Plus, Edit, Trash2, 
   RefreshCw, X, CheckCircle, AlertTriangle, Loader2, 
   UtensilsCrossed, Coffee, Pizza, Utensils, Building, Shield, ClipboardCopy, Download, Printer,
-  Hotel, Wine, CakeSlice, ArrowRightLeft, QrCode, Ban
+  Hotel, Wine, CakeSlice, ArrowRightLeft, QrCode, Ban, UserPlus
 } from 'lucide-vue-next'
-import { 
-  TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle, Switch 
-} from '@headlessui/vue'
-import QRCodeVue3 from 'qrcode-vue3'
-import html2canvas from 'html2canvas'
-import RestaurantFormModal from '~/components/admin/RestaurantFormModal.vue'
 import ActionDropdown from '~/components/admin/ActionDropdown.vue'
-import StaffManagementModal from '~/components/admin/StaffManagementModal.vue'
-import EstablishmentAssignmentModal from '~/components/admin/EstablishmentAssignmentModal.vue'
-import { useEstablishmentAssignment } from '~/composables/useEstablishmentAssignment'
 
 // Supabase client
 const {client: supabase } = useSupabaseWrapper()
@@ -360,16 +181,6 @@ const filters = ref({
   status: ''
 })
 
-// Modal
-const showRestaurantModal = ref(false)
-const showStaffModal = ref(false)
-const assignmentModal = useEstablishmentAssignment()
-const selectedRestaurant = ref(null)
-
-// État pour le modal QR code
-const showQrModal = ref(false)
-const qrCodeUrl = ref('')
-const qrCodeRef = ref(null)
 
 // Table columns for DataTable component
 const tableColumns = [
@@ -637,12 +448,12 @@ const statsDisplay = computed(() => [
     iconBg: 'bg-green-50',
     iconColor: 'text-green-500'
   },
-  { 
-    name: 'Types d\'établissements', 
-    value: Object.keys(stats.value.subscriptions).length.toString(),
-    icon: Utensils,
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-500'
+  {
+    name: 'Sans marchand',
+    value: restaurants.value.filter((r: any) => !r.user_id).length.toString(),
+    icon: UserPlus,
+    iconBg: 'bg-pink-50',
+    iconColor: 'text-pink-500'
   }
 ])
 
@@ -756,28 +567,11 @@ const getSubscriptionLabel = (type: string) => {
 // Methods
 const handleAction = (action: string) => {
   if (action === 'add') {
-    openRestaurantModal()
+    navigateTo('/admin/establishments/new')
   }
 }
 
-const openRestaurantModal = (restaurant: any = null) => {
-  selectedRestaurant.value = restaurant
-  showRestaurantModal.value = true
-}
-
-const editRestaurant = (restaurant: any) => {
-  selectedRestaurant.value = { ...restaurant }
-  showRestaurantModal.value = true
-}
-
-const closeRestaurantModal = () => {
-  showRestaurantModal.value = false
-  selectedRestaurant.value = null
-}
-
-const handleRestaurantSubmitted = () => {
-  loadRestaurants()
-}
+const editRestaurant = (restaurant: any) => navigateTo(`/admin/establishments/${restaurant.id}/edit`)
 
 // Get establishment actions for dropdown
 const getEstablishmentActions = (establishment: any) => {
@@ -812,12 +606,13 @@ const getEstablishmentActions = (establishment: any) => {
     },
     {
       id: 'transfer',
-      label: 'Transférer Propriété',
-      icon: ArrowRightLeft,
-      variant: 'secondary' as const,
+      label: establishment.user_id ? 'Changer de marchand' : 'Assigner un marchand',
+      icon: establishment.user_id ? ArrowRightLeft : UserPlus,
+      variant: establishment.user_id ? 'secondary' as const : 'primary' as const,
       callback: () => transferEstablishment(establishment)
     }
   ]
+  if (!establishment.user_id) actions.unshift(actions.pop()!)
 
   // Add status-specific actions
   if (establishment.is_active) {
@@ -849,29 +644,14 @@ const getEstablishmentActions = (establishment: any) => {
   return actions
 }
 
-// Action handlers
-const manageStaff = (establishment: any) => {
-  selectedRestaurant.value = establishment
-  showStaffModal.value = true
-}
+// Action handlers : chaque action a sa page
+const manageStaff = (establishment: any) => navigateTo(`/admin/establishments/${establishment.id}/staff`)
 
-const transferEstablishment = (establishment: any) => {
-  assignmentModal.transferEstablishment(establishment)
-}
+const transferEstablishment = (establishment: any) => navigateTo(`/admin/establishments/${establishment.id}/owner`)
 
 // Handle action from dropdown
 const handleEstablishmentAction = (action: any) => {
   // Actions are handled by their callbacks
-}
-
-// Handle modal success
-const handleModalSuccess = () => {
-  loadRestaurants()
-}
-
-const handleEstablishmentAssignmentSuccess = () => {
-  assignmentModal.onSuccess()
-  loadRestaurants()
 }
 
 const deleteRestaurant = async (id: string) => {
@@ -908,122 +688,7 @@ const viewRestaurantMenu = (restaurant: any) => {
   navigateTo(`/admin/restaurants/${restaurant.id}/menu`)
 }
 
-const manageQrCodes = (restaurant: any) => {
-  selectedRestaurant.value = restaurant
-  // Construire l'URL du menu (à adapter selon votre structure)
-  qrCodeUrl.value = `${window.location.origin}/menu/${restaurant.slug}`
-  showQrModal.value = true
-}
-
-const closeQrModal = () => {
-  showQrModal.value = false
-  selectedRestaurant.value = null
-}
-
-// Méthode pour copier l'URL dans le presse-papier
-const copyToClipboard = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text)
-    showToast.success('URL copiée dans le presse-papier', 'success')
-  } catch (err) {
-    console.error('Erreur lors de la copie :', err)
-    showToast.error('Impossible de copier l\'URL', 'error')
-  }
-}
-
-// Méthode pour télécharger le QR code
-const downloadQrCode = async () => {
-  try {
-    const qrElement = document.querySelector('.qrcode-vue3') as HTMLElement
-    if (!qrElement) return
-    
-    const canvas = await html2canvas(qrElement)
-    const dataUrl = canvas.toDataURL('image/png')
-    
-    const link = document.createElement('a')
-    link.href = dataUrl
-    link.download = `qrcode-${selectedRestaurant.value?.slug || 'restaurant'}.png`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    
-    showToast.success('QR code téléchargé', 'success')
-  } catch (err) {
-    console.error('Erreur lors du téléchargement :', err)
-    showToast.error('Impossible de télécharger le QR code', 'error')
-  }
-}
-
-// Méthode pour imprimer le QR code
-const printQrCode = async () => {
-  try {
-    const qrElement = document.querySelector('.qrcode-vue3') as HTMLElement
-    if (!qrElement) return
-    
-    const canvas = await html2canvas(qrElement)
-    const dataUrl = canvas.toDataURL('image/png')
-    
-    const printWindow = window.open('', '_blank')
-    if (!printWindow) {
-      showToast.error('Veuillez autoriser les popups pour imprimer', 'error')
-      return
-    }
-    
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>QR Code - ${selectedRestaurant.value?.name || 'Restaurant'}</title>
-          <style>
-            body {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              height: 100vh;
-              margin: 0;
-              font-family: system-ui, -apple-system, sans-serif;
-            }
-            .container {
-              text-align: center;
-            }
-            h1 {
-              font-size: 24px;
-              margin-bottom: 8px;
-            }
-            p {
-              font-size: 14px;
-              color: #666;
-              margin-bottom: 24px;
-            }
-            img {
-              max-width: 300px;
-              border: 1px solid #eee;
-              border-radius: 12px;
-              padding: 16px;
-            }
-            .url {
-              margin-top: 16px;
-              font-size: 12px;
-              color: #666;
-            }
-          </style>
-        </head>
-        <body onload="window.print(); window.close();">
-          <div class="container">
-            <h1>${selectedRestaurant.value?.name || 'Restaurant'}</h1>
-            <p>Scannez ce QR code pour accéder au menu</p>
-            <img src="${dataUrl}" alt="QR Code" />
-            <div class="url">${qrCodeUrl.value}</div>
-          </div>
-        </body>
-      </html>
-    `)
-    printWindow.document.close()
-  } catch (err) {
-    console.error('Erreur lors de l\'impression :', err)
-    showToast.error('Impossible d\'imprimer le QR code', 'error')
-  }
-}
+const manageQrCodes = (restaurant: any) => navigateTo(`/admin/establishments/${restaurant.id}/qr`)
 
 const toggleRestaurantStatus = async (restaurant: any) => {
   try {

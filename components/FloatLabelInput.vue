@@ -8,11 +8,12 @@
         @input="handleInput"
         @focus="handleFocus"
         @blur="handleBlur"
-        class="block w-full pl-6 pr-4 h-16 pt-3  text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-none focus:ring-none-400 focus:border-primary-500 transition-colors text-lg dark:bg-gray-800"
+        class="float-input block w-full pl-6 pr-4 h-16 pt-3  text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-none focus:ring-none-400 focus:border-primary-500 transition-colors text-lg dark:bg-gray-800"
         :class="[
           error ? 'border-red-500 focus:ring-none focus:ring-none-400' : 
-                 (isFocused ? 'border-green-500 -focus:ring-none focus:ring-none-400' : ''),
+                 (isFocused ? 'border-gray-900 dark:border-white' : ''),
           disabled ? 'bg-gray-50 dark:bg-gray-900 opacity-60 cursor-not-allowed' : '',
+          pill ? '!rounded-full !pl-7 !pr-7' : '',
           iconLeft ? 'pl-12' : '',
           iconRight ? 'pr-12' : ''
         ]"
@@ -29,15 +30,17 @@
         :aria-describedby="error ? `${id}-error` : undefined"
       />
       
-      <!-- Label flottant -->
+      <!-- Label flottant : au repos il occupe le champ, au focus / à la saisie il se réduit et monte -->
       <label
         :for="id"
-        class="absolute left-3 pointer-events-none transition-all duration-200 ease-out"
         :class="[
-          iconLeft ? 'left-12' : 'left-4',
-          (isFocused || hasValue) ? 
-            'text-xs top-2 text-blue-600 dark:text-blue-400' : 
-            'text-base top-4 text-gray-500 dark:text-gray-400',
+          'absolute pointer-events-none origin-left select-none whitespace-nowrap',
+          'transition-all duration-200 ease-out',
+          iconLeft ? 'left-12' : (pill ? 'left-7' : 'left-6'),
+          (isFocused || hasValue)
+            ? 'top-2.5 translate-y-0 scale-[0.72] text-gray-500 dark:text-gray-400'
+            : 'top-8 -translate-y-1/2 scale-100 text-base text-gray-500 dark:text-gray-400',
+          isFocused && !error ? '!text-gray-900 dark:!text-white' : '',
           error ? '!text-red-500' : ''
         ]"
       >
@@ -181,6 +184,11 @@
     validationRules: {
       type: Function,
       default: null
+    },
+    // Champ en pilule (rounded-full), label flottant décalé en conséquence
+    pill: {
+      type: Boolean,
+      default: false
     }
   });
   

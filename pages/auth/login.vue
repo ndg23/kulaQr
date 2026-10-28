@@ -208,7 +208,7 @@ const handleLogin = async () => {
     // Vérifier si l'utilisateur est actif
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('is_active, full_name')
+      .select('is_active, full_name, role')
       .eq('id', data.user.id)
       .single()
     
@@ -224,29 +224,31 @@ const handleLogin = async () => {
       return
     }
 
+    // Un admin n'a pas d'établissement : le rôle vient de la table users (data.user.role vaut 'authenticated')
+    if (userData.role === 'admin') {
+      navigateTo('/admin')
+      return
+    }
+
     // Récupérer l'établissement de l'utilisateur
     const { data: establishment, error: establishmentError } = await supabase
       .from('establishments')
       .select('id, slug')
       .eq('user_id', data.user.id)
-      .single()
+      .maybeSingle()
 
     if (establishmentError) {
       error.value = 'Erreur lors de la récupération des données'
       return
     }
-    
+
     if (!establishment) {
       error.value = "Aucun établissement trouvé pour cet utilisateur"
       return
     }
-    
-if (data.user.role && data.user.role === 'admin') {
-      navigateTo(`/admin`)
-    }
 
-    // Rediriger vers le dashboard avec le slug de l'établissement
-    navigateTo(`/manager/${establishment?.id}`)
+    // Rediriger vers le dashboard de l'établissement
+    navigateTo(`/manager/${establishment.id}`)
   } catch (err) {
     error.value = 'Une erreur inattendue est survenue'
   } finally {

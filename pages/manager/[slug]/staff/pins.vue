@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">
       <div>
@@ -138,139 +138,6 @@
       </div>
     </div>
 
-    <!-- Staff Modal -->
-    <TransitionRoot appear :show="showStaffModal" as="template">
-      <Dialog as="div" @close="closeStaffModal" class="relative z-50">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900 mb-4">
-                  {{ editingStaff ? 'Modifier un membre' : 'Ajouter un membre' }}
-                </DialogTitle>
-                
-                <form @submit.prevent="saveStaff" class="space-y-4">
-                  <!-- Username -->
-                  <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
-                      Nom d'utilisateur
-                    </label>
-                    <input
-                      id="username"
-                      v-model="staffForm.username"
-                      type="text"
-                      required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-kula-500 focus:border-kula-500"
-                      placeholder="Ex: Jean D."
-                    />
-                    <p class="mt-1 text-xs text-gray-500">
-                      Nom que le membre utilisera pour se connecter avec son PIN
-                    </p>
-                  </div>
-                  
-                  <!-- PIN (visible only when editing) -->
-                  <div v-if="editingStaff">
-                    <div class="flex items-center justify-between">
-                      <label class="block text-sm font-medium text-gray-700">
-                        PIN actuel
-                      </label>
-                      <button 
-                        type="button"
-                        @click="regeneratePin(editingStaff)"
-                        class="text-xs text-kula-500 hover:text-kula-600 flex items-center"
-                      >
-                        <RefreshCw class="w-3 h-3 mr-1" />
-                        Régénérer
-                      </button>
-                    </div>
-                    <div class="mt-1 flex items-center space-x-2">
-                      <div class="bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 font-mono text-lg w-24 text-center">
-                        {{ editingStaff.pin }}
-                      </div>
-                      <p class="text-xs text-gray-500">
-                        Code à 4 chiffres pour la connexion rapide
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <!-- Role -->
-                  <div>
-                    <label for="role" class="block text-sm font-medium text-gray-700 mb-1">
-                      Rôle
-                    </label>
-                    <select
-                      id="role"
-                      v-model="staffForm.role"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-kula-500 focus:border-kula-500"
-                    >
-                      <option value="waiter">Serveur</option>
-                      <option value="kitchen">Cuisine</option>
-                      <option value="staff">Personnel</option>
-                    </select>
-                  </div>
-                  
-                  <!-- Active Status -->
-                  <div class="flex items-center">
-                    <input
-                      id="is_active"
-                      v-model="staffForm.is_active"
-                      type="checkbox"
-                      class="h-4 w-4 text-kula-500 focus:ring-kula-500 border-gray-300 rounded"
-                    />
-                    <label for="is_active" class="ml-2 block text-sm text-gray-700">
-                      Compte actif
-                    </label>
-                  </div>
-                  
-                  <!-- Buttons -->
-                  <div class="mt-6 flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      @click="closeStaffModal"
-                      class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kula-500"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      type="submit"
-                      class="px-4 py-2 text-sm font-medium text-white bg-kula-500 border border-transparent rounded-md hover:bg-kula-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kula-500 relative"
-                      :disabled="formLoading"
-                    >
-                      <span v-if="formLoading" class="absolute inset-0 flex items-center justify-center">
-                        <Loader2 class="w-5 h-5 animate-spin" />
-                      </span>
-                      <span :class="{ invisible: formLoading }">
-                        {{ editingStaff ? 'Mettre à jour' : 'Ajouter' }}
-                      </span>
-                    </button>
-                  </div>
-                </form>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
   </div>
 </template>
 
@@ -287,13 +154,6 @@ import {
   Trash2, 
   RefreshCw 
 } from 'lucide-vue-next'
-import { 
-  Dialog, 
-  DialogPanel, 
-  DialogTitle, 
-  TransitionChild, 
-  TransitionRoot 
-} from '@headlessui/vue'
 import { useCustomToast } from '~/composables/useToast'
 
 const route = useRoute()
@@ -302,16 +162,8 @@ const { showToast } = useCustomToast()
 
 const slug = route.params.slug
 const loading = ref(false)
-const formLoading = ref(false)
 const staffMembers = ref([])
-const showStaffModal = ref(false)
-const editingStaff = ref(null)
 
-const staffForm = reactive({
-  username: '',
-  role: 'waiter',
-  is_active: true
-})
 
 // Format date
 const formatDate = (dateString) => {
@@ -353,86 +205,10 @@ const loadStaffMembers = async () => {
   }
 }
 
-// Open staff modal
-const openStaffModal = () => {
-  editingStaff.value = null
-  staffForm.username = ''
-  staffForm.role = 'waiter'
-  staffForm.is_active = true
-  showStaffModal.value = true
-}
+// Chaque action a sa page
+const openStaffModal = () => navigateTo(`/manager/${slug}/staff/new`)
 
-// Close staff modal
-const closeStaffModal = () => {
-  showStaffModal.value = false
-}
-
-// Edit staff
-const editStaff = (staff) => {
-  editingStaff.value = staff
-  staffForm.username = staff.username
-  staffForm.role = staff.role
-  staffForm.is_active = staff.is_active
-  showStaffModal.value = true
-}
-
-// Save staff
-const saveStaff = async () => {
-  try {
-    formLoading.value = true
-    
-    if (editingStaff.value) {
-      // Update existing staff
-      const { error } = await supabase
-        .from('staff')
-        .update({
-          username: staffForm.username,
-          role: staffForm.role,
-          is_active: staffForm.is_active,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingStaff.value.id)
-      
-      if (error) throw error
-      
-      // Update local state
-      const index = staffMembers.value.findIndex(s => s.id === editingStaff.value.id)
-      if (index !== -1) {
-        staffMembers.value[index] = {
-          ...staffMembers.value[index],
-          username: staffForm.username,
-          role: staffForm.role,
-          is_active: staffForm.is_active,
-          updated_at: new Date().toISOString()
-        }
-      }
-      
-      showToast.success('Succès', 'Membre mis à jour avec succès')
-    } else {
-      // Create new staff using the function
-      const { data, error } = await supabase.rpc('create_staff_pin', {
-        p_username: staffForm.username,
-        p_establishment_id: slug,
-        p_role: staffForm.role
-      })
-      
-      if (error) throw error
-      
-      // Show PIN to manager
-      showToast.success('Nouveau membre créé', `PIN: ${data.pin}`, 10000)
-      
-      // Reload staff to get the new one with PIN
-      await loadStaffMembers()
-    }
-    
-    closeStaffModal()
-  } catch (error) {
-    console.error('Error saving staff:', error)
-    showToast.error('Erreur', error.message || 'Une erreur est survenue')
-  } finally {
-    formLoading.value = false
-  }
-}
+const editStaff = (staff) => navigateTo(`/manager/${slug}/staff/${staff.id}/edit`)
 
 // Regenerate PIN
 const regeneratePin = async (staff) => {
@@ -447,11 +223,6 @@ const regeneratePin = async (staff) => {
     const index = staffMembers.value.findIndex(s => s.id === staff.id)
     if (index !== -1) {
       staffMembers.value[index].pin = data
-      
-      // If we're editing this staff, update the editing state too
-      if (editingStaff.value?.id === staff.id) {
-        editingStaff.value.pin = data
-      }
     }
     
     showToast.success('Succès', 'PIN régénéré avec succès')

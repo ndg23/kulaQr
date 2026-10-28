@@ -1,0 +1,82 @@
+/*
+ * Design du back-office (layouts/admin.vue), repris de xticket-office :
+ * surfaces très arrondies, champs en pilule, tactile. Tout est scopé sous `.adm`
+ * pour ne pas toucher au reste de l'app.
+ */
+.adm {
+  --adm-border: #e5e7eb;
+  --adm-radius-card: 1.75rem;
+  --adm-radius-item: 1.25rem;
+}
+
+/* Jamais de scroll horizontal au niveau de la page (les tableaux défilent dans leur conteneur) */
+.adm main {
+  overflow-x: clip;
+}
+
+/* Rayons */
+.adm main .rounded-md,
+.adm main .rounded-lg,
+.adm main .rounded-xl {
+  border-radius: var(--adm-radius-item);
+}
+.adm main .rounded-2xl,
+.adm main .rounded-3xl {
+  border-radius: var(--adm-radius-card);
+}
+
+/* Champs : pilules, hauteur tactile, 16px minimum pour éviter le zoom automatique sur mobile */
+.adm main input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']):not(.float-input),
+.adm main select:not(.float-input) {
+  min-height: 2.5rem;
+  border-radius: 9999px;
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
+}
+.adm main input.pl-9,
+.adm main input.pl-10,
+.adm main input.pl-11 {
+  padding-left: 2.6rem;
+}
+.adm main textarea {
+  border-radius: var(--adm-radius-item);
+}
+.adm main input:not([type='checkbox']):not([type='radio']):not(.float-input),
+.adm main select:not(.float-input),
+.adm main textarea {
+  font-size: max(16px, 1rem);
+}
+@media (min-width: 768px) {
+  .adm main input:not([type='checkbox']):not([type='radio']):not(.float-input),
+  .adm main select:not(.float-input),
+  .adm main textarea {
+    font-size: 0.875rem;
+  }
+}
+
+/* Tactile */
+.adm button,
+.adm a,
+.adm [role='button'] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.adm main button:active {
+  transform: scale(0.98);
+}
+
+/* Tableaux : défilement contenu, en-têtes en capitales grasses */
+.adm main table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.adm main .overflow-x-auto {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+.adm main thead th {
+  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+}

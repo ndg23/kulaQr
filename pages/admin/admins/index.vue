@@ -1,27 +1,17 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="bg-white shadow">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="py-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <h1 class="text-2xl font-bold text-gray-900">Administrateurs</h1>
-              <p class="text-gray-600">Gérez les comptes administrateurs</p>
-            </div>
-            <button
-              @click="showAddAdminModal = true"
-              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Ajouter un admin
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div>
+    <PageHeader title="Administrateurs" description="Gérez les comptes administrateurs">
+      <template #actions>
+        <NuxtLink
+          to="/admin/admins/new"
+          class="bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors text-sm font-semibold"
+        >
+          Ajouter un admin
+        </NuxtLink>
+      </template>
+    </PageHeader>
 
-    <!-- Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div>
       <!-- Loading -->
       <div v-if="loading" class="flex justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -33,7 +23,7 @@
       </div>
 
       <!-- Admins List -->
-      <div v-else class="bg-white shadow rounded-lg overflow-hidden">
+      <div v-else class="bg-white border border-gray-200 rounded-2xl overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -91,62 +81,7 @@
       </div>
     </div>
 
-    <!-- Add Admin Modal -->
-    <div v-if="showAddAdminModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 class="text-lg font-semibold mb-4">Ajouter un administrateur</h3>
-        
-        <form @submit.prevent="addAdmin" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Nom complet</label>
-            <input
-              v-model="newAdmin.full_name"
-              type="text"
-              required
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              v-model="newAdmin.email"
-              type="email"
-              required
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Mot de passe</label>
-            <input
-              v-model="newAdmin.password"
-              type="password"
-              required
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div class="flex justify-end space-x-3">
-            <button
-              type="button"
-              @click="showAddAdminModal = false"
-              class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              :disabled="addingAdmin"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-            >
-              {{ addingAdmin ? 'Ajout...' : 'Ajouter' }}
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -161,14 +96,6 @@ const { showToast } = useCustomToast()
 const admins = ref([])
 const loading = ref(true)
 const error = ref('')
-const showAddAdminModal = ref(false)
-const addingAdmin = ref(false)
-
-const newAdmin = ref({
-  full_name: '',
-  email: '',
-  password: ''
-})
 
 // Methods
 const loadAdmins = async () => {
@@ -187,28 +114,6 @@ const loadAdmins = async () => {
     showToast.error('Erreur', 'Impossible de charger les administrateurs')
   } finally {
     loading.value = false
-  }
-}
-
-const addAdmin = async () => {
-  try {
-    addingAdmin.value = true
-    
-    const { data, error: err } = await $fetch('/api/admin/create-admin', {
-      method: 'POST',
-      body: newAdmin.value
-    })
-
-    if (err) throw err
-
-    showToast.success('Succès', 'Administrateur ajouté avec succès')
-    showAddAdminModal.value = false
-    newAdmin.value = { full_name: '', email: '', password: '' }
-    await loadAdmins()
-  } catch (err: any) {
-    showToast.error('Erreur', err.message || 'Impossible d\'ajouter l\'administrateur')
-  } finally {
-    addingAdmin.value = false
   }
 }
 
@@ -260,7 +165,6 @@ onMounted(() => {
 })
 
 definePageMeta({
-  layout: 'admin',
-  middleware: 'admin-auth'
+  layout: 'admin'
 })
 </script>

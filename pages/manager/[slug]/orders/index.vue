@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div>
     <!-- Modern Header -->
     <ManagerModernHeader
       title="Commandes"
@@ -12,7 +12,7 @@
       }"
     />
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <main>
       <!-- Stats Cards - Responsive Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         <div class="bg-white rounded-xl p-6  border border-gray-100">
@@ -260,101 +260,11 @@
       </div>
     </main>
 
-    <!-- Modal - Mobile Optimized -->
-    <TransitionRoot appear :show="showNewOrderModal" as="template">
-      <Dialog as="div" class="relative z-50" @close="closeModal">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/20 backdrop-blur-sm" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl sm:rounded-3xl bg-white border border-gray-200 shadow-2xl transition-all">
-                <div class="p-6 sm:p-10">
-                  <div class="flex items-center justify-between mb-6 sm:mb-8">
-                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Nouvelle commande</h3>
-                    <button
-                      @click="closeModal"
-                      class="w-9 h-9 sm:w-10 sm:h-10 border border-gray-200 rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
-                    >
-                      <X class="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-
-                  <form @submit.prevent="createNewOrder" class="space-y-5 sm:space-y-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-900 mb-2 sm:mb-3 uppercase tracking-wider">
-                        Numéro de table
-                      </label>
-                      <input
-                        v-model.number="orderForm.table_number"
-                        type="number"
-                        required
-                        min="1"
-                        placeholder="5"
-                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base focus:outline-none focus:border-black transition-colors"
-                      />
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-900 mb-2 sm:mb-3 uppercase tracking-wider">
-                        Notes
-                      </label>
-                      <textarea
-                        v-model="orderForm.notes"
-                        rows="4"
-                        placeholder="Notes spéciales..."
-                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base focus:outline-none focus:border-black transition-colors resize-none"
-                      />
-                    </div>
-
-                    <div class="flex gap-3 sm:gap-4 pt-2 sm:pt-4">
-                      <button
-                        type="button"
-                        @click="closeModal"
-                        class="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium hover:bg-gray-50 transition-colors"
-                      >
-                        Annuler
-                      </button>
-                      <button
-                        type="submit"
-                        :disabled="creating"
-                        class="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-black text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {{ creating ? 'Création...' : 'Créer' }}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
-import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue'
 import {
   Receipt, Plus, Clock, Coffee, CheckCircle, Filter, Search,
   Printer, User, X
@@ -379,8 +289,6 @@ const loading = ref<boolean>(true)
 const searchQuery = ref<string>('')
 const statusFilter = ref('')
 const staffFilter = ref('')
-const showNewOrderModal = ref(false)
-const creating = ref(false)
 const stats = ref<{
   total_orders: number
   pending_orders: number
@@ -388,11 +296,6 @@ const stats = ref<{
   completed_orders: number
 } | null>(null)
 
-// Form data
-const orderForm = ref({
-  table_number: null as number | null,
-  notes: ''
-})
 
 // Item color functions - alternating colors for visual distinction
 const getItemColorClass = (index: number) => {
@@ -596,28 +499,7 @@ const loadOrders = async () => {
   }
 }
 
-const openNewOrderModal = () => {
-  orderForm.value = { table_number: null, notes: '' }
-  showNewOrderModal.value = true
-}
-
-const closeModal = () => {
-  showNewOrderModal.value = false
-}
-
-const createNewOrder = async () => {
-  if (!establishment.value?.id) return
-  creating.value = true
-  try {
-    showToast.info('Fonction à implémenter', 'La création manuelle sera bientôt disponible')
-    closeModal()
-  } catch (error) {
-    console.error('Error creating order:', error)
-    showToast.error('Erreur', 'Impossible de créer la commande')
-  } finally {
-    creating.value = false
-  }
-}
+const openNewOrderModal = () => navigateTo(`/manager/${route.params.slug}/orders/new`)
 
 const loadStats = () => {
   const total = orders.value.length

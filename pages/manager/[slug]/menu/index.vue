@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div>
     <!-- Modern Header -->
     <ManagerModernHeader
       title="Menu"
@@ -26,7 +26,7 @@
       </div>
     </div> -->
 
-    <main class="max-w-7xl mx-auto px-8 pb-16 mt-2">
+    <main>
       <!-- Stats Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         <div
@@ -199,58 +199,17 @@
       </div>
     </main>
 
-    <!-- Add/Edit Product Modal -->
-    <TransitionRoot appear :show="showAddProduct" as="template">
-      <Dialog as="div" class="relative z-50" @close="closeModal">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-8">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-2xl transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
-                <ProductModal
-                  :product="editingProduct"
-                  :categories="categories"
-                  @close="closeModal"
-                  @submit="saveProduct"
-                />
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-  </div>
+      </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue'
 import {
   Plus, UtensilsCrossed, Store, TrendingUp, Search, Pencil, List, Menu as MenuIcon, Trash2
 } from 'lucide-vue-next'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
 import { useCustomToast } from '~/composables/useToast'
 import { useEstablishment } from '~/composables/useEstablishment'
-import ProductModal from '~/components/modals/ProductModal.vue'
 import Switch from '~/components/ui/Switch.vue'
 
 const route = useRoute()
@@ -260,8 +219,6 @@ const {showToast} = useCustomToast()
 const { establishment } = useEstablishment()
 
 // State
-const showAddProduct = ref(false)
-const editingProduct = ref(null as any)
 const activeCategory = ref('all')
 const categories = ref<any[]>([])
 const products = ref<any[]>([])
@@ -391,10 +348,7 @@ const updateAvailability = async (product: any, isAvailable: boolean) => {
   }
 }
 
-const editProduct = (product: any) => {
-  editingProduct.value = { ...product }
-  showAddProduct.value = true
-}
+const editProduct = (product: any) => navigateTo(`/manager/${slug}/menu/${product.id}/edit`)
 
 const confirmDeleteProduct = (product: any) => {
   if (confirm(`Êtes-vous sûr de vouloir supprimer le produit "${product.name}" ? Cette action est irréversible.`)) {
@@ -424,65 +378,7 @@ const deleteProduct = async (product: any) => {
   }
 }
 
-const closeModal = () => {
-  showAddProduct.value = false
-  editingProduct.value = null
-}
-
-const saveProduct = async (productData: any) => {
-  try {
-    // Make sure the product has a valid category_id that belongs to this establishment
-    if (!productData.category_id) {
-      showToast.error('Erreur', 'Veuillez sélectionner une catégorie')
-      return
-    }
-    
-    // Verify the category belongs to this establishment
-    const categoryExists = categories.value.some((c: any) => c.id === productData.category_id)
-    if (!categoryExists) {
-      showToast.error('Erreur', 'Catégorie invalide')
-      return
-    }
-    
-    // Add establishment_id to the product data
-    productData.establishment_id = establishment.value?.id
-    
-    if (editingProduct.value?.id) {
-      // Update existing product
-      const { error } = await supabase
-        .from('products')
-        .update(productData)
-        .eq('id', editingProduct.value?.id as string) as any as any
-      if (error) throw error
-    } else {
-      // Create new product
-      const { error } = await supabase
-        .from('products')
-        .insert({
-          ...productData,
-          is_available: true
-        }) as any as any
-
-      if (error) throw error
-    }
-
-    // Reload data
-    await loadData()
-    closeModal()
-    showToast.success(
-      'Sauvegarde réussie',
-      editingProduct.value?.id ? 'Modifications enregistrées' : 'Nouveau produit ajouté'
-    )
-  } catch (err) {
-    console.error('Erreur sauvegarde:', err)
-    showToast.error('Erreur', 'Impossible de sauvegarder le produit')
-  }
-}
-
-const openAddProduct = () => {
-  editingProduct.value = null
-  showAddProduct.value = true
-}
+const openAddProduct = () => navigateTo(`/manager/${slug}/menu/new`)
 
 // Initial load
 onMounted(loadData)

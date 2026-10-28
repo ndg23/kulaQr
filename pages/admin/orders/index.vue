@@ -1,24 +1,20 @@
 <template>
-  <div class="py-6">
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between mb-2">
-        <div>
-          <h1 class="text-3xl font-semibold text-gray-900">Commandes</h1>
-          <p class="text-gray-600 mt-1">Gérer et suivre toutes les commandes de la plateforme</p>
-        </div>
+  <div>
+    <PageHeader title="Commandes" description="Gérer et suivre toutes les commandes de la plateforme">
+      <template #actions>
         <button
-          @click="loadOrders"
           :disabled="loading"
+          aria-label="Rafraîchir"
           class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          @click="loadOrders"
         >
           <RefreshCw class="w-5 h-5" :class="{ 'animate-spin': loading }" />
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filters and Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <button
         v-for="status in orderStatuses"
         :key="status.value"
