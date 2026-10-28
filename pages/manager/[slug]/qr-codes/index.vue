@@ -40,6 +40,7 @@
 
     <main class="max-w-4xl mx-auto">
       <!-- Utilisation du composant QrCodeCard -->
+      <div class="bg-white rounded-[2rem] border border-gray-200 p-6 sm:p-8">
       <div ref="qrCard">
         <QrCodeCard 
           ref="qrCodeCardRef"
@@ -48,6 +49,7 @@
           :restaurant-id="establishment?.id || ''"
         />
         </div>
+      </div>
 
         <!-- Actions modernes -->
       <div class="mt-8">
@@ -82,45 +84,24 @@
 
       <!-- Stats modernes -->
       <div class="mt-8 space-y-6 no-print">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Statistiques</h2>
-        <div class="grid grid-cols-3 gap-6">
-          <ManagerModernCard class="p-6">
-            <div class="text-center">
-            <div class="text-2xl font-bold text-gray-900">{{ scanStats.total_scans }}</div>
-            <div class="text-sm text-gray-500 mt-1">Total scans</div>
-          </div>
-          </ManagerModernCard>
-          <ManagerModernCard class="p-6">
-            <div class="text-center">
-            <div class="text-2xl font-bold text-gray-900">{{ scanStats.today_scans }}</div>
-            <div class="text-sm text-gray-500 mt-1">Aujourd'hui</div>
-          </div>
-          </ManagerModernCard>
-          <ManagerModernCard class="p-6">
-            <div class="text-center">
-            <div class="text-2xl font-bold text-gray-900">{{ scanStats.conversion_rate }}%</div>
-            <div class="text-sm text-gray-500 mt-1">Conversion</div>
-          </div>
-          </ManagerModernCard>
+        <h2 class="text-xl font-extrabold text-gray-900">Statistiques</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <PageStatCard name="Total scans" :value="scanStats.total_scans" :icon="QrCode" tone="pink" />
+          <PageStatCard name="Aujourd'hui" :value="scanStats.today_scans" :icon="Smartphone" tone="yellow" />
+          <PageStatCard name="Conversion" :value="`${scanStats.conversion_rate}%`" :icon="Share2" tone="green" />
         </div>
 
         <!-- Dernier scan -->
-        <ManagerModernCard v-if="lastScan" class="p-6">
-          <div class="flex items-center gap-4">
-            <div class="relative">
-              <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
-                <Smartphone class="w-5 h-5" style="color: #ff6b35;" />
-              </div>
-              <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-            </div>
-            <div class="flex-1">
-              <div class="text-sm font-medium text-gray-900">Dernier scan</div>
-              <div class="text-sm text-gray-500">
-                {{ formatTimeAgo(lastScan.created_at) }}
-              </div>
-            </div>
+        <div v-if="lastScan" class="flex items-center gap-4 rounded-[2rem] bg-gray-50 p-4 sm:p-5">
+          <div class="relative">
+            <IconBadge :icon="Smartphone" tone="orange" size="lg" />
+            <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
           </div>
-        </ManagerModernCard>
+          <div class="flex-1">
+            <div class="font-extrabold text-gray-900">Dernier scan</div>
+            <div class="text-sm text-gray-500">{{ formatTimeAgo(lastScan.created_at) }}</div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -132,6 +113,7 @@ import { Share2, Download, Smartphone, QrCode, Clipboard, MessageSquare, Utensil
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useCustomToast } from '~/composables/useToast'
 import { useSupabaseClient } from '#imports'
+import IconBadge from '~/components/ui/IconBadge.vue'
 
 // Récupérer le slug de l'URL
 const route = useRoute()

@@ -45,7 +45,7 @@
         <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
           <ClipboardList class="w-8 h-8 text-gray-900" />
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune activité enregistrée</h3>
+        <h3 class="text-lg font-extrabold text-gray-900 mb-2">Aucune activité enregistrée</h3>
         <p class="text-gray-500 mb-6 max-w-md mx-auto">
           Aucune activité n'a été enregistrée pour le moment ou selon les filtres sélectionnés.
         </p>
@@ -58,47 +58,47 @@
         </div>
         
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
+          <table class="min-w-full divide-y divide-gray-100">
             <thead class="bg-gray-50">
               <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-black text-gray-900 uppercase tracking-wider">
                   Date
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-black text-gray-900 uppercase tracking-wider">
                   Membre
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-black text-gray-900 uppercase tracking-wider">
                   Action
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-black text-gray-900 uppercase tracking-wider">
                   Détails
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-black text-gray-900 uppercase tracking-wider">
                   Appareil
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="log in logs" :key="log.id" class="hover:bg-gray-50">
+            <tbody class="bg-white divide-y divide-gray-100">
+              <tr v-for="log in logs" :key="log.id" class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {{ formatDate(log.created_at) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <div class="h-8 w-8 flex-shrink-0">
-                      <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                        <User class="h-4 w-4 text-gray-900" />
+                    <div class="h-10 w-10 flex-shrink-0">
+                      <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                        <User class="h-5 w-5 text-green-900" />
                       </div>
                     </div>
                     <div class="ml-3">
-                      <div class="text-sm font-medium text-gray-900">
+                      <div class="text-sm font-bold text-gray-900">
                         {{ getStaffName(log.staff_id) }}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" :class="getActionClass(log.action)">
+                  <span class="px-3 h-7 inline-flex items-center text-xs font-bold rounded-full" :class="getActionClass(log.action)">
                     {{ getActionName(log.action) }}
                   </span>
                 </td>
@@ -114,7 +114,7 @@
         </div>
         
         <!-- Pagination -->
-        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div class="bg-white px-4 py-4 flex items-center justify-between border-t border-gray-100 sm:px-6">
           <div class="flex-1 flex justify-between sm:hidden">
             <button
               @click="page > 1 ? page-- : null"
@@ -134,7 +134,7 @@
           <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p class="text-sm text-gray-700">
-                Affichage de <span class="font-medium">{{ (page - 1) * perPage + 1 }}</span> à <span class="font-medium">{{ Math.min(page * perPage, totalLogs) }}</span> sur <span class="font-medium">{{ totalLogs }}</span> résultats
+                Affichage de <span class="font-bold">{{ (page - 1) * perPage + 1 }}</span> à <span class="font-bold">{{ Math.min(page * perPage, totalLogs) }}</span> sur <span class="font-bold">{{ totalLogs }}</span> résultats
               </p>
             </div>
             <div>
@@ -278,11 +278,11 @@
   
   const getActionClass = (action) => {
     const classes = {
-      login: 'bg-green-100 text-green-800',
-      logout: 'bg-gray-100 text-gray-800',
-      order_created: 'bg-blue-100 text-blue-800',
-      order_updated: 'bg-yellow-100 text-yellow-800',
-      order_completed: 'bg-purple-100 text-purple-800'
+      login: 'bg-green-100 text-green-900',
+      logout: 'bg-gray-100 text-gray-900',
+      order_created: 'bg-blue-100 text-blue-900',
+      order_updated: 'bg-yellow-100 text-yellow-900',
+      order_completed: 'bg-purple-100 text-purple-900'
     }
     return classes[action] || 'bg-gray-100 text-gray-800'
   }
