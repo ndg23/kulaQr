@@ -2,6 +2,20 @@
   <div>
     <PageHeader title="Tableau de bord" description="Bienvenue sur votre espace d'administration" />
 
+    <HeroCard
+      class="mb-4 sm:mb-6"
+      label="Utilisateurs"
+      :value="adminStats.total_users"
+      :hint="`${adminStats.active_users_7d} actifs ces 7 derniers jours`"
+      :icon="Users"
+      :chips="[
+        { label: 'Établissements', value: adminStats.total_establishments, to: '/admin/establishments' },
+        { label: 'Commandes', value: adminStats.total_orders, to: '/admin/orders' },
+        { label: 'Produits', value: adminStats.total_products },
+        { label: 'Scans QR', value: adminStats.total_qr_scans }
+      ]"
+    />
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-10">
       <PageStatCard
         v-for="(stat, i) in statsDisplay"
@@ -157,6 +171,7 @@
   
   <script setup lang="ts">
 import { cycleTone } from '~/utils/palette'
+import HeroCard from '~/components/ui/HeroCard.vue'
   import { ref, computed, onMounted } from 'vue'
   import { 
     Users, UserCheck, Shield, Activity, Utensils, ShoppingBag, 

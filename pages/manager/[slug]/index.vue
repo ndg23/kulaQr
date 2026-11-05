@@ -21,6 +21,20 @@
     </div>
 
     <div v-else class="space-y-6 sm:space-y-8">
+      <!-- Grande carte : chiffre d'affaires du jour + pastilles -->
+      <HeroCard
+        v-if="mainMetrics.length"
+        :label="mainMetrics[2]?.name || 'Aujourd’hui'"
+        :value="mainMetrics[2]?.value ?? '0'"
+        hint="Mis à jour à chaque actualisation"
+        :icon="mainMetrics[2]?.icon"
+        :chips="[
+          { label: 'Scans QR', value: mainMetrics[0]?.value ?? '0' },
+          { label: 'Commandes', value: mainMetrics[1]?.value ?? '0', to: `/manager/${establishment?.id}/orders` },
+          { label: 'Panier moyen', value: mainMetrics[3]?.value ?? '0' }
+        ]"
+      />
+
       <!-- Indicateurs du jour -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <PageStatCard
@@ -157,6 +171,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import HeroCard from '~/components/ui/HeroCard.vue'
 import { 
   ShoppingCart, 
   DollarSign,

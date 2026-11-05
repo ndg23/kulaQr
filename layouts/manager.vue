@@ -4,7 +4,7 @@
     <header class="lg:hidden bg-white/95 backdrop-blur border-b border-gray-200 sticky top-0 z-40">
       <div class="px-4 h-14 flex items-center justify-between gap-3">
         <NuxtLink :to="base" class="flex items-center gap-2 min-w-0">
-          <span class="w-8 h-8 rounded-full bg-[#00E676] flex items-center justify-center flex-shrink-0">
+          <span class="w-8 h-8 rounded-full bg-[#FB6A00] flex items-center justify-center flex-shrink-0">
             <span class="text-sm font-black text-black">{{ establishmentInitials }}</span>
           </span>
           <span class="text-base font-black text-black truncate">{{ establishment?.name || 'Mon établissement' }}</span>
@@ -48,7 +48,7 @@
       >
         <div class="h-14 px-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
           <NuxtLink :to="base" class="flex items-center gap-2 min-w-0" @click="showMobileMenu = false">
-            <span class="w-8 h-8 rounded-full bg-[#00E676] flex items-center justify-center flex-shrink-0">
+            <span class="w-8 h-8 rounded-full bg-[#FB6A00] flex items-center justify-center flex-shrink-0">
               <span class="text-sm font-black text-black">{{ establishmentInitials }}</span>
             </span>
             <span class="text-base font-black text-black truncate">{{ establishment?.name || 'Mon établissement' }}</span>
@@ -71,14 +71,14 @@
             :class="isActive(item) ? navActive : navIdle"
             :aria-current="isActive(item) ? 'page' : undefined"
           >
-            <IconBadge :icon="item.icon" :tone="item.tone" />
+            <NavIcon :icon="item.icon" :active="isActive(item)" />
             <span class="text-base leading-tight">{{ item.name }}</span>
           </NuxtLink>
         </nav>
 
         <div class="p-3 border-t border-gray-100 flex-shrink-0">
           <div class="flex items-center gap-3 px-2 py-2">
-            <div class="w-10 h-10 rounded-full bg-[#2962FF] flex items-center justify-center flex-shrink-0">
+            <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center flex-shrink-0">
               <span class="text-base font-bold text-white">{{ userInitials }}</span>
             </div>
             <div class="min-w-0">
@@ -87,7 +87,7 @@
             </div>
           </div>
           <button
-            class="flex w-full items-center gap-3 min-h-[3rem] px-2 py-1.5 text-red-600 font-semibold hover:bg-gray-100 rounded-full transition-colors"
+            class="flex w-full items-center gap-3 min-h-[3rem] px-2 py-1.5 text-[#C54E00] font-semibold hover:bg-gray-100 rounded-full transition-colors"
             @click="handleLogout"
           >
             <IconBadge :icon="LogOut" tone="pink" />
@@ -98,15 +98,15 @@
     </Transition>
 
     <!-- Desktop sidebar -->
-    <aside class="hidden lg:flex w-64 xl:w-72 border-r border-gray-100 flex-col h-dvh fixed left-0 top-0 bg-white z-30">
+    <aside class="hidden lg:flex w-64 xl:w-72 flex-col fixed left-3 top-3 xl:left-6 xl:top-6 h-[calc(100dvh-1.5rem)] xl:h-[calc(100dvh-3rem)] bg-[#F4F1EE] rounded-[28px] z-30 overflow-hidden">
       <div class="p-4 flex-shrink-0">
         <NuxtLink :to="base" class="group inline-flex items-center max-w-full p-3 hover:bg-gray-100 rounded-full transition-colors">
-          <span class="w-10 h-10 rounded-full bg-[#00E676] flex items-center justify-center flex-shrink-0">
+          <span class="w-10 h-10 rounded-full bg-[#FB6A00] flex items-center justify-center flex-shrink-0">
             <span class="text-base font-black text-black group-hover:scale-110 transition-transform">{{ establishmentInitials }}</span>
           </span>
           <span class="ml-3 flex flex-col leading-tight min-w-0">
             <span class="text-lg font-black text-black truncate">{{ establishment?.name || 'Mon établissement' }}</span>
-            <span class="text-xs font-bold text-blue-600">GESTIONNAIRE</span>
+            <span class="text-xs font-bold text-[#C54E00]">GESTIONNAIRE</span>
           </span>
         </NuxtLink>
       </div>
@@ -120,19 +120,19 @@
           :class="isActive(item) ? navActive : navIdle"
           :aria-current="isActive(item) ? 'page' : undefined"
         >
-          <IconBadge :icon="item.icon" :tone="item.tone" />
+          <NavIcon :icon="item.icon" :active="isActive(item)" />
           <span class="leading-tight min-w-0 break-words">{{ item.name }}</span>
         </NuxtLink>
       </nav>
 
-      <div class="border-t border-gray-100 p-3 flex-shrink-0 relative" ref="userMenuRoot">
+      <div class="border-t border-[#E3DDD7] p-3 flex-shrink-0 relative" ref="userMenuRoot">
         <button
           class="flex w-full items-center gap-3 p-3 rounded-full hover:bg-gray-100 transition-colors"
           :aria-expanded="showUserMenu"
           @click="showUserMenu = !showUserMenu"
         >
           <span class="relative flex-shrink-0">
-            <span class="w-10 h-10 bg-[#2962FF] rounded-full flex items-center justify-center">
+            <span class="w-10 h-10 bg-black rounded-full flex items-center justify-center">
               <span class="text-lg font-bold text-white">{{ userInitials }}</span>
             </span>
             <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center border-2 border-white">
@@ -158,10 +158,10 @@
             class="absolute bottom-full left-3 right-3 mb-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
           >
             <div class="p-4 border-b border-gray-100">
-              <span class="inline-block px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-700">Gestionnaire</span>
+              <span class="inline-block px-3 py-1 text-sm font-medium rounded-full bg-[#FFECD8] text-[#C54E00]">Gestionnaire</span>
             </div>
             <button
-              class="flex items-center w-full gap-3 px-4 py-3 text-red-600 hover:bg-gray-100 transition-colors"
+              class="flex items-center w-full gap-3 px-4 py-3 text-[#C54E00] hover:bg-gray-100 transition-colors"
               @click="handleLogout"
             >
               <LogOut class="w-5 h-5" />
@@ -173,7 +173,7 @@
     </aside>
 
     <!-- Contenu : un seul <slot />, le même conteneur pour toutes les pages manager -->
-    <main class="lg:ml-64 xl:ml-72 min-h-dvh min-w-0 pb-[env(safe-area-inset-bottom)]">
+    <main class="lg:ml-[17.5rem] xl:ml-[21rem] min-h-dvh min-w-0 pb-[env(safe-area-inset-bottom)]">
       <div class="max-w-7xl mx-auto px-3 sm:px-6 xl:px-8 py-4 sm:py-6">
         <slot />
       </div>
@@ -187,6 +187,7 @@ import { Menu, X, LogOut, MoreHorizontal } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
 import IconBadge from '~/components/ui/IconBadge.vue'
+import NavIcon from '~/components/ui/NavIcon.vue'
 import { MANAGER_NAV, isManagerNavActive, type ManagerNavItem } from '~/utils/managerNav'
 import '~/assets/css/admin.css'
 
@@ -221,8 +222,8 @@ const base = computed(() => `/manager/${route.params.slug || establishment.value
 const navigationItems = MANAGER_NAV.filter(item => !item.hidden)
 const isActive = (item: ManagerNavItem) => isManagerNavActive(item, base.value, route.path)
 
-const navActive = 'font-black text-black bg-gray-100 ring-2 ring-black'
-const navIdle = 'font-semibold text-gray-700 hover:bg-gray-100'
+const navActive = 'font-bold text-black bg-white'
+const navIdle = 'font-semibold text-black hover:bg-[#E8E2DC]'
 
 const handleLogout = async () => {
   showUserMenu.value = false
