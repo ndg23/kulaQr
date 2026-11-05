@@ -38,7 +38,7 @@
           <!-- L'illustration à droite -->
           <div class="rounded-[2rem] overflow-hidden bg-[#FB6A00]">
             <img
-              src="~/assets/images/scan.png"
+              src="~/assets/images/scan.webp"
               alt="Des clients scannent le QR code de leur table et commandent, le cuisinier sourit"
               class="w-full h-full max-h-[34rem] lg:max-h-[40rem] object-cover object-top"
               width="1024"
