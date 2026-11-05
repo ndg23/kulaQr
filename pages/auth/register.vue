@@ -73,7 +73,7 @@
           <!-- Header -->
           <div class="space-y-1 sm:space-y-2">
             <h1 class="text-[27px] sm:text-[31px] font-black tracking-tight text-gray-900 leading-tight">
-              Sécurisez votre compte
+              {{ isProviderUser ? 'Confirmez votre email' : 'Sécurisez votre compte' }}
             </h1>
           </div>
 
@@ -82,7 +82,7 @@
             <FloatLabelInput id="email" v-model="form.email" type="email" label="Email" autocomplete="email"
               :error="errors.email" :show-char-count="false" pill required />
 
-            <FloatLabelInput id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'"
+            <FloatLabelInput v-if="!isProviderUser" id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'"
               label="Mot de passe" autocomplete="new-password" minlength="6" :error="errors.password"
               :show-char-count="false" pill required>
               <template #trailing>
@@ -355,6 +355,8 @@ const scrollToInput = (event: FocusEvent) => {
   }, 300) // Délai pour l'ouverture du clavier mobile
 }
 const step = ref(1)
+// Compte créé via Google : déjà authentifié, pas de mot de passe à saisir (il serait ignoré)
+const isProviderUser = ref(false)
 
 // Validate phone number
 const validatePhone = (phone: string): boolean => {
@@ -578,6 +580,7 @@ onMounted(() => {
       const userData = JSON.parse(atob(dataParam as string))
       form.email = userData.email
       form.fullName = userData.fullName
+      isProviderUser.value = !!userData.provider && userData.provider !== 'email'
       step.value = 2
     } catch (error) {
       console.error('❌ Erreur décodage données utilisateur:', error)
@@ -796,7 +799,7 @@ const nextStep = () => {
       hasErrors = true
     }
 
-    if (!form.password || form.password.length < 6) {
+    if (!isProviderUser.value && (!form.password || form.password.length < 6)) {
       errors.password = 'Le mot de passe doit contenir au moins 6 caractères'
       hasErrors = true
     }
