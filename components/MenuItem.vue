@@ -19,7 +19,7 @@
         <div v-if="item.allergens && item.allergens.length" class="mt-1 flex flex-wrap gap-1">
           <span v-for="allergen in item.allergens" :key="allergen" class="px-2 h-5 inline-flex items-center rounded-full bg-white text-gray-600 text-[10px] font-extrabold">{{ allergen }}</span>
         </div>
-        <span class="mt-1.5 inline-flex items-center h-7 px-3 rounded-full bg-[#FB6A00] text-black text-sm font-black tabular-nums">{{ formatPrice(item.price) }}</span>
+        <span class="mt-1 block text-lg font-black text-[#FB6A00] tabular-nums">{{ formatPrice(item.price) }}</span>
       </div>
 
       <div class="relative flex-shrink-0">
