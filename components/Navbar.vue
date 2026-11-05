@@ -5,7 +5,7 @@
         <!-- Logo -->
         <div class="flex items-center">
           <NuxtLink to="/" class="flex items-center space-x-2 group">
-            <div class="w-9 h-9 bg-[#FB6A00] rounded-full p-1.5 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+            <div class="w-9 h-9 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
               <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <span class="text-xl font-bold  group-hover:text-gray-700 transition-colors">
