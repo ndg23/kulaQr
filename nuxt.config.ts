@@ -118,6 +118,10 @@ colorMode: {
     },
   },
   vite: {
+    // Le sel des codes de table est le même dans le navigateur et sur le serveur (variable QR_SECRET, lue au build)
+    define: {
+      __QR_SALT__: JSON.stringify(process.env.QR_SECRET || '')
+    },
     optimizeDeps: {
       include: [
         '@heroicons/vue/24/outline',
@@ -133,7 +137,6 @@ colorMode: {
     
     // Variables publiques
     public: {
-      qrSecretKey: process.env.QR_SECRET_KEY,
       baseURL: process.env.BASE_URL,
       siteUrl: process.env.SITE_URL || 'https://kulaqr.vercel.app',
       supabaseUrl: process.env.SUPABASE_URL,
