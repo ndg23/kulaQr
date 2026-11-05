@@ -672,7 +672,7 @@ const handleRegister = async () => {
           full_name: form.fullName,
           role: 'owner',
           subscription_tier: 'demo', // Demo par défaut (7 jours)
-          is_active: false, // Compte inactif par défaut (activé par admin)
+          is_active: true, // Compte actif dès l'inscription
           phone: getFullPhoneNumber() || null,
           subscription_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 jours de démo
         })
@@ -692,7 +692,7 @@ const handleRegister = async () => {
         type_id: form.type,
         user_id: userId,
         created_by: userId,
-        is_active: false, // Établissement inactif par défaut
+        is_active: true, // Établissement actif dès l'inscription : il peut recevoir des commandes
         subscription_type: 'basic',
         address: form.address || null,
         phone: getFullPhoneNumber() || null,
@@ -720,12 +720,10 @@ const handleRegister = async () => {
       }
     }
 
-    // Déconnexion immédiate pour empêcher l'accès
-    await supabase.auth.signOut()
-
-    // Afficher le message de succès et rediriger vers la page de confirmation
-    showToast.success('Compte créé !', 'Votre compte a été créé avec succès')
-    navigateTo('/auth/pending-activation?name=' + encodeURIComponent(form.fullName) + '&email=' + encodeURIComponent(form.email))
+    // Plus d'attente : l'utilisateur reste connecté et arrive directement sur son tableau de bord
+    const createdId = establishment?.[0]?.id
+    showToast.success('Compte créé !', 'Bienvenue, votre espace est prêt')
+    await navigateTo(createdId ? `/manager/${createdId}` : '/auth/login')
     return
   } catch (err) {
     console.error('❌ Erreur inscription:', err)

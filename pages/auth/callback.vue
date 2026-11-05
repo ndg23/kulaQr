@@ -84,7 +84,7 @@ onMounted(async () => {
           full_name: fullName,
           role: 'owner',
           subscription_tier: 'demo', // CORRIGÉ : demo au lieu de free
-          is_active: false, // CORRIGÉ : inactif par défaut comme pour l'inscription normale
+          is_active: true, // Actif dès l'inscription, comme pour l'inscription par mot de passe
           subscription_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // CORRIGÉ : 7 jours pour demo
         })
 

@@ -29,10 +29,10 @@
           <!-- Title -->
           <div class="space-y-4">
             <h1 class="text-5xl font-bold text-gray-900 tracking-tight">
-              Compte créé
+              Accès suspendu
             </h1>
             <p class="text-xl text-gray-500 font-light">
-              Votre compte est en attente d'activation
+              Votre compte est suspendu pour le moment
             </p>
           </div>
 
@@ -50,7 +50,7 @@
               <span v-if="userEmail" class="block text-base text-gray-500 mb-3">{{ userEmail }}</span>
             </p>
             <p class="text-lg text-gray-600 leading-relaxed font-light">
-              Notre équipe examine votre demande. Vous recevrez une  confirmation dans les <span class="font-medium text-gray-900">24 heures</span>.
+              Contactez-nous pour le réactiver, nous vous répondons rapidement.
             </p>
           </div>
 
