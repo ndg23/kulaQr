@@ -7,14 +7,17 @@
     @update:model-value="v => { if (!v) close() }"
   >
     <div v-if="order" class="space-y-3">
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="inline-flex items-center h-8 px-4 rounded-full text-xs font-extrabold" :class="statusPill(order.status)">{{ STATUS_LABEL[order.status] || order.status }}</span>
-        <span v-if="order.staff?.username" class="inline-flex items-center h-8 px-4 rounded-full bg-gray-100 text-xs font-extrabold text-gray-900">{{ order.staff.username }}</span>
-        <span class="inline-flex items-center h-8 px-4 rounded-full bg-gray-100 text-xs font-extrabold text-gray-900 tabular-nums">{{ clock(order.created_at) }}</span>
+      <div class="rounded-3xl bg-white border-2 px-4 py-3 flex flex-wrap items-center gap-2" :class="tone.border">
+        <span class="inline-flex items-center gap-2 h-8 px-4 rounded-full bg-white border-2 text-xs font-extrabold" :class="[tone.border, tone.text]">
+          <span class="w-2 h-2 rounded-full" :class="tone.dot"></span>{{ STATUS_LABEL[order.status] || order.status }}
+        </span>
+        <span class="inline-flex items-center h-8 px-4 rounded-full bg-white border border-gray-300 text-xs font-extrabold text-gray-900 tabular-nums">Reçue à {{ clock(order.created_at) }}</span>
+        <span v-if="order.staff?.username" class="inline-flex items-center h-8 px-4 rounded-full bg-white border border-gray-300 text-xs font-extrabold text-gray-900">{{ order.staff.username }}</span>
+        <span class="inline-flex items-center h-8 px-4 rounded-full bg-white border-2 text-xs font-extrabold" :class="isPaid ? 'border-[#16A34A] text-[#15803D]' : 'border-[#FB6A00] text-[#C54E00]'">{{ payLabel }}</span>
       </div>
 
       <ul class="space-y-2">
-        <li v-for="item in order.items" :key="item.id" class="rounded-3xl bg-gray-100 px-4 py-3">
+        <li v-for="item in order.items" :key="item.id" class="rounded-3xl bg-white border border-gray-200 px-4 py-3">
           <div class="flex items-start justify-between gap-3">
             <span class="font-extrabold text-gray-900 break-words min-w-0">{{ item.quantity }} × {{ item.name }}</span>
             <span class="font-black text-gray-900 tabular-nums flex-shrink-0">{{ money(item.unit_price * item.quantity) }}</span>
@@ -23,25 +26,26 @@
         </li>
       </ul>
 
-      <p v-if="order.notes" class="rounded-3xl bg-[#FFECD8] px-4 py-3 text-sm font-bold text-[#7C2900] break-words whitespace-pre-line">{{ order.notes }}</p>
+      <p v-if="order.notes" class="rounded-3xl bg-white border-2 border-[#FB6A00] px-4 py-3 text-sm font-bold text-[#7C2900] break-words whitespace-pre-line">{{ order.notes }}</p>
 
-      <div class="flex items-center justify-between rounded-full bg-[#FB6A00] px-5 h-14">
-        <span class="text-sm font-extrabold text-black">Total</span>
-        <span class="text-xl font-black text-black tabular-nums">{{ money(order.total_amount) }}</span>
+      <div class="flex items-center justify-between rounded-full bg-white border-2 px-5 h-14" :class="tone.border">
+        <span class="text-sm font-extrabold text-gray-900">Total</span>
+        <span class="text-xl font-black tabular-nums" :class="tone.text">{{ money(order.total_amount) }}</span>
       </div>
 
       <button
         v-if="NEXT_STEP[order.status]"
         type="button"
         :disabled="busy"
-        class="w-full h-16 rounded-full bg-black text-white text-lg font-black uppercase tracking-wide disabled:opacity-50 active:scale-[0.98] transition-all"
+        class="w-full h-16 rounded-full text-white text-lg font-black uppercase tracking-wide disabled:opacity-50 active:scale-[0.98] transition-all"
+        :class="order.status === 'pending' ? 'bg-[#16A34A] hover:bg-[#15803D]' : 'bg-black'"
         @click="advance"
       >{{ NEXT_STEP[order.status]!.label }}</button>
 
       <div class="grid gap-2" :class="canCancel ? 'grid-cols-2' : 'grid-cols-1'">
         <button
           type="button"
-          class="h-12 rounded-full bg-gray-100 text-gray-900 font-extrabold inline-flex items-center justify-center gap-2 hover:bg-gray-200 active:scale-[0.97] transition-all"
+          class="h-12 rounded-full bg-white border-2 border-gray-300 text-gray-900 font-extrabold inline-flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-[0.97] transition-all"
           @click="$emit('print', order)"
         ><Printer class="w-4 h-4" :stroke-width="2.5" /> Ticket</button>
 
@@ -51,7 +55,7 @@
           type="button"
           :disabled="busy"
           class="h-12 rounded-full font-extrabold active:scale-[0.97] transition-all disabled:opacity-50"
-          :class="confirmCancel ? 'bg-[#C54E00] text-white' : 'bg-[#FFECD8] text-[#7C2900]'"
+          :class="confirmCancel ? 'bg-[#DC2626] border-2 border-[#DC2626] text-white' : 'bg-white border-2 border-[#DC2626] text-[#B91C1C]'"
           @click="cancel"
         >{{ confirmCancel ? 'Confirmer l’annulation' : 'Annuler' }}</button>
       </div>
@@ -95,13 +99,28 @@ const money = (v: number | string) =>
 const clock = (iso: string) =>
   new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 
-const statusPill = (status: string) => ({
-  pending: 'bg-[#FB6A00] text-black',
-  confirmed: 'bg-black text-white',
-  processing: 'bg-[#FFB77A] text-black',
-  completed: 'bg-white text-black ring-2 ring-black',
-  cancelled: 'bg-gray-300 text-gray-700'
-} as Record<string, string>)[status] || 'bg-gray-200 text-gray-900'
+// Mêmes couleurs que les cartes de la liste : orange = à traiter, vert = en cours / terminé, rouge = en retard ou annulé
+const TONES = {
+  red: { border: 'border-[#DC2626]', text: 'text-[#B91C1C]', dot: 'bg-[#DC2626]' },
+  orange: { border: 'border-[#FB6A00]', text: 'text-[#C54E00]', dot: 'bg-[#FB6A00]' },
+  green: { border: 'border-[#16A34A]', text: 'text-[#15803D]', dot: 'bg-[#16A34A]' }
+}
+const tone = computed(() => {
+  const o = props.order
+  if (!o) return TONES.green
+  const active = ['pending', 'confirmed', 'processing'].includes(o.status)
+  if (o.status === 'cancelled' || (active && ageMinutes(o.created_at) >= 20)) return TONES.red
+  if (o.status === 'pending' || o.status === 'confirmed') return TONES.orange
+  return TONES.green
+})
+
+const METHODS: Record<string, string> = { cash: 'Espèces', card: 'Carte', mobile_money: 'Mobile Money', wave: 'Wave', orange_money: 'Orange Money' }
+const isPaid = computed(() => props.order?.payment_status === 'paid')
+const payLabel = computed(() => {
+  const o = props.order
+  if (!o) return ''
+  return isPaid.value ? `Payé${o.payment_method ? ' · ' + (METHODS[o.payment_method] || o.payment_method) : ''}` : 'À payer'
+})
 
 const advance = () => {
   if (!props.order) return

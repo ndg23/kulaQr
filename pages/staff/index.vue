@@ -94,7 +94,8 @@
             v-if="NEXT_STEP[order.status]"
             type="button"
             :disabled="busyId === order.id"
-            class="ml-auto h-14 px-6 rounded-full bg-black text-white text-sm font-black uppercase tracking-wide disabled:opacity-50 active:scale-[0.96] transition-all"
+            class="ml-auto h-14 px-6 rounded-full text-white text-sm font-black uppercase tracking-wide disabled:opacity-50 active:scale-[0.96] transition-all"
+            :class="order.status === 'pending' ? 'bg-[#16A34A] hover:bg-[#15803D]' : 'bg-black'"
             @click.stop="advance(order)"
           >{{ busyId === order.id ? '…' : NEXT_STEP[order.status]!.label }}</button>
         </div>
