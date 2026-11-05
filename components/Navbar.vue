@@ -1,11 +1,11 @@
 <template>
-  <nav class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100">
+  <nav class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-100">
     <div class="max-w-7xl bg-white mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
         <div class="flex items-center">
           <NuxtLink to="/" class="flex items-center space-x-2 group">
-            <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+            <div class="w-9 h-9 bg-[#FB6A00] rounded-full p-1.5 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
               <img src="~/assets/icon/logo.png" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <span class="text-xl font-bold  group-hover:text-gray-700 transition-colors">
@@ -22,8 +22,8 @@
           <a href="#pricing" class="text-gray-600 hover:text-gray-900 transition-colors font-medium">
             Tarifs
           </a>
-          <a href="#testimonials" class="text-gray-600 hover:text-gray-900 transition-colors font-medium">
-            Témoignages
+          <a href="#steps" class="text-gray-600 hover:text-gray-900 transition-colors font-medium">
+            Comment ça marche
           </a>
           <a href="#contact" class="text-gray-600 hover:text-gray-900 transition-colors font-medium">
             Contact
@@ -53,7 +53,7 @@
               >
                 <!-- Avatar -->
                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-medium text-sm"
-                     :class="userRole === 'admin' ? 'bg-red-500' : 'bg-blue-500'">
+                     :class="userRole === 'admin' ? 'bg-black' : 'bg-[#FB6A00] !text-black'">
                   {{ userInitials }}
                 </div>
                 <!-- Nom utilisateur -->
@@ -65,12 +65,12 @@
               </button>
               
               <!-- Dropdown Menu -->
-              <div v-if="userMenuOpen" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[100] transform transition-all duration-200 ease-in-out">
+              <div v-if="userMenuOpen" class="absolute right-0 mt-2 w-56 bg-white rounded-[1.75rem] shadow-xl border border-gray-200 py-2 z-[100] transform transition-all duration-200 ease-in-out">
                 <!-- User Info -->
                 <div class="px-4 py-3 border-b border-gray-100">
                   <p class="text-sm font-medium text-gray-900">{{ user.full_name || 'Utilisateur' }}</p>
                   <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1"
-                        :class="userRole === 'admin' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'">
+                        :class="userRole === 'admin' ? 'bg-black text-white' : 'bg-[#FFECD8] text-[#7C2900]'">
                     {{ userRole === 'admin' ? 'Administrateur' : 'Propriétaire' }}
                   </span>
                 </div>
@@ -146,7 +146,7 @@
             </NuxtLink>
             <NuxtLink 
               to="/auth/register"
-              class="bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm hover:shadow-md"
+              class="bg-black text-white h-11 px-6 inline-flex items-center rounded-full font-extrabold hover:bg-gray-800 active:scale-[0.97] transition-all"
             >
               Commencer
             </NuxtLink>
@@ -191,7 +191,7 @@
               <div class="px-3 py-2 bg-gray-50 rounded-md">
                 <div class="flex items-center space-x-3">
                   <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-medium text-sm"
-                       :class="userRole === 'admin' ? 'bg-red-500' : 'bg-blue-500'">
+                       :class="userRole === 'admin' ? 'bg-black' : 'bg-[#FB6A00] !text-black'">
                     {{ userInitials }}
                   </div>
                   <div>

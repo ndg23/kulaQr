@@ -1,166 +1,92 @@
 <template>
   <div>
-    <!-- Overlay -->
-    <div 
-      v-if="isExpanded" 
-      class="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm z-40 transition-opacity duration-300"
-      @click="$emit('toggle')"
-    ></div>
-    
-    <div
-      class="fixed bottom-0 left-0 w-full max-w-lg mx-auto border-t border-gray-300 right-0 bg-white transition-all duration-300 z-50"
-      :class="{ 
-        'inset-0 rounded-none': isExpanded,
-        'rounded-t-3xl': !isExpanded,
-        'pb-0': !isExpanded,
-        'pb-safe': isExpanded || (!isExpanded && cart.length > 0)
-      }"
-      :style="cartStyle"
-    >
-      <!-- En-tête du panier -->
-      <div 
-        class="p-4 flex justify-between items-center border-b border-gray-100 cursor-pointer relative"
+    <!-- Barre repliée : le nombre d'articles, le total, un rond orange pour ouvrir -->
+    <div v-if="cart.length && !isExpanded" class="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-xl">
+      <button
+        type="button"
+        class="w-full h-[68px] pl-6 pr-2 rounded-full bg-black text-white flex items-center gap-3 shadow-xl shadow-black/20 active:scale-[0.98] transition-all"
         @click="$emit('toggle')"
       >
-        <div class="flex items-center space-x-2">
-          <div class="relative">
-            <ShoppingBag class="w-6 h-6 text-gray-700" />
-            <transition name="bounce">
-              <span 
-                v-if="totalItems > 0" 
-                class="absolute -top-2 font-mono -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
-              >
-                {{ totalItems }}
-              </span>
-            </transition>
-          </div>
-        </div>
-        
-        <!-- Chevron centré -->
-        <div 
-          class="absolute left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center transition-transform duration-300"
-          :class="{ 'rotate-180': isExpanded }"
-        >
-          <ChevronUp class="w-5 h-5 text-gray-600" />
-        </div>
-        
-        <div class="flex items-center">
-          <span class="font-medium text-gray-800">{{ formatPrice(totalPrice) }}</span>
-        </div>
-      </div>
+        <span class="min-w-0 flex-1 text-left leading-tight">
+          <span class="block text-sm font-black">{{ totalItems }} article{{ totalItems > 1 ? 's' : '' }}</span>
+          <span class="block text-[11px] font-semibold opacity-70 truncate">{{ recap }}</span>
+        </span>
+        <span class="text-xl font-black tabular-nums">{{ formatPrice(totalPrice) }}</span>
+        <span class="w-[52px] h-[52px] flex-shrink-0 rounded-full bg-[#FB6A00] text-black flex items-center justify-center"><ShoppingBag class="w-6 h-6" :stroke-width="2.75" /></span>
+      </button>
+    </div>
 
-      <!-- Aperçu rapide des articles (visible quand non déployé) -->
-      <div 
-        v-if="!isExpanded && cart.length > 0" 
-        class="px-4 pb-4 flex items-center overflow-x-auto scrollbar-hide space-x-2"
-      >
-        <transition-group name="slide-fade">
-          <div 
-            v-for="item in cart.slice(0, 3)" 
-            :key="item.id" 
-            class="px-3 py-1.5 bg-gray-100 rounded-full text-sm whitespace-nowrap flex items-center space-x-1"
-          >
-            <span>{{ item.quantity }}×</span>
-            <span>{{ item.name }}</span>
-            <span v-if="item.note" class="text-gray-500">
-              <SquarePen class="w-3.5 h-3.5 inline-block" />
-            </span>
-          </div>
-          <div 
-            v-if="cart.length > 3" 
-            :key="'more'" 
-            class="px-3 py-1.5 bg-gray-100 rounded-full text-sm whitespace-nowrap text-gray-600"
-          >
-            +{{ cart.length - 3 }} autres
-          </div>
-        </transition-group>
-      </div>
+    <!-- Panier déployé : une feuille -->
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      leave-active-class="transition-opacity duration-150"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="isExpanded" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end justify-center" @click.self="$emit('toggle')">
+        <div class="w-full max-w-2xl max-h-[92dvh] flex flex-col rounded-t-[2rem] bg-white" role="dialog" aria-modal="true" aria-label="Mon panier">
+          <div class="pt-3 pb-1 flex justify-center"><span class="w-10 h-1.5 rounded-full bg-gray-300"></span></div>
 
-      <!-- Contenu du panier -->
-      <div 
-        v-if="isExpanded" 
-        class="px-4 overflow-y-auto cart-items"
-        :class="{ 'max-h-[50vh]': cart.length > 4 }"
-        ref="cartItemsContainer"
-      >
-        <transition-group name="list" tag="div">
-          <div
-            v-for="item in cart"
-            :key="item.id"
-            class="flex justify-between items-start py-3 border-b border-gray-100 last:border-0 relative"
-          >
-            <!-- Bouton supprimer -->
-            <button 
-              @click="$emit('remove-item', item.id)"
-              class="absolute top-3 right-0 w-10 h-10  border border-gray-300 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
-            >
-              <X class="w-8 h-8" />
+          <header class="flex items-center justify-between gap-3 px-5 pt-1 pb-3">
+            <h2 class="text-xl font-black text-gray-900">Mon panier</h2>
+            <button type="button" aria-label="Fermer" class="w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center active:scale-[0.94] transition-all" @click="$emit('toggle')">
+              <X class="w-5 h-5" :stroke-width="2.5" />
             </button>
+          </header>
 
-            <div class="flex flex-col pr-8">
-              <span class="font-medium">{{ item.name }}</span>
-              <span class="text-sm text-gray-500">{{ formatPrice(item.price) }}</span>
-              <div v-if="item.note" class="text-sm text-gray-500 mt-1">
-                Note: {{ item.note }}
-              </div>
-              <div class="flex items-center space-x-4 mt-2">
-                <div class="flex items-center space-x-2">
-                  <button 
-                    @click="$emit('remove', item.id)" 
-                    class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center"
-                  >
-                    <Minus class="w-5 h-5" />
-                  </button>
-                  <span class="mx-3 font-medium w-5 text-center">{{ item.quantity }}</span>
-                  <button
-                    @click="$emit('increment', item.id)"
-                    v-if="item.quantity<5"
-                    class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center"
-                    :disabled="item.quantity>=5"
-                  >
-                    <Plus class="w-5 h-5" />
+          <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 space-y-2" ref="cartItemsContainer">
+            <div v-for="item in cart" :key="item.id" class="rounded-[1.75rem] bg-gray-100 p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="font-black text-gray-900 break-words">{{ item.name }}</p>
+                  <p class="text-xs font-semibold text-gray-500">{{ formatPrice(item.price) }}</p>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <span class="font-black tabular-nums text-gray-900">{{ formatPrice(item.price * item.quantity) }}</span>
+                  <button type="button" :aria-label="`Retirer ${item.name}`" class="w-9 h-9 rounded-full bg-white text-gray-500 hover:text-[#C54E00] flex items-center justify-center active:scale-[0.92] transition-all" @click="$emit('remove-item', item.id)">
+                    <X class="w-4 h-4" :stroke-width="2.5" />
                   </button>
                 </div>
-                <button 
-                  @click="$emit('add-note', item.id)"
-                  class="text-sm text-gray-600 underline"
-                >
+              </div>
+
+              <p v-if="item.note" class="mt-2 text-sm font-semibold text-[#C54E00] break-words">{{ item.note }}</p>
+
+              <div class="mt-3 flex items-center justify-between gap-3">
+                <div class="inline-flex items-center rounded-full bg-white p-1">
+                  <button type="button" aria-label="Retirer un" class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center active:scale-[0.92] transition-all" @click="$emit('remove', item.id)">
+                    <Minus class="w-4 h-4" :stroke-width="3" />
+                  </button>
+                  <span class="w-9 text-center font-black tabular-nums">{{ item.quantity }}</span>
+                  <button type="button" aria-label="Ajouter un" :disabled="item.quantity >= 5" class="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center disabled:opacity-30 active:scale-[0.92] transition-all" @click="$emit('increment', item.id)">
+                    <Plus class="w-4 h-4" :stroke-width="3" />
+                  </button>
+                </div>
+                <button type="button" class="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-white text-sm font-extrabold text-gray-900 active:scale-[0.96] transition-all" @click="$emit('add-note', item.id)">
+                  <SquarePen class="w-4 h-4" :stroke-width="2.5" />
                   {{ item.note ? 'Modifier la note' : 'Ajouter une note' }}
                 </button>
               </div>
             </div>
           </div>
-        </transition-group>
-      </div>
 
-      <!-- Footer avec boutons -->
-      <div v-if="isExpanded" class="px-4 py-4 bg-white border-t border-gray-100 mt-auto space-y-3">
-        <div class="flex justify-between py-2">
-          <span class="text-gray-600">Sous-total</span>
-          <span class="font-medium">{{ formatPrice(totalPrice) }}</span>
+          <footer class="px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))] space-y-3">
+            <div class="rounded-[2rem] bg-[#FB6A00] text-black p-5">
+              <p class="text-xs font-extrabold uppercase">{{ totalItems }} article{{ totalItems > 1 ? 's' : '' }}</p>
+              <p class="text-4xl font-black tabular-nums tracking-tight break-words">{{ formatPrice(totalPrice) }}</p>
+            </div>
+            <button
+              type="button"
+              :disabled="cart.length === 0"
+              class="w-full h-16 rounded-full bg-black text-white text-lg font-black uppercase tracking-wide inline-flex items-center justify-center gap-2 disabled:opacity-40 active:scale-[0.98] transition-all"
+              @click="handleOrder"
+            >
+              Commander
+              <ArrowRight class="w-5 h-5" :stroke-width="3" />
+            </button>
+          </footer>
         </div>
-        
-        <button
-          @click="handleOrder"
-          class="w-full py-3 bg-red-500 rounded-full hover:bg-red-800 text-white font-medium rounded-full transition-all transform active:scale-95 flex items-center justify-center"
-          :disabled="cart.length === 0"
-          :class="{ 'opacity-50 cursor-not-allowed': cart.length === 0 }"
-        >
-          <span class="relative text-white text-lg font-medium  ">
-            Commander maintenant
-          </span>
-          <ArrowRight class="ml-2 w-5 h-5 " />
-        </button>
-
-        <button 
-          @click="$emit('toggle')"
-          class="w-full py-3 border border-gray-200 text-gray-600 font-medium rounded-full hover:bg-gray-50 transition-colors"
-        >
-<span class="text-red-500">          Fermer
-</span>
-      </button>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -303,90 +229,3 @@ onUnmounted(() => {
   document.body.style.overflow = ''
 })
 </script>
-
-<style scoped>
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-/* Animation pour l'ajout d'articles */
-.bounce-enter-active {
-  animation: bounce-in 0.5s;
-}
-.bounce-leave-active {
-  animation: bounce-in 0.5s reverse;
-}
-@keyframes bounce-in {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
-/* Animation pour la liste d'articles */
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.3s ease;
-}
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
-}
-
-/* Animation pour l'aperçu des articles */
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.3s ease;
-}
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-
-/* Animation du pulse */
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.6; }
-  100% { opacity: 1; }
-}
-.animate-pulse {
-  animation: pulse 2s infinite;
-}
-
-/* Animation du ping */
-@keyframes ping {
-  0% { transform: scale(1); opacity: 1; }
-  75%, 100% { transform: scale(2); opacity: 0; }
-}
-.animate-ping {
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.cart-items {
-  scrollbar-width: thin;
-  scrollbar-color: #E5E7EB transparent;
-}
-
-.cart-items::-webkit-scrollbar {
-  width: 6px;
-}
-
-.cart-items::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.cart-items::-webkit-scrollbar-thumb {
-  background-color: #E5E7EB;
-  border-radius: 20px;
-}
-</style>

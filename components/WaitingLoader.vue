@@ -1,92 +1,44 @@
 <template>
-  <div v-if="isVisible" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden animate-slideUp">
-
-      <!-- Header minimaliste -->
-      <div class="px-10 pt-10 pb-8">
-        <div class="flex items-center justify-center mb-8">
-          <div :class="[
-            'w-20 h-20 rounded-full flex items-center justify-center transition-all',
-            getStatusBg(status)
-          ]">
-            <component 
-              :is="getStatusIcon(status)" 
-              :class="[
-                'transition-all',
-                status === 'loading' ? 'w-8 h-8 animate-spin' : 'w-9 h-9',
-                getStatusColor(status)
-              ]" 
-            />
-          </div>
-        </div>
-
-        <h2 class="text-3xl font-semibold text-gray-900 text-center mb-3 tracking-tight">
-          {{ getStatusTitle(status) }}
-        </h2>
-        <p class="text-gray-500 text-center text-base leading-relaxed">
-          {{ message || defaultMessage }}
-        </p>
+  <div v-if="isVisible" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm">
+    <div class="bg-white rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl max-w-sm w-full overflow-hidden animate-slideUp pb-[env(safe-area-inset-bottom)]">
+      <div class="px-8 pt-8 pb-6 text-center">
+        <span :class="['w-20 h-20 mx-auto rounded-full flex items-center justify-center', getStatusBg(status)]">
+          <component :is="getStatusIcon(status)" :class="[status === 'loading' ? 'w-8 h-8 animate-spin' : 'w-9 h-9', getStatusColor(status)]" :stroke-width="2.75" />
+        </span>
+        <h2 class="mt-5 text-3xl font-black text-gray-900 tracking-tight">{{ getStatusTitle(status) }}</h2>
+        <p class="mt-2 text-gray-500 text-base font-medium leading-relaxed">{{ message || defaultMessage }}</p>
       </div>
 
-      <!-- Détails de commande -->
-      <div v-if="order && status !== 'loading'" class="px-10 pb-8">
-        <div class="bg-gray-50 rounded-2xl p-5 space-y-4">
+      <div v-if="order && status !== 'loading'" class="px-8 pb-5">
+        <div class="rounded-[2rem] bg-gray-100 p-4 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-500">Commande</span>
-            <span class="font-medium text-gray-900">#{{ orderNumber }}</span>
+            <span class="text-sm font-semibold text-gray-500">Commande</span>
+            <span class="font-black text-gray-900">#{{ orderNumber }}</span>
           </div>
           <div v-if="tableNumber" class="flex items-center justify-between">
-            <span class="text-sm text-gray-500">Emplacement N°</span>
-            <span class="font-medium text-gray-900">{{ tableNumber }}</span>
+            <span class="text-sm font-semibold text-gray-500">Table</span>
+            <span class="font-black text-gray-900">{{ tableNumber }}</span>
           </div>
-          <!-- <div v-for="order   in source" class="flex items-center justify-between">
-            <span class="text-sm text-gray-500">Établissement</span>
-            <span class="font-medium text-gray-900">{{ establishmentName }}</span>
-          </div> -->
-          <div class="flex items-center justify-between pt-3 border-t border-gray-200">
-            <span class="text-sm text-gray-500">Total</span>
-            <span class="font-semibold text-gray-900 text-lg">{{ formatPrice(order?.total_amount) }}</span>
-          </div>
+        </div>
+        <div class="mt-2 flex items-center justify-between rounded-full bg-[#FB6A00] px-5 h-14">
+          <span class="text-sm font-extrabold text-black">Total</span>
+          <span class="text-xl font-black text-black tabular-nums">{{ formatPrice(order?.total_amount) }}</span>
         </div>
       </div>
 
-      <!-- Barre de progression (loading states) -->
-      <div v-if="['loading', 'pending', 'confirmed', 'processing'].includes(status)" class="px-10 pb-8">
-        <div class="flex items-center justify-center gap-2 mb-4">
-          <div :class="[
-            'w-1.5 h-1.5 rounded-full animate-pulse',
-            getStatusDotColor(status)
-          ]"></div>
-          <span class="text-xs text-gray-500 font-medium">{{ getProgressText(status) }}</span>
+      <div v-if="['loading', 'pending', 'confirmed', 'processing'].includes(status)" class="px-8 pb-6">
+        <div class="flex items-center justify-center gap-2 mb-3">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#FB6A00] animate-pulse"></span>
+          <span class="text-xs text-gray-500 font-extrabold">{{ getProgressText(status) }}</span>
         </div>
-        <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div 
-            :class="[
-              'h-full rounded-full transition-all duration-1000 ease-out',
-              getStatusBarColor(status)
-            ]" 
-            :style="{ width: progressWidth }"
-          ></div>
+        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div class="h-full rounded-full bg-[#FB6A00] transition-all duration-1000 ease-out" :style="{ width: progressWidth }"></div>
         </div>
       </div>
 
-      <!-- Actions -->
-      <div v-if="status !== 'loading'" class="px-10 pb-10 flex gap-3">
-        <button
-          v-if="['pending'].includes(status) && cancelable"
-          @click="$emit('cancel')"
-          class="flex-1 h-12 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-900 rounded-full font-medium text-sm transition-all"
-        >
-          Annuler
-        </button>
-
-        <button
-          v-if="status === 'completed'"
-          @click="$emit('close')"
-          class="flex-1 h-12 bg-gray-900 hover:bg-gray-800 active:bg-gray-950 text-white rounded-full font-medium text-sm transition-all"
-        >
-          Fermer
-        </button>
+      <div v-if="status !== 'loading'" class="px-8 pb-8 flex gap-3">
+        <button v-if="['pending'].includes(status) && cancelable" type="button" class="flex-1 h-14 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-extrabold text-sm" @click="$emit('cancel')">Annuler</button>
+        <button v-if="status === 'completed'" type="button" class="flex-1 h-14 rounded-full bg-black text-white font-black uppercase text-sm" @click="$emit('close')">Fermer</button>
       </div>
     </div>
   </div>
@@ -161,10 +113,10 @@ const getStatusIcon = (status) => {
 const getStatusBg = (status) => {
   switch (status) {
     case 'loading': return 'bg-gray-100'
-    case 'pending': return 'bg-yellow-50'
-    case 'confirmed': return 'bg-blue-50'
-    case 'processing': return 'bg-orange-50'
-    case 'completed': return 'bg-green-50'
+    case 'pending': return 'bg-[#FFECD8]'
+    case 'confirmed': return 'bg-black'
+    case 'processing': return 'bg-[#FFECD8]'
+    case 'completed': return 'bg-[#FB6A00]'
     default: return 'bg-gray-100'
   }
 }
@@ -172,10 +124,10 @@ const getStatusBg = (status) => {
 const getStatusColor = (status) => {
   switch (status) {
     case 'loading': return 'text-gray-700'
-    case 'pending': return 'text-yellow-600'
-    case 'confirmed': return 'text-blue-600'
-    case 'processing': return 'text-orange-600'
-    case 'completed': return 'text-green-600'
+    case 'pending': return 'text-[#C54E00]'
+    case 'confirmed': return 'text-white'
+    case 'processing': return 'text-[#C54E00]'
+    case 'completed': return 'text-black'
     default: return 'text-gray-700'
   }
 }

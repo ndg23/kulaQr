@@ -17,12 +17,13 @@
       </div>
 
       <ul class="space-y-2">
-        <li v-for="item in order.items" :key="item.id" class="rounded-3xl bg-white border border-gray-200 px-4 py-3">
-          <div class="flex items-start justify-between gap-3">
-            <span class="font-extrabold text-gray-900 break-words min-w-0">{{ item.quantity }} × {{ item.name }}</span>
-            <span class="font-black text-gray-900 tabular-nums flex-shrink-0">{{ money(item.unit_price * item.quantity) }}</span>
-          </div>
-          <p v-if="item.notes" class="mt-1 text-sm font-semibold text-[#C54E00] break-words">{{ item.notes }}</p>
+        <li v-for="item in order.items" :key="item.id" class="rounded-full bg-white border border-gray-200 pl-2 pr-5 min-h-[3.5rem] py-2 flex items-center gap-3">
+          <span class="w-10 h-10 flex-shrink-0 rounded-full bg-black text-white flex items-center justify-center text-sm font-black tabular-nums">{{ item.quantity }}×</span>
+          <span class="min-w-0 flex-1 leading-tight">
+            <span class="block font-extrabold text-gray-900 break-words">{{ item.name }}</span>
+            <span v-if="item.notes" class="block text-xs font-semibold text-[#C54E00] break-words">{{ item.notes }}</span>
+          </span>
+          <span class="font-black text-gray-900 tabular-nums flex-shrink-0">{{ money(item.unit_price * item.quantity) }}</span>
         </li>
       </ul>
 

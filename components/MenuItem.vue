@@ -1,49 +1,44 @@
 <template>
-  <div
-    class="bg-white py-4 px-6 border-b border-gray-100 flex items-center hover:bg-gray-50 transition-colors duration-200"
-  >
-    <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 mr-4 flex items-center justify-center">
-      <img
-        v-if="item.image_url"
-        :src="item.image_url"
-        :alt="item.name"
-        class="w-full h-full object-cover"
-        @error="handleImageError"
-      />
-      <UtensilsCrossed v-else class="w-6 h-6 text-gray-300" />
-    </div>
-    
-    <div class="flex-grow">
-      <h3 class="text-lg font-mono font-medium text-gray-800 mb-1">{{ item.name }}</h3>
-      <p class="text-sm font-mono text-gray-500 mb-2 line-clamp-2">{{ item.description || '' }}</p>
-      <span class="text-lg font-mono font-medium text-gray-700">{{ formatPrice(item.price) }}</span>
-      
-      <!-- Allergens if available -->
-      <div v-if="item.allergens && item.allergens.length > 0" class="mt-1">
-        <div class="flex flex-wrap gap-1">
-          <span 
-            v-for="allergen in item.allergens" 
-            :key="allergen"
-            class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full"
-          >
-            {{ allergen }}
-          </span>
+  <div class="px-4 py-2">
+    <div class="rounded-[2rem] bg-gray-100 p-3 pr-4 flex items-center gap-3" :class="disabled ? 'opacity-60' : ''">
+      <div class="relative w-20 h-20 flex-shrink-0 rounded-3xl overflow-hidden bg-white flex items-center justify-center">
+        <img
+          v-if="item.image_url"
+          :src="item.image_url"
+          :alt="item.name"
+          class="w-full h-full object-cover"
+          loading="lazy"
+          @error="handleImageError"
+        />
+        <UtensilsCrossed v-else class="w-7 h-7 text-gray-300" />
+      </div>
+
+      <div class="min-w-0 flex-1">
+        <h3 class="text-base font-black text-gray-900 leading-tight break-words">{{ item.name }}</h3>
+        <p v-if="item.description" class="text-xs font-medium text-gray-500 mt-0.5 line-clamp-2">{{ item.description }}</p>
+        <div v-if="item.allergens && item.allergens.length" class="mt-1 flex flex-wrap gap-1">
+          <span v-for="allergen in item.allergens" :key="allergen" class="px-2 h-5 inline-flex items-center rounded-full bg-white text-gray-600 text-[10px] font-extrabold">{{ allergen }}</span>
         </div>
+        <span class="mt-1.5 inline-flex items-center h-7 px-3 rounded-full bg-[#FB6A00] text-black text-sm font-black tabular-nums">{{ formatPrice(item.price) }}</span>
+      </div>
+
+      <div class="relative flex-shrink-0">
+        <button
+          type="button"
+          :disabled="disabled"
+          :aria-label="`Ajouter ${item.name}`"
+          class="w-12 h-12 rounded-full flex items-center justify-center active:scale-[0.92] transition-all"
+          :class="disabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-black text-white'"
+          @click="$emit('add', item)"
+        >
+          <Plus class="w-6 h-6" :stroke-width="3" />
+        </button>
+        <span
+          v-if="quantity > 0"
+          class="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] px-1.5 rounded-full bg-[#FB6A00] text-black text-xs font-black flex items-center justify-center pointer-events-none"
+        >{{ quantity }}</span>
       </div>
     </div>
-    
-    <button
-      @click="$emit('add', item)"
-      :disabled="disabled"
-      :class="[
-        'ml-4 rounded-full w-10 h-10 flex items-center justify-center focus:outline-none transition-colors',
-        disabled 
-          ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-      ]"
-    >
-      <Plus class="w-6 h-6" />
-    </button>
   </div>
 </template>
 
@@ -59,6 +54,11 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  /** Quantité déjà au panier (pastille orange) */
+  quantity: {
+    type: Number,
+    default: 0
   },
   defaultImage: {
     type: String,

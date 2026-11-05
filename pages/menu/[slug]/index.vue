@@ -1,5 +1,5 @@
 <template>
-  <div class="font-sans bg-white min-h-dvh max-w-2xl mx-auto border-x border-gray-100">
+  <div class="font-sans bg-white min-h-dvh max-w-2xl mx-auto">
     <!-- SEO Head Component -->
     <MenuHead 
       :establishment="establishment"
@@ -19,107 +19,85 @@
     <!-- Error State -->
     <ErrorMessage v-if="error" :message="error" />
     
-    <!-- Loading State - Apple Style -->
+    <!-- Chargement -->
     <div v-if="loading" class="min-h-dvh flex items-center justify-center">
       <div class="text-center space-y-4">
-        <div class="w-12 h-12 mx-auto">
-        <div class="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-gray-900"></div>
-        </div>
-        <p class="text-sm text-gray-500 font-medium">Chargement...</p>
+        <div class="w-12 h-12 mx-auto animate-spin rounded-full border-4 border-gray-200 border-t-[#FB6A00]"></div>
+        <p class="text-sm text-gray-500 font-extrabold">Chargement du menu…</p>
       </div>
     </div>
-    
-    <!-- Not Found State - Apple/Twitter Style -->
+
+    <!-- Établissement introuvable -->
     <div v-else-if="!establishment" class="min-h-dvh flex items-center justify-center px-4">
-      <div class="max-w-sm w-full text-center space-y-6">
-        <!-- Icon -->
-        <div class="w-20 h-20 mx-auto bg-gray-100 rounded-3xl flex items-center justify-center">
-          <Store class="w-10 h-10 text-gray-400" :stroke-width="2" />
+      <div class="max-w-sm w-full text-center space-y-5">
+        <span class="w-20 h-20 mx-auto rounded-full bg-[#FB6A00] text-black flex items-center justify-center"><Store class="w-10 h-10" :stroke-width="2.5" /></span>
+        <div class="space-y-1">
+          <h1 class="text-2xl font-black text-gray-900 tracking-tight">Établissement introuvable</h1>
+          <p class="text-base font-medium text-gray-500 leading-relaxed">Cet établissement n'existe pas ou a été désactivé.</p>
         </div>
-        
-        <!-- Title & Description -->
-        <div class="space-y-2">
-          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
-            Établissement introuvable
-          </h1>
-          <p class="text-base text-gray-600 leading-relaxed">
-            Cet établissement n'existe pas ou a été désactivé.
-          </p>
-        </div>
-        
-        <!-- Action Button -->
-        <button
-          @click="navigateTo('/')"
-          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3.5 px-6 rounded-full transition-all duration-200 active:scale-95"
-        >
-          Retour à l'accueil
-        </button>
-        
-        <!-- Help Text -->
-        <p class="text-sm text-gray-500">
-          Besoin d'aide ? 
-          <button class="text-blue-500 hover:text-blue-600 font-medium transition-colors">
-            Contactez-nous
-          </button>
-        </p>
+        <button type="button" class="w-full h-14 rounded-full bg-black text-white font-black uppercase active:scale-[0.98] transition-all" @click="navigateTo('/')">Retour à l'accueil</button>
       </div>
     </div>
-    
+
     <!-- Main Content -->
     <template v-else>
       <!-- Restaurant Header -->
       <RestaurantHeader :data="establishment" />
 
-      <!-- Table Number & Phone Banner - Clean & Minimal -->
-      <div v-if="showTableBanner" class="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-100">
-        <div class="flex items-center justify-between py-3 px-4">
-          <!-- Table Number -->
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div>
-              <p class="text-lg font-bold text-gray-900 tabular-nums">N° {{ tableNumber }}</p>
-            </div>
-          </div>
-
-          <!-- Phone Number - Clickable -->
-          <a 
-            v-if="establishment?.phone" 
+      <!-- Table + téléphone, puis les catégories en pilules (qui restent en haut quand on fait défiler) -->
+      <div class="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-100">
+        <div v-if="showTableBanner" class="flex items-center justify-between gap-2 px-4 pt-3">
+          <span class="inline-flex items-center h-10 px-5 rounded-full bg-black text-white text-base font-black tabular-nums">Table {{ tableNumber }}</span>
+          <a
+            v-if="establishment?.phone"
             :href="`tel:${establishment.phone}`"
-            class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            class="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-gray-100 text-sm font-extrabold text-gray-900 active:scale-[0.96] transition-all"
           >
-            <Phone class="w-4 h-4 text-gray-600" :stroke-width="2" />
-            <span class="text-sm font-medium text-gray-700">{{ formatPhone(establishment.phone) }}</span>
+            <Phone class="w-4 h-4" :stroke-width="2.5" />
+            {{ formatPhone(establishment.phone) }}
           </a>
         </div>
-      </div>
-      
-      <div class="pb-24" v-if="categories.length > 0">
-        <div v-for="category in categories" :key="category.id">
-          <CategoryButton
-            :category="category"
-            :is-active="activeCategory === category.id"
-            :item-count="getCategoryProducts(category.id).length"
-            @click="toggleCategory(category.id)"
-          />
-          
-          <TransitionGroup>
-            <div v-if="activeCategory === category.id">
-              <MenuItem
-                v-for="product in getCategoryProducts(category.id)"
-                :key="product.id"
-                :item="product"
-                :disabled="!isQrValid"
-                @add="addToCart"
-              />
-            </div>
-          </TransitionGroup>
+
+        <div v-if="categories.length > 1" class="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide" role="tablist" aria-label="Catégories">
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="!activeCategory"
+            class="h-10 px-4 rounded-full text-sm font-extrabold whitespace-nowrap flex-shrink-0 active:scale-[0.97] transition-all"
+            :class="!activeCategory ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'"
+            @click="activeCategory = ''"
+          >Tout</button>
+          <button
+            v-for="category in categories"
+            :key="category.id"
+            type="button"
+            role="tab"
+            :aria-selected="activeCategory === category.id"
+            class="h-10 px-4 rounded-full text-sm font-extrabold whitespace-nowrap flex-shrink-0 active:scale-[0.97] transition-all"
+            :class="activeCategory === category.id ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'"
+            @click="activeCategory = category.id"
+          >{{ category.name }}</button>
         </div>
       </div>
-      
+
+      <div class="pb-32" v-if="categories.length > 0">
+        <section
+          v-for="category in categories.filter(c => !activeCategory || c.id === activeCategory)"
+          :key="category.id"
+          class="pt-4"
+        >
+          <h2 v-if="!activeCategory || categories.length > 1" class="px-5 pb-1 text-xl font-black text-gray-900 tracking-tight">{{ category.name }}</h2>
+          <MenuItem
+            v-for="product in getCategoryProducts(category.id)"
+            :key="product.id"
+            :item="product"
+            :quantity="cartQty(product.id)"
+            :disabled="!isQrValid"
+            @add="addToCart"
+          />
+        </section>
+      </div>
+
       <!-- Empty State -->
       <div v-else class="flex flex-col items-center justify-center py-24 px-4">
         <div class="w-20 h-20 bg-gray-100 rounded-3xl flex items-center justify-center mb-6">
@@ -200,60 +178,28 @@
       </div>
     </transition> -->
 
-    <!-- Invalid QR Alert - Apple Style -->
+    <!-- QR invalide -->
     <transition
       enter-active-class="transition-all duration-300 ease-out"
       enter-from-class="opacity-0"
       enter-to-class="opacity-100"
       leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-0"
-      leave-to-class="opacity-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
     >
-      <div
-        v-if="showInvalidQrAlert"
-        class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-      >
-        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
-          <!-- Header -->
+      <div v-if="showInvalidQrAlert" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl max-w-sm w-full overflow-hidden pb-[env(safe-area-inset-bottom)]">
           <div class="pt-8 pb-4 px-6 text-center">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <h2 class="text-xl font-bold text-gray-900 mb-2">
-              QR Code invalide
-            </h2>
-            <p class="text-gray-600 text-sm leading-relaxed">
-              Ce QR code a été modifié ou est corrompu. Veuillez scanner à nouveau le QR code original de votre table.
-            </p>
+            <span class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#FB6A00] text-black flex items-center justify-center"><AlertTriangle class="w-8 h-8" :stroke-width="2.5" /></span>
+            <h2 class="text-xl font-black text-gray-900 mb-2">QR code invalide</h2>
+            <p class="text-gray-600 text-sm font-medium leading-relaxed">Ce QR code a été modifié ou est abîmé. Scannez à nouveau le QR code de votre table.</p>
           </div>
-
-          <!-- Actions -->
-          <div class="px-6 pb-6 space-y-3">
-           <button
-      @click="openCamera"
-      class="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
-    >
-      <Camera class="w-5 h-5" />
-      Ouvrir Scanner
-    </button>
-
-    <!-- Input caché -->
-    <input
-      ref="cameraInput"
-      type="file"
-      accept="image/*"
-      capture="environment"
-      class="hidden"
-    />
-
-            <button
-              @click="goHome"
-              class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-2xl transition-all duration-200 active:scale-95"
-            >
-              Retour à l'accueil
+          <div class="px-6 pb-6 space-y-2">
+            <button type="button" class="w-full h-14 rounded-full bg-black text-white font-black inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-all" @click="openCamera">
+              <Camera class="w-5 h-5" :stroke-width="2.5" /> Ouvrir le scanner
             </button>
+            <input ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden" />
+            <button type="button" class="w-full h-12 rounded-full bg-gray-100 text-gray-900 font-extrabold active:scale-[0.98] transition-all" @click="goHome">Retour à l'accueil</button>
           </div>
         </div>
       </div>
@@ -262,7 +208,7 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
-import { UtensilsCrossed, Store, Camera, X, Phone } from 'lucide-vue-next'
+import { UtensilsCrossed, Store, Camera, X, Phone, AlertTriangle } from 'lucide-vue-next'
 import { useDebounceFn } from '@vueuse/core'
 import { decodeTableHashids } from '~/utils/secure-encoding'
 
@@ -518,6 +464,8 @@ const fetchTableInfo = async () => {
   }
 }
 
+const cartQty = (productId: string) => cart.value.find(item => item.id === productId)?.quantity || 0
+
 const getCategoryProducts = (categoryId: string): Product[] => {
   return products.value.filter(product => product.category_id === categoryId)
 }
@@ -721,51 +669,56 @@ const placeOrder = async () => {
       .map(item => `${item.name}: ${item.note}`)
       .join('\n')
     
-    // Créer la commande avec table_id (foreign key vers tables)
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        establishment_id: establishment.value?.id,
-        table_id: tableInfo.value?.id, // ← ID de la table (foreign key)
-        status: 'pending',
-        total_amount: totalAmount.value,
-        notes: orderNotes || null
-      })
-      .select(`
-        *,
-        tables (
-          id,
-          table_number,
-          section_name,
-          floor_level,
-          capacity,
-          type
-        )
-      `)
-      .single()
-    
-    if (orderError) throw new Error(orderError.message)
-    if (!orderData) throw new Error('Aucune donnée de commande retournée')
-    
+    // La base reprend les prix dans la table products et vérifie la table : le navigateur n'envoie que
+    // les produits et les quantités (bdd/customer_create_order.sql)
+    const { data: created, error: orderError } = await (supabase as any).rpc('create_customer_order', {
+      p_establishment_id: establishment.value?.id,
+      p_table_number: tableId.value !== null ? String(tableId.value) : null,
+      p_notes: orderNotes || null,
+      p_items: cart.value.map(item => ({
+        product_id: item.id,
+        quantity: item.quantity,
+        notes: item.note || null
+      }))
+    })
+
+    let orderId: string | null = created?.id ?? null
+
+    // Fonction SQL pas encore installée (bdd/customer_create_order.sql) : on garde l'ancien chemin
+    const functionMissing = orderError && (orderError.code === 'PGRST202' || orderError.code === '42883' || /could not find the function/i.test(orderError.message || ''))
+    if (functionMissing) {
+      const { data: legacy, error: legacyError } = await supabase
+        .from('orders')
+        .insert({
+          establishment_id: establishment.value?.id,
+          table_id: tableInfo.value?.id,
+          status: 'pending',
+          total_amount: totalAmount.value,
+          notes: orderNotes || null
+        })
+        .select('id')
+        .single()
+      if (legacyError) throw new Error(legacyError.message)
+      const { error: itemsError } = await supabase.from('order_items').insert(
+        cart.value.map(item => ({
+          order_id: legacy.id,
+          product_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price,
+          subtotal: item.price * item.quantity,
+          notes: item.note || null
+        }))
+      )
+      if (itemsError) throw new Error(itemsError.message)
+      orderId = legacy.id
+    } else if (orderError) {
+      throw new Error(orderError.message)
+    }
+    if (!orderId) throw new Error('Aucune donnée de commande retournée')
+
+    const orderData = { id: orderId }
     currentOrderId.value = orderData.id
-    
-    // Créer les items de commande
-    const orderItems = cart.value.map(item => ({
-      order_id: orderData.id,
-      product_id: item.id,
-      quantity: item.quantity,
-      unit_price: item.price,
-      subtotal: item.price * item.quantity,
-      notes: item.notes || null
-    }))
-    
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(orderItems)
-    
-    if (itemsError) throw new Error(itemsError.message)
-    
-    
+
     // Mettre à jour le statut
     orderStatus.value = 'pending'
     statusMessage.value = 'En attente de confirmation...'

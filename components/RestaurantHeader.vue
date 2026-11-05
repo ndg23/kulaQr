@@ -1,72 +1,51 @@
 <template>
-  <div class="relative overflow-hidden">
-    <!-- Cover Image with Parallax Effect -->
+  <div class="relative overflow-hidden rounded-b-[2rem]">
     <div class="h-64 w-full relative">
-      <img 
-        :src="data.cover_image || defaultImage" 
-        alt="Restaurant cover"
-        class="w-full h-full object-cover scale-105"
+      <img
+        :src="data.cover_image || defaultImage"
+        alt="Couverture de l'établissement"
+        class="w-full h-full object-cover"
         @error="handleImageError"
       />
-      <!-- Refined gradient overlay -->
-      <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/90"></div>
-    </div>
-    
-    <!-- Restaurant Info - Card Style -->
-    <div class="absolute bottom-0 left-0 right-0 px-5 pb-6">
-      <!-- Welcome Label -->
-      <div class="inline-block mb-2">
-        <span class="text-white text-sm font-mono tracking-wide">Bienvenue chez</span>
-      </div>
-      
-      <!-- Restaurant Name -->
-      <h1 class="text-white text-4xl font-bold tracking-tight leading-tight mb-3">
-        {{ data.name || 'Etablissement' }}
-      </h1>
-
-      <!-- Description -->
-      <p class="text-white/90 text-base leading-relaxed mb-4 max-w-md">
-        {{ data.description }}
-
-        
-      </p>
-      
-      <!-- Info Pills -->
-      <div class="flex flex-wrap gap-2">
-        <div 
-          v-if="data.opening_hours" 
-          class="flex items-center bg-white/15 backdrop-blur-md rounded-full px-3 py-2"
-        >
-          <Clock class="w-4 h-4 mr-2 text-white" :stroke-width="2.5" />
-          <span class="text-white text-sm font-medium">{{ data.opening_hours }}</span>
-        </div>
-        
-        <div 
-          v-if="data.address" 
-          class="flex underline items-center bg-white/15 backdrop-blur-md rounded-full px-3 py-2 cursor-pointer hover:bg-white/25 transition-all duration-200 active:scale-95"
-          @click="openGoogleMaps"
-        >
-          <MapPin class="w-4 h-4 mr-2 text-white" :stroke-width="2.5" />
-          <span class="text-white text-sm font-medium">{{ data.address }}</span>
-        </div>
-      </div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-black/40 to-black/85"></div>
     </div>
 
-    <!-- Logo in top right -->
+    <!-- Logo en haut à droite -->
     <div class="absolute top-4 right-4">
-      <div class="bg-white backdrop-blur-xl rounded-xl p-1 border border-white">
+      <div class="w-14 h-14 rounded-full bg-white p-1 shadow-lg">
         <img
           v-if="data.image_url"
           :src="data.image_url"
-          alt="Restaurant logo"
-          class="w-10 h-10 rounded-xl object-cover"
+          alt="Logo"
+          class="w-full h-full rounded-full object-cover"
           @error="handleLogoError"
         />
-        <div v-else class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center fallback-icon">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
+        <div v-else class="w-full h-full rounded-full bg-[#FB6A00] flex items-center justify-center fallback-icon">
+          <span class="text-xl font-black text-black">{{ (data.name || 'K').charAt(0).toUpperCase() }}</span>
         </div>
+      </div>
+    </div>
+
+    <!-- Nom, description, infos en pilules -->
+    <div class="absolute bottom-0 left-0 right-0 px-5 pb-6">
+      <span class="inline-flex items-center h-7 px-3 rounded-full bg-[#FB6A00] text-black text-xs font-black mb-2">Bienvenue chez</span>
+      <h1 class="text-white text-4xl font-black tracking-tight leading-tight mb-2 break-words">{{ data.name || 'Établissement' }}</h1>
+      <p v-if="data.description" class="text-white/90 text-sm font-medium leading-relaxed mb-3 max-w-md line-clamp-2">{{ data.description }}</p>
+
+      <div class="flex flex-wrap gap-2">
+        <span v-if="data.opening_hours" class="inline-flex items-center gap-2 h-9 px-4 rounded-full bg-white text-black text-xs font-extrabold">
+          <Clock class="w-4 h-4" :stroke-width="2.5" />
+          {{ data.opening_hours }}
+        </span>
+        <button
+          v-if="data.address"
+          type="button"
+          class="inline-flex items-center gap-2 h-9 px-4 rounded-full bg-white text-black text-xs font-extrabold active:scale-[0.96] transition-all max-w-full"
+          @click="openGoogleMaps"
+        >
+          <MapPin class="w-4 h-4 flex-shrink-0" :stroke-width="2.5" />
+          <span class="truncate">{{ data.address }}</span>
+        </button>
       </div>
     </div>
   </div>

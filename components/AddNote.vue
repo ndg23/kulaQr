@@ -1,38 +1,31 @@
 <template>
-    <div 
-      v-if="showModal"
-      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
-    >
-      <div class="bg-white rounded-xl w-full max-w-sm p-4 shadow-lg">
-        <h3 class="text-lg font-medium mb-3">Note pour {{ currentItem?.name }}</h3>
-        
+  <Transition
+    enter-active-class="transition-opacity duration-200"
+    enter-from-class="opacity-0"
+    leave-active-class="transition-opacity duration-150"
+    leave-to-class="opacity-0"
+  >
+    <div v-if="showModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60] p-0 sm:p-4" @click.self="closeModal">
+      <div class="bg-white rounded-t-[2rem] sm:rounded-[2rem] w-full max-w-md p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]" role="dialog" aria-modal="true">
+        <h3 class="text-lg font-black text-gray-900 mb-3 break-words">Note pour {{ currentItem?.name }}</h3>
         <textarea
           v-model="noteText"
-          placeholder="Instructions spéciales..."
-          class="w-full border border-gray-200 rounded-lg p-3 h-24"
+          placeholder="Sans piment, bien cuit…"
+          class="w-full rounded-3xl bg-gray-100 border-0 px-5 py-4 h-24 text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-black"
           ref="noteInput"
           maxlength="25"
         ></textarea>
-        
-        <div class="flex justify-between mt-4">
-          <button 
-            @click="closeModal"
-            class="px-4 py-2 border rounded-lg text-gray-600"
-          >
-            Annuler
-          </button>
-          <button 
-            @click="saveNote"
-            class="px-4 py-2 bg-black text-white rounded-lg"
-          >
-            Enregistrer
-          </button>
+        <p class="mt-1 text-right text-xs font-bold text-gray-400 tabular-nums">{{ noteText.length }}/25</p>
+        <div class="mt-3 grid grid-cols-2 gap-2">
+          <button type="button" class="h-14 rounded-full bg-gray-100 text-gray-900 font-extrabold active:scale-[0.97] transition-all" @click="closeModal">Annuler</button>
+          <button type="button" class="h-14 rounded-full bg-black text-white font-black active:scale-[0.97] transition-all" @click="saveNote">Enregistrer</button>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
+  </Transition>
+</template>
+
+<script setup>
   import { ref, computed, nextTick } from 'vue'
   
   const props = defineProps(['cart'])
