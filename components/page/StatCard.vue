@@ -2,7 +2,7 @@
   <component
     :is="to ? NuxtLink : 'div'"
     v-bind="to ? { to } : {}"
-    :class="['block rounded-[2rem] p-4 sm:p-5 min-w-0 text-gray-900', style.tint, to ? 'hover:opacity-90 transition-opacity' : '']"
+    :class="['block rounded-[2rem] p-4 sm:p-5 min-w-0 text-gray-900 bg-gray-100/70 dark:bg-white/5', to ? 'hover:bg-gray-100 transition-colors' : '']"
   >
     <div class="flex items-center justify-between gap-2 mb-3">
       <span :class="['w-11 h-11 flex-shrink-0 rounded-full flex items-center justify-center', style.solid]" aria-hidden="true">
@@ -10,7 +10,7 @@
       </span>
       <span
         v-if="badge"
-        class="inline-flex items-center h-7 px-3 rounded-full bg-white/80 text-xs font-bold text-gray-900"
+        class="inline-flex items-center h-7 px-3 rounded-full bg-white text-xs font-bold text-gray-900"
       >
         {{ badge }}
       </span>
