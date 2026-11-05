@@ -117,15 +117,36 @@ export const useStaffSpace = () => {
     if (!establishment.value?.id) return
     if (!silent) loading.value = true
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(SELECT)
-        .eq('establishment_id', establishment.value.id)
-        .order('created_at', { ascending: false })
-        .limit(150)
-      if (error) throw error
+      let data: any[] | null = null
+      const token = readSession()?.token
+
+      // Le personnel (PIN) lit par une fonction SQL : sans elle il ne voit pas les articles (bdd/staff_list_orders.sql)
+      if (token) {
+        const res = await (supabase as any).rpc('staff_list_orders', { p_token: token, p_limit: 150 })
+        if (!res.error) data = res.data || []
+        else if (res.error.code === '28000') {
+          localStorage.removeItem('staff_session')
+          await navigateTo('/auth/pin')
+          return
+        } else if (!(res.error.code === 'PGRST202' || res.error.code === '42883' || /could not find the function/i.test(res.error.message || ''))) {
+          throw res.error
+        }
+      }
+
+      // Ancien chemin (fonction pas encore installée, ou session sans jeton)
+      if (data === null) {
+        const res = await supabase
+          .from('orders')
+          .select(SELECT)
+          .eq('establishment_id', establishment.value.id)
+          .order('created_at', { ascending: false })
+          .limit(150)
+        if (res.error) throw res.error
+        data = res.data || []
+      }
+
       const previous = new Set<string>(orders.value.map(o => o.id))
-      const next = decorate(data || [])
+      const next = decorate(data)
       notifyArrivals(previous, next)
       orders.value = next
       loadError.value = false
