@@ -76,6 +76,17 @@
           </NuxtLink>
         </nav>
 
+        <a
+          v-if="publicUrl"
+          :href="publicUrl"
+          target="_blank"
+          rel="noopener"
+          class="mx-2 mb-2 flex items-center justify-center gap-2 h-12 rounded-full bg-[#FB6A00] text-black font-bold hover:brightness-95 transition"
+        >
+          <ExternalLink class="w-5 h-5" />
+          Voir la page client
+        </a>
+
         <div class="p-3 border-t border-gray-100 flex-shrink-0">
           <div class="flex items-center gap-3 px-2 py-2">
             <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center flex-shrink-0">
@@ -124,6 +135,17 @@
           <span class="leading-tight min-w-0 break-words">{{ item.name }}</span>
         </NuxtLink>
       </nav>
+
+      <a
+        v-if="publicUrl"
+        :href="publicUrl"
+        target="_blank"
+        rel="noopener"
+        class="mx-3 mb-3 flex items-center justify-center gap-2 h-12 flex-shrink-0 rounded-full bg-[#FB6A00] text-black font-bold hover:brightness-95 transition"
+      >
+        <ExternalLink class="w-5 h-5" />
+        Voir la page client
+      </a>
 
       <div class="border-t border-[#E3DDD7] p-3 flex-shrink-0 relative" ref="userMenuRoot">
         <button
@@ -183,7 +205,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { Menu, X, LogOut, MoreHorizontal } from 'lucide-vue-next'
+import { Menu, X, LogOut, MoreHorizontal, ExternalLink } from 'lucide-vue-next'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useAuth } from '~/composables/useAuth'
 import IconBadge from '~/components/ui/IconBadge.vue'
@@ -218,6 +240,12 @@ const establishmentInitials = computed(() =>
 
 // L'identifiant est dans l'URL : les liens fonctionnent avant même que l'établissement soit chargé
 const base = computed(() => `/manager/${route.params.slug || establishment.value?.id || ''}`)
+
+// Page publique que voient les clients (menu de l'établissement)
+const publicUrl = computed(() => {
+  const slug = (establishment.value as any)?.slug
+  return slug ? `/menu/${slug}` : ''
+})
 
 const navigationItems = MANAGER_NAV.filter(item => !item.hidden)
 const isActive = (item: ManagerNavItem) => isManagerNavActive(item, base.value, route.path)
