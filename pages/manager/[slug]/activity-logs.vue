@@ -34,6 +34,18 @@
         </template>
       </PageHeader>
 
+      <!-- Grande carte : activité du personnel -->
+      <HeroCard
+        class="mb-4 sm:mb-6"
+        label="Activités enregistrées"
+        :value="logs.length"
+        hint="Selon les filtres choisis"
+        :icon="Activity"
+        :chips="[
+          { label: 'Membres du personnel', value: staffMembers.length }
+        ]"
+      />
+
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-12">
         <Loader2 class="w-10 h-10 text-gray-900 animate-spin mb-4" />
@@ -167,9 +179,10 @@
   import { ref, reactive, computed, onMounted, watch } from 'vue'
   import { useRoute } from 'vue-router'
   import { 
-    User, Loader2, RefreshCw, ClipboardList,
+    Activity, User, Loader2, RefreshCw, ClipboardList,
     ChevronLeft, ChevronRight
   } from 'lucide-vue-next'
+  import HeroCard from '~/components/ui/HeroCard.vue'
   import { useSupabaseWrapper } from '~/composables/useSupabase'
   import { useCustomToast } from '~/composables/useToast'
   import { useEstablishment } from '~/composables/useEstablishment'

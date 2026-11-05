@@ -13,56 +13,19 @@
     />
 
     <main>
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-[#FFECD8] rounded-xl flex items-center justify-center">
-              <HelpCircle class="w-6 h-6 text-[#C54E00]" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-900">{{ stats?.total_requests || 0 }}</p>
-              <p class="text-sm text-gray-500">Total demandes</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center">
-              <Clock class="w-6 h-6 text-yellow-600" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-900">{{ stats?.pending_requests || 0 }}</p>
-              <p class="text-sm text-gray-500">En attente</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
-              <Loader2 class="w-6 h-6 text-orange-600" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-900">{{ stats?.in_progress_requests || 0 }}</p>
-              <p class="text-sm text-gray-500">En cours</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-[#FFECD8] rounded-xl flex items-center justify-center">
-              <AlertTriangle class="w-6 h-6 text-[#C54E00]" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-900">{{ stats?.urgent_requests || 0 }}</p>
-              <p class="text-sm text-gray-500">Urgentes</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Grande carte : demandes de support -->
+      <HeroCard
+        class="mb-4 sm:mb-6"
+        label="Demandes de support"
+        :value="stats?.total_requests || 0"
+        :hint="(stats?.pending_requests || 0) + ' en attente'"
+        :icon="HelpCircle"
+        :chips="[
+          { label: 'En attente', value: stats?.pending_requests || 0 },
+          { label: 'En cours', value: stats?.in_progress_requests || 0 },
+          { label: 'Urgentes', value: stats?.urgent_requests || 0 }
+        ]"
+      />
 
       <!-- Filters -->
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
@@ -74,7 +37,7 @@
 
           <select
             v-model="statusFilter"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
+            class="h-12 px-5 rounded-full bg-gray-100 border-0 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-black"
           >
             <option value="">Tous les statuts</option>
             <option value="pending">En attente</option>
@@ -86,7 +49,7 @@
 
           <select
             v-model="priorityFilter"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
+            class="h-12 px-5 rounded-full bg-gray-100 border-0 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-black"
           >
             <option value="">Toutes les priorités</option>
             <option value="urgent">Urgent</option>
@@ -97,7 +60,7 @@
 
           <select
             v-model="typeFilter"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
+            class="h-12 px-5 rounded-full bg-gray-100 border-0 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-black"
           >
             <option value="">Tous les types</option>
             <option value="new_qr">Nouveau QR</option>
@@ -207,6 +170,7 @@ import {
   Edit,
   X
 } from 'lucide-vue-next'
+import HeroCard from '~/components/ui/HeroCard.vue'
 import { useQrSupport } from '~/composables/useQrSupport'
 import { useEstablishment } from '~/composables/useEstablishment'
 import { useSupabaseWrapper } from '~/composables/useSupabase'
