@@ -48,8 +48,8 @@
       <article
         v-for="order in visible"
         :key="order.id"
-        class="rounded-[2rem] bg-gray-100 p-4 sm:p-5 cursor-pointer active:scale-[0.99] transition-all"
-        :class="fresh.includes(order.id) ? 'ring-4 ring-[#FB6A00] animate-pulse' : ''"
+        class="rounded-[2rem] bg-white border-2 p-4 sm:p-5 cursor-pointer shadow-sm active:scale-[0.99] transition-all"
+        :class="[statusBorder(order), fresh.includes(order.id) ? 'ring-4 ring-[#FB6A00]/40 animate-pulse' : '']"
         @click="selectedId = order.id"
       >
         <div class="flex items-center justify-between gap-3">
@@ -67,20 +67,28 @@
           </span>
         </div>
 
-        <ul class="mt-3 space-y-1">
-          <li v-for="item in order.items.slice(0, 4)" :key="item.id" class="flex gap-2 text-[15px]">
+        <p class="mt-2 text-xs font-extrabold text-gray-500 tabular-nums">
+          Commande N° {{ order.orderNumber }} · reçue à {{ timeOf(order.created_at) }} · {{ countItems(order) }} article{{ countItems(order) > 1 ? 's' : '' }}
+        </p>
+
+        <ul class="mt-3 space-y-1.5">
+          <li v-for="item in order.items.slice(0, 6)" :key="item.id" class="flex gap-2 text-[15px]">
             <span class="font-black text-gray-900 tabular-nums w-8 flex-shrink-0">{{ item.quantity }}×</span>
-            <span class="font-bold text-gray-900 min-w-0 break-words">{{ item.name }}<span v-if="item.notes" class="block text-xs font-semibold text-[#C54E00]">{{ item.notes }}</span></span>
+            <span class="font-bold text-gray-900 min-w-0 flex-1 break-words">{{ item.name }}<span v-if="item.notes" class="block text-xs font-semibold text-[#C54E00]">{{ item.notes }}</span></span>
+            <span class="font-bold text-gray-500 tabular-nums flex-shrink-0">{{ money(lineTotal(item)) }}</span>
           </li>
-          <li v-if="order.items.length > 4" class="pl-10 text-xs font-extrabold text-gray-500">+{{ order.items.length - 4 }} autre{{ order.items.length - 4 > 1 ? 's' : '' }}</li>
+          <li v-if="order.items.length > 6" class="pl-10 text-xs font-extrabold text-gray-500">+{{ order.items.length - 6 }} autre{{ order.items.length - 6 > 1 ? 's' : '' }}</li>
         </ul>
 
         <p v-if="order.notes" class="mt-3 rounded-3xl bg-[#FFECD8] px-4 py-2 text-sm font-bold text-[#7C2900] break-words line-clamp-2">{{ order.notes }}</p>
 
         <div class="mt-4 flex items-center gap-2">
           <div class="leading-tight min-w-0">
-            <p class="text-[11px] font-extrabold uppercase tracking-wide text-gray-500">{{ STATUS_LABEL[order.status] }}</p>
+            <p class="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wide" :class="statusText(order)">
+              <span class="w-2 h-2 rounded-full" :class="statusDot(order)"></span>{{ STATUS_LABEL[order.status] }}
+            </p>
             <p class="text-lg font-black text-gray-900 tabular-nums">{{ money(order.total_amount) }}</p>
+            <p class="mt-0.5 inline-flex items-center h-6 px-2.5 rounded-full border text-[11px] font-extrabold" :class="payClass(order)">{{ payLabel(order) }}</p>
           </div>
           <button
             v-if="NEXT_STEP[order.status]"
@@ -146,6 +154,27 @@ const urgency = (o: any) => {
   if (m >= 10) return 'bg-[#FB6A00] text-black'
   return 'bg-white text-gray-900'
 }
+
+// Couleur de statut : fond blanc, seuls la bordure et les accents changent
+//   orange = à traiter, vert = en cours / terminé, rouge = en retard ou annulé
+const isLate = (o: any) => ACTIVE.includes(o.status) && ageMinutes(o.created_at, now.value) >= 20
+const statusTone = (o: any): 'red' | 'orange' | 'green' => {
+  if (o.status === 'cancelled' || isLate(o)) return 'red'
+  if (o.status === 'pending' || o.status === 'confirmed') return 'orange'
+  return 'green'
+}
+const statusBorder = (o: any) => ({ red: 'border-[#DC2626]', orange: 'border-[#FB6A00]', green: 'border-[#16A34A]' }[statusTone(o)])
+const statusDot = (o: any) => ({ red: 'bg-[#DC2626]', orange: 'bg-[#FB6A00]', green: 'bg-[#16A34A]' }[statusTone(o)])
+const statusText = (o: any) => ({ red: 'text-[#B91C1C]', orange: 'text-[#C54E00]', green: 'text-[#15803D]' }[statusTone(o)])
+
+const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+const countItems = (o: any) => (o.items || []).reduce((n: number, i: any) => n + (Number(i.quantity) || 0), 0)
+const lineTotal = (i: any) => (Number(i.unit_price) || Number(i.products?.price) || 0) * (Number(i.quantity) || 0)
+
+const METHODS: Record<string, string> = { cash: 'Espèces', card: 'Carte', mobile_money: 'Mobile Money', wave: 'Wave', orange_money: 'Orange Money' }
+const isPaid = (o: any) => o.payment_status === 'paid'
+const payLabel = (o: any) => isPaid(o) ? `Payé${o.payment_method ? ' · ' + (METHODS[o.payment_method] || o.payment_method) : ''}` : 'À payer'
+const payClass = (o: any) => isPaid(o) ? 'border-[#16A34A] text-[#15803D]' : 'border-[#FB6A00] text-[#C54E00]'
 
 const money = (v: number | string) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(Number(v) || 0)
