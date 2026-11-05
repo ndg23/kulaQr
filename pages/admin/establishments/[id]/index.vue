@@ -1,313 +1,202 @@
 <template>
-  <div class="p-6 lg:p-8">
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center space-x-4">
-          <NuxtLink 
-            to="/admin/establishments"
-            class="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-all"
-          >
-            <ArrowLeft class="w-5 h-5" />
-          </NuxtLink>
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">{{ restaurant.name }}</h1>
-            <p class="text-sm text-gray-500 mt-1">{{ restaurant.address }}</p>
+  <div class="space-y-4 sm:space-y-6">
+    <!-- En-tête : retour, nom, statut, enregistrer -->
+    <header class="flex flex-wrap items-center gap-3">
+      <NuxtLink
+        to="/admin/establishments"
+        aria-label="Retour aux établissements"
+        class="w-11 h-11 flex-shrink-0 rounded-full bg-gray-100 flex items-center justify-center text-gray-900 hover:bg-gray-200 active:scale-[0.94] transition-all"
+      >
+        <ArrowLeft class="w-5 h-5" :stroke-width="2.5" />
+      </NuxtLink>
+      <div class="flex-1 min-w-[10rem]">
+        <h1 class="text-2xl lg:text-3xl font-black tracking-tight text-gray-900 break-words">{{ restaurant.name }}</h1>
+        <p v-if="restaurant.address" class="text-sm font-semibold text-gray-500 break-words">{{ restaurant.address }}</p>
+      </div>
+      <span
+        class="inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-extrabold"
+        :class="restaurant.status === 'active' ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'"
+      >
+        <span class="w-2 h-2 rounded-full" :class="restaurant.status === 'active' ? 'bg-[#FB6A00]' : 'bg-gray-500'"></span>
+        {{ restaurant.status === 'active' ? 'Actif' : 'Inactif' }}
+      </span>
+      <button
+        type="button"
+        :disabled="loading"
+        class="h-11 px-6 rounded-full bg-[#FB6A00] text-black font-black inline-flex items-center gap-2 hover:bg-[#FD9542] active:scale-[0.97] transition-all disabled:opacity-50"
+        @click="saveChanges"
+      >
+        <Save class="w-4 h-4" :stroke-width="2.5" />
+        Enregistrer
+      </button>
+    </header>
+
+    <!-- La grande carte : l'activité de l'établissement -->
+    <HeroCard
+      label="Revenu"
+      :value="formatPrice(stats.totalRevenue)"
+      :icon="Store"
+      :chips="[
+        { label: 'Produits', value: stats.totalProducts },
+        { label: 'Catégories', value: stats.totalCategories },
+        { label: 'Commandes', value: stats.totalOrders }
+      ]"
+    />
+
+    <!-- Onglets en pilules -->
+    <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="tablist" aria-label="Sections">
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        type="button"
+        role="tab"
+        :aria-selected="activeTab === tab.id"
+        class="inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-extrabold whitespace-nowrap flex-shrink-0 active:scale-[0.97] transition-all"
+        :class="activeTab === tab.id ? 'bg-black text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'"
+        @click="activeTab = tab.id"
+      >
+        <component :is="tab.icon" class="w-4 h-4" :stroke-width="2.5" />
+        {{ tab.name }}
+      </button>
+    </div>
+
+    <!-- Informations -->
+    <section v-if="activeTab === 'info'" class="space-y-4">
+      <div class="rounded-[2rem] bg-gray-100 p-5 sm:p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
+          <FloatLabelInput id="establishment-name" v-model="restaurant.name" label="Nom de l'établissement" type="text" pill required />
+          <FloatLabelInput id="establishment-email" v-model="restaurant.email" label="Email" type="email" pill />
+          <FloatLabelInput id="establishment-phone" v-model="restaurant.phone" label="Téléphone" type="tel" pill />
+          <FloatLabelInput id="establishment-address" v-model="restaurant.address" label="Adresse" type="text" pill />
+          <div class="md:col-span-2">
+            <FloatLabelInput id="establishment-description" v-model="restaurant.description" label="Description" type="text" pill />
           </div>
         </div>
-        <div class="flex items-center gap-3">
-          <span 
-            class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium"
-            :class="{
-              'bg-green-100 text-green-700': restaurant.status === 'active',
-              'bg-red-100 text-red-700': restaurant.status === 'inactive'
-            }"
-          >
-            <div 
-              class="w-2 h-2 rounded-full mr-2"
-              :class="{
-                'bg-green-500': restaurant.status === 'active',
-                'bg-red-500': restaurant.status === 'inactive'
-              }"
-            />
-            {{ restaurant.status === 'active' ? 'Actif' : 'Inactif' }}
+      </div>
+
+      <div class="rounded-[2rem] bg-gray-100 p-5 sm:p-6 flex items-center gap-4">
+        <span class="w-12 h-12 flex-shrink-0 rounded-full bg-[#FB6A00] text-black flex items-center justify-center"><User class="w-6 h-6" :stroke-width="2.5" /></span>
+        <div class="min-w-0">
+          <p class="text-xs font-extrabold uppercase tracking-wide text-gray-500">Propriétaire</p>
+          <p class="font-black text-gray-900 break-words">{{ restaurant.owner }}</p>
+          <p class="text-sm font-semibold text-gray-500 break-words">{{ restaurant.ownerEmail }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Menu : des cartes, les options dans une feuille -->
+    <section v-if="activeTab === 'menu'" class="space-y-4">
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          class="h-11 px-5 rounded-full bg-black text-white text-sm font-extrabold inline-flex items-center gap-2 active:scale-[0.97] transition-all"
+          @click="openNewProductModal"
+        ><Plus class="w-4 h-4" :stroke-width="3" /> Ajouter un produit</button>
+        <button
+          type="button"
+          class="h-11 px-5 rounded-full bg-gray-100 text-gray-900 text-sm font-extrabold inline-flex items-center gap-2 hover:bg-gray-200 active:scale-[0.97] transition-all"
+          @click="handleProductButtonClick('manage-categories')"
+        ><Layers class="w-4 h-4" :stroke-width="2.5" /> Catégories</button>
+      </div>
+
+      <div v-if="loadingProducts" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3" aria-busy="true">
+        <div v-for="i in 6" :key="i" class="h-28 rounded-[2rem] bg-gray-100 animate-pulse"></div>
+      </div>
+
+      <div v-else-if="allProducts.length === 0" class="rounded-[2rem] bg-gray-100 px-6 py-14 text-center">
+        <UtensilsCrossed class="w-10 h-10 text-gray-400 mx-auto" />
+        <h3 class="mt-3 text-lg font-black text-gray-900">Aucun produit</h3>
+        <p class="mt-1 text-sm font-semibold text-gray-500">Aucun produit n'a été ajouté à cet établissement</p>
+      </div>
+
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        <article
+          v-for="item in pagedProducts"
+          :key="item.id"
+          class="rounded-[2rem] bg-gray-100 p-3 pr-4 flex items-center gap-3"
+          :class="item.is_available ? '' : 'opacity-70'"
+        >
+          <span class="w-20 h-20 flex-shrink-0 rounded-3xl bg-white overflow-hidden flex items-center justify-center">
+            <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="w-full h-full object-cover" />
+            <UtensilsCrossed v-else class="w-7 h-7 text-gray-300" />
           </span>
-          <button
-            @click="saveChanges"
-            :disabled="loading"
-            class="px-6 py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-all shadow-sm hover:shadow-md disabled:opacity-50"
-          >
-            <Save class="w-4 h-4 inline mr-2" />
-            Enregistrer
-          </button>
-        </div>
-      </div>
-
-      <!-- Stats Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white p-6 rounded-2xl border border-gray-100">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500">Produits</p>
-              <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ stats.totalProducts }}</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-              <UtensilsCrossed class="w-6 h-6 text-blue-500" />
-            </div>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-gray-100">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500">Catégories</p>
-              <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ stats.totalCategories }}</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center">
-              <Layers class="w-6 h-6 text-purple-500" />
-            </div>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-gray-100">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500">Commandes</p>
-              <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ stats.totalOrders }}</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
-              <ShoppingBag class="w-6 h-6 text-green-500" />
-            </div>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-gray-100">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500">Revenu</p>
-              <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ formatPrice(stats.totalRevenue) }}</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center">
-              <DollarSign class="w-6 h-6 text-orange-500" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-      <div class="border-b border-gray-100">
-        <nav class="flex space-x-8 px-6" aria-label="Tabs">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            @click="activeTab = tab.id"
-            class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-            :class="[
-              activeTab === tab.id
-                ? 'border-black text-black'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            ]"
-          >
-            <component :is="tab.icon" class="w-5 h-5 inline mr-2" />
-            {{ tab.name }}
-          </button>
-        </nav>
-      </div>
-
-      <!-- Tab Content -->
-      <div class="p-6">
-        <!-- Informations Tab -->
-        <div v-if="activeTab === 'info'">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-            <FloatLabelInput
-              id="establishment-name"
-              v-model="restaurant.name"
-              label="Nom de l'établissement"
-              type="text"
-              required
-            />
-            
-            <FloatLabelInput
-              id="establishment-email"
-              v-model="restaurant.email"
-              label="Email"
-              type="email"
-            />
-            
-            <FloatLabelInput
-              id="establishment-phone"
-              v-model="restaurant.phone"
-              label="Téléphone"
-              type="tel"
-            />
-            
-            <FloatLabelInput
-              id="establishment-address"
-              v-model="restaurant.address"
-              label="Adresse"
-              type="text"
-            />
-
-            <div class="md:col-span-2">
-              <FloatLabelInput
-                id="establishment-description"
-                v-model="restaurant.description"
-                label="Description"
-                type="text"
-              />
-            </div>
-          </div>
-
-          <!-- Owner Info -->
-          <div class="mt-8 p-6 bg-gray-50 rounded-2xl">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <User class="w-5 h-5 mr-2" />
-              Propriétaire
-            </h3>
-            <div class="flex items-center space-x-4">
-              <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                <User class="w-6 h-6 text-gray-400" />
-              </div>
-              <div>
-                <div class="font-medium text-gray-900">{{ restaurant.owner }}</div>
-                <div class="text-sm text-gray-500">{{ restaurant.ownerEmail }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Menu/Products Tab -->
-        <div v-if="activeTab === 'menu'">
-          <DataTable
-            :items="allProducts"
-            :columns="productColumns"
-            :loading="loadingProducts"
-            :current-page="productsPage"
-            :per-page="productsPerPage"
-            :total-items="allProducts.length"
-            :show-pagination="true"
-            :show-add-button="true"
-            add-button-label="Ajouter un produit"
-            :header-buttons="[
-              { label: 'Catégories', icon: 'fas fa-folder', variant: 'secondary', action: 'manage-categories' }
-            ]"
-            empty-title="Aucun produit"
-            empty-description="Aucun produit n'a été ajouté à ce restaurant"
-            empty-icon="fas fa-utensils"
-            @page-change="productsPage = $event"
-            @update:per-page="productsPerPage = $event"
-            @add="openNewProductModal"
-            @button-click="handleProductButtonClick"
-          >
-            <!-- Product Name with Image -->
-            <template #cell-name="{ item }">
-              <div class="flex items-center space-x-3 max-w-[300px]">
-                <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="w-full h-full object-cover" />
-                  <UtensilsCrossed v-else class="w-6 h-6 text-gray-400" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <div class="font-medium text-gray-900 truncate">{{ item.name }}</div>
-                  <div class="text-sm text-gray-500 truncate">{{ item.category_name }}</div>
-                </div>
-              </div>
-            </template>
-
-            <!-- Price -->
-            <template #cell-price="{ item }">
-              <div class="font-semibold text-gray-900">{{ formatPrice(item.price) }}</div>
-            </template>
-
-            <!-- Availability -->
-            <template #cell-is_available="{ item }">
+          <div class="min-w-0 flex-1">
+            <h3 class="font-black text-gray-900 leading-tight truncate">{{ item.name }}</h3>
+            <p class="text-xs font-semibold text-gray-500 truncate">{{ item.category_name }}</p>
+            <div class="mt-1.5 flex items-center gap-2">
+              <span class="inline-flex items-center h-7 px-3 rounded-full bg-[#FB6A00] text-black text-xs font-black tabular-nums">{{ formatPrice(item.price) }}</span>
               <span
-                class="px-3 py-1 rounded-full text-xs font-medium inline-flex items-center whitespace-nowrap"
-                :class="item.is_available ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-              >
-                <div 
-                  class="w-1.5 h-1.5 rounded-full mr-1.5"
-                  :class="item.is_available ? 'bg-green-500' : 'bg-gray-500'"
-                />
-                {{ item.is_available ? 'Disponible' : 'Indisponible' }}
-              </span>
-            </template>
-
-            <!-- Actions -->
-            <template #cell-actions="{ item }">
-              <div class="flex items-center gap-2">
-                <button
-                  @click="editProduct(item)"
-                  class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  title="Modifier"
-                >
-                  <Edit2 class="w-4 h-4" />
-                </button>
-                <button
-                  @click="toggleProductAvailability(item)"
-                  class="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                  :title="item.is_available ? 'Marquer indisponible' : 'Marquer disponible'"
-                >
-                  <EyeOff v-if="item.is_available" class="w-4 h-4" />
-                  <Eye v-else class="w-4 h-4" />
-                </button>
-                <button
-                  @click="deleteProduct(item.id)"
-                  class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  title="Supprimer"
-                >
-                  <Trash2 class="w-4 h-4" />
-                </button>
-              </div>
-            </template>
-          </DataTable>
-        </div>
-
-        <!-- Settings Tab -->
-        <div v-if="activeTab === 'settings'" class="max-w-2xl">
-          <div class="space-y-6">
-            <!-- Status Toggle -->
-            <div class="flex items-center justify-between p-6 bg-gray-50 rounded-2xl">
-              <div>
-                <h3 class="font-semibold text-gray-900">Statut de l'établissement</h3>
-                <p class="text-sm text-gray-500 mt-1">Activer ou désactiver cet établissement</p>
-              </div>
-              <button
-                @click="toggleStatus"
-                :class="[
-                  'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
-                  restaurant.is_active ? 'bg-black' : 'bg-gray-200'
-                ]"
-              >
-                <span
-                  :class="[
-                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                    restaurant.is_active ? 'translate-x-5' : 'translate-x-0'
-                  ]"
-                />
-              </button>
-            </div>
-
-            <!-- Danger Zone -->
-            <div class="border-2 border-red-200 rounded-2xl p-6">
-              <h3 class="font-semibold text-red-900 mb-2">Zone de danger</h3>
-              <p class="text-sm text-gray-600 mb-4">
-                La suppression de cet établissement est irréversible. Toutes les données associées seront perdues.
-              </p>
-              <button
-                @click="deleteRestaurant"
-                class="px-6 py-2 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-all shadow-sm hover:shadow-md"
-              >
-                <Trash2 class="w-4 h-4 inline mr-2" />
-                Supprimer l'établissement
-              </button>
+                class="inline-flex items-center h-7 px-3 rounded-full text-xs font-extrabold"
+                :class="item.is_available ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'"
+              >{{ item.is_available ? 'Disponible' : 'Indisponible' }}</span>
             </div>
           </div>
-        </div>
+          <button
+            type="button"
+            :aria-label="`Options pour ${item.name}`"
+            class="w-11 h-11 flex-shrink-0 rounded-full bg-white text-gray-900 flex items-center justify-center active:scale-[0.92] transition-all"
+            @click="sheetProduct = item"
+          ><MoreHorizontal class="w-5 h-5" :stroke-width="2.5" /></button>
+        </article>
       </div>
-    </div>
+
+      <div v-if="allProducts.length > productsPerPage" class="flex items-center justify-center gap-2">
+        <button
+          type="button"
+          class="h-11 px-5 rounded-full bg-gray-100 text-sm font-extrabold disabled:opacity-40 active:scale-[0.97] transition-all"
+          :disabled="productsPage <= 1"
+          @click="productsPage--"
+        >Précédent</button>
+        <span class="text-sm font-extrabold text-gray-600 tabular-nums">{{ productsPage }} / {{ productPageCount }}</span>
+        <button
+          type="button"
+          class="h-11 px-5 rounded-full bg-black text-white text-sm font-extrabold disabled:opacity-40 active:scale-[0.97] transition-all"
+          :disabled="productsPage >= productPageCount"
+          @click="productsPage++"
+        >Suivant</button>
+      </div>
+    </section>
+
+    <!-- Réglages -->
+    <section v-if="activeTab === 'settings'" class="space-y-4 max-w-2xl">
+      <div class="rounded-[2rem] bg-gray-100 p-5 sm:p-6 flex items-center justify-between gap-4">
+        <div class="min-w-0">
+          <h3 class="font-black text-gray-900">Statut de l'établissement</h3>
+          <p class="text-sm font-semibold text-gray-500 mt-0.5">Activer ou désactiver cet établissement</p>
+        </div>
+        <AppleSwitch :model-value="!!restaurant.is_active" @update:model-value="toggleStatus" />
+      </div>
+
+      <div class="rounded-[2rem] bg-[#FFECD8] p-5 sm:p-6">
+        <h3 class="font-black text-[#7C2900]">Zone de danger</h3>
+        <p class="text-sm font-semibold text-[#7C2900]/80 mt-1 mb-4">
+          La suppression de cet établissement est irréversible. Toutes les données associées seront perdues.
+        </p>
+        <button
+          type="button"
+          class="h-12 px-6 rounded-full bg-[#C54E00] text-white font-black inline-flex items-center gap-2 hover:bg-[#7C2900] active:scale-[0.97] transition-all"
+          @click="deleteRestaurant"
+        ><Trash2 class="w-4 h-4" :stroke-width="2.5" /> Supprimer l'établissement</button>
+      </div>
+    </section>
+
+    <!-- Options d'un produit : une feuille, pas une carte -->
+    <UiActionSheet
+      :model-value="!!sheetProduct"
+      :title="sheetProduct?.name || 'Produit'"
+      :subtitle="sheetProduct ? formatPrice(sheetProduct.price) : ''"
+      :actions="sheetActions"
+      @update:model-value="v => { if (!v) sheetProduct = null }"
+      @select="onSheetSelect"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import HeroCard from '~/components/ui/HeroCard.vue'
+import UiActionSheet from '~/components/ui/ActionSheet.vue'
+import AppleSwitch from '~/components/AppleSwitch.vue'
+import { MoreHorizontal } from 'lucide-vue-next'
 import {
   ArrowLeft, Store, User, UtensilsCrossed, Save,
   Plus, Edit2, Trash2, Settings as SettingsIcon,
@@ -634,6 +523,36 @@ const handleProductButtonClick = (action: string) => {
     default:
       console.log('Unknown action:', action)
   }
+}
+
+// Pagination des produits (cartes) et feuille d'options
+const productPageCount = computed(() => Math.max(1, Math.ceil(allProducts.value.length / productsPerPage.value)))
+const pagedProducts = computed(() => {
+  const start = (productsPage.value - 1) * productsPerPage.value
+  return allProducts.value.slice(start, start + productsPerPage.value)
+})
+
+const sheetProduct = ref<any | null>(null)
+const sheetActions = computed(() => {
+  const p = sheetProduct.value
+  if (!p) return []
+  return [
+    { key: 'edit', label: 'Modifier', icon: Edit2, hint: 'Nom, prix, photo, catégorie' },
+    {
+      key: 'availability',
+      label: p.is_available ? 'Marquer indisponible' : 'Marquer disponible',
+      icon: p.is_available ? EyeOff : Eye,
+      hint: p.is_available ? 'Le produit disparaît du menu client' : 'Le produit revient dans le menu client'
+    },
+    { key: 'delete', label: 'Supprimer', icon: Trash2, danger: true, hint: 'Action irréversible' }
+  ]
+})
+const onSheetSelect = (key: string) => {
+  const p = sheetProduct.value
+  if (!p) return
+  if (key === 'edit') editProduct(p)
+  else if (key === 'availability') toggleProductAvailability(p)
+  else if (key === 'delete') deleteProduct(p.id)
 }
 
 // Load data on mount

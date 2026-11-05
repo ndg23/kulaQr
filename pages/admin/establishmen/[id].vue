@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-dvh bg-gray-50">
     <AdminHeader title="Détails de l'établissement" :back-link="'/admin/establishments'" />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -11,14 +11,14 @@
 
       <!-- Error state -->
       <div v-else-if="error" class="bg-white rounded-2xl shadow-sm p-8 text-center">
-        <div class="w-16 h-16 mx-auto bg-red-50 rounded-2xl flex items-center justify-center mb-4">
-          <AlertTriangle class="w-8 h-8 text-red-400" />
+        <div class="w-16 h-16 mx-auto bg-[#FFECD8] rounded-2xl flex items-center justify-center mb-4">
+          <AlertTriangle class="w-8 h-8 text-[#C54E00]" />
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Erreur de chargement</h3>
         <p class="text-gray-500 max-w-md mx-auto mb-4">
           Impossible de charger les informations de cet établissement.
         </p>
-        <NuxtLink to="/admin/establishments" class="text-blue-600 hover:text-blue-800">
+        <NuxtLink to="/admin/establishments" class="text-[#C54E00] hover:text-[#C54E00]">
           Retour à la liste
         </NuxtLink>
       </div>
@@ -35,7 +35,7 @@
             <div class="flex items-center gap-3">
               <button 
                 @click="openEditModal" 
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                class="px-4 py-2 bg-[#FB6A00] text-black rounded-lg hover:bg-[#FB6A00] transition-colors"
               >
                 <Edit3 class="w-4 h-4 mr-2 inline-block" />
                 Modifier
@@ -83,7 +83,7 @@
               </div>
               <div>
                 <p class="text-sm text-gray-500">Site web</p>
-                <p v-if="establishment.website" class="font-medium text-blue-600">
+                <p v-if="establishment.website" class="font-medium text-[#C54E00]">
                   <a :href="establishment.website" target="_blank" rel="noopener noreferrer">
                     {{ establishment.website }}
                   </a>
@@ -102,7 +102,7 @@
                 <div class="mt-1">
                   <span 
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                    :class="establishment.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                    :class="establishment.active ? 'bg-gray-100 text-black' : 'bg-[#FFECD8] text-[#C54E00]'"
                   >
                     {{ establishment.active ? 'Actif' : 'Inactif' }}
                   </span>
@@ -174,7 +174,7 @@
                       </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-[#FFECD8] text-[#C54E00]">
                         {{ staff.role || 'Staff' }}
                       </span>
                     </td>
@@ -185,8 +185,8 @@
                       {{ staff.last_login ? formatDate(staff.last_login) : 'Jamais' }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button class="text-blue-600 hover:text-blue-900 mr-3">Modifier</button>
-                      <button class="text-red-600 hover:text-red-900">Supprimer</button>
+                      <button class="text-[#C54E00] hover:text-[#C54E00] mr-3">Modifier</button>
+                      <button class="text-[#C54E00] hover:text-[#C54E00]">Supprimer</button>
                     </td>
                   </tr>
                 </tbody>
@@ -223,7 +223,7 @@
                     type="text" 
                     readonly 
                     :value="qrCodeUrl" 
-                    class="block w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    class="block w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#FB6A00] focus:border-[#FB6A00]"
                   />
                   <button 
                     @click="copyToClipboard(qrCodeUrl)" 
@@ -237,14 +237,14 @@
               <div class="flex flex-wrap gap-3">
                 <button 
                   @click="downloadQRCode('png')" 
-                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  class="px-4 py-2 bg-[#FB6A00] text-black rounded-lg hover:bg-[#FB6A00] transition-colors"
                 >
                   <Download class="w-4 h-4 mr-2 inline-block" />
                   Télécharger PNG
                 </button>
                 <button 
                   @click="downloadQRCode('svg')" 
-                  class="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors"
+                  class="px-4 py-2 bg-[#FFECD8] text-[#C54E00] rounded-lg hover:bg-[#FFD4AD] transition-colors"
                 >
                   <Download class="w-4 h-4 mr-2 inline-block" />
                   Télécharger SVG

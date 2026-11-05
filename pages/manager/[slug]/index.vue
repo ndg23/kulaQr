@@ -104,14 +104,14 @@
                     :class="[
                       'inline-flex items-center h-7 px-3 text-xs font-bold rounded-full',
                       order.status === 'pending' && 'bg-yellow-100 text-yellow-900',
-                      order.status === 'confirmed' && 'bg-blue-100 text-blue-900',
+                      order.status === 'confirmed' && 'bg-[#FFECD8] text-[#C54E00]',
                       order.status === 'processing' && 'bg-orange-100 text-orange-900',
-                      order.status === 'completed' && 'bg-green-100 text-green-900'
+                      order.status === 'completed' && 'bg-gray-100 text-black'
                     ]"
                   >{{ getStatusText(order.status) }}</span>
                   <span
                     v-if="order.tables?.type === 'VIP'"
-                    class="inline-flex items-center h-7 px-3 text-xs font-bold bg-purple-100 text-purple-900 rounded-full"
+                    class="inline-flex items-center h-7 px-3 text-xs font-bold bg-gray-100 text-black rounded-full"
                   >VIP</span>
                 </div>
 
@@ -144,7 +144,7 @@
 
             <div class="flex gap-2">
               <NuxtLink
-                :to="`/staff/order-detail/${order?.id}`"
+                :to="`/manager/${establishment?.id}/orders`"
                 class="flex-1 inline-flex items-center justify-center h-12 px-4 bg-gray-100 text-gray-900 rounded-full font-bold hover:bg-gray-200 transition-colors"
               >
                 <Eye class="w-4 h-4 mr-2" />

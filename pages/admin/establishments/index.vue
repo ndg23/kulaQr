@@ -1,149 +1,129 @@
 <template>
-  <div>
+  <div class="space-y-4 sm:space-y-6">
     <PageHeader title="Établissements" description="Gérez les établissements et leurs propriétaires" />
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-10">
-      <PageStatCard v-for="(stat, i) in statsDisplay" :key="stat.name" :tone="cycleTone(i)" :name="stat.name" :value="stat.value" :icon="stat.icon" />
+    <!-- La grande carte -->
+    <HeroCard
+      label="Établissements"
+      :value="stats.total"
+      :icon="Store"
+      :chips="[
+        { label: 'Actifs', value: stats.active },
+        { label: 'Sans marchand', value: restaurants.filter((r: any) => !r.user_id).length, alert: restaurants.some((r: any) => !r.user_id), dot: restaurants.some((r: any) => !r.user_id) }
+      ]"
+    >
+      <template #action>
+        <button
+          type="button"
+          class="h-11 px-5 rounded-full bg-black text-white text-sm font-extrabold inline-flex items-center gap-2 flex-shrink-0 active:scale-[0.97] transition-all"
+          @click="handleAction('add')"
+        ><Plus class="w-4 h-4" :stroke-width="3" /> Ajouter</button>
+      </template>
+    </HeroCard>
+
+    <!-- Recherche et statut -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+      <div class="relative flex-1 max-w-md">
+        <Search class="w-5 h-5 text-gray-400 absolute left-5 top-1/2 -translate-y-1/2" />
+        <input
+          v-model="filters.search"
+          type="search"
+          placeholder="Rechercher un établissement"
+          class="w-full h-12 pl-12 pr-5 rounded-full bg-gray-100 border-0 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
+        />
+      </div>
+      <div class="flex gap-2 overflow-x-auto scrollbar-hide" role="tablist" aria-label="Statut">
+        <button
+          v-for="opt in [{ v: '', l: 'Tous' }, { v: 'active', l: 'Actifs' }, { v: 'inactive', l: 'Inactifs' }]"
+          :key="opt.v"
+          type="button"
+          role="tab"
+          :aria-selected="filters.status === opt.v"
+          class="h-11 px-5 rounded-full text-sm font-extrabold whitespace-nowrap flex-shrink-0 active:scale-[0.97] transition-all"
+          :class="filters.status === opt.v ? 'bg-black text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'"
+          @click="filters.status = opt.v"
+        >{{ opt.l }}</button>
+      </div>
     </div>
 
-        <DataTable
-          :items="restaurants"
-          :columns="tableColumns"
-          :loading="loading"
-          :current-page="currentPage"
-          :per-page="perPage"
-          :total-items="filteredRestaurants.length"
-          :show-pagination="true"
-          :header-buttons="[
-            { label: 'Ajouter', icon: 'Plus', variant: 'primary', action: 'add' }
-          ]"
-          empty-title="Aucun établissement trouvé"
-          empty-description="Commencez par créer votre premier établissement"
-          empty-icon="fas fa-store"
-          @page-change="currentPage = $event"
-          @update:per-page="perPage = $event"
-          @button-click="handleAction"
-        >
-      <!-- Restaurant Name Column -->
-      <template #cell-name="{ item }">
-        <NuxtLink 
-          :to="`/admin/establishments/${item.id}`"
-          class="flex items-center gap-2 sm:gap-3 max-w-[240px] sm:max-w-[280px] group"
-        >
-          <div class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-            <Store class="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="font-semibold text-gray-900 text-sm sm:text-base truncate group-hover:text-orange-600 transition-colors">{{ item.name }}</div>
-            <div class="text-xs sm:text-sm text-gray-500 truncate hidden sm:block">{{ item.address || 'Adresse non définie' }}</div>
-          </div>
-        </NuxtLink>
-      </template>
+    <!-- Chargement -->
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4" aria-busy="true">
+      <div v-for="i in 6" :key="i" class="h-44 rounded-[2rem] bg-gray-100 animate-pulse"></div>
+    </div>
 
-      <!-- Type Column -->
-      <template #cell-type_name="{ item }">
-        <div class="max-w-[100px] sm:max-w-[120px]">
-          <span
-            class="px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
-            :class="getTypeBadgeClass(item.type_name)"
-          >
-            {{ formatType(item.type_name) }}
-          </span>
+    <!-- Vide -->
+    <div v-else-if="filteredRestaurants.length === 0" class="rounded-[2rem] bg-gray-100 px-6 py-14 text-center">
+      <Store class="w-10 h-10 text-gray-400 mx-auto" />
+      <h3 class="mt-3 text-lg font-black text-gray-900">Aucun établissement trouvé</h3>
+      <p class="mt-1 text-sm font-semibold text-gray-500">Commencez par créer votre premier établissement</p>
+      <button
+        type="button"
+        class="mt-5 h-12 px-6 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all"
+        @click="handleAction('add')"
+      >Ajouter un établissement</button>
+    </div>
+
+    <!-- Cartes : les options dans une feuille sur mobile -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+      <article v-for="item in filteredRestaurants.slice(0, perPage)" :key="item.id" class="rounded-[2rem] bg-gray-100 p-5 flex flex-col gap-4">
+        <div class="flex items-start gap-3">
+          <NuxtLink :to="`/admin/establishments/${item.id}`" class="flex items-center gap-3 min-w-0 flex-1 group">
+            <span class="w-12 h-12 flex-shrink-0 rounded-full bg-[#FB6A00] text-black flex items-center justify-center">
+              <Store class="w-6 h-6" :stroke-width="2.5" />
+            </span>
+            <span class="min-w-0">
+              <span class="block font-black text-gray-900 leading-tight truncate group-hover:underline">{{ item.name }}</span>
+              <span class="block text-xs font-semibold text-gray-500 truncate">{{ item.address || 'Adresse non définie' }}</span>
+            </span>
+          </NuxtLink>
+          <ActionDropdown
+            :actions="getEstablishmentActions(item)"
+            :title="item.name"
+            @action="handleEstablishmentAction"
+          />
         </div>
-      </template>
 
-      <!-- Owner Column -->
-      <template #cell-owner_name="{ item }">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center h-7 px-3 rounded-full bg-white text-gray-900 text-xs font-extrabold">{{ formatType(item.type_name) }}</span>
+          <span
+            class="inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-xs font-extrabold"
+            :class="item.is_active ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'"
+          >
+            <span class="w-1.5 h-1.5 rounded-full" :class="item.is_active ? 'bg-[#FB6A00]' : 'bg-gray-500'"></span>
+            {{ item.is_active ? 'Actif' : 'Inactif' }}
+          </span>
+          <span class="inline-flex items-center h-7 px-3 rounded-full bg-white text-gray-600 text-xs font-extrabold">{{ item.currency || 'XOF' }}</span>
+        </div>
+
         <NuxtLink
           v-if="!item.user_id"
           :to="`/admin/establishments/${item.id}/owner`"
-          class="inline-flex items-center gap-1.5 h-8 px-4 rounded-full bg-[#FFE0F0] text-[#A10054] text-xs font-bold hover:opacity-80 transition-opacity whitespace-nowrap"
-        >
-          <UserPlus class="w-3.5 h-3.5" />
-          Assigner un marchand
-        </NuxtLink>
+          class="mt-auto h-11 rounded-full bg-[#FB6A00] text-black text-sm font-black inline-flex items-center justify-center gap-2 hover:bg-[#FD9542] active:scale-[0.97] transition-all"
+        ><UserPlus class="w-4 h-4" :stroke-width="2.5" /> Assigner un marchand</NuxtLink>
         <NuxtLink
           v-else
           :to="`/admin/establishments/${item.id}/owner`"
-          class="flex items-center gap-2 max-w-[180px] group"
+          class="mt-auto h-11 pl-1.5 pr-4 rounded-full bg-white flex items-center gap-2 min-w-0 active:scale-[0.98] transition-all"
           title="Changer de marchand"
         >
-          <span class="h-8 w-8 rounded-full bg-[#7050FF] text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">{{ getInitials(item.owner_name) }}</span>
-          <span class="text-sm font-medium text-gray-700 truncate group-hover:underline">{{ item.owner_name }}</span>
+          <span class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center flex-shrink-0 text-xs font-black">{{ getInitials(item.owner_name) }}</span>
+          <span class="text-sm font-extrabold text-gray-900 truncate">{{ item.owner_name }}</span>
         </NuxtLink>
-      </template>
+      </article>
+    </div>
 
-      <!-- Subscription Column -->
-      <!-- <template #cell-subscription_type="{ item }">
-        <div class="max-w-[100px]">
-          <span
-            class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
-            :class="getSubscriptionBadgeClass(item.subscription_type)"
-          >
-            {{ getSubscriptionLabel(item.subscription_type) }}
-          </span>
-        </div>
-      </template> -->
-
-      <!-- Status Column -->
-      <template #cell-is_active="{ item }">
-        <div class="max-w-[80px] sm:max-w-[100px]">
-          <span
-            class="px-2 sm:px-3 py-1 rounded-full text-xs font-medium inline-flex items-center whitespace-nowrap"
-            :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-          >
-            <div 
-              class="w-1.5 h-1.5 rounded-full mr-1 sm:mr-1.5 flex-shrink-0"
-              :class="item.is_active ? 'bg-green-500' : 'bg-red-500'"
-            />
-            <span class="hidden sm:inline">{{ item.is_active ? 'Actif' : 'Inactif' }}</span>
-            <span class="sm:hidden">{{ item.is_active ? 'ON' : 'OFF' }}</span>
-          </span>
-        </div>
-      </template>
-
-      <!-- Currency Column -->
-      <template #cell-currency="{ item }">
-        <div class="max-w-[80px]">
-          <span class="text-sm font-medium text-gray-700">{{ item.currency || 'XOF' }}</span>
-        </div>
-      </template>
-
-      <!-- Max Categories Column -->
-      <!-- <template #cell-max_categories="{ item }">
-        <div class="text-center max-w-[80px]">
-          <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium whitespace-nowrap">
-            {{ item.max_categories }}
-          </span>
-        </div>
-      </template> -->
-
-      <!-- Max Products Column -->
-      <!-- <template #cell-max_products="{ item }">
-        <div class="text-center max-w-[80px]">
-          <span class="px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs font-medium whitespace-nowrap">
-            {{ item.max_products }}
-          </span>
-        </div>
-      </template> -->
-
-      <!-- Actions Column -->
-      <template #cell-actions="{ item }">
-        <div class="max-w-[100px] sm:max-w-[120px]">
-          <ActionDropdown
-            :actions="getEstablishmentActions(item)"
-            @action="handleEstablishmentAction"
-            trigger-text="Actions"
-            class="text-sm"
-          />
-        </div>
-      </template>
-        </DataTable>
-
-      </div>
+    <div v-if="filteredRestaurants.length > perPage" class="flex justify-center">
+      <button
+        type="button"
+        class="h-12 px-6 rounded-full bg-gray-100 text-gray-900 font-extrabold hover:bg-gray-200 active:scale-[0.97] transition-all"
+        @click="perPage += 12"
+      >Voir plus ({{ filteredRestaurants.length - perPage }})</button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
+import HeroCard from '~/components/ui/HeroCard.vue'
 import { cycleTone } from '~/utils/palette'
 import { ref, computed, onMounted } from 'vue'
 import { useCustomToast } from '~/composables/useToast'
@@ -172,7 +152,7 @@ const stats = ref({
 
 // Pagination
 const currentPage = ref(1)
-const perPage = ref(10)
+const perPage = ref(12)
 
 // Filters
 const filters = ref({
@@ -445,15 +425,15 @@ const statsDisplay = computed(() => [
     name: 'Restaurants actifs', 
     value: stats.value.active.toString(),
     icon: CheckCircle,
-    iconBg: 'bg-green-50',
-    iconColor: 'text-green-500'
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-black'
   },
   {
     name: 'Sans marchand',
     value: restaurants.value.filter((r: any) => !r.user_id).length.toString(),
     icon: UserPlus,
-    iconBg: 'bg-pink-50',
-    iconColor: 'text-pink-500'
+    iconBg: 'bg-[#FFECD8]',
+    iconColor: 'text-[#C54E00]'
   }
 ])
 
@@ -499,9 +479,9 @@ const getTypeBadgeClass = (type: string) => {
   const classes: Record<string, string> = {
     'restaurant': 'bg-orange-50 text-orange-700 border border-orange-200',
     'cafe': 'bg-amber-50 text-amber-700 border border-amber-200',
-    'bar': 'bg-purple-50 text-purple-700 border border-purple-200',
-    'fast_food': 'bg-red-50 text-red-700 border border-red-200',
-    'hotel': 'bg-blue-50 text-blue-700 border border-blue-200'
+    'bar': 'bg-gray-100 text-black border border-gray-100',
+    'fast_food': 'bg-[#FFECD8] text-[#C54E00] border border-[#FFD4AD]',
+    'hotel': 'bg-[#FFECD8] text-[#C54E00] border border-[#FFD4AD]'
   }
   return classes[type] || 'bg-gray-50 text-gray-700 border border-gray-200'
 }
@@ -548,9 +528,9 @@ const getSubscriptionColor = (type: string) => {
 
 const getSubscriptionBadgeClass = (type: string) => {
   const classes: Record<string, string> = {
-    'basic': 'bg-green-100 text-green-800',
+    'basic': 'bg-gray-100 text-black',
     'premium': 'bg-yellow-100 text-yellow-800',
-    'pro': 'bg-purple-100 text-purple-800'
+    'pro': 'bg-gray-100 text-black'
   }
   return classes[type] || 'bg-gray-100 text-gray-800'
 }

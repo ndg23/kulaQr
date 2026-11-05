@@ -8,7 +8,7 @@
         @input="handleInput"
         @focus="handleFocus"
         @blur="handleBlur"
-        class="float-input block w-full pl-6 pr-4 h-16 pt-3  text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-none focus:ring-none-400 focus:border-primary-500 transition-colors text-lg dark:bg-gray-800"
+        class="float-input block w-full pl-6 pr-4 h-16 pt-3  text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-none focus:ring-none-400 focus:border-[#FB6A00] transition-colors text-lg dark:bg-gray-800"
         :class="[
           error ? 'border-red-500 focus:ring-none focus:ring-none-400' : 
                  (isFocused ? 'border-gray-900 dark:border-white' : ''),

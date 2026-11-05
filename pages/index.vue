@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-dvh bg-white">
     <div class="relative">
       <!-- Navigation Bar -->
       <Navbar />

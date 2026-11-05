@@ -4,7 +4,7 @@
         :id="id"
         :value="modelValue"
         @input="$emit('update:modelValue', $event.target.value)"
-        class="block w-full pl-6 pr-4 h-16 pt-3 text-gray-900 appearance-none dark:text-white border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-lg dark:bg-gray-800 float-input"
+        class="block w-full pl-6 pr-4 h-16 pt-3 text-gray-900 appearance-none dark:text-white border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-0 focus:border-[#FB6A00] transition-colors text-lg dark:bg-gray-800 float-input"
         :class="[
           pill ? '!rounded-full !pl-7 !pr-10' : '',
           error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '',
@@ -21,7 +21,7 @@
       
       <label
         :for="id"
-        class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-focus:text-primary-600 dark:peer-focus:text-primary-400 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+        class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-focus:text-[#C54E00] dark:peer-focus:text-[#FD9542] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
         :class="[
           pill ? '!left-7' : '',
           error ? 'text-red-500 peer-focus:text-red-500' : ''

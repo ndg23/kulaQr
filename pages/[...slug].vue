@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white flex items-center justify-center">
+  <div class="min-h-dvh bg-white flex items-center justify-center">
     <div class="text-center px-4">
       <!-- 404 Icon -->
       <div class="mb-8">

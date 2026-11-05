@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+  <div class="min-h-dvh bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
     <div class="relative py-3 sm:max-w-xl sm:mx-auto">
       <div class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
         <div class="max-w-md mx-auto">
@@ -14,7 +14,7 @@
                     v-model="form.name"
                     type="text"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FB6A00] focus:ring-[#FB6A00]"
                   />
                 </div>
 
@@ -24,7 +24,7 @@
                     v-model="form.email"
                     type="email"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FB6A00] focus:ring-[#FB6A00]"
                   />
                 </div>
 
@@ -34,7 +34,7 @@
                     v-model="form.password"
                     type="password"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FB6A00] focus:ring-[#FB6A00]"
                   />
                 </div>
 
@@ -44,7 +44,7 @@
                     v-model="form.address"
                     type="text"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FB6A00] focus:ring-[#FB6A00]"
                   />
                 </div>
 
@@ -54,13 +54,13 @@
                     v-model="form.phone"
                     type="tel"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#FB6A00] focus:ring-[#FB6A00]"
                   />
                 </div>
 
                 <button 
                   type="submit"
-                  class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#FB6A00] hover:bg-[#FB6A00] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FB6A00]"
                 >
                   S'inscrire
                 </button>

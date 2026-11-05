@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <!-- Modern Header -->
+  <div class="space-y-4 sm:space-y-6">
     <ManagerModernHeader
       title="Gestion du personnel"
       subtitle="Gérez les membres de votre équipe et leurs accès"
@@ -12,202 +11,103 @@
       }"
     />
 
+    <!-- La grande carte : l'équipe -->
+    <HeroCard
+      label="Membres de l'équipe"
+      :value="staffMembers.length"
+      :icon="Users"
+      :chips="[
+        { label: 'Actifs', value: staffMembers.filter(m => m.is_active).length },
+        { label: 'Avec PIN', value: staffMembers.filter(m => m.pin).length },
+        { label: 'Sans PIN', value: staffMembers.filter(m => !m.pin).length, alert: staffMembers.some(m => !m.pin), dot: staffMembers.some(m => !m.pin) }
+      ]"
+    />
+
     <main>
-      <!-- Loading State -->
-      <div v-if="loading" class="flex flex-col items-center justify-center py-16">
-        <Loader2 class="w-10 h-10 text-kula-500 animate-spin mb-4" />
-        <p class="text-sm text-gray-500">Chargement du personnel...</p>
+      <!-- Chargement -->
+      <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4" aria-busy="true">
+        <div v-for="i in 3" :key="i" class="h-48 rounded-[2rem] bg-gray-100 animate-pulse"></div>
       </div>
 
-      <!-- Empty State -->
-      <ManagerModernCard v-else-if="staffMembers.length === 0" class="p-8 sm:p-12 text-center">
-        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-          <Users class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Aucun membre du personnel</h3>
-        <p class="text-sm sm:text-base text-gray-500 mb-6 max-w-md mx-auto">
+      <!-- Vide -->
+      <div v-else-if="staffMembers.length === 0" class="rounded-[2rem] bg-gray-100 px-6 py-14 text-center">
+        <Users class="w-10 h-10 text-gray-400 mx-auto" />
+        <h3 class="mt-3 text-lg font-black text-gray-900">Aucun membre du personnel</h3>
+        <p class="mt-1 text-sm font-semibold text-gray-500 max-w-md mx-auto">
           Vous n'avez pas encore ajouté de membres à votre équipe. Commencez par ajouter votre premier membre.
         </p>
-        <ManagerModernButton
-          variant="primary"
-          @click="openStaffModal"
-          :icon="Plus"
-        >
-          Ajouter un membre
-        </ManagerModernButton>
-      </ManagerModernCard>
+        <button
+          type="button"
+          class="mt-5 h-12 px-6 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all"
+          @click="openStaffModal()"
+        >Ajouter un membre</button>
+      </div>
 
-      <!-- Staff List - Desktop Table -->
-      <ManagerModernCard v-else class="hidden lg:block overflow-hidden">
-        <template #header>
-          <h2 class="text-lg font-semibold text-gray-900">Membres de l'équipe</h2>
-        </template>
-      
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Membre
-                </th>
-                <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  PIN
-                </th>
-                <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Statut
-                </th>
-                <th scope="col" class="relative px-6 py-3.5">
-                  <span class="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
-              <tr v-for="member in staffMembers" :key="member.id" class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-kula-400 to-kula-600 flex items-center justify-center">
-                      <User class="h-5 w-5 text-white" />
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">
-                        {{ member.username }}
-                      </div>
-                      <div class="text-xs text-gray-500">
-                        {{ getRoleName(member.role) }}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-900 font-mono bg-gray-100 px-2.5 py-1 rounded-md">
-                      {{ member.pin || '-' }}
-                    </span>
-                    <button 
-                      v-if="member.pin"
-                      @click="regeneratePin(member)"
-                      class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-                      title="Régénérer le PIN"
-                    >
-                      <RefreshCw class="w-4 h-4" />
-                    </button>
-                    <button 
-                      v-else
-                      @click="generatePin(member)"
-                      class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-                      title="Générer un PIN"
-                    >
-                      <Key class="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <AppleSwitch 
-                    :model-value="member.is_active"
-                    @update:model-value="toggleStaffStatus(member, $event)"
-                  />
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <div class="flex justify-end gap-1">
-                    <button 
-                      @click="openStaffModal(member)" 
-          class="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-200  transition-all duration-200 hover:scale-10 z-10"
-                      title="Modifier"
-                    >
-                      <Edit class="w-5 h-5 text-gray-400" />
-                    </button>
-                    <button 
-                      @click="confirmDeleteStaff(member)" 
-          class="w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-200  transition-all duration-200 hover:scale-10 z-10"
-                      title="Supprimer"
-                    >
-                      <Trash2 class="w-5 h-5 text-gray-400" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </ManagerModernCard>
-
-      <!-- Staff List - Mobile Cards -->
-      <div v-if="!loading && staffMembers.length > 0" class="lg:hidden space-y-3">
-        <div 
-          v-for="member in staffMembers" 
+      <!-- Membres -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+        <article
+          v-for="member in staffMembers"
           :key="member.id"
-          class="bg-white rounded-2xl p-4  border border-gray-100"
+          class="rounded-[2rem] bg-gray-100 p-5 flex flex-col gap-4"
+          :class="member.is_active ? '' : 'opacity-70'"
         >
-          <!-- Header -->
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-kula-400 to-kula-600 flex items-center justify-center">
-                <User class="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 class="text-base font-semibold text-gray-900">{{ member.username }}</h3>
-                <p class="text-xs text-gray-500">{{ getRoleName(member.role) }}</p>
-              </div>
+          <div class="flex items-center gap-3">
+            <span class="w-12 h-12 flex-shrink-0 rounded-full bg-[#FB6A00] text-black flex items-center justify-center">
+              <User class="w-6 h-6" :stroke-width="2.5" />
+            </span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-black text-gray-900 truncate">{{ member.username }}</h3>
+              <span class="inline-flex items-center h-6 px-3 mt-0.5 rounded-full bg-white text-xs font-extrabold text-gray-900">{{ getRoleName(member.role) }}</span>
             </div>
-            <AppleSwitch 
+            <AppleSwitch
               :model-value="member.is_active"
               @update:model-value="toggleStaffStatus(member, $event)"
-              class="scale-90"
             />
           </div>
 
-          <!-- PIN Section -->
-          <div class="flex items-center justify-between py-3 px-3 bg-gray-50 rounded-xl mb-3">
-            <div class="flex items-center gap-2">
-              <Key class="w-4 h-4 text-gray-400" />
-              <span class="text-sm text-gray-600">PIN</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-mono font-medium text-gray-900">
-                {{ member.pin || '----' }}
-              </span>
-              <button 
+          <!-- PIN -->
+          <div class="flex items-center justify-between rounded-full bg-white pl-5 pr-2 h-12">
+            <span class="inline-flex items-center gap-2 text-sm font-bold text-gray-600"><Key class="w-4 h-4" :stroke-width="2.5" /> PIN</span>
+            <span class="flex items-center gap-2">
+              <span class="font-mono font-black text-gray-900 tracking-widest">{{ member.pin || '----' }}</span>
+              <button
                 v-if="member.pin"
+                type="button"
+                aria-label="Régénérer le PIN"
+                class="w-9 h-9 rounded-full bg-gray-100 text-gray-900 flex items-center justify-center active:scale-[0.92] transition-all"
                 @click="regeneratePin(member)"
-                class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                <RefreshCw class="w-3.5 h-3.5" />
-              </button>
-              <button 
+              ><RefreshCw class="w-4 h-4" :stroke-width="2.5" /></button>
+              <button
                 v-else
+                type="button"
+                aria-label="Générer un PIN"
+                class="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center active:scale-[0.92] transition-all"
                 @click="generatePin(member)"
-                class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                <Plus class="w-3.5 h-3.5" />
-              </button>
-            </div>
+              ><Plus class="w-4 h-4" :stroke-width="2.5" /></button>
+            </span>
           </div>
 
-          <!-- Actions -->
-          <div class="flex gap-2">
-            <button 
+          <div class="mt-auto flex gap-2">
+            <button
+              type="button"
+              class="flex-1 h-11 inline-flex items-center justify-center gap-2 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all"
               @click="openStaffModal(member)"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
-            >
-              <Edit class="w-4 h-4" />
-              Modifier
-            </button>
-            <button 
+            ><Edit class="w-4 h-4" :stroke-width="2.5" /> Modifier</button>
+            <button
+              type="button"
+              :aria-label="`Supprimer ${member.username}`"
+              class="w-11 h-11 flex-shrink-0 rounded-full bg-white text-gray-500 hover:text-[#C54E00] flex items-center justify-center active:scale-[0.92] transition-all"
               @click="confirmDeleteStaff(member)"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
-            >
-              <Trash2 class="w-4 h-4" />
-              Supprimer
-            </button>
+            ><Trash2 class="w-4 h-4" :stroke-width="2.5" /></button>
           </div>
-        </div>
+        </article>
       </div>
     </main>
-
   </div>
 </template>
 
 <script setup lang="ts">
+import HeroCard from '~/components/ui/HeroCard.vue'
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { 

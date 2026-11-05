@@ -207,7 +207,7 @@
                       v-model="categoryForm.name"
                       type="text"
                       required
-                      class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
+                      class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-[#FFECD8]"
                     />
                   </div>
 
@@ -219,7 +219,7 @@
                     <textarea
                       v-model="categoryForm.description"
                       rows="3"
-                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
+                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-[#FFECD8]"
                     ></textarea>
                   </div>
 
@@ -232,7 +232,7 @@
                       v-model.number="categoryForm.order"
                       type="number"
                       min="0"
-                      class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
+                      class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-[#FFECD8]"
                     />
                   </div>
 
@@ -308,7 +308,7 @@
                       v-model="productForm.name"
                       type="text"
                       required
-                      class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
+                      class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-[#FFECD8]"
                     />
                   </div>
 
@@ -320,7 +320,7 @@
                     <textarea
                       v-model="productForm.description"
                       rows="3"
-                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
+                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-[#FFECD8]"
                     ></textarea>
                   </div>
 
@@ -339,7 +339,7 @@
                         min="0"
                         step="0.01"
                         required
-                        class="w-full h-12 pl-10 pr-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
+                        class="w-full h-12 pl-10 pr-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-[#FFECD8]"
                       />
                     </div>
                   </div>
@@ -352,7 +352,7 @@
                     <input
                       v-model="productForm.image_url"
                       type="url"
-                      class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-blue-50"
+                      class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring focus:ring-[#FFECD8]"
                     />
                   </div>
 
@@ -360,8 +360,8 @@
                   <div class="flex items-center">
                     <Switch
                       v-model="productForm.is_available"
-                      :class="productForm.is_available ? 'bg-green-500' : 'bg-gray-200'"
-                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      :class="productForm.is_available ? 'bg-[#FB6A00]' : 'bg-gray-200'"
+                      class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#FB6A00] focus:ring-offset-2"
                     >
                       <span
                         :class="productForm.is_available ? 'translate-x-6' : 'translate-x-1'"

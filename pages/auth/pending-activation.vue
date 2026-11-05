@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center p-6 bg-white">
+  <div class="min-h-dvh flex items-center justify-center p-6 bg-white">
     <div class="w-full max-w-lg">
       <!-- Minimalist Success Card -->
       <div class="text-center space-y-10">

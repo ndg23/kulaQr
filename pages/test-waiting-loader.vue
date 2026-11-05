@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-100 p-8">
+  <div class="min-h-dvh bg-gray-100 p-8">
     <div class="max-w-4xl mx-auto">
       <h1 class="text-3xl font-bold text-gray-900 mb-8">WaitingLoader Test Suite</h1>
 

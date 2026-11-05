@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50">
+  <div class="min-h-dvh flex items-center justify-center bg-gray-50">
     <div class="text-center">
       <Loader2 class="w-16 h-16 text-orange-400 animate-spin mx-auto mb-4" />
       <p class="text-gray-600">{{ loadingMessage }}</p>

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white flex items-center justify-center p-4">
+  <div class="min-h-dvh bg-white flex items-center justify-center p-4">
     <div class="max-w-sm w-full text-center">
       <!-- Broken QR Icon -->
       <div class="relative inline-flex items-center justify-center mb-6">

@@ -1,814 +1,174 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <!-- Apple-style Header -->
-    <header class="border-b border-gray-100 sticky top-0 z-30 bg-white/80 backdrop-blur-xl">
-      <div class="max-w-6xl mx-auto px-6 sm:px-8 py-6">
-        <div class="flex justify-between items-center mb-6">
-          <div>
-            <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Commandes</h1>
-            <p class="text-sm text-gray-500 mt-1">Gérez vos commandes en temps réel</p>
-          </div>
-          
-          <div class="flex gap-3 items-center">
-            <!-- Connection Status -->
-            <div class="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium"
-                 :class="connectionStatus === 'connected' 
-                   ? 'bg-green-50 text-green-700' 
-                   : 'bg-red-50 text-red-700'">
-              <div class="w-2 h-2 rounded-full"
-                   :class="connectionStatus === 'connected' ? 'bg-green-500' : 'bg-red-500'"></div>
-              <span class="hidden sm:inline">{{ connectionStatusText }}</span>
-            </div>
-            
-            <!-- Refresh Button -->
-            <button @click="refreshOrders" 
-                    class="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-gray-100"
-                    :class="{ 'animate-spin': isRefreshing }">
-              <RefreshCw class="w-5 h-5 text-gray-700" />
-            </button>
-          </div>
-        </div>
-        
-        <!-- Search -->
-        <div class="relative mb-6">
-          <Search class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-          <input 
-            v-model="searchQuery"
-            type="text"
-            placeholder="Rechercher une commande..."
-            class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm transition-all focus:outline-none focus:bg-white focus:border-gray-900"
-          />
-        </div>
-        
-        <!-- Filters -->
-        <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          <button 
-            v-for="status in statusFilters" 
-            :key="status.value"
-            @click="filterStatus = status.value"
-            class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex-shrink-0"
-            :class="[
-              filterStatus === status.value 
-                ? 'bg-gray-900 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            ]"
-          >
-            <component v-if="status.value !== 'all'" :is="getStatusIcon(status.value)" class="w-4 h-4" />
-            <span>{{ status.label }}</span>
-            <span class="px-2 py-0.5 rounded-full text-xs font-semibold min-w-[20px] text-center"
-                  :class="filterStatus === status.value ? 'bg-white/20' : 'bg-white'">
-              {{ orders.filter(order => status.value === 'all' ? true : order.status === status.value).length }}
-            </span>
-          </button>
-        </div>
-      </div>
-    </header>
+  <!-- L'écran de travail : ce qui attend une action, la plus ancienne en premier, un seul bouton par commande -->
+  <div class="space-y-4">
+    <!-- Files d'attente : un coup d'œil, un appui -->
+    <div class="grid grid-cols-4 gap-2" role="tablist" aria-label="Files de commandes">
+      <button
+        v-for="q in queues"
+        :key="q.key"
+        type="button"
+        role="tab"
+        :aria-selected="queueKey === q.key"
+        class="rounded-3xl py-3 px-1 flex flex-col items-center gap-0.5 active:scale-[0.97] transition-all"
+        :class="queueKey === q.key ? 'bg-black text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'"
+        @click="queue = q.key"
+      >
+        <span
+          class="text-2xl font-black tabular-nums leading-none"
+          :class="queueKey !== q.key && q.count > 0 && q.alert ? 'text-[#C54E00]' : ''"
+        >{{ q.count }}</span>
+        <span class="text-[11px] font-extrabold leading-tight text-center" :class="queueKey === q.key ? 'text-white/80' : 'text-gray-500'">{{ q.label }}</span>
+      </button>
+    </div>
 
-    <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-6 sm:px-8 py-8 pb-16">
-      <!-- Loading State -->
-      <div v-if="isLoading" class="flex flex-col items-center justify-center py-32">
-        <div class="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-gray-900 mb-4"></div>
-        <p class="text-sm text-gray-500">Chargement des commandes...</p>
-      </div>
-      
-      <!-- Error State -->
-      <div v-else-if="loadError" class="text-center py-32">
-        <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-          <AlertTriangle class="w-8 h-8 text-red-500" />
-        </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">Erreur de chargement</h3>
-        <p class="text-sm text-gray-500 mb-6">Impossible de charger les commandes</p>
-        <button @click="loadOrders" 
-                class="px-6 py-3 bg-gray-900 text-white rounded-2xl text-sm font-medium hover:bg-gray-800 transition-colors">
-          Réessayer
-        </button>
-      </div>
-      
-      <!-- Empty State -->
-      <div v-else-if="filteredOrders.length === 0" class="text-center py-32">
-        <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">
-          <ClipboardList class="w-8 h-8 text-gray-400" />
-        </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucune commande</h3>
-        <p class="text-sm text-gray-500">
-          {{ searchQuery ? 'Aucun résultat trouvé' : 'Les commandes apparaîtront ici' }}
-        </p>
-      </div>
-      
-      <!-- Orders Grid -->
-      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div 
-          v-for="order in filteredOrders" 
-          :key="order.id"
-          class="bg-white border border-gray-200 rounded-3xl overflow-hidden cursor-pointer transition-all hover:border-gray-900"
-          @click="viewOrderDetails(order)"
-        >
-          <!-- Order Header -->
-          <div class="p-6 border-b border-gray-100"
-               :class="{
-                 'bg-yellow-500': order.status === 'pending',
-                 'bg-blue-500': order.status === 'confirmed', 
-                 'bg-orange-500': order.status === 'processing',
-                 'bg-green-500': order.status === 'completed',
-                 'bg-red-500': order.status === 'cancelled'
-               }">
-            <div class="flex justify-between items-start mb-3">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-gray-900 text-white flex items-center justify-center text-lg font-semibold">
-                  {{ order.table_number }}
-                </div>
-                <div>
-                  <!-- Table Info Enrichie -->
-                  <div class="mb-3">
-                    <div class="flex items-center gap-2 mb-1">
-                      <MapPin class="w-4 h-4 text-white" />
-                      <h4 class="text-lg font-semibold text-white">
-                        N° {{ order.tables?.table_number || order.table_number || 'N/A' }}
-                      </h4>
-                      <span 
-                        v-if="order.tables?.type === 'VIP'"
-                        class="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-900 rounded-full"
-                      >
-                        VIP
-                      </span>
-                    </div>
-                    
-                    <div class="flex items-center gap-4 text-sm text-white">
-                      <span v-if="order.tables?.section_name" class="inline-flex items-center gap-1">
-                        <Store class="w-3.5 h-3.5" />
-                        {{ order.tables.section_name }}
-                      </span>
-                      <span v-if="order.tables?.floor_level" class="inline-flex items-center gap-1">
-                        <Building class="w-3.5 h-3.5" />
-                        {{ order.tables.floor_level }}
-                      </span>
-                      <span v-if="order.tables?.capacity" class="inline-flex items-center gap-1">
-                        <Users class="w-3.5 h-3.5" />
-                        {{ order.tables.capacity }} pers.
-                      </span>
-                    </div>
-                  </div>
-                
-                </div>
-              </div>
-              <span class="px-3 py-1 rounded-full text-xs font-medium"
-                   :class="{
-                     'bg-yellow-100 text-yellow-900': order.status === 'pending',
-                     'bg-blue-100 text-blue-900': order.status === 'confirmed',
-                     'bg-orange-100 text-orange-900': order.status === 'processing',
-                     'bg-green-100 text-green-900': order.status === 'completed',
-                     'bg-red-100 text-red-900': order.status === 'cancelled'
-                   }">
-                {{ translateStatus(order.status) }}
-              </span>
-            </div>
-            <div class="text-sm font-sans text-white">{{ formatRelativeTime(order.created_at) }}</div>
+    <!-- Chargement -->
+    <div v-if="loading && !orders.length" class="grid grid-cols-1 lg:grid-cols-2 gap-3" aria-busy="true">
+      <div v-for="i in 4" :key="i" class="h-56 rounded-[2rem] bg-gray-100 animate-pulse"></div>
+    </div>
+
+    <!-- Erreur -->
+    <div v-else-if="loadError && !orders.length" class="rounded-[2rem] bg-[#FFECD8] px-6 py-10 text-center" role="alert">
+      <AlertTriangle class="w-10 h-10 text-[#C54E00] mx-auto" />
+      <h3 class="mt-3 text-lg font-black text-gray-900">Impossible de charger les commandes</h3>
+      <button type="button" class="mt-4 h-12 px-6 rounded-full bg-black text-white font-extrabold active:scale-[0.97] transition-all" @click="load()">Réessayer</button>
+    </div>
+
+    <!-- Rien à faire -->
+    <div v-else-if="!visible.length" class="rounded-[2rem] bg-gray-100 px-6 py-16 text-center">
+      <span class="w-16 h-16 mx-auto rounded-full bg-[#FB6A00] text-black flex items-center justify-center"><Check class="w-8 h-8" :stroke-width="3.5" /></span>
+      <h3 class="mt-4 text-xl font-black text-gray-900">Tout est à jour</h3>
+      <p class="mt-1 text-sm font-semibold text-gray-500">Les nouvelles commandes apparaissent ici toutes seules.</p>
+      <NuxtLink to="/staff/vendre" class="mt-5 inline-flex items-center gap-2 h-12 px-6 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all">
+        <Plus class="w-4 h-4" :stroke-width="3" /> Prendre une commande
+      </NuxtLink>
+    </div>
+
+    <!-- Les commandes, la plus ancienne d'abord -->
+    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+      <article
+        v-for="order in visible"
+        :key="order.id"
+        class="rounded-[2rem] bg-gray-100 p-4 sm:p-5 cursor-pointer active:scale-[0.99] transition-all"
+        :class="fresh.includes(order.id) ? 'ring-4 ring-[#FB6A00] animate-pulse' : ''"
+        @click="selectedId = order.id"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="inline-flex items-center h-11 px-5 rounded-full bg-black text-white text-lg font-black">{{ tableOf(order) }}</span>
+            <span v-if="order.tables?.type === 'VIP'" class="inline-flex items-center h-7 px-3 rounded-full bg-[#FB6A00] text-black text-xs font-black">VIP</span>
+            <span v-if="order.tables?.section_name" class="text-xs font-bold text-gray-500 truncate">{{ order.tables.section_name }}</span>
           </div>
-          
-          <!-- Order Body -->
-          <div class="p-6">
-            <!-- Items List -->
-            <div class="space-y-3 mb-6">
-              <div 
-                v-for="(item, index) in order.items.slice(0, 3)" 
-                :key="index"
-                class="flex justify-between text-sm"
-              >
-                <div class="text-gray-700 font-mono">{{ item.quantity }}× {{ item.name }} </div>
-                <span class="font-medium text-gray-900 font-mono">{{ formatPrice(item.unit_price * item.quantity) }}</span>
-              </div>
-              <div v-if="order.items.length > 3" class="text-center text-gray-400 text-xs py-2">
-                +{{ order.items.length - 3 }} article{{ order.items.length - 3 > 1 ? 's' : '' }} supplémentaire{{ order.items.length - 3 > 1 ? 's' : '' }}
-              </div>
-            </div>
-            
-            <!-- Total -->
-             <div class="my-1 flex ">
-               <span v-if="order.notes" class="text-gray-700 italic text-sm "> <FileText class="w-4 h-4 inline-block mr-1" /> {{ order.notes }}</span>
-             </div>
-            <div class="border-t border-gray-200 pt-4 flex justify-between items-center mb-6">
-              <span class="text-sm text-gray-500">Total</span>
-              <span class="text-2xl font-semibold text-gray-900">{{ formatPrice(order.total_amount) }}</span>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div class="space-y-2">
-              <!-- Main Action -->
-              <button 
-                v-if="order.status === 'pending'" 
-                @click.stop="updateOrderStatus(order.id, 'confirmed')"
-                class="w-full py-3 px-4 bg-gray-900 text-white rounded-2xl text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                Confirmer la commande
-              </button>
-              
-              <button 
-                v-else-if="order.status === 'confirmed'"
-                @click.stop="updateOrderStatus(order.id, 'processing')"
-                class="w-full py-3 px-4 bg-gray-900 text-white rounded-2xl text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                Commencer la préparation
-              </button>
-              
-              <button 
-                v-else-if="order.status === 'processing'"
-                @click.stop="updateOrderStatus(order.id, 'completed')"
-                class="w-full py-3 px-4 bg-gray-900 text-white rounded-2xl text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                Marquer comme terminée
-              </button>
-              
-              <div v-else-if="order.status === 'completed'" class="text-center py-3 text-sm text-gray-500 font-medium">
-                Commande terminée
-              </div>
-              
-              <!-- Cancel Button -->
-              <button 
-                v-if="order.status === 'pending' || order.status === 'confirmed'"
-                @click.stop="cancelOrder(order.id)"
-                class="w-full py-3 px-4 bg-gray-100 text-gray-900 rounded-2xl text-sm font-medium hover:bg-gray-200 transition-colors"
-              >
-                Annuler la commande
-              </button>
-            </div>
-          </div>
+          <span
+            class="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-black tabular-nums flex-shrink-0"
+            :class="urgency(order)"
+          >
+            <Clock class="w-4 h-4" :stroke-width="2.5" />
+            {{ ageLabel(order.created_at, now) }}
+          </span>
         </div>
-      </div>
-    </main>
+
+        <ul class="mt-3 space-y-1">
+          <li v-for="item in order.items.slice(0, 4)" :key="item.id" class="flex gap-2 text-[15px]">
+            <span class="font-black text-gray-900 tabular-nums w-8 flex-shrink-0">{{ item.quantity }}×</span>
+            <span class="font-bold text-gray-900 min-w-0 break-words">{{ item.name }}<span v-if="item.notes" class="block text-xs font-semibold text-[#C54E00]">{{ item.notes }}</span></span>
+          </li>
+          <li v-if="order.items.length > 4" class="pl-10 text-xs font-extrabold text-gray-500">+{{ order.items.length - 4 }} autre{{ order.items.length - 4 > 1 ? 's' : '' }}</li>
+        </ul>
+
+        <p v-if="order.notes" class="mt-3 rounded-3xl bg-[#FFECD8] px-4 py-2 text-sm font-bold text-[#7C2900] break-words line-clamp-2">{{ order.notes }}</p>
+
+        <div class="mt-4 flex items-center gap-2">
+          <div class="leading-tight min-w-0">
+            <p class="text-[11px] font-extrabold uppercase tracking-wide text-gray-500">{{ STATUS_LABEL[order.status] }}</p>
+            <p class="text-lg font-black text-gray-900 tabular-nums">{{ money(order.total_amount) }}</p>
+          </div>
+          <button
+            v-if="NEXT_STEP[order.status]"
+            type="button"
+            :disabled="busyId === order.id"
+            class="ml-auto h-14 px-6 rounded-full bg-black text-white text-sm font-black uppercase tracking-wide disabled:opacity-50 active:scale-[0.96] transition-all"
+            @click.stop="advance(order)"
+          >{{ busyId === order.id ? '…' : NEXT_STEP[order.status]!.label }}</button>
+        </div>
+      </article>
+    </div>
+
+    <OrderSheet :order="selected" @close="selectedId = null" @status="onSheetStatus" @print="printOrder" />
   </div>
 </template>
+
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { 
-  Clock, 
-  Search,
-  RefreshCw,
-  Loader2, 
-  AlertTriangle, 
-  ClipboardList, 
-  CheckCircle,
-  Coffee,
-  X,
-  MapPin,
-  Store,
-  Building,
-  Users,
-  FileText,
-} from 'lucide-vue-next'
-import { useSupabaseWrapper } from '~/composables/useSupabase'
-import { useCustomToast } from '~/composables/useToast'
-import { useEstablishment } from '~/composables/useEstablishment'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { AlertTriangle, Check, Clock, Plus } from 'lucide-vue-next'
+import OrderSheet from '~/components/staff/OrderSheet.vue'
 
-const { client: supabase } = useSupabaseWrapper()
-const { showToast } = useCustomToast()
-const { establishment, fetchEstablishmentByUserId } = useEstablishment()
+definePageMeta({ layout: 'staff' })
 
-// State
-const orders = ref<any[]>([])
-const isLoading = ref(true)
-const loadError = ref(false)
-const isRefreshing = ref(false)
-const searchQuery = ref('')
-const filterStatus = ref('all')
-const connectionStatus = ref<'connected' | 'disconnected'>('disconnected')
+const { staff, establishment, orders, loading, loadError, fresh, load, setStatus } = useStaffSpace()
 
-// Computed
-const connectionStatusText = computed(() => 
-  connectionStatus.value === 'connected' ? 'En ligne' : 'Hors ligne'
-)
+// Le temps qui passe : les durées et les couleurs d'urgence se mettent à jour sans recharger
+const now = ref(Date.now())
+let tick: ReturnType<typeof setInterval> | null = null
+onMounted(() => { tick = setInterval(() => { now.value = Date.now() }, 20000) })
+onBeforeUnmount(() => { if (tick) clearInterval(tick) })
 
-const statusFilters = [
-  { value: 'all', label: 'Toutes' },
-  { value: 'pending', label: 'En attente' },
-  { value: 'confirmed', label: 'Confirmées' },
-  { value: 'processing', label: 'En traitement' },
-  { value: 'completed', label: 'Terminées' }
-]
+const ACTIVE = ['pending', 'confirmed', 'processing']
+const queue = ref<string>('')
+// La cuisine arrive directement sur ce qu'elle doit préparer ; le reste sur tout ce qui est actif
+const queueKey = computed(() => queue.value || (staff.value?.role === 'kitchen' ? 'confirmed' : 'active'))
 
-const filteredOrders = computed(() => {
-  let filtered = orders.value
+const countOf = (status: string) => orders.value.filter(o => o.status === status).length
+const queues = computed(() => [
+  { key: 'active', label: 'Toutes', count: orders.value.filter(o => ACTIVE.includes(o.status)).length, alert: false },
+  { key: 'pending', label: 'À accepter', count: countOf('pending'), alert: true },
+  { key: 'confirmed', label: 'À préparer', count: countOf('confirmed'), alert: true },
+  { key: 'processing', label: 'En cours', count: countOf('processing'), alert: false }
+])
 
-  // Filter by status
-  if (filterStatus.value !== 'all') {
-    filtered = filtered.filter(order => order.status === filterStatus.value)
-  }
-  
-  // Filter by search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(order => 
-      order.orderNumber?.toLowerCase().includes(query) ||
-      order.table_number?.toString().includes(query) ||
-      order.items.some((item: any) => item.name.toLowerCase().includes(query))
-    )
-  }
-
-  return filtered
+const visible = computed(() => {
+  const wanted = queueKey.value === 'active' ? ACTIVE : [queueKey.value]
+  return orders.value
+    .filter(o => wanted.includes(o.status))
+    // La plus ancienne d'abord : premier arrivé, premier servi
+    .sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at))
 })
 
-// Methods
-const loadOrders = async () => {
-  isLoading.value = true
-  loadError.value = false
-  
-  try {
-    // Pour l'interface staff, récupérer l'établissement depuis la session staff
-    const currentStaff = await getCurrentStaff()
-    if (!currentStaff) {
-      throw new Error('Session du personnel non trouvée')
-    }
-    
-    // Charger l'établissement directement avec l'ID du staff
-    if (!establishment.value) {
-      const { data: establishmentData, error } = await supabase
-        .from('establishments')
-        .select('*')
-        .eq('id', currentStaff.establishment_id)
-        .single()
-      
-      if (error) throw error
-      establishment.value = establishmentData
-    }
-    
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        tables (
-          id,
-          table_number,
-          type,
-          section_name,
-          floor_level,
-          capacity,
-          location_description
-        ),
-        id,
-        table_number,
-        status,
-        total_amount,
-        payment_status,
-        notes,
-        created_at,
-        updated_at,
-        staff_id,
-        staff:staff_id (
-          id,
-          username
-        ),
-        items:order_items(
-          id,
-          quantity,
-          unit_price,
-          notes,
-          products(
-            id,
-            name,
-            description,
-            price
-          )
-        )
-      `)
-      .eq('establishment_id', establishment.value.id)
-      .order('created_at', { ascending: false })
-      .limit(50)
-    
-    if (error) throw error
-    
-    orders.value = data.map((order, index) => ({
-      ...order,
-      orderNumber: String(index + 1).padStart(3, '0'),
-      items: order.items.map((item: any) => ({
-        ...item,
-        name: item.products?.name || 'Produit inconnu',
-        productId: item.products?.id
-      }))
-    }))
-    
-    connectionStatus.value = 'connected'
-    
-    console.log('✅ Commandes chargées depuis l\'API:', orders.value.length)
-  } catch (error) {
-    console.error('Error loading orders:', error)
-    showToast.error('Erreur', 'Impossible de charger les commandes')
-    loadError.value = true
-  } finally {
-    isLoading.value = false
-  }
+const tableOf = (o: any) => {
+  const t = o.tables?.table_number || o.table_number
+  return t ? `Table ${t}` : 'À emporter'
 }
 
-const loadEstablishment = async () => {
-  try {
-    // Pour l'interface staff, utiliser la session PIN au lieu de Supabase Auth
-    const currentStaff = await getCurrentStaff()
-    if (!currentStaff) {
-      throw new Error('Session du personnel non trouvée')
-    }
-    
-    const { data: establishmentData, error } = await supabase
-      .from('establishments')
-      .select('*')
-      .eq('id', currentStaff.establishment_id)
-      .single()
-    
-    if (error) throw error
-    establishment.value = establishmentData
-  } catch (error) {
-    console.error('Error loading establishment:', error)
-    // Rediriger vers la page de connexion staff si pas de session
-    navigateTo('/auth/pin')
-  }
+// Couleur d'urgence : calme, puis orange, puis noir plein
+const urgency = (o: any) => {
+  const m = ageMinutes(o.created_at, now.value)
+  if (!ACTIVE.includes(o.status)) return 'bg-white text-gray-700'
+  if (m >= 20) return 'bg-black text-white'
+  if (m >= 10) return 'bg-[#FB6A00] text-black'
+  return 'bg-white text-gray-900'
 }
 
-const refreshOrders = async () => {
-  isRefreshing.value = true
-  await loadOrders()
-  isRefreshing.value = false
+const money = (v: number | string) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(Number(v) || 0)
+
+// Un appui = la commande avance
+const busyId = ref<string | null>(null)
+const advance = async (order: any) => {
+  const step = NEXT_STEP[order.status]
+  if (!step || busyId.value) return
+  busyId.value = order.id
+  await setStatus(order.id, step.to)
+  busyId.value = null
 }
 
-// Helper function to get current staff info (prioritizes PIN auth for staff interface)
-const getCurrentStaff = async () => {
-  try {
-    const staffSession = localStorage.getItem('staff_session')
-    if (staffSession) {
-      const sessionData = JSON.parse(staffSession)
-      if (sessionData.auth_type === 'pin') {
-        if (sessionData.token) {
-          // Le jeton est vérifié côté base : session valide, non expirée, compte toujours actif
-          const { data: staffData, error } = await (supabase as any).rpc('staff_session_info', {
-            p_token: sessionData.token
-          })
-          if (!error && staffData) return staffData
-        } else if (sessionData.staff_id) {
-          // Session sans jeton (fonctions SQL non installées) : ancienne vérification directe
-          const { data: staffData, error } = await supabase
-            .from('staff')
-            .select('id, username, role, establishment_id')
-            .eq('id', sessionData.staff_id)
-            .eq('is_active', true)
-            .maybeSingle()
-          if (!error && staffData) return staffData
-        }
-        console.warn('⚠️ Session du personnel expirée ou invalide')
-        localStorage.removeItem('staff_session')
-      }
-    }
-
-    return null
-  } catch (error) {
-    console.error('Error getting current staff:', error)
-    return null
-  }
+// Fiche détaillée en feuille
+const selectedId = ref<string | null>(null)
+const selected = computed(() => orders.value.find(o => o.id === selectedId.value) || null)
+const onSheetStatus = async ({ id, status }: { id: string, status: string }) => {
+  const ok = await setStatus(id, status)
+  if (ok && ['completed', 'cancelled'].includes(status)) selectedId.value = null
 }
 
-const updateOrderStatus = async (orderId: string, newStatus: string) => {
-  try {
-    // Récupérer l'ID du staff actuel (gère les deux types d'authentification)
-    const currentStaff = await getCurrentStaff()
-    if (!currentStaff) {
-      showToast.error('Erreur', 'Informations du personnel non trouvées')
-      return
-    }
-
-    const token = JSON.parse(localStorage.getItem('staff_session') || '{}').token
-
-    if (token) {
-      // La base vérifie la session, l'établissement et la transition de statut
-      const { data: updated, error } = await (supabase as any).rpc('staff_set_order_status', {
-        p_token: token,
-        p_order_id: orderId,
-        p_status: newStatus
-      })
-
-      if (error) throw error
-
-      if (!updated) {
-        showToast.error('Commande déjà mise à jour', 'Le statut de cette commande a changé')
-        await loadOrders() // Recharger pour voir l'état actuel
-        return
-      }
-    } else {
-      // Session sans jeton : ancienne mise à jour directe
-      const updateData: any = { status: newStatus, updated_at: new Date().toISOString() }
-      if (newStatus === 'confirmed' || newStatus === 'processing') {
-        updateData.staff_id = currentStaff.id
-      }
-      let expected = 'pending'
-      if (newStatus === 'processing') expected = 'confirmed'
-      else if (newStatus === 'completed') expected = 'processing'
-
-      const { data: rows, error } = await (supabase as any)
-        .from('orders')
-        .update(updateData)
-        .eq('id', orderId)
-        .eq('status', expected)
-        .select('id')
-
-      if (error) throw error
-
-      if (!rows || rows.length === 0) {
-        showToast.error('Commande déjà mise à jour', 'Le statut de cette commande a changé')
-        await loadOrders()
-        return
-      }
-    }
-
-    // Update local state
-    const orderIndex = orders.value.findIndex(order => order.id === orderId)
-    if (orderIndex !== -1) {
-      orders.value[orderIndex].status = newStatus
-      if (newStatus === 'confirmed' || newStatus === 'processing') {
-        orders.value[orderIndex].staff_id = currentStaff.id
-      }
-    }
-    
-    showToast.success('Succès', `Commande mise à jour: ${translateStatus(newStatus)}`)
-    
-    console.log(`✅ Statut mis à jour: Commande ${orderId} → ${newStatus}`)
-  } catch (err) {
-    console.error('Error updating order status:', err)
-    showToast.error('Erreur', 'Impossible de mettre à jour le statut')
-  }
+const printOrder = (order: any) => {
+  printTicket(order, establishment.value?.name || '')
 }
-
-const cancelOrder = async (orderId: string) => {
-  if (!confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) {
-    return
-  }
-  
-  try {
-    await updateOrderStatus(orderId, 'cancelled')
-    showToast.success('Commande annulée', 'La commande a été annulée avec succès')
-  } catch (err) {
-    console.error('Error cancelling order:', err)
-    showToast.error('Erreur', 'Impossible d\'annuler la commande')
-  }
-}
-
-// Une commande ne peut être annulée que si elle est en attente (pas encore acceptée)
-const canCancelOrder = (status: string) => {
-  return status === 'pending'
-}
-
-const canManageOrder = (order: any) => {
-  // Pour l'instant, on permet à tout le monde de gérer les commandes processing
-  // TODO: Dans le futur, on pourrait restreindre aux seuls agents qui l'ont prise
-  return true
-}
-
-const viewOrderDetails = (order: any) => {
-  navigateTo(`/staff/order-detail/${order.id}`)
-}
-
-// Utility functions
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF'
-  }).format(price)
-}
-
-const formatDateTime = (dateString: string) => {
-  if (!dateString) return '---'
-  const date = new Date(dateString)
-  if (isNaN(date.getTime())) return '---'
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
-}
-
-const translateStatus = (status: string) => {
-  const translations: any = {
-    'pending': 'En attente',
-    'confirmed': 'Confirmée',
-    'processing': 'En traitement',
-    'completed': 'Terminée',
-    'cancelled': 'Annulée'
-  }
-  
-  return translations[status] || 'Inconnu'
-}
-
-const formatRelativeTime = (dateString: string) => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-  const diffInMinutes = Math.floor(diffInSeconds / 60)
-  const diffInHours = Math.floor(diffInMinutes / 60)
-  const diffInDays = Math.floor(diffInHours / 24)
-  
-  if (diffInSeconds < 30) return 'À l\'instant'
-  if (diffInSeconds < 60) return 'il y a 1 min'
-  if (diffInMinutes < 60) return `il y a ${diffInMinutes} min`
-  if (diffInHours < 24) return `il y a ${diffInHours}h`
-  if (diffInDays < 7) return `il y a ${diffInDays}j`
-  if (diffInDays < 30) return `il y a ${Math.floor(diffInDays / 7)} sem`
-  if (diffInDays < 365) return `il y a ${Math.floor(diffInDays / 30)} mois`
-  return `il y a ${Math.floor(diffInDays / 365)} an`
-}
-
-const getStatusColor = (status: string) => {
-  const colors: any = {
-    'pending': {
-      badge: 'bg-yellow-100 text-yellow-800'
-    },
-    'confirmed': {
-      badge: 'bg-blue-100 text-blue-800'
-    },
-    'processing': {
-      badge: 'bg-orange-100 text-orange-800'
-    },
-    'completed': {
-      badge: 'bg-green-100 text-green-800'
-    }
-  }
-  
-  return colors[status] || colors.pending
-}
-
-const getStatusIcon = (status: string) => {
-  const icons = {
-    'pending': Clock,
-    'confirmed': CheckCircle,
-    'processing': Coffee,
-    'completed': CheckCircle
-  }
-  
-  return icons[status as keyof typeof icons] || Clock
-}
-
-// Realtime subscription
-let subscription: any = null
-
-const setupRealtimeConnection = () => {
-  if (!establishment.value?.id) return
-  
-  if (subscription) {
-    subscription.unsubscribe()
-  }
-  
-  subscription = supabase
-    .channel(`orders-${establishment.value.id}`)
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'orders',
-        filter: `establishment_id=eq.${establishment.value.id}`
-      },
-      (payload) => {
-        console.log('🔄 Mise à jour en temps réel:', payload)
-        loadOrders()
-        playNotificationSound()
-      }
-    )
-    .subscribe((status) => {
-      connectionStatus.value = status === 'SUBSCRIBED' ? 'connected' : 'disconnected'
-    })
-}
-
-const playNotificationSound = () => {
-  const audio = new Audio('/sounds/new-order.mp3')
-  audio.play().catch(() => {
-    // Gérer l'erreur silencieusement (les navigateurs peuvent bloquer l'autoplay)
-  })
-}
-// Lifecycle
-onMounted(async () => {
-  // Vérifier d'abord si on a une session staff valide
-  const currentStaff = await getCurrentStaff()
-  if (!currentStaff) {
-    console.warn('Aucune session staff trouvée, redirection vers login')
-    navigateTo('/auth/pin')
-    return
-  }
-  
-  await loadEstablishment()
-  await loadOrders()
-  setupRealtimeConnection()
-})
-
-onUnmounted(() => {
-  if (subscription) {
-    subscription.unsubscribe()
-  }
-})
-
-definePageMeta({
-  layout: 'staff',
-})
 </script>
-
-<style scoped>
-/* Soft Ticket Style Custom Styles */
-.font-mono {
-  font-family: 'Courier New', monospace;
-}
-
-/* Custom scrollbar */
-.overflow-x-auto::-webkit-scrollbar {
-  height: 4px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 2px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 2px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Soft hover effects */
-.hover\:-translate-y-1:hover {
-  transform: translateY(-2px);
-}
-
-/* Smooth transitions */
-* {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Soft shadows for tickets */
-.shadow-lg {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.shadow-sm {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-/* Twitter-style button hover effects */
-button:hover {
-  transform: translateY(-1px);
-}
-
-/* Filter buttons specific styles */
-.filter-btn {
-  position: relative;
-  overflow: hidden;
-}
-
-.filter-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
-}
-
-.filter-btn:hover::before {
-  left: 100%;
-}
-
-/* Active filter button animation */
-.filter-btn.active {
-  animation: pulse 0.3s ease-in-out;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-/* Responsive improvements */
-@media (max-width: 640px) {
-  .grid-cols-1 {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-  
-  .md\:grid-cols-2 {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-  
-  .text-2xl {
-    font-size: 1.25rem;
-  }
-}
-
-/* Animation for refresh button */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-</style>

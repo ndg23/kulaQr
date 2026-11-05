@@ -2,7 +2,7 @@
   <!-- Après création : le PIN généré n'est montré qu'ici -->
   <div v-if="createdPin" class="mx-auto max-w-2xl">
     <div class="rounded-[2rem] bg-white border border-gray-200 p-6 sm:p-10 text-center space-y-5">
-      <span class="mx-auto w-14 h-14 rounded-full bg-[#00E676] text-black flex items-center justify-center">
+      <span class="mx-auto w-14 h-14 rounded-full bg-[#FB6A00] text-black flex items-center justify-center">
         <Check class="w-7 h-7" :stroke-width="3" />
       </span>
       <div>

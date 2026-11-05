@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-dvh bg-white">
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-100">
       <div class="max-w-2xl mx-auto px-4 py-4">
@@ -70,13 +70,13 @@
             <button 
               @click="toggleStaffStatus(staff.id, !staff.is_active)"
               class="p-2 rounded-full"
-              :class="staff.is_active ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-50'"
+              :class="staff.is_active ? 'text-black hover:bg-gray-100' : 'text-gray-400 hover:bg-gray-50'"
             >
               <ToggleLeft class="w-5 h-5" />
             </button>
             <button 
               @click="deleteStaff(staff.id)"
-              class="p-2 text-red-600 hover:bg-red-50 rounded-full"
+              class="p-2 text-[#C54E00] hover:bg-[#FFECD8] rounded-full"
             >
               <Trash2 class="w-5 h-5" />
             </button>

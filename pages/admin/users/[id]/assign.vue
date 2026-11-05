@@ -60,7 +60,7 @@
           ]"
           @click="toggle(e.id)"
         >
-          <span class="w-10 h-10 rounded-full bg-[#2962FF] text-white flex items-center justify-center flex-shrink-0">
+          <span class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center flex-shrink-0">
             <Store class="w-5 h-5" :stroke-width="2.25" />
           </span>
           <span class="flex-1 min-w-0">

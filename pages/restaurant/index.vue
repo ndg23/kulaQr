@@ -1,5 +1,5 @@
 <template>
-    <div class="font-sans bg-white min-h-screen max-w-lg mx-auto pb-24">
+    <div class="font-sans bg-white min-h-dvh max-w-lg mx-auto pb-24">
       <ErrorMessage v-if="error" :message="error" />
       
       <RestaurantHeader :data="data" v-if="data" />

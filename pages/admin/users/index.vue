@@ -70,11 +70,11 @@
         <template #cell-is_active="{ item }">
           <span
             class="px-2 py-1 rounded-md text-xs font-medium inline-flex items-center whitespace-nowrap"
-            :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+            :class="item.is_active ? 'bg-gray-100 text-black' : 'bg-[#FFECD8] text-[#C54E00]'"
           >
             <div 
               class="w-1.5 h-1.5 rounded-full mr-1.5 flex-shrink-0"
-              :class="item.is_active ? 'bg-green-500' : 'bg-red-500'"
+              :class="item.is_active ? 'bg-[#FB6A00]' : 'bg-[#C54E00]'"
             />
             {{ item.is_active ? 'Actif' : 'Inactif' }}
           </span>
@@ -358,9 +358,9 @@ const getRoleColor = (role: string) => {
 
 const getRoleBadgeClass = (role: string) => {
   switch (role) {
-    case 'admin': return 'bg-purple-100 text-purple-800'
-    case 'manager': return 'bg-blue-100 text-blue-800'
-    case 'staff': return 'bg-green-100 text-green-800'
+    case 'admin': return 'bg-gray-100 text-black'
+    case 'manager': return 'bg-[#FFECD8] text-[#C54E00]'
+    case 'staff': return 'bg-gray-100 text-black'
     case 'owner': return 'bg-orange-100 text-orange-800'
     default: return 'bg-gray-100 text-gray-800'
   }
@@ -378,8 +378,8 @@ const getSubscriptionColor = (tier: string) => {
 const getSubscriptionBadgeClass = (tier: string) => {
   const classes: Record<string, string> = {
     'free': 'bg-gray-100 text-gray-800',
-    'premium': 'bg-purple-100 text-purple-800',
-    'pro': 'bg-blue-100 text-blue-800'
+    'premium': 'bg-gray-100 text-black',
+    'pro': 'bg-[#FFECD8] text-[#C54E00]'
   }
   return classes[tier] || 'bg-gray-100 text-gray-800'
 }

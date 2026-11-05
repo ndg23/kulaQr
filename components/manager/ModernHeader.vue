@@ -72,16 +72,16 @@ const route = useRoute()
 const nav = computed(() => managerNavForPath(`/manager/${route.params.slug}`, route.path))
 
 const statusClasses = computed(() => ({
-  success: 'bg-[#D6FBE6] text-[#00632F]',
-  warning: 'bg-[#FFF9C2] text-[#6B5B00]',
-  error: 'bg-[#FFE0F0] text-[#A10054]',
-  info: 'bg-[#E8EEFF] text-[#1741B8]'
+  success: 'bg-[#EDEAE7] text-black',
+  warning: 'bg-[#FFECD8] text-[#7C2900]',
+  error: 'bg-[#FFD4AD] text-[#7C2900]',
+  info: 'bg-[#EDEAE7] text-black'
 }[props.statusType]))
 
 const statusDotClasses = computed(() => ({
-  success: 'bg-[#00A650]',
-  warning: 'bg-[#C9A900]',
-  error: 'bg-[#FF007F]',
-  info: 'bg-[#2962FF]'
+  success: 'bg-black',
+  warning: 'bg-[#FD9542]',
+  error: 'bg-[#C54E00]',
+  info: 'bg-[#FB6A00]'
 }[props.statusType]))
 </script>

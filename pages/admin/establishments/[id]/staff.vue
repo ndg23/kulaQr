@@ -40,7 +40,7 @@
             type="button"
             :aria-label="`Retirer ${member.full_name || member.username}`"
             :disabled="removingId === member.id"
-            class="w-10 h-10 flex-shrink-0 rounded-full bg-white text-red-600 flex items-center justify-center hover:bg-red-50 active:scale-[0.95] transition-all disabled:opacity-50"
+            class="w-10 h-10 flex-shrink-0 rounded-full bg-white text-[#C54E00] flex items-center justify-center hover:bg-[#FFECD8] active:scale-[0.95] transition-all disabled:opacity-50"
             @click="removeStaff(member)"
           >
             <X class="w-4 h-4" :stroke-width="2.5" />

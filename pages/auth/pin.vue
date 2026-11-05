@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-dvh bg-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <img src="~/assets/icon/logo.png" alt="Logo" class="mx-auto h-12 w-auto" />
       <h2 class="mt-6 text-center text-2xl font-bold text-gray-900">
@@ -8,11 +8,11 @@
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div class="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
+      <div class="bg-white py-8 px-4 sm:px-10">
         <!-- Error message -->
         <div 
           v-if="error" 
-          class="mb-6 p-3 bg-red-50 border border-red-100 text-red-700 text-sm rounded-md"
+          class="mb-6 px-4 py-3 bg-[#FFD4AD] text-[#7C2900] font-bold text-sm rounded-3xl" role="alert"
         >
           {{ error }}
         </div>
@@ -44,7 +44,7 @@
                 type="password"
                 inputmode="numeric"
                 maxlength="1"
-                class="block w-1/4 h-12 text-center text-xl font-medium border border-gray-300 rounded-md focus:outline-none focus:ring-0 focus:ring-- focus:border-red-500"
+                class="block w-1/4 h-14 text-center text-xl font-black bg-gray-100 border-2 border-transparent rounded-full focus:outline-none focus:border-[#FB6A00]"
                 @input="onPinDigitInput(index)"
                 @keydown="onPinDigitKeydown($event, index)"
                 @focus="$event.target.select()"
@@ -57,16 +57,16 @@
             <button
               type="submit"
               :disabled="loading || !isPinComplete || !username"
-              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-black hover:bg-gray-800 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full h-14 flex items-center justify-center rounded-full text-[17px] font-black text-black bg-[#FB6A00] hover:bg-[#FD9542] active:scale-[0.97] transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="loading" class="inline-block h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
               <span>Se connecter</span>
             </button>
           </div>
           
-          <div class="text-center mt-4 border p-3 rounded-md bg-gray-50 flex items-center justify-center">
+          <div class="text-center mt-4 h-12 rounded-full bg-gray-100 flex items-center justify-center">
 <ArrowLeft class="w-4 h-4 inline-block mr-2" />
-            <NuxtLink to="/auth/login" class="text-sm text-blue-500 hover:text-blue-900">
+            <NuxtLink to="/auth/login" class="text-sm font-bold text-gray-900 hover:underline">
               Retourner à la connexion standard
             </NuxtLink>
           </div>

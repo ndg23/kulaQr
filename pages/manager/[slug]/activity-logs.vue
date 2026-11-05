@@ -86,8 +86,8 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="h-10 w-10 flex-shrink-0">
-                      <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                        <User class="h-5 w-5 text-green-900" />
+                      <div class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                        <User class="h-5 w-5 text-black" />
                       </div>
                     </div>
                     <div class="ml-3">
@@ -278,11 +278,11 @@
   
   const getActionClass = (action) => {
     const classes = {
-      login: 'bg-green-100 text-green-900',
+      login: 'bg-gray-100 text-black',
       logout: 'bg-gray-100 text-gray-900',
-      order_created: 'bg-blue-100 text-blue-900',
+      order_created: 'bg-[#FFECD8] text-[#C54E00]',
       order_updated: 'bg-yellow-100 text-yellow-900',
-      order_completed: 'bg-purple-100 text-purple-900'
+      order_completed: 'bg-gray-100 text-black'
     }
     return classes[action] || 'bg-gray-100 text-gray-800'
   }

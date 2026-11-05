@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 font-sans antialiased overflow-hidden">
+  <div class="min-h-dvh bg-gray-50 font-sans antialiased overflow-hidden">
     <NuxtLayout>
       <NuxtPage />
       <CustomToast />

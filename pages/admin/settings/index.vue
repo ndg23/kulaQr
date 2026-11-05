@@ -55,8 +55,8 @@
       <div class="bg-white rounded-[2rem] border border-gray-100 overflow-hidden shadow-sm">
         <div class="p-6 border-b border-gray-100">
           <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
-              <Settings class="w-6 h-6 text-blue-500" />
+            <div class="w-12 h-12 rounded-2xl bg-[#FFECD8] flex items-center justify-center">
+              <Settings class="w-6 h-6 text-[#C54E00]" />
             </div>
             <h2 class="text-xl font-semibold text-gray-900">Système</h2>
           </div>

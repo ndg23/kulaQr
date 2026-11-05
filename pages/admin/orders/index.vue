@@ -50,7 +50,7 @@
               v-model="searchQuery"
               type="text"
               placeholder="Rechercher par ID, table, établissement..."
-              class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+              class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:border-[#FB6A00] focus:ring-2 focus:ring-[#FB6A00]/10 transition-all"
             />
           </div>
         </div>
@@ -58,7 +58,7 @@
         <div>
           <select
             v-model="filterEstablishment"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#FB6A00] focus:ring-2 focus:ring-[#FB6A00]/10 transition-all"
           >
             <option value="">Tous les établissements</option>
             <option v-for="est in establishments" :key="est.id" :value="est.id">
@@ -70,7 +70,7 @@
         <div>
           <select
             v-model="filterPaymentStatus"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#FB6A00] focus:ring-2 focus:ring-[#FB6A00]/10 transition-all"
           >
             <option value="">Tous les paiements</option>
             <option value="unpaid">Non payé</option>
@@ -155,8 +155,8 @@
                 <span
                   class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium"
                   :class="{
-                    'bg-green-50 text-green-700 border border-green-200': order.payment_status === 'paid',
-                    'bg-red-50 text-red-700 border border-red-200': order.payment_status === 'unpaid'
+                    'bg-gray-100 text-black border border-gray-100': order.payment_status === 'paid',
+                    'bg-[#FFECD8] text-[#C54E00] border border-[#FFD4AD]': order.payment_status === 'unpaid'
                   }"
                 >
                   {{ order.payment_status === 'paid' ? 'Payé' : 'Non payé' }}
@@ -169,7 +169,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <NuxtLink
                   :to="`/admin/orders/${order.id}`"
-                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-[#C54E00] hover:text-[#C54E00] hover:bg-[#FFECD8] rounded-lg transition-colors"
                 >
                   <Eye class="w-4 h-4" />
                   Voir
@@ -263,9 +263,9 @@ const itemsPerPage = 20
 const orderStatuses = [
   { value: 'all', label: 'Toutes', icon: ShoppingBag, color: 'text-gray-500' },
   { value: 'pending', label: 'En attente', icon: Clock, color: 'text-yellow-500' },
-  { value: 'processing', label: 'En cours', icon: Package, color: 'text-blue-500' },
-  { value: 'ready', label: 'Prêtes', icon: Truck, color: 'text-purple-500' },
-  { value: 'completed', label: 'Terminées', icon: CheckCircle, color: 'text-green-500' }
+  { value: 'processing', label: 'En cours', icon: Package, color: 'text-[#C54E00]' },
+  { value: 'ready', label: 'Prêtes', icon: Truck, color: 'text-black' },
+  { value: 'completed', label: 'Terminées', icon: CheckCircle, color: 'text-black' }
 ]
 
 // Load orders
@@ -377,10 +377,10 @@ const getStatusCount = (status: string) => {
 const getStatusBadgeClass = (status: string) => {
   const classes: Record<string, string> = {
     pending: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
-    processing: 'bg-blue-50 text-blue-700 border border-blue-200',
-    ready: 'bg-purple-50 text-purple-700 border border-purple-200',
-    completed: 'bg-green-50 text-green-700 border border-green-200',
-    cancelled: 'bg-red-50 text-red-700 border border-red-200'
+    processing: 'bg-[#FFECD8] text-[#C54E00] border border-[#FFD4AD]',
+    ready: 'bg-gray-100 text-black border border-gray-100',
+    completed: 'bg-gray-100 text-black border border-gray-100',
+    cancelled: 'bg-[#FFECD8] text-[#C54E00] border border-[#FFD4AD]'
   }
   return classes[status] || 'bg-gray-50 text-gray-700 border border-gray-200'
 }

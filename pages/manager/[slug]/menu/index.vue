@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <!-- Modern Header -->
+  <div class="space-y-4 sm:space-y-6">
     <ManagerModernHeader
       title="Menu"
       subtitle="Gérez vos produits et catégories"
@@ -10,199 +9,144 @@
         icon: Plus,
         action: openAddProduct
       }"
-    
     />
 
-    <!-- Search Bar -->
-    <!-- <div class="max-w-7xl mx-auto px-8 py-6">
-      <div class="relative">
-        <Search class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-              <input
+    <!-- La grande carte : les produits du menu -->
+    <HeroCard
+      label="Produits"
+      :value="products.length"
+      :hint="`${categories.length} catégorie${categories.length > 1 ? 's' : ''}`"
+      :icon="UtensilsCrossed"
+      :chips="[
+        { label: 'Actifs', value: quickStats[2].value },
+        { label: 'Prix moyen', value: quickStats[3].value }
+      ]"
+    />
+
+    <main class="space-y-4">
+      <!-- Recherche et catégories -->
+      <div class="relative max-w-md">
+        <Search class="w-5 h-5 text-gray-400 absolute left-5 top-1/2 -translate-y-1/2" />
+        <input
           v-model="search"
-                type="text"
-                placeholder="Rechercher un produit..."
-          class="w-full pl-12 pr-6 py-4 bg-white border border-gray-200 rounded-2xl text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+          type="search"
+          placeholder="Rechercher un produit"
+          class="w-full h-12 pl-12 pr-5 rounded-full bg-gray-100 border-0 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
+          @input="handleSearch"
         />
       </div>
-    </div> -->
 
-    <main>
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <div
-          v-for="stat in quickStats"
-          :key="stat.name"
-          class="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
-        >
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center">
-              <component :is="stat.icon" class="w-6 h-6 text-gray-600" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
-              <p class="text-sm text-gray-500 mt-1">{{ stat.name }}</p>
-            </div>
-          </div>
-        </div>
+      <div v-if="categories.length" class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="tablist" aria-label="Catégories">
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="activeCategory === 'all'"
+          class="h-10 px-4 rounded-full text-sm font-extrabold whitespace-nowrap flex-shrink-0 active:scale-[0.97] transition-all"
+          :class="activeCategory === 'all' ? 'bg-black text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'"
+          @click="activeCategory = 'all'"
+        >Tout</button>
+        <button
+          v-for="category in categories"
+          :key="category.id"
+          type="button"
+          role="tab"
+          :aria-selected="activeCategory === category.id"
+          class="h-10 px-4 rounded-full text-sm font-extrabold whitespace-nowrap flex-shrink-0 active:scale-[0.97] transition-all"
+          :class="activeCategory === category.id ? 'bg-black text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'"
+          @click="activeCategory = category.id"
+        >{{ category.name }}</button>
       </div>
 
-      <!-- Filters -->
-      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-        <div class="flex flex-wrap gap-4 items-center">
-          <div class="flex items-center gap-2">
-            <List class="w-5 h-5 text-gray-400" />
-            <span class="text-sm font-medium text-gray-700">Filtrer par:</span>
-          </div>
-
-          <select
-            v-model="activeCategory"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="all">Toutes les catégories</option>
-            <option
-              v-for="category in categories"
-              :key="category.id"
-              :value="category.id"
-            >
-              {{ category.name }}
-            </option>
-          </select>
-
-          <div class="relative flex-1 max-w-sm">
-            <Search class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Rechercher un produit..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              @input="handleSearch"
-            />
-          </div>
-        </div>
+      <!-- Chargement -->
+      <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4" aria-busy="true">
+        <div v-for="i in 8" :key="i" class="rounded-[2rem] bg-gray-100 animate-pulse" style="aspect-ratio: 4 / 5"></div>
       </div>
 
-      <!-- Products Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <!-- Loading State -->
-        <div v-if="loading" class="col-span-full flex flex-col items-center justify-center py-20">
-          <div class="w-16 h-16 relative">
-            <div class="w-16 h-16 bg-gray-100 rounded-full animate-pulse"></div>
-            <div class="w-8 h-8 text-gray-400 animate-spin absolute inset-0 m-auto" />
-          </div>
-          <p class="text-sm text-gray-500 mt-4">Chargement...</p>
-        </div>
+      <!-- Vide -->
+      <div v-else-if="filteredProducts.length === 0" class="rounded-[2rem] bg-gray-100 px-6 py-14 text-center">
+        <Search class="w-10 h-10 text-gray-400 mx-auto" />
+        <h3 class="mt-3 text-lg font-black text-gray-900">Aucun produit trouvé</h3>
+        <p class="mt-1 text-sm font-semibold text-gray-500">
+          {{ search ? 'Aucun produit ne correspond à votre recherche.' : 'Aucun produit dans cette catégorie.' }}
+        </p>
+        <button
+          type="button"
+          class="mt-5 h-12 px-6 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all"
+          @click="openAddProduct"
+        >Ajouter un produit</button>
+      </div>
 
-        <!-- Empty State -->
-        <div v-else-if="filteredProducts.length === 0" class="col-span-full text-center py-16">
-          <div class="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <Search class="w-8 h-8 text-gray-400" />
-          </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun produit trouvé</h3>
-          <p class="text-gray-500 mb-6">
-            {{ search ? "Aucun produit ne correspond à votre recherche." : "Aucun produit dans cette catégorie." }}
-          </p>
-          <button
-            @click="openAddProduct"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
-          >
-            Ajouter un produit
-          </button>
-        </div>
-
-        <!-- Product Cards -->
-        <div
+      <!-- Produits -->
+      <div v-else class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <article
           v-for="product in filteredProducts"
           :key="product.id"
-          class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group"
+          class="rounded-[2rem] bg-gray-100 overflow-hidden flex flex-col"
+          :class="product.is_available ? '' : 'opacity-70'"
         >
-          <!-- Product Image -->
-          <div class="relative aspect-[4/3] overflow-hidden">
+          <div class="relative bg-white" style="aspect-ratio: 4 / 3">
             <img
               :src="product.image_url || '/images/product-empty.png'"
               :alt="product.name"
-              class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+              class="absolute inset-0 w-full h-full object-contain"
             />
-  <!-- Availability Toggle -->
-  <div class="absolute top-3 right-3">
-    <button
-      :class="[
-        'relative inline-flex h-[31px] w-[51px] items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
-        product.is_available ? 'bg-green-500' : 'bg-gray-300'
-      ]"
-      role="switch"
-      :aria-checked="product.is_available"
-      @click="updateAvailability(product, !product.is_available)"
-    >
-      <span
-        :class="[
-          'inline-block h-[27px] w-[27px] transform rounded-full bg-white shadow-lg transition-transform duration-200 ease-in-out',
-          product.is_available ? 'translate-x-[22px]' : 'translate-x-[2px]'
-        ]"
-      />
-    </button>
-  </div>
-            <!-- Status Badge -->
-            <div class="absolute top-3 left-3">
+            <span
+              class="absolute top-3 left-3 inline-flex items-center h-7 px-3 rounded-full text-xs font-extrabold"
+              :class="product.is_available ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'"
+            >{{ product.is_available ? 'Disponible' : 'Indisponible' }}</span>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="product.is_available"
+              :aria-label="`Disponibilité de ${product.name}`"
+              class="absolute top-3 right-3 inline-flex h-[31px] w-[51px] items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+              :class="product.is_available ? 'bg-[#FB6A00]' : 'bg-gray-300'"
+              @click="updateAvailability(product, !product.is_available)"
+            >
               <span
-                class="px-2 py-1 text-xs font-medium rounded-full"
-                :class="product.is_available
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-gray-100 text-gray-600'"
-              >
-                {{ product.is_available ? 'Disponible' : 'Indisponible' }}
-              </span>
-            </div>
+                class="inline-block h-[27px] w-[27px] transform rounded-full bg-white shadow transition-transform duration-200"
+                :class="product.is_available ? 'translate-x-[22px]' : 'translate-x-[2px]'"
+              />
+            </button>
           </div>
 
-          <!-- Product Info -->
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-2">
-              <div class="flex-1">
-                <h3 class="font-semibold text-gray-900 text-lg leading-tight mb-1">
-                  {{ product.name }}
-                </h3>
-                <p class="text-sm text-gray-500">
-                  {{ getCategoryName(product.category_id) }}
-                </p>
+          <div class="p-4 flex flex-col gap-3 flex-1">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <h3 class="font-black text-gray-900 leading-tight break-words">{{ product.name }}</h3>
+                <p class="text-xs font-semibold text-gray-500 truncate">{{ getCategoryName(product.category_id) }}</p>
               </div>
-              <div class="text-right ml-2">
-                <p class="font-bold text-lg text-gray-900">
-                  {{ formatPrice(product.price) }}
-                </p>
-              </div>
+              <span class="inline-flex items-center h-8 px-3 rounded-full bg-[#FB6A00] text-black text-sm font-black tabular-nums flex-shrink-0">{{ formatPrice(product.price) }}</span>
             </div>
 
-            <!-- Product Description -->
-            <p v-if="product.description" class="text-sm text-gray-600 mb-4 line-clamp-2">
-              {{ product.description }}
-            </p>
+            <p v-if="product.description" class="text-sm font-medium text-gray-600 line-clamp-2">{{ product.description }}</p>
 
-            <!-- Action Buttons -->
-            <div class="flex gap-2">
+            <div class="mt-auto flex gap-2">
               <button
+                type="button"
+                class="flex-1 h-11 inline-flex items-center justify-center gap-2 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all"
                 @click="editProduct(product)"
-                class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-200"
               >
-                <Pencil class="w-4 h-4" />
-                Modifier
+                <Pencil class="w-4 h-4" :stroke-width="2.5" /> Modifier
               </button>
               <button
+                type="button"
+                :aria-label="`Supprimer ${product.name}`"
+                class="w-11 h-11 flex-shrink-0 inline-flex items-center justify-center rounded-full bg-white text-gray-500 hover:text-[#C54E00] active:scale-[0.92] transition-all"
                 @click="confirmDeleteProduct(product)"
-                class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors duration-200"
               >
-                <Trash2 class="w-4 h-4" />
-                Supprimer
+                <Trash2 class="w-4 h-4" :stroke-width="2.5" />
               </button>
             </div>
           </div>
-        </div>
+        </article>
       </div>
     </main>
-
-      </div>
+  </div>
 </template>
 
 <script setup lang="ts">
+import HeroCard from '~/components/ui/HeroCard.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import {
   Plus, UtensilsCrossed, Store, TrendingUp, Search, Pencil, List, Menu as MenuIcon, Trash2
@@ -394,79 +338,3 @@ definePageMeta({
   layout: 'manager'
 })
 </script>
-
-<style scoped>
-/* Smooth element appearance animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.grid > div {
-  animation: fadeInUp 0.4s ease-out;
-  animation-fill-mode: both;
-}
-
-.grid > div:nth-child(1) { animation-delay: 0.05s; }
-.grid > div:nth-child(2) { animation-delay: 0.1s; }
-.grid > div:nth-child(3) { animation-delay: 0.15s; }
-.grid > div:nth-child(4) { animation-delay: 0.2s; }
-.grid > div:nth-child(5) { animation-delay: 0.25s; }
-.grid > div:nth-child(6) { animation-delay: 0.3s; }
-.grid > div:nth-child(7) { animation-delay: 0.35s; }
-.grid > div:nth-child(8) { animation-delay: 0.4s; }
-.grid > div:nth-child(9) { animation-delay: 0.45s; }
-.grid > div:nth-child(10) { animation-delay: 0.5s; }
-.grid > div:nth-child(11) { animation-delay: 0.55s; }
-.grid > div:nth-child(12) { animation-delay: 0.6s; }
-
-/* Enhanced hover effects */
-.ManagerModernCard {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.ManagerModernCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Improved focus states */
-input:focus, button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Better scrollbar styling */
-.overflow-x-auto::-webkit-scrollbar {
-  height: 6px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Line clamp utility */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
-  overflow: hidden;
-}
-</style> 

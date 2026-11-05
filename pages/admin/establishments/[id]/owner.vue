@@ -81,7 +81,7 @@
         </button>
       </div>
 
-      <p v-if="errors.owner" class="text-sm font-semibold text-red-600 px-1">{{ errors.owner }}</p>
+      <p v-if="errors.owner" class="text-sm font-semibold text-[#C54E00] px-1">{{ errors.owner }}</p>
     </div>
 
     <template v-else>

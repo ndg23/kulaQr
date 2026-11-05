@@ -2,8 +2,9 @@
 // Chaque ton fournit : un aplat (pastille d'icône, bouton principal), une teinte douce (fond de tuile),
 // une couleur de barre de graphique. Les classes sont écrites en entier pour que Tailwind les détecte.
 //
-// Encre sur aplat : noir sur jaune, vert, orange, rose ; blanc sur bleu et violet (jamais blanc sur rose,
-// jamais noir sur bleu ou violet). Chaque rapport de contraste est ≥ 4,5.
+// Charte Kula : orange (#FB6A00) et noir. Les noms de tons restent ceux de l'ancienne palette pour ne pas toucher
+// aux pages ; chacun pointe maintenant vers une nuance d'orange ou le noir.
+// Encre sur aplat : noir sur orange clair et vif, blanc sur orange foncé et noir. Chaque rapport de contraste est ≥ 4,5.
 
 export type Tone = 'yellow' | 'blue' | 'pink' | 'green' | 'violet' | 'orange' | 'black'
 
@@ -20,40 +21,40 @@ export interface ToneStyle {
 
 export const TONES: Record<Tone, ToneStyle> = {
   yellow: {
-    hex: '#FFEA00',
-    solid: 'bg-[#FFEA00] text-black',
-    tint: 'bg-[#FFF9C2] dark:bg-[#FFEA00]/15',
-    bar: 'bg-[#FFEA00]'
+    hex: '#FB6A00',
+    solid: 'bg-[#FB6A00] text-black',
+    tint: 'bg-[#FFECD8] dark:bg-[#FB6A00]/15',
+    bar: 'bg-[#FB6A00]'
   },
   blue: {
-    hex: '#2962FF',
-    solid: 'bg-[#2962FF] text-white',
-    tint: 'bg-[#E8EEFF] dark:bg-[#2962FF]/20',
-    bar: 'bg-[#2962FF]'
+    hex: '#1A1A1A',
+    solid: 'bg-[#1A1A1A] text-white',
+    tint: 'bg-[#EDEAE7] dark:bg-white/10',
+    bar: 'bg-[#1A1A1A] dark:bg-white'
   },
   pink: {
-    hex: '#FF007F',
-    solid: 'bg-[#FF007F] text-black',
-    tint: 'bg-[#FFE0F0] dark:bg-[#FF007F]/20',
-    bar: 'bg-[#FF007F]'
+    hex: '#C54E00',
+    solid: 'bg-[#C54E00] text-white',
+    tint: 'bg-[#FFD4AD] dark:bg-[#C54E00]/25',
+    bar: 'bg-[#C54E00]'
   },
   green: {
-    hex: '#00E676',
-    solid: 'bg-[#00E676] text-black',
-    tint: 'bg-[#D6FBE6] dark:bg-[#00E676]/15',
-    bar: 'bg-[#00E676]'
+    hex: '#FFB77A',
+    solid: 'bg-[#FFB77A] text-black',
+    tint: 'bg-[#FFF8F0] dark:bg-[#FFB77A]/15',
+    bar: 'bg-[#FFB77A]'
   },
   violet: {
-    hex: '#7050FF',
-    solid: 'bg-[#7050FF] text-white',
-    tint: 'bg-[#EFEAFF] dark:bg-[#7050FF]/20',
-    bar: 'bg-[#7050FF]'
+    hex: '#7C2900',
+    solid: 'bg-[#7C2900] text-white',
+    tint: 'bg-[#FFECD8] dark:bg-[#7C2900]/30',
+    bar: 'bg-[#7C2900]'
   },
   orange: {
-    hex: '#FF7A00',
-    solid: 'bg-[#FF7A00] text-black',
-    tint: 'bg-[#FFEBD6] dark:bg-[#FF7A00]/20',
-    bar: 'bg-[#FF7A00]'
+    hex: '#FD9542',
+    solid: 'bg-[#FD9542] text-black',
+    tint: 'bg-[#FFECD8] dark:bg-[#FD9542]/20',
+    bar: 'bg-[#FD9542]'
   },
   black: {
     hex: '#000000',
@@ -67,5 +68,5 @@ export const TONES: Record<Tone, ToneStyle> = {
 export const toneOf = (tone?: Tone | string | null): ToneStyle => TONES[(tone as Tone) || 'black'] || TONES.black
 
 // Tons utilisés à tour de rôle pour des tuiles de chiffres qui n'ont pas de couleur propre.
-const CYCLE: Tone[] = ['blue', 'green', 'violet', 'orange', 'pink', 'yellow']
+const CYCLE: Tone[] = ['yellow', 'blue', 'orange', 'pink', 'black', 'green']
 export const cycleTone = (index: number): Tone => CYCLE[index % CYCLE.length]

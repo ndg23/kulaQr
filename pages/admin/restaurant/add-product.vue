@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="min-h-dvh bg-gray-50 py-8">
     <div class="max-w-lg mx-auto px-4">
       <div class="bg-white rounded-lg shadow p-6">
         <!-- En-tête -->
@@ -25,7 +25,7 @@
               :class="[
                 'px-4 py-2 rounded-full text-sm',
                 form.categoryId === type.id 
-                  ? 'bg-blue-500 text-white' 
+                  ? 'bg-[#FB6A00] text-black' 
                   : 'bg-gray-100 text-gray-700'
               ]"
             >
@@ -80,7 +80,7 @@
           <div class="flex gap-3 pt-4">
             <button 
               type="submit"
-              class="flex-1 bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600"
+              class="flex-1 bg-[#FB6A00] text-black py-3 rounded-lg font-medium hover:bg-[#FB6A00]"
             >
               Ajouter au menu
             </button>

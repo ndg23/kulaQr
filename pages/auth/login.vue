@@ -1,5 +1,5 @@
 <template>
- <div class="min-h-screen bg-white flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-y-auto">
+ <div class="min-h-dvh bg-white flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-y-auto">
     <div class="w-full max-w-[400px] py-4 sm:py-0">
       <!-- Success Alert -->
       <transition
@@ -12,11 +12,11 @@
       >
         <div 
           v-if="route.query.registered"
-          class="mb-6 p-4 rounded-3xl bg-green-50 border border-green-200"
+          class="mb-6 p-4 rounded-3xl bg-[#FFECD8]"
         >
           <div class="flex items-start gap-3">
-            <CheckCircle class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-            <p class="text-sm text-green-900 font-medium">
+            <CheckCircle class="w-5 h-5 text-[#FB6A00] mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-black font-medium">
               Compte créé avec succès ! Un email de confirmation a été envoyé à 
               <span class="font-semibold">{{ route.query.email }}</span>
             </p>
@@ -85,9 +85,9 @@
           >
             <div 
               v-if="error"
-              class="px-5 py-4 rounded-3xl bg-red-50 border border-red-200"
+              class="px-5 py-4 rounded-3xl bg-[#FFD4AD]" role="alert"
             >
-              <p class="text-sm text-red-900 font-medium">{{ error }}</p>
+              <p class="text-sm text-[#7C2900] font-bold">{{ error }}</p>
             </div>
           </transition>
 
@@ -133,7 +133,7 @@
           <!-- Submit Button -->
           <button
             type="submit"
-            class="w-full h-14 bg-gray-900 text-white rounded-full text-[17px] font-bold hover:bg-gray-800 active:scale-[0.97] transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-900 disabled:active:scale-100"
+            class="w-full h-14 bg-[#FB6A00] text-black rounded-full text-[17px] font-black hover:bg-[#FD9542] active:scale-[0.97] transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
             :disabled="loading"
           >
             <span v-if="!loading">Suivant</span>
@@ -156,7 +156,7 @@
             Vous n'avez pas de compte ?
             <NuxtLink 
               to="/auth/register" 
-              class="text-gray-900 underline font-bold ml-1"
+              class="text-[#C54E00] underline font-bold ml-1"
             >
               S'inscrire
             </NuxtLink>
@@ -168,7 +168,7 @@
       <div class="mt-8 pt-6 border-t border-gray-200">
         <NuxtLink 
           to="/auth/pin"
-          class="flex items-center justify-center gap-2 h-12 rounded-full bg-gray-100 text-[15px] text-gray-900 hover:bg-gray-200 transition-colors"
+          class="flex items-center justify-center gap-2 h-12 rounded-full bg-black text-[15px] text-white hover:bg-gray-800 transition-colors"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>

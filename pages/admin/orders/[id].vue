@@ -82,7 +82,7 @@
           
           <div v-if="establishment">
             <div class="flex items-start gap-4 mb-4">
-              <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center flex-shrink-0">
+              <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-[#FB6A00] to-[#FB6A00] flex items-center justify-center flex-shrink-0">
                 <Store class="w-8 h-8 text-white" />
               </div>
               <div class="flex-1">
@@ -92,7 +92,7 @@
                   <span
                     class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold"
                     :class="{
-                      'bg-green-50 text-green-700 border border-green-200': establishment.is_active,
+                      'bg-gray-100 text-black border border-gray-100': establishment.is_active,
                       'bg-gray-50 text-gray-600 border border-gray-200': !establishment.is_active
                     }"
                   >
@@ -100,7 +100,7 @@
                   </span>
                   <NuxtLink
                     :to="`/admin/establishments/${establishment.id}`"
-                    class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    class="text-sm text-[#C54E00] hover:text-[#C54E00] font-medium"
                   >
                     Voir l'établissement →
                   </NuxtLink>
@@ -120,13 +120,13 @@
                     <span
                       class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
                       :class="{
-                        'bg-green-50 text-green-700 border border-green-200': owner.is_active,
-                        'bg-red-50 text-red-700 border border-red-200': !owner.is_active
+                        'bg-gray-100 text-black border border-gray-100': owner.is_active,
+                        'bg-[#FFECD8] text-[#C54E00] border border-[#FFD4AD]': !owner.is_active
                       }"
                     >
                       <div 
                         class="w-1.5 h-1.5 rounded-full mr-1.5"
-                        :class="owner.is_active ? 'bg-green-500' : 'bg-red-500'"
+                        :class="owner.is_active ? 'bg-[#FB6A00]' : 'bg-[#C54E00]'"
                       />
                       {{ owner.is_active ? 'Actif' : 'Bloqué' }}
                     </span>
@@ -135,12 +135,12 @@
                   <p class="text-xs text-gray-500">{{ owner.email }}</p>
                   
                   <!-- Warning if owner is blocked -->
-                  <div v-if="!owner.is_active" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div v-if="!owner.is_active" class="mt-3 p-3 bg-[#FFECD8] border border-[#FFD4AD] rounded-lg">
                     <div class="flex items-start gap-2">
-                      <AlertCircle class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                      <AlertCircle class="w-4 h-4 text-[#C54E00] flex-shrink-0 mt-0.5" />
                       <div>
-                        <p class="text-xs font-semibold text-red-900">Propriétaire bloqué</p>
-                        <p class="text-xs text-red-700 mt-1">
+                        <p class="text-xs font-semibold text-[#C54E00]">Propriétaire bloqué</p>
+                        <p class="text-xs text-[#C54E00] mt-1">
                           Cet établissement ne peut plus recevoir de nouvelles commandes. 
                           Les commandes en attente ont été automatiquement annulées.
                         </p>
@@ -149,10 +149,10 @@
                   </div>
 
                   <!-- Info if both are active -->
-                  <div v-else-if="owner.is_active && establishment.is_active" class="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div v-else-if="owner.is_active && establishment.is_active" class="mt-3 p-3 bg-gray-100 border border-gray-100 rounded-lg">
                     <div class="flex items-start gap-2">
-                      <CheckCircle class="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                      <p class="text-xs text-green-700">
+                      <CheckCircle class="w-4 h-4 text-black flex-shrink-0 mt-0.5" />
+                      <p class="text-xs text-black">
                         Cet établissement peut recevoir des commandes normalement.
                       </p>
                     </div>
@@ -236,7 +236,7 @@
                 v-model="order.status"
                 @change="updateOrderStatus"
                 :disabled="updating"
-                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#FB6A00] focus:ring-2 focus:ring-[#FB6A00]/10 transition-all"
               >
                 <option value="pending">En attente</option>
                 <option value="processing">En cours</option>
@@ -252,7 +252,7 @@
                 v-model="order.payment_status"
                 @change="updatePaymentStatus"
                 :disabled="updating"
-                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#FB6A00] focus:ring-2 focus:ring-[#FB6A00]/10 transition-all"
               >
                 <option value="unpaid">Non payé</option>
                 <option value="paid">Payé</option>
@@ -301,7 +301,7 @@
               v-if="order.status === 'pending'"
               @click="cancelOrder"
               :disabled="updating"
-              class="w-full px-4 py-3 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              class="w-full px-4 py-3 bg-[#FFECD8] text-[#C54E00] rounded-xl font-semibold hover:bg-[#FFECD8] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               <XCircle class="w-4 h-4" />
               Annuler la commande
@@ -310,7 +310,7 @@
             <button 
               @click="deleteOrder"
               :disabled="updating"
-              class="w-full px-4 py-3 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              class="w-full px-4 py-3 bg-[#FFECD8] text-[#C54E00] rounded-xl font-semibold hover:bg-[#FFECD8] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               <Trash2 class="w-4 h-4" />
               Supprimer

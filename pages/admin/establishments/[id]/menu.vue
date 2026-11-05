@@ -98,7 +98,7 @@
                     </button>
                     <button 
                       @click="deleteProduct(product.id)"
-                      class="p-2 text-white hover:text-red-400 rounded-xl hover:bg-white/10"
+                      class="p-2 text-white hover:text-[#C54E00] rounded-xl hover:bg-white/10"
                     >
                       <Trash2 class="w-5 h-5" />
                     </button>
@@ -115,8 +115,8 @@
                   <span 
                     class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-medium"
                     :class="{
-                      'bg-green-50 text-green-700': product.available,
-                      'bg-red-50 text-red-700': !product.available
+                      'bg-gray-100 text-black': product.available,
+                      'bg-[#FFECD8] text-[#C54E00]': !product.available
                     }"
                   >
                     {{ product.available ? 'Disponible' : 'Indisponible' }}
@@ -169,15 +169,15 @@ const stats = [
     name: 'Catégories',
     value: '6',
     icon: Coffee,
-    iconBg: 'bg-purple-50',
-    iconColor: 'text-purple-500'
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-black'
   },
   {
     name: 'Produits actifs',
     value: '42',
     icon: Pizza,
-    iconBg: 'bg-green-50',
-    iconColor: 'text-green-500'
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-black'
   }
 ]
 

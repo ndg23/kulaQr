@@ -14,12 +14,12 @@
     <div>
       <!-- Loading -->
       <div v-if="loading" class="flex justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FB6A00]"></div>
       </div>
 
       <!-- Error -->
-      <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p class="text-red-800">{{ error }}</p>
+      <div v-else-if="error" class="bg-[#FFECD8] border border-[#FFD4AD] rounded-lg p-4">
+        <p class="text-[#C54E00]">{{ error }}</p>
       </div>
 
       <!-- Admins List -->
@@ -54,7 +54,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                      :class="admin.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                      :class="admin.status === 'active' ? 'bg-gray-100 text-black' : 'bg-[#FFECD8] text-[#C54E00]'">
                   {{ admin.status === 'active' ? 'Actif' : 'Inactif' }}
                 </span>
               </td>
@@ -64,13 +64,13 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
                   @click="toggleAdminStatus(admin)"
-                  class="text-blue-600 hover:text-blue-900 mr-4"
+                  class="text-[#C54E00] hover:text-[#C54E00] mr-4"
                 >
                   {{ admin.status === 'active' ? 'Désactiver' : 'Activer' }}
                 </button>
                 <button
                   @click="deleteAdmin(admin)"
-                  class="text-red-600 hover:text-red-900"
+                  class="text-[#C54E00] hover:text-[#C54E00]"
                 >
                   Supprimer
                 </button>

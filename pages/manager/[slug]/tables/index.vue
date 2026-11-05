@@ -1,171 +1,139 @@
 <template>
-  <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Emplacements</h1>
-      <p class="text-lg text-gray-600">Gérez les emplacements de votre établissement</p>
+  <div class="space-y-4 sm:space-y-6">
+    <ManagerModernHeader
+      title="Emplacements"
+      subtitle="Gérez les emplacements de votre établissement"
+      :icon="Table"
+      :primary-action="{
+        label: 'Nouvel emplacement',
+        icon: Plus,
+        action: openTableModal
+      }"
+    />
+
+    <!-- La grande carte : les emplacements et leurs QR -->
+    <HeroCard
+      label="Emplacements"
+      :value="tables.length"
+      :icon="Table"
+      :chips="[
+        { label: 'QR prêts', value: qrCodesGenerated },
+        { label: 'Sans QR', value: tables.length - qrCodesGenerated, alert: tables.length - qrCodesGenerated > 0 },
+        { label: 'VIP', value: vipTables }
+      ]"
+    />
+
+    <!-- Recherche et actualisation -->
+    <div class="flex items-center gap-2">
+      <div class="relative flex-1 max-w-md">
+        <Search class="w-5 h-5 text-gray-400 absolute left-5 top-1/2 -translate-y-1/2" />
+        <input
+          v-model="searchQuery"
+          type="search"
+          placeholder="Rechercher un emplacement"
+          class="w-full h-12 pl-12 pr-5 rounded-full bg-gray-100 border-0 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
+        />
+      </div>
+      <button
+        type="button"
+        aria-label="Actualiser"
+        :disabled="loading"
+        class="w-12 h-12 flex-shrink-0 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-50 active:scale-[0.94] transition-all"
+        @click="refreshData"
+      >
+        <RefreshCw :class="{ 'animate-spin': loading }" class="w-5 h-5 text-gray-900" :stroke-width="2.5" />
+      </button>
     </div>
 
-   
-    <!-- Actions Bar -->
-    <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
-      <div class="flex gap-4 items-start sm:items-center justify-between flex-wrap p-3 md:p-0">
-        <div class="flex items-center gap-4">
-          <div class="relative">
-            <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Rechercher un emplacement..."
-              class="pl-10 pr-4 py-3 w-full sm:w-80 text-base border border-gray-200 rounded-2xl focus:border-black focus:ring-2 focus:ring-black/10"
-            />
-          </div>
-        </div>
-        
-        <div class="flex gap-3 flex-wrap">
-          <button
-            @click="refreshData"
-            :disabled="loading"
-            class="px-4 py-3 bg-gray-100 text-gray-700 rounded-2xl font-semibold hover:bg-gray-200 disabled:opacity-50 transition-colors flex items-center gap-2"
-          >
-            <RefreshCw :class="{ 'animate-spin': loading }" class="w-4 h-4" />
-            Actualiser
-          </button>
-          
-          <button
-            @click="openTableModal"
-            class="px-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-800 transition-colors flex items-center gap-2"
-          >
-            <Plus class="w-4 h-4" />
-            Nouvel emplacement
-          </button>
-        </div>
-      </div>
+    <!-- Chargement -->
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" aria-busy="true">
+      <div v-for="i in 6" :key="i" class="h-60 rounded-[2rem] bg-gray-100 animate-pulse"></div>
     </div>
 
-    <!-- Tables Grid -->
-    <div v-if="loading" class="flex justify-center py-12">
- <div class="w-16 h-16 relative">
-          <div class="w-16 h-16 bg-gray-100 rounded-full animate-pulse"></div>
-          <Loader2 class="w-8 h-8 text-gray-400 animate-spin absolute inset-0 m-auto" />
-        </div>
-          </div>
-
-    <div v-else-if="filteredTables.length === 0" class="text-center py-16">
-      <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <Table class="w-12 h-12 text-gray-400" />
-      </div>
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun emplacement trouvé</h3>
-      <p class="text-gray-600 mb-6">
+    <!-- Vide -->
+    <div v-else-if="filteredTables.length === 0" class="rounded-[2rem] bg-gray-100 px-6 py-14 text-center">
+      <Table class="w-10 h-10 text-gray-400 mx-auto" />
+      <h3 class="mt-3 text-lg font-black text-gray-900">Aucun emplacement trouvé</h3>
+      <p class="mt-1 text-sm font-semibold text-gray-500">
         {{ searchQuery ? 'Aucun emplacement ne correspond à votre recherche' : 'Commencez par créer votre premier emplacement' }}
       </p>
       <button
         v-if="!searchQuery"
+        type="button"
+        class="mt-5 h-12 px-6 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all"
         @click="openTableModal"
-        class="px-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-800 transition-colors"
-      >
-        Créer un emplacement  
-      </button>
+      >Créer un emplacement</button>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6">
-      <div
-        v-for="table in filteredTables"
-        :key="table.id"
-        class="group bg-white rounded-3xl border border-gray-100 p-6 hover:shadow-lg- hover:border-red-200 transition-all duration-300 hover:-translate-y-0.5"
-      >
-        <!-- Table Header -->
-        <div class="flex items-center justify-between mb-5 flex-wrap">
-        <div class="flex items-center gap-4 mt-2 lg:mt-0">
-          
-            <div>
-              <h3 class="text-xl font-bold text-gray-900 mb-1">N° : {{ table.table_number || table.number }}</h3>
-              <div class="flex items-center gap-2">
-                <span :class="[
-                  table.type === 'VIP' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700',
-                  'px-2 py-1 rounded-lg text-xs font-medium'
-                ]">
-                  {{ table.type || 'STANDARD' }}
-                </span>
-                <!-- <span class="text-sm text-gray-500">{{ table.section_name || table.zone }}</span>
-                <span v-if="table.floor_level" class="text-sm text-gray-500">• {{ table.floor_level }}</span> -->
-              </div>
-            </div>
+    <!-- Cartes -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <article v-for="table in filteredTables" :key="table.id" class="rounded-[2rem] bg-gray-100 p-5 flex flex-col gap-4">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <span class="inline-flex items-center h-10 px-5 rounded-full bg-black text-white text-lg font-black">N° {{ table.table_number || table.number }}</span>
+            <span
+              v-if="table.type === 'VIP'"
+              class="ml-2 inline-flex items-center h-7 px-3 rounded-full bg-[#FB6A00] text-black text-xs font-extrabold align-middle"
+            >VIP</span>
           </div>
-          
-          <div class="flex items-center gap-2">
-            <span :class="[
-              table.qr_code_generated ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-50 text-gray-600 border-gray-200',
-              'px-3 py-1.5 rounded-full text-xs font-medium border'
-            ]">
-              {{ table.qr_code_generated ? 'QR Prêt' : 'Pas de QR' }}
-            </span>
-          </div>
+          <span
+            class="inline-flex items-center h-8 px-3 rounded-full text-xs font-extrabold flex-shrink-0"
+            :class="table.qr_code_generated ? 'bg-[#FB6A00] text-black' : 'bg-white text-gray-600'"
+          >{{ table.qr_code_generated ? 'QR prêt' : 'Pas de QR' }}</span>
         </div>
 
-        <!-- Table Info -->
-                       <QrCode v-if="table.qr_code_url" 
-
-                class="block w-[200px] h-[200px] object-contain mx-auto mb-4 text-[#f919000]"
-              />
-              <QrCode v-else class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <p class="text-gray-500 text-sm mb-6 leading-relaxed h-16 overflow-hidden">
-          <strong v-if="table.location_description || table.section_name || table.floor_level">📍 Localisation:</strong>
-          <span v-if="table.location_description">{{ table.location_description }}</span>
-          <span v-else-if="table.section_name || table.floor_level">
-            {{ table.section_name || 'Section non spécifiée' }}
-            {{ table.floor_level ? `• ${table.floor_level}` : '' }}
+        <div class="flex items-center gap-4">
+          <span class="w-16 h-16 flex-shrink-0 rounded-3xl bg-white flex items-center justify-center">
+            <QrCode class="w-8 h-8" :class="table.qr_code_generated ? 'text-black' : 'text-gray-300'" :stroke-width="2" />
           </span>
-          <span v-else>{{ table.description || 'Aucune description fournie pour cette table.' }}</span>
-        </p>
+          <p class="text-sm font-semibold text-gray-600 leading-snug line-clamp-3 min-w-0">
+            <span v-if="table.location_description">{{ table.location_description }}</span>
+            <span v-else-if="table.section_name || table.floor_level">
+              {{ table.section_name || 'Section non spécifiée' }}{{ table.floor_level ? ` · ${table.floor_level}` : '' }}
+            </span>
+            <span v-else>{{ table.description || 'Aucune description.' }}</span>
+          </p>
+        </div>
 
-
-        <!-- Actions -->
-        <div class="flex gap-2 flex-wrap">
+        <div class="mt-auto flex gap-2">
           <button
+            type="button"
+            class="flex-1 h-11 rounded-full bg-white text-gray-900 text-sm font-extrabold hover:bg-gray-50 active:scale-[0.97] transition-all"
             @click="editTable(table)"
-            class="flex-1 px-4 py-2.5 bg-gray-50 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors border border-gray-200"
-          >
-            Modifier
-          </button>
+          >Modifier</button>
           <button
             v-if="!table.qr_code_generated"
+            type="button"
+            class="flex-1 h-11 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all"
             @click="generateQrCode(table)"
-            class="flex-1 px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors border border-blue-200"
-          >
-            Générer QR
-          </button>
+          >Générer QR</button>
           <button
             v-else
+            type="button"
+            class="flex-1 h-11 inline-flex items-center justify-center gap-1.5 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all"
             @click="viewMenuTable(table)"
-            class="flex-1 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-medium hover:bg-emerald-100 transition-colors border border-emerald-200 flex items-center justify-center gap-1.5"
-          >
-            <ArrowRight class="w-4 h-4" />
-             Menu
-          </button>
+          >Menu <ArrowRight class="w-4 h-4" :stroke-width="2.5" /></button>
           <button
             v-if="table.qr_code_generated"
-              @click="showQrCodeCard(table)"
-            class="px-4 py-2.5 bg-orange-50 text-orange-700 rounded-xl text-sm font-medium hover:bg-orange-100 transition-colors border border-orange-200 flex items-center justify-center gap-1.5"
-            title="Imprimer QR Code Card"
-          >
-            <QrCode class="w-4 h-4" />
-          </button>
+            type="button"
+            aria-label="Imprimer la carte QR"
+            class="w-11 h-11 flex-shrink-0 rounded-full bg-white text-gray-900 flex items-center justify-center active:scale-[0.92] transition-all"
+            @click="showQrCodeCard(table)"
+          ><QrCode class="w-4 h-4" :stroke-width="2.5" /></button>
           <button
+            type="button"
+            aria-label="Supprimer l'emplacement"
+            class="w-11 h-11 flex-shrink-0 rounded-full bg-white text-gray-500 hover:text-[#C54E00] flex items-center justify-center active:scale-[0.92] transition-all"
             @click="deleteTable(table.id)"
-            class="px-4 py-2.5 bg-red-50 text-red-700 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors border border-red-200"
-            title="Supprimer la table"
-          >
-            <Trash2 class="w-4 h-4" />
-          </button>
+          ><Trash2 class="w-4 h-4" :stroke-width="2.5" /></button>
         </div>
-      </div>
+      </article>
     </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
+import HeroCard from '~/components/ui/HeroCard.vue'
 import { ref, computed, onMounted } from 'vue'
 import { 
   Table, Users, CheckCircle, ShoppingCart, Plus, Search, 

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-dvh bg-white">
     <!-- Header Twitter Style -->
     <div class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200">
       <div class="px-4 py-4">
@@ -63,8 +63,8 @@
         <div class="bg-white border border-gray-200 rounded-3xl overflow-hidden">
           <div class="p-6 border-b border-gray-100">
             <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
-                <Store class="w-6 h-6 text-blue-500" />
+              <div class="w-12 h-12 rounded-2xl bg-[#FFECD8] flex items-center justify-center">
+                <Store class="w-6 h-6 text-[#C54E00]" />
               </div>
               <h2 class="text-xl font-semibold text-gray-900">Informations générales</h2>
             </div>
@@ -114,8 +114,8 @@
           <div class="p-6 border-b border-gray-100">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
-                  <List class="w-6 h-6 text-green-500" />
+                <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
+                  <List class="w-6 h-6 text-black" />
                 </div>
                 <h2 class="text-xl font-semibold text-gray-900">Catégories ({{ categories.length }})</h2>
               </div>
@@ -155,7 +155,7 @@
                   </button>
                   <button
                     @click="deleteCategory(category.id)"
-                    class="px-3 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors"
+                    class="px-3 py-2 bg-[#FFECD8] text-[#C54E00] rounded-xl text-sm font-medium hover:bg-[#FFECD8] transition-colors"
                   >
                     <Trash2 class="w-4 h-4" />
                   </button>
@@ -212,7 +212,7 @@
                   </button>
                   <button
                     @click="deleteProduct(product.id)"
-                    class="px-3 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors"
+                    class="px-3 py-2 bg-[#FFECD8] text-[#C54E00] rounded-xl text-sm font-medium hover:bg-[#FFECD8] transition-colors"
                   >
                     <Trash2 class="w-4 h-4" />
                   </button>

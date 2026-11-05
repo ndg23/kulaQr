@@ -1,5 +1,5 @@
 <template>
-  <div class="font-sans bg-white min-h-screen max-w-2xl mx-auto border-x border-gray-100">
+  <div class="font-sans bg-white min-h-dvh max-w-2xl mx-auto border-x border-gray-100">
     <!-- SEO Head Component -->
     <MenuHead 
       :establishment="establishment"
@@ -20,7 +20,7 @@
     <ErrorMessage v-if="error" :message="error" />
     
     <!-- Loading State - Apple Style -->
-    <div v-if="loading" class="min-h-screen flex items-center justify-center">
+    <div v-if="loading" class="min-h-dvh flex items-center justify-center">
       <div class="text-center space-y-4">
         <div class="w-12 h-12 mx-auto">
         <div class="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-gray-900"></div>
@@ -30,7 +30,7 @@
     </div>
     
     <!-- Not Found State - Apple/Twitter Style -->
-    <div v-else-if="!establishment" class="min-h-screen flex items-center justify-center px-4">
+    <div v-else-if="!establishment" class="min-h-dvh flex items-center justify-center px-4">
       <div class="max-w-sm w-full text-center space-y-6">
         <!-- Icon -->
         <div class="w-20 h-20 mx-auto bg-gray-100 rounded-3xl flex items-center justify-center">

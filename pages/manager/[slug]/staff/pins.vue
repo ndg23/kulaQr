@@ -87,8 +87,8 @@
                 <span class="px-2 inline-flex text-xs leading-5 font-medium rounded-full" 
                   :class="{
                     'bg-kula-100 text-kula-800': staff.role === 'staff',
-                    'bg-blue-100 text-blue-800': staff.role === 'waiter',
-                    'bg-green-100 text-green-800': staff.role === 'kitchen'
+                    'bg-[#FFECD8] text-[#C54E00]': staff.role === 'waiter',
+                    'bg-gray-100 text-black': staff.role === 'kitchen'
                   }">
                   {{ getRoleName(staff.role) }}
                 </span>
@@ -107,7 +107,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="px-2 inline-flex text-xs leading-5 font-medium rounded-full" 
-                  :class="staff.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                  :class="staff.is_active ? 'bg-gray-100 text-black' : 'bg-gray-100 text-gray-800'">
                   {{ staff.is_active ? 'Actif' : 'Inactif' }}
                 </span>
               </td>
@@ -125,7 +125,7 @@
                   </button>
                   <button
                     @click="confirmDeleteStaff(staff)"
-                    class="text-gray-400 hover:text-red-600"
+                    class="text-gray-400 hover:text-[#C54E00]"
                     title="Supprimer"
                   >
                     <Trash2 class="w-4 h-4" />

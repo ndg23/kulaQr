@@ -8,7 +8,7 @@
         <h2 class="text-xl font-semibold mb-4">Sélectionner un établissement</h2>
             <select 
           v-model="selectedEstablishment" 
-          class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 text-lg"
+          class="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-[#FB6A00] focus:ring focus:ring-[#FFD4AD] text-lg"
           @change="loadEstablishmentData"
             >
               <option value="">Sélectionnez un établissement</option>

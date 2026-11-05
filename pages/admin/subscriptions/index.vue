@@ -5,7 +5,7 @@
         <!-- Actions rapides -->
         <div class="mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button @click="manualCheck" :disabled="checking"
-                class="px-5 py-2.5 justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                class="px-5 py-2.5 justify-center bg-[#FB6A00] text-black rounded-full hover:bg-[#FB6A00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                 <RefreshCw :class="{ 'animate-spin': checking }" class="w-5 h-5" />
                 {{ checking ? 'Vérification en cours...' : 'Vérifier maintenant' }}
             </button>
@@ -87,7 +87,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="px-3 py-1 rounded-full text-xs font-medium" :class="user.days_remaining <= 1
-                                            ? 'bg-red-100 text-red-800'
+                                            ? 'bg-[#FFECD8] text-[#C54E00]'
                                             : user.days_remaining <= 3
                                                 ? 'bg-orange-100 text-orange-800'
                                                 : 'bg-yellow-100 text-yellow-800'
@@ -100,7 +100,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <button @click="openReactivateModal(user)"
-                                        class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1">
+                                        class="text-[#C54E00] hover:text-[#C54E00] font-medium text-sm flex items-center gap-1">
                                         <Zap class="w-4 h-4" />
                                         Prolonger
                                     </button>
@@ -166,24 +166,24 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-sm text-red-600 font-medium">
+                                    <span class="text-sm text-[#C54E00] font-medium">
                                         {{ block.days_expired }} jour(s)
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span v-if="block.reactivated_at"
-                                        class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-black">
                                         Réactivé
                                     </span>
                                     <span v-else
-                                        class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        class="px-3 py-1 rounded-full text-xs font-medium bg-[#FFECD8] text-[#C54E00]">
                                         Bloqué
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
                                     <button v-if="!block.reactivated_at"
                                         @click="openReactivateModal({ user_id: block.user_id, user_name: block.users?.full_name, email: block.users?.email, subscription_tier: block.subscription_tier })"
-                                        class="text-green-600 hover:text-green-800 font-medium text-sm flex items-center gap-1">
+                                        class="text-black hover:text-black font-medium text-sm flex items-center gap-1">
                                         <CheckCircle class="w-4 h-4" />
                                         Réactiver
                                     </button>
@@ -199,8 +199,8 @@
         <UModal v-model="showReactivateModal" size="md" :actionButtonText="'Réactiver'" @action="reactivateUser">
             <div class="p-6">
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                        <Zap class="w-6 h-6 text-green-600" />
+                    <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Zap class="w-6 h-6 text-black" />
                     </div>
                     <div>
                         <h2 class="text-xl font-semibold text-gray-900">Réactiver l'abonnement</h2>
@@ -223,8 +223,8 @@
                             label="Durée (jours)" required min="1" />
                     </div>
 
-                    <div v-if="reactivationError" class="p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p class="text-sm text-red-900">{{ reactivationError }}</p>
+                    <div v-if="reactivationError" class="p-4 bg-[#FFECD8] border border-[#FFD4AD] rounded-lg">
+                        <p class="text-sm text-[#C54E00]">{{ reactivationError }}</p>
                     </div>
                 </form>
             </div>
@@ -364,26 +364,26 @@ const statsDisplay = computed(() => {
             label: 'Total utilisateurs',
             value: totalUsers,
             icon: Users,
-            bgColor: 'bg-blue-50',
-            iconColor: 'text-blue-600'
+            bgColor: 'bg-[#FFECD8]',
+            iconColor: 'text-[#C54E00]'
         },
         {
             label: 'Actifs',
             value: totalActive,
             icon: UserCheck,
-            bgColor: 'bg-green-50',
-            iconColor: 'text-green-600',
+            bgColor: 'bg-gray-100',
+            iconColor: 'text-black',
             badge: `${Math.round((totalActive / totalUsers) * 100)}%`,
-            badgeClass: 'bg-green-100 text-green-800'
+            badgeClass: 'bg-gray-100 text-black'
         },
         {
             label: 'Bloqués',
             value: totalBlocked,
             icon: UserX,
-            bgColor: 'bg-red-50',
-            iconColor: 'text-red-600',
+            bgColor: 'bg-[#FFECD8]',
+            iconColor: 'text-[#C54E00]',
             badge: totalBlocked > 0 ? `${Math.round((totalBlocked / totalUsers) * 100)}%` : null,
-            badgeClass: 'bg-red-100 text-red-800'
+            badgeClass: 'bg-[#FFECD8] text-[#C54E00]'
         },
         {
             label: 'Expirent bientôt',
@@ -401,8 +401,8 @@ const statsDisplay = computed(() => {
 const getSubscriptionBadgeClass = (tier: string) => {
     const classes: Record<string, string> = {
         demo: 'bg-gray-100 text-gray-800',
-        pro: 'bg-blue-100 text-blue-800',
-        premium: 'bg-purple-100 text-purple-800'
+        pro: 'bg-[#FFECD8] text-[#C54E00]',
+        premium: 'bg-gray-100 text-black'
     }
     return classes[tier] || 'bg-gray-100 text-gray-800'
 }

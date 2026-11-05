@@ -1,8 +1,8 @@
 <template>
   <button
     :class="[
-      'relative inline-flex h-[31px] w-[51px] items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
-      modelValue ? 'bg-green-500' : 'bg-gray-300'
+      'relative inline-flex h-[31px] w-[51px] items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2',
+      modelValue ? 'bg-[#FB6A00]' : 'bg-gray-300'
     ]"
     role="switch"
     :aria-checked="modelValue"

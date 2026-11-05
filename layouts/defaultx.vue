@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-white">
+    <div class="min-h-dvh bg-white">
       <!-- Header with Logo -->
       <header class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">

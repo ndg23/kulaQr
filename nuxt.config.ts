@@ -15,7 +15,7 @@ export default defineNuxtConfig({
       title: 'Kula Qr - Catalogues Digitaux pour tous vos établissements',
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'description', content: 'Viens découvrir mon établissement avec des catalogues digitaux QR code. Solution moderne, sans contact et écologique pour tous types de commerces.' },
         { name: 'keywords', content: 'QR code, catalogue digital, établissement, commerce, sans contact, menu électronique, commande en ligne, boutique, salon, bar, restaurant' },
         { name: 'author', content: 'Kula Qr' },

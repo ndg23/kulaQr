@@ -17,8 +17,8 @@
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-              <HelpCircle class="w-6 h-6 text-blue-600" />
+            <div class="w-12 h-12 bg-[#FFECD8] rounded-xl flex items-center justify-center">
+              <HelpCircle class="w-6 h-6 text-[#C54E00]" />
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900">{{ stats?.total_requests || 0 }}</p>
@@ -53,8 +53,8 @@
 
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
-              <AlertTriangle class="w-6 h-6 text-red-600" />
+            <div class="w-12 h-12 bg-[#FFECD8] rounded-xl flex items-center justify-center">
+              <AlertTriangle class="w-6 h-6 text-[#C54E00]" />
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900">{{ stats?.urgent_requests || 0 }}</p>
@@ -74,7 +74,7 @@
 
           <select
             v-model="statusFilter"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
           >
             <option value="">Tous les statuts</option>
             <option value="pending">En attente</option>
@@ -86,7 +86,7 @@
 
           <select
             v-model="priorityFilter"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
           >
             <option value="">Toutes les priorités</option>
             <option value="urgent">Urgent</option>
@@ -97,7 +97,7 @@
 
           <select
             v-model="typeFilter"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
           >
             <option value="">Tous les types</option>
             <option value="new_qr">Nouveau QR</option>
@@ -149,7 +149,7 @@
               <button
                 v-if="request.status === 'pending'"
                 @click="editRequest(request)"
-                class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                class="p-2 text-gray-400 hover:text-[#C54E00] hover:bg-[#FFECD8] rounded-lg transition-colors"
                 title="Modifier"
               >
                 <Edit class="w-5 h-5" />
@@ -158,7 +158,7 @@
               <button
                 v-if="request.status === 'pending'"
                 @click="cancelRequest(request)"
-                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                class="p-2 text-gray-400 hover:text-[#C54E00] hover:bg-[#FFECD8] rounded-lg transition-colors"
                 title="Annuler"
               >
                 <X class="w-5 h-5" />
@@ -179,7 +179,7 @@
         </p>
         <button
           @click="openNewRequestModal"
-          class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+          class="bg-[#FB6A00] hover:bg-[#FB6A00] text-black px-6 py-3 rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
         >
           Créer une demande
         </button>
@@ -187,7 +187,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center py-16">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FB6A00]"></div>
         <span class="ml-3 text-gray-600">Chargement...</span>
       </div>
     </main>
@@ -280,10 +280,10 @@ const formatDate = (dateString: string) => {
 const getStatusBadgeClass = (status: string) => {
   const classes = {
     pending: 'bg-yellow-100 text-yellow-800',
-    in_progress: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
+    in_progress: 'bg-[#FFECD8] text-[#C54E00]',
+    completed: 'bg-gray-100 text-black',
     cancelled: 'bg-gray-100 text-gray-800',
-    rejected: 'bg-red-100 text-red-800'
+    rejected: 'bg-[#FFECD8] text-[#C54E00]'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
@@ -291,9 +291,9 @@ const getStatusBadgeClass = (status: string) => {
 const getPriorityBadgeClass = (priority: string) => {
   const classes = {
     low: 'bg-gray-100 text-gray-800',
-    medium: 'bg-blue-100 text-blue-800',
+    medium: 'bg-[#FFECD8] text-[#C54E00]',
     high: 'bg-orange-100 text-orange-800',
-    urgent: 'bg-red-100 text-red-800'
+    urgent: 'bg-[#FFECD8] text-[#C54E00]'
   }
   return classes[priority] || 'bg-gray-100 text-gray-800'
 }

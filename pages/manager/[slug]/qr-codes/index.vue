@@ -95,7 +95,7 @@
         <div v-if="lastScan" class="flex items-center gap-4 rounded-[2rem] bg-gray-50 p-4 sm:p-5">
           <div class="relative">
             <IconBadge :icon="Smartphone" tone="orange" size="lg" />
-            <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+            <div class="absolute -top-1 -right-1 w-4 h-4 bg-[#FB6A00] rounded-full border-2 border-white"></div>
           </div>
           <div class="flex-1">
             <div class="font-extrabold text-gray-900">Dernier scan</div>

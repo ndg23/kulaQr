@@ -43,7 +43,7 @@
           <select
             v-model="selectedEstablishment"
             @change="filterRequests"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
           >
             <option value="">Tous les établissements</option>
             <option v-for="establishment in establishments" :key="establishment.id" :value="establishment.id">
@@ -54,7 +54,7 @@
           <select
             v-model="selectedStatus"
             @change="filterRequests"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
           >
             <option value="">Tous les statuts</option>
             <option value="pending">En attente</option>
@@ -67,7 +67,7 @@
           <select
             v-model="filters.priority"
             @change="applyFilters"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
           >
             <option value="">Toutes les priorités</option>
             <option value="low">Faible</option>
@@ -79,7 +79,7 @@
           <select
             v-model="filters.type"
             @change="applyFilters"
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
           >
             <option value="">Tous les types</option>
             <option value="new_qr">Nouveau QR</option>
@@ -98,7 +98,7 @@
               @input="applyFilters"
               type="text"
               placeholder="Rechercher par titre ou établissement..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
             />
           </div>
         </div>
@@ -203,7 +203,7 @@
                   <div class="flex items-center space-x-2">
                     <button
                       @click="viewRequest(request)"
-                      class="text-blue-600 hover:text-blue-900 transition-colors"
+                      class="text-[#C54E00] hover:text-[#C54E00] transition-colors"
                     >
                       <Eye class="h-4 w-4" />
                     </button>
@@ -304,7 +304,7 @@
                           <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau statut</label>
                           <select
                             v-model="newStatus"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
                           >
                             <option value="pending">En attente</option>
                             <option value="in_progress">En cours</option>
@@ -318,7 +318,7 @@
                           <textarea
                             v-model="resolutionNotes"
                             rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FB6A00] focus:border-transparent"
                             placeholder="Ajouter des notes sur la résolution..."
                           ></textarea>
                         </div>
@@ -338,7 +338,7 @@
                       v-if="!viewOnly"
                       @click="updateRequestStatus"
                       :disabled="updating"
-                      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                      class="px-4 py-2 text-sm font-medium text-white bg-[#FB6A00] hover:bg-[#FB6A00] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
                     >
                       <span v-if="updating">Mise à jour...</span>
                       <span v-else>Mettre à jour</span>
@@ -517,12 +517,12 @@ const getStatusLabel = (status: string) => {
 
 const getTypeBadgeClass = (type: string) => {
   const classes: Record<string, string> = {
-    'new_qr': 'bg-blue-100 text-blue-800',
+    'new_qr': 'bg-[#FFECD8] text-[#C54E00]',
     'qr_replacement': 'bg-orange-100 text-orange-800',
-    'qr_update': 'bg-purple-100 text-purple-800',
-    'qr_deactivation': 'bg-red-100 text-red-800',
-    'bulk_qr_generation': 'bg-indigo-100 text-indigo-800',
-    'qr_customization': 'bg-pink-100 text-pink-800',
+    'qr_update': 'bg-gray-100 text-black',
+    'qr_deactivation': 'bg-[#FFECD8] text-[#C54E00]',
+    'bulk_qr_generation': 'bg-[#FFECD8] text-[#C54E00]',
+    'qr_customization': 'bg-[#FFECD8] text-[#C54E00]',
     'technical_issue': 'bg-yellow-100 text-yellow-800'
   }
   return classes[type] || 'bg-gray-100 text-gray-800'
@@ -533,7 +533,7 @@ const getPriorityBadgeClass = (priority: string) => {
     'low': 'bg-gray-100 text-gray-800',
     'medium': 'bg-yellow-100 text-yellow-800',
     'high': 'bg-orange-100 text-orange-800',
-    'urgent': 'bg-red-100 text-red-800'
+    'urgent': 'bg-[#FFECD8] text-[#C54E00]'
   }
   return classes[priority] || 'bg-gray-100 text-gray-800'
 }
@@ -541,10 +541,10 @@ const getPriorityBadgeClass = (priority: string) => {
 const getStatusBadgeClass = (status: string) => {
   const classes: Record<string, string> = {
     'pending': 'bg-yellow-100 text-yellow-800',
-    'in_progress': 'bg-blue-100 text-blue-800',
-    'completed': 'bg-green-100 text-green-800',
+    'in_progress': 'bg-[#FFECD8] text-[#C54E00]',
+    'completed': 'bg-gray-100 text-black',
     'cancelled': 'bg-gray-100 text-gray-800',
-    'rejected': 'bg-red-100 text-red-800'
+    'rejected': 'bg-[#FFECD8] text-[#C54E00]'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }

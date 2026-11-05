@@ -36,7 +36,7 @@
     >
       <slot />
 
-      <div v-if="error" class="rounded-3xl bg-red-50 text-red-700 px-5 py-4 text-sm font-semibold flex items-start gap-3" role="alert">
+      <div v-if="error" class="rounded-3xl bg-[#FFD4AD] text-[#7C2900] px-5 py-4 text-sm font-semibold flex items-start gap-3" role="alert">
         <AlertCircle class="w-5 h-5 flex-shrink-0 mt-0.5" />
         <span class="break-words min-w-0">{{ error }}</span>
       </div>
@@ -51,7 +51,7 @@
         <button
           type="submit"
           :disabled="loading || submitDisabled"
-          class="h-12 px-8 rounded-full bg-gray-900 text-white font-bold inline-flex items-center justify-center gap-2 hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          class="h-12 px-8 rounded-full bg-[#FB6A00] text-black font-black inline-flex items-center justify-center gap-2 hover:bg-[#FD9542] active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
           {{ loading ? loadingLabel : submitLabel }}

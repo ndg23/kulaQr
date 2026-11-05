@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#FFFBFB] relative overflow-hidden flex items-center justify-center">
+  <div class="min-h-dvh bg-[#FFFBFB] relative overflow-hidden flex items-center justify-center">
     <PatternBackground :opacity="0.8" :duration="60" />
 
     <div class="relative z-50 max-w-md mx-auto px-4 text-center">
@@ -96,7 +96,7 @@ useHead({
 
 <style scoped>
 /* Ensure proper centering and spacing */
-.min-h-screen {
+.min-h-dvh {
   min-height: 100vh;
 }
 

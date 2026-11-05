@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-dvh bg-gray-100">
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
         <div class="bg-white shadow rounded-lg p-6">
@@ -14,7 +14,7 @@
               :class="[
                 'px-4 py-2 rounded-md',
                 selectedPeriod === period 
-                  ? 'bg-blue-500 text-white' 
+                  ? 'bg-[#FB6A00] text-black' 
                   : 'bg-gray-100'
               ]"
             >

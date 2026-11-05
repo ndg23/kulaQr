@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <!-- Modern Header -->
+  <div class="space-y-4 sm:space-y-6">
     <ManagerModernHeader
       title="Commandes"
       subtitle="Gérez vos commandes en temps réel"
@@ -12,258 +11,135 @@
       }"
     />
 
-    <main>
-      <!-- Stats Cards - Responsive Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-        <div class="bg-white rounded-xl p-6  border border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center">
-              <Receipt class="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-900">{{ stats?.total_orders || 0 }}</p>
-              <p class="text-sm text-gray-500">Total</p>
-            </div>
-          </div>
-        </div>
+    <!-- La grande carte : les commandes en un coup d'œil -->
+    <HeroCard
+      label="Commandes"
+      :value="stats?.total_orders || 0"
+      :icon="Receipt"
+      :chips="[
+        { label: 'En attente', value: stats?.pending_orders || 0, alert: (stats?.pending_orders || 0) > 0, dot: (stats?.pending_orders || 0) > 0 },
+        { label: 'Préparation', value: stats?.processing_orders || 0 },
+        { label: 'Terminées', value: stats?.completed_orders || 0 }
+      ]"
+    />
 
-        <div class="bg-white rounded-xl p-6  border border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center">
-              <Clock class="w-6 h-6 text-yellow-600" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-900">{{ stats?.pending_orders || 0 }}</p>
-              <p class="text-sm text-gray-500">Attente</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-6  border border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
-              <Coffee class="w-6 h-6 text-orange-600" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-900">{{ stats?.processing_orders || 0 }}</p>
-              <p class="text-sm text-gray-500">Préparation</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-6  border border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-              <CheckCircle class="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-900">{{ stats?.completed_orders || 0 }}</p>
-              <p class="text-sm text-gray-500">Terminées</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filtres - Mobile Friendly -->
-      <div class="bg-white rounded-xl  border border-gray-100 p-6 mb-6">
-        <div class="space-y-4">
-          <!-- Header de filtres -->
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-              <Filter class="w-4 h-4 text-gray-600" />
-            </div>
-            <h2 class="text-lg font-semibold text-gray-900">Filtres</h2>
-          </div>
-
-          <!-- Filtres en colonne sur mobile -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <select
-              v-model="statusFilter"
-              class="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all bg-white hover:border-gray-300 cursor-pointer"
-            >
-              <option value="">Tous les statuts</option>
-              <option value="pending">En attente</option>
-              <option value="confirmed">Confirmée</option>
-              <option value="processing">En traitement</option>
-              <option value="completed">Terminée</option>
-            </select>
-
-            <select
-              v-model="staffFilter"
-              class="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all bg-white hover:border-gray-300 cursor-pointer"
-            >
-              <option value="">Tout le staff</option>
-              <option v-for="member in staff" :key="member.id" :value="member.id">
-                {{ member.username }}
-              </option>
-            </select>
-
-            <div class="relative">
-              <Search class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Rechercher..."
-                class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all hover:border-gray-300"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Liste des commandes - Design épuré et responsive -->
-      <div class="space-y-4">
-        <!-- Order Card -->
-        <div
-          v-for="order in filteredOrders"
-          :key="order.id"
-          class="bg-white border border-gray-200 rounded-3xl p-5 hover:border-blue-300 transition-all cursor-pointer active:scale-[0.98]"
+    <main class="space-y-4">
+      <!-- Filtres en pilules -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <select
+          v-model="statusFilter"
+          aria-label="Statut"
+          class="h-12 px-5 rounded-full bg-gray-100 border-0 text-sm font-extrabold text-gray-900 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
         >
-          <div class="flex items-start gap-4">
-            <!-- Order Avatar/Number -->
-            <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
-              {{ order.table_number }}
-            </div>
+          <option value="">Tous les statuts</option>
+          <option value="pending">En attente</option>
+          <option value="confirmed">Confirmée</option>
+          <option value="processing">En traitement</option>
+          <option value="completed">Terminée</option>
+        </select>
 
-            <!-- Info -->
-            <div class="flex-1 min-w-0">
-              <!-- Header -->
-              <div class="flex items-center justify-between mb-2">
-                <h3 class="text-base font-bold text-gray-900">
-                  Commande #{{ order.orderNumber }}
-                </h3>
-                <span
-                  :class="[
-                    'px-3 py-1 rounded-full text-xs font-semibold',
-                    getStatusClass(order.status)
-                  ]"
-                >
-                  {{ getStatusText(order.status) }}
-                </span>
-              </div>
-              
-              <!-- Meta Info -->
-              <div class="flex items-center gap-2 flex-wrap mb-3 text-xs text-gray-500">
-                <span>📍 Table {{ order.table_number }}</span>
-                <span>•</span>
-                <span>🕐 {{ formatTime(order.created_at) }}</span>
-                <span v-if="order.staff" class="flex items-center gap-1 text-blue-600 font-semibold">
-                  <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                  </svg>
-                  {{ order.staff.username }}
-                </span>
-              </div>
+        <select
+          v-model="staffFilter"
+          aria-label="Personnel"
+          class="h-12 px-5 rounded-full bg-gray-100 border-0 text-sm font-extrabold text-gray-900 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
+        >
+          <option value="">Tout le staff</option>
+          <option v-for="member in staff" :key="member.id" :value="member.id">{{ member.username }}</option>
+        </select>
 
-              <!-- Items Preview -->
-              <div class="space-y-2 mb-3">
-                <div
-                  v-for="item in order.items.slice(0, 2)"
-                  :key="item.id"
-                  class="flex items-center justify-between text-sm"
-                >
-                  <div class="flex items-center gap-2 flex-1 min-w-0">
-                    <span class="font-medium text-gray-400 w-6">{{ item.quantity }}×</span>
-                    <span class="text-gray-900 truncate">{{ item.name }}</span>
-                  </div>
-                  <span class="font-medium text-gray-900 ml-2">
-                    {{ formatPrice(item.unit_price * item.quantity) }}
-                  </span>
-                </div>
-                <div
-                  v-if="order.items.length > 2"
-                  class="text-xs text-gray-500 font-medium pl-8"
-                >
-                  +{{ order.items.length - 2 }} autres articles
-                </div>
-              </div>
-
-              <!-- Footer -->
-              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                <span class="text-lg font-bold text-gray-900">
-                  {{ formatPrice(order.total_amount) }}
-                </span>
-                
-                <!-- Actions -->
-                <div class="flex items-center gap-2">
-                  <button
-                    v-if="canAcceptOrder(order.status)"
-                    @click.stop="updateOrderStatus(order.id, 'confirmed')"
-                    class="w-9 h-9 rounded-full hover:bg-green-50 flex items-center justify-center transition-colors group"
-                    title="Accepter"
-                  >
-                    <svg class="w-5 h-5 text-gray-600 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
-                  
-                  <button
-                    v-if="canPrepareOrder(order.status)"
-                    @click.stop="updateOrderStatus(order.id, 'processing')"
-                    class="w-9 h-9 rounded-full hover:bg-orange-50 flex items-center justify-center transition-colors group"
-                    title="Préparer"
-                  >
-                    <svg class="w-5 h-5 text-gray-600 group-hover:text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                  </button>
-                  
-                  <button
-                    v-if="canCompleteOrder(order.status)"
-                    @click.stop="updateOrderStatus(order.id, 'completed')"
-                    class="w-9 h-9 rounded-full hover:bg-blue-50 flex items-center justify-center transition-colors group"
-                    title="Terminer"
-                  >
-                    <svg class="w-5 h-5 text-gray-600 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </button>
-                  
-                  <button
-                    @click.stop="printOrder(order)"
-                    class="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors group"
-                    title="Imprimer"
-                  >
-                    <svg class="w-5 h-5 text-gray-600 group-hover:text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          
+        <div class="relative">
+          <Search class="w-5 h-5 text-gray-400 absolute left-5 top-1/2 -translate-y-1/2" />
+          <input
+            v-model="searchQuery"
+            type="search"
+            placeholder="Rechercher"
+            class="w-full h-12 pl-12 pr-5 rounded-full bg-gray-100 border-0 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
+          />
         </div>
+      </div>
 
-        </div>
-      <!-- Empty State -->
-      <div v-if="filteredOrders.length === 0 && !loading" class="text-center py-12 sm:py-16">
-        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gray-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4">
-          <Receipt class="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
-        </div>
-        <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Aucune commande</h3>
-        <p class="text-sm sm:text-base text-gray-500 mb-6 px-4">
-          {{ orders.length === 0 ? 'Aucune commande n\'a encore été passée.' : 'Aucune commande ne correspond à vos critères.' }}
+      <!-- Chargement -->
+      <div v-if="loading" class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4" aria-busy="true">
+        <div v-for="i in 4" :key="i" class="h-56 rounded-[2rem] bg-gray-100 animate-pulse"></div>
+      </div>
+
+      <!-- Vide -->
+      <div v-else-if="filteredOrders.length === 0" class="rounded-[2rem] bg-gray-100 px-6 py-14 text-center">
+        <Receipt class="w-10 h-10 text-gray-400 mx-auto" />
+        <h3 class="mt-3 text-lg font-black text-gray-900">Aucune commande</h3>
+        <p class="mt-1 text-sm font-semibold text-gray-500">
+          {{ orders.length === 0 ? "Aucune commande n'a encore été passée." : 'Aucune commande ne correspond à vos critères.' }}
         </p>
         <button
+          type="button"
+          class="mt-5 h-12 px-6 rounded-full bg-black text-white text-sm font-extrabold active:scale-[0.97] transition-all"
           @click="openNewOrderModal"
-          class="bg-black hover:bg-gray-800 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium transition-colors"
-        >
-          Créer une commande
-        </button>
+        >Créer une commande</button>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="flex items-center justify-center py-12 sm:py-16">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
-        <span class="ml-3 text-sm sm:text-base text-gray-600">Chargement...</span>
+      <!-- Commandes -->
+      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+        <article v-for="order in filteredOrders" :key="order.id" class="rounded-[2rem] bg-gray-100 p-5 sm:p-6 flex flex-col gap-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <span class="inline-flex items-center h-9 px-4 rounded-full bg-black text-white text-sm font-extrabold">Table {{ order.table_number || '—' }}</span>
+              <p class="mt-2 text-xs font-semibold text-gray-500 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span>Commande #{{ order.orderNumber }}</span>
+                <span>·</span>
+                <span>{{ formatTime(order.created_at) }}</span>
+                <span v-if="order.staff" class="inline-flex items-center h-5 px-2 rounded-full bg-white text-gray-900 font-extrabold">{{ order.staff.username }}</span>
+              </p>
+            </div>
+            <span class="inline-flex items-center h-8 px-4 rounded-full text-xs font-extrabold flex-shrink-0" :class="statusPill(order.status)">{{ getStatusText(order.status) }}</span>
+          </div>
+
+          <ul class="space-y-1.5">
+            <li v-for="item in order.items.slice(0, 3)" :key="item.id" class="flex items-center justify-between gap-3 text-sm">
+              <span class="font-bold text-gray-900 min-w-0 truncate">{{ item.quantity }} × {{ item.name }}</span>
+              <span class="font-extrabold text-gray-900 tabular-nums flex-shrink-0">{{ formatPrice(item.unit_price * item.quantity) }}</span>
+            </li>
+            <li v-if="order.items.length > 3" class="text-xs font-bold text-gray-500">+{{ order.items.length - 3 }} autres articles</li>
+          </ul>
+
+          <div class="flex items-center justify-between rounded-full bg-[#FB6A00] px-5 h-14">
+            <span class="text-sm font-extrabold text-black">Total</span>
+            <span class="text-xl font-black text-black tabular-nums">{{ formatPrice(order.total_amount) }}</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              v-if="canAcceptOrder(order.status)"
+              type="button"
+              class="flex-1 h-12 rounded-full bg-black text-white text-sm font-black uppercase tracking-wide active:scale-[0.97] transition-all"
+              @click.stop="updateOrderStatus(order.id, 'confirmed')"
+            >Accepter</button>
+            <button
+              v-if="canPrepareOrder(order.status)"
+              type="button"
+              class="flex-1 h-12 rounded-full bg-black text-white text-sm font-black uppercase tracking-wide active:scale-[0.97] transition-all"
+              @click.stop="updateOrderStatus(order.id, 'processing')"
+            >Préparer</button>
+            <button
+              v-if="canCompleteOrder(order.status)"
+              type="button"
+              class="flex-1 h-12 rounded-full bg-black text-white text-sm font-black uppercase tracking-wide active:scale-[0.97] transition-all"
+              @click.stop="updateOrderStatus(order.id, 'completed')"
+            >Terminer</button>
+            <button
+              type="button"
+              aria-label="Imprimer"
+              class="w-12 h-12 flex-shrink-0 rounded-full bg-white text-gray-900 flex items-center justify-center active:scale-[0.92] transition-all"
+              @click.stop="printOrder(order)"
+            ><Printer class="w-5 h-5" :stroke-width="2.5" /></button>
+          </div>
+        </article>
       </div>
     </main>
-
   </div>
 </template>
 
 <script setup lang="ts">
+import HeroCard from '~/components/ui/HeroCard.vue'
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import {
   Receipt, Plus, Clock, Coffee, CheckCircle, Filter, Search,
@@ -297,36 +173,45 @@ const stats = ref<{
 } | null>(null)
 
 
+// Pastille de statut, aux couleurs Kula (orange et noir)
+const statusPill = (status: string) => ({
+  pending: 'bg-[#FB6A00] text-black',
+  confirmed: 'bg-black text-white',
+  processing: 'bg-[#FFB77A] text-black',
+  completed: 'bg-white text-black ring-2 ring-black',
+  cancelled: 'bg-gray-300 text-gray-700'
+} as Record<string, string>)[status] || 'bg-gray-200 text-gray-900'
+
 // Item color functions - alternating colors for visual distinction
 const getItemColorClass = (index: number) => {
   const colors = [
-    'bg-blue-50 border border-blue-100',
-    'bg-green-50 border border-green-100', 
-    'bg-purple-50 border border-purple-100',
+    'bg-[#FFECD8] border border-[#FFECD8]',
+    'bg-gray-100 border border-gray-100', 
+    'bg-gray-100 border border-gray-100',
     'bg-orange-50 border border-orange-100',
-    'bg-pink-50 border border-pink-100'
+    'bg-[#FFECD8] border border-[#FFECD8]'
   ]
   return colors[index % colors.length]
 }
 
 const getItemBadgeClass = (index: number) => {
   const colors = [
-    'bg-blue-500 text-white',
-    'bg-green-500 text-white',
-    'bg-purple-500 text-white',
+    'bg-[#FB6A00] text-black',
+    'bg-[#FB6A00] text-black',
+    'bg-black text-white',
     'bg-orange-500 text-white',
-    'bg-pink-500 text-white'
+    'bg-[#C54E00] text-white'
   ]
   return colors[index % colors.length]
 }
 
 const getItemTextClass = (index: number) => {
   const colors = [
-    'text-blue-900',
-    'text-green-900',
-    'text-purple-900',
+    'text-[#C54E00]',
+    'text-black',
+    'text-black',
     'text-orange-900',
-    'text-pink-900'
+    'text-[#C54E00]'
   ]
   return colors[index % colors.length]
 }
@@ -339,11 +224,11 @@ const getStatusClass = (status: string) => {
     case 'pending':
       return 'bg-yellow-100 text-yellow-800'
     case 'confirmed':
-      return 'bg-blue-100 text-blue-800'
+      return 'bg-[#FFECD8] text-[#C54E00]'
     case 'processing':
       return 'bg-orange-100 text-orange-800'
     case 'completed':
-      return 'bg-green-100 text-green-800'
+      return 'bg-gray-100 text-black'
     default:
       return 'bg-gray-100 text-gray-800'
   }
@@ -622,71 +507,10 @@ const staffOptions = computed(() => {
 
 // Print order
 const printOrder = (order: any) => {
-  // Create a printable version of the order
-  const printWindow = window.open('', '', 'width=800,height=600')
-
-  if (!printWindow) {
-    showToast.error('Erreur', 'Impossible d\'ouvrir la fenêtre d\'impression')
-    return
+  // Ticket 80 mm en police à chasse fixe (utils/ticket.ts)
+  if (!printTicket(order, establishment.value?.name || '')) {
+    showToast.error('Erreur', "Impossible d'ouvrir l'impression")
   }
-
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Commande #${order.orderNumber}</title>
-        <style>
-          body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; }
-          h1 { margin-bottom: 10px; }
-          .header { margin-bottom: 20px; }
-          .items { margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
-          .item { padding: 10px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-          .total { margin-top: 20px; font-weight: bold; text-align: right; }
-          .notes { margin-top: 20px; font-style: italic; }
-          .info { color: #666; font-size: 14px; margin: 5px 0; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>Commande #${order.orderNumber}</h1>
-          <p class="info">Date: ${formatDate(order.created_at)}</p>
-          <p class="info">Table: ${order.table_number || 'N/A'}</p>
-          <p class="info">Statut: ${getStatusText(order.status)}</p>
-        </div>
-
-        <div class="items">
-          <h2>Articles commandés</h2>
-          ${(order.items || []).map((item: any) => `
-            <div class="item">
-              <div>
-                <strong>${item.quantity || 0}x</strong> ${item.name || 'Produit inconnu'}
-                ${item.notes ? `<p><small>Note: ${item.notes}</small></p>` : ''}
-              </div>
-              <div>${formatPrice((item.unit_price || 0) * (item.quantity || 0))}</div>
-            </div>
-          `).join('')}
-        </div>
-
-        <div class="total">
-          Total: ${formatPrice(order.total_amount)}
-        </div>
-
-        ${order.notes ? `
-          <div class="notes">
-            <p><strong>Notes:</strong> ${order.notes}</p>
-          </div>
-        ` : ''}
-      </body>
-    </html>
-  `)
-
-  printWindow.document.close()
-  printWindow.focus()
-
-  // Print after a short delay to ensure content is loaded
-  setTimeout(() => {
-    printWindow.print()
-    printWindow.close()
-  }, 500)
 }
 
 // Utility functions
@@ -702,9 +526,9 @@ const formatPrice = (price: number) => {
 const getStatusBadgeClass = (status: string) => {
   const classes: Record<string, string> = {
     'pending': 'bg-yellow-100 text-yellow-800',
-    'confirmed': 'bg-blue-100 text-blue-800',
+    'confirmed': 'bg-[#FFECD8] text-[#C54E00]',
     'processing': 'bg-orange-100 text-orange-800',
-    'completed': 'bg-green-100 text-green-800'
+    'completed': 'bg-gray-100 text-black'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }

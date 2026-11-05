@@ -224,22 +224,22 @@ import HeroCard from '~/components/ui/HeroCard.vue'
       name: 'Utilisateurs', 
       value: adminStats.value.total_users.toString(),
       icon: Users,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-500'
+      iconBg: 'bg-[#FFECD8]',
+      iconColor: 'text-[#C54E00]'
     },
     { 
       name: 'Utilisateurs actifs', 
       value: adminStats.value.active_users_7d.toString(),
       icon: UserCheck,
-      iconBg: 'bg-green-50',
-      iconColor: 'text-green-500'
+      iconBg: 'bg-gray-100',
+      iconColor: 'text-black'
     },
     { 
       name: 'Établissements', 
       value: adminStats.value.total_establishments.toString(),
       icon: Store,
-      iconBg: 'bg-purple-50',
-      iconColor: 'text-purple-500'
+      iconBg: 'bg-gray-100',
+      iconColor: 'text-black'
     },
     { 
       name: 'Commandes', 
@@ -253,15 +253,15 @@ import HeroCard from '~/components/ui/HeroCard.vue'
       name: 'Produits', 
       value: adminStats.value.total_products.toString(),
       icon: Package,
-      iconBg: 'bg-indigo-50',
-      iconColor: 'text-indigo-500'
+      iconBg: 'bg-[#FFECD8]',
+      iconColor: 'text-[#C54E00]'
     },
     { 
       name: 'Scans QR', 
       value: adminStats.value.total_qr_scans.toString(),
       icon: QrCode,
-      iconBg: 'bg-rose-50',
-      iconColor: 'text-rose-500'
+      iconBg: 'bg-[#FFECD8]',
+      iconColor: 'text-[#C54E00]'
     }
   ])
   

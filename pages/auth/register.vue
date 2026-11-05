@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-y-auto">
+  <div class="min-h-dvh bg-white flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-y-auto">
     <div class="w-full max-w-[400px] py-4 sm:py-0">
       <!-- Progress Indicator - Enhanced -->
       <div class="mb-8 sm:mb-10">

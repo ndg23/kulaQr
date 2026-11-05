@@ -21,7 +21,7 @@
             <h3 class="font-extrabold text-gray-900 mb-4">Manager</h3>
             <ul class="space-y-2">
               <li v-for="perm in allPermissions" :key="perm.id" class="flex items-center">
-                <CheckCircle class="w-5 h-5 text-green-500 mr-2" />
+                <CheckCircle class="w-5 h-5 text-black mr-2" />
                 <span class="text-sm text-gray-700">{{ perm.label }}</span>
               </li>
             </ul>
@@ -32,7 +32,7 @@
             <h3 class="font-extrabold text-gray-900 mb-4">Staff</h3>
             <ul class="space-y-2">
               <li v-for="perm in staffPermissions" :key="perm.id" class="flex items-center">
-                <CheckCircle class="w-5 h-5 text-green-500 mr-2" />
+                <CheckCircle class="w-5 h-5 text-black mr-2" />
                 <span class="text-sm text-gray-700">{{ perm.label }}</span>
               </li>
             </ul>
@@ -43,7 +43,7 @@
             <h3 class="font-extrabold text-gray-900 mb-4">Cuisine</h3>
             <ul class="space-y-2">
               <li v-for="perm in kitchenPermissions" :key="perm.id" class="flex items-center">
-                <CheckCircle class="w-5 h-5 text-green-500 mr-2" />
+                <CheckCircle class="w-5 h-5 text-black mr-2" />
                 <span class="text-sm text-gray-700">{{ perm.label }}</span>
               </li>
             </ul>

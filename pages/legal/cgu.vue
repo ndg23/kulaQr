@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-dvh bg-white">
     <!-- Header -->
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
       <div class="max-w-6xl mx-auto px-4 sm:px-6">

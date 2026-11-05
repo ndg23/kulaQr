@@ -48,7 +48,7 @@
         placeholder="Décrivez votre demande en détail..."
         class="w-full px-5 py-4 border border-gray-200 rounded-3xl focus:outline-none focus:border-gray-900 resize-none"
       />
-      <p v-if="errors.description" class="text-sm font-semibold text-red-600 px-1 mt-1">{{ errors.description }}</p>
+      <p v-if="errors.description" class="text-sm font-semibold text-[#C54E00] px-1 mt-1">{{ errors.description }}</p>
     </div>
   </PageForm>
 </template>
