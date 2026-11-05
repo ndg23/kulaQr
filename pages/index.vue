@@ -7,11 +7,7 @@
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-10">
         <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
           <div>
-            <span class="inline-flex items-center gap-2 h-9 px-4 rounded-full bg-gray-100 text-sm font-extrabold text-gray-900">
-              <span class="w-2 h-2 rounded-full bg-[#FB6A00] animate-pulse"></span>
-              Menu digital · sans application
-            </span>
-            <h1 class="mt-5 text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 leading-[1.02]">
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 leading-[1.02]">
               Scannez.<br />Commandez.<br />
               <span class="inline-block mt-1 px-4 rounded-[1.25rem] bg-[#FB6A00] text-black">Servez.</span>
             </h1>
@@ -39,41 +35,16 @@
             </ul>
           </div>
 
-          <!-- La grande carte orange avec un aperçu du menu client -->
-          <div class="rounded-[2rem] bg-[#FB6A00] p-6 sm:p-10 flex justify-center">
-            <div class="w-full max-w-[19rem] rounded-[2.5rem] bg-white p-3 shadow-2xl shadow-black/20" aria-hidden="true">
-              <div class="rounded-[2rem] bg-white overflow-hidden">
-                <div class="flex items-center justify-between px-4 pt-4">
-                  <span class="inline-flex items-center h-8 px-4 rounded-full bg-black text-white text-xs font-black">Table 7</span>
-                  <span class="inline-flex items-center h-8 px-3 rounded-full bg-gray-100 text-[11px] font-extrabold text-gray-900">Chez Awa</span>
-                </div>
-                <div class="flex gap-1.5 px-4 py-3 overflow-hidden">
-                  <span class="h-8 px-3 rounded-full bg-black text-white text-[11px] font-extrabold inline-flex items-center">Tout</span>
-                  <span class="h-8 px-3 rounded-full bg-gray-100 text-gray-900 text-[11px] font-extrabold inline-flex items-center">Plats</span>
-                  <span class="h-8 px-3 rounded-full bg-gray-100 text-gray-900 text-[11px] font-extrabold inline-flex items-center">Boissons</span>
-                </div>
-                <div class="px-3 space-y-2 pb-3">
-                  <div v-for="demo in demoItems" :key="demo.name" class="rounded-3xl bg-gray-100 p-2.5 flex items-center gap-2.5">
-                    <span class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-lg font-black text-[#FB6A00]">{{ demo.name.charAt(0) }}</span>
-                    <span class="min-w-0 flex-1 leading-tight">
-                      <span class="block text-[13px] font-black text-gray-900 truncate">{{ demo.name }}</span>
-                      <span class="mt-1 inline-flex items-center h-5 px-2 rounded-full bg-[#FB6A00] text-black text-[10px] font-black">{{ demo.price }}</span>
-                    </span>
-                    <span class="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center text-lg font-black">+</span>
-                  </div>
-                </div>
-                <div class="px-3 pb-3">
-                  <div class="h-14 rounded-full bg-black text-white pl-4 pr-1.5 flex items-center gap-2">
-                    <span class="flex-1 leading-tight">
-                      <span class="block text-[11px] font-black">3 articles</span>
-                      <span class="block text-[9px] font-semibold opacity-70">2× Poulet braisé, 1× Bissap</span>
-                    </span>
-                    <span class="text-sm font-black tabular-nums">13 500 F</span>
-                    <span class="w-10 h-10 rounded-full bg-[#FB6A00] text-black flex items-center justify-center"><ShoppingBag class="w-4 h-4" :stroke-width="3" /></span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <!-- L'illustration à droite -->
+          <div class="rounded-[2rem] overflow-hidden bg-[#FB6A00]">
+            <img
+              src="~/assets/images/scan.png"
+              alt="Des clients scannent le QR code de leur table et commandent, le cuisinier sourit"
+              class="w-full h-full max-h-[34rem] lg:max-h-[40rem] object-cover object-top"
+              width="1024"
+              height="1536"
+              fetchpriority="high"
+            />
           </div>
         </div>
       </section>
@@ -238,17 +209,11 @@ import {
   BarChart3,
   Smartphone,
   Check,
-  Clock,
-  ShoppingBag
+  Clock
 } from 'lucide-vue-next'
 
 // Ce que dit le produit, et rien d'autre : tout ce qui est listé existe dans l'application
 const chips = ['Aucune application', 'Tous les smartphones', 'Mise à jour instantanée']
-
-const demoItems = [
-  { name: 'Poulet braisé', price: '5 000 F' },
-  { name: 'Jus de bissap', price: '3 500 F' }
-]
 
 const features = [
   { icon: QrCode, title: 'Un QR code par table', text: 'Chaque table a son code. Un scan et le menu s’ouvre, la table est déjà connue.' },
